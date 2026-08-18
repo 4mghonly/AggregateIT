@@ -34,18 +34,13 @@ async def check_rss(session, src, sem):
 
 async def check_reddit(session, sub, sem):
     try:
-        status, txt = await get(session, f"https://www.reddit.com/r/{sub}/new.json?limit=3&raw_json=1", sem)
-        posts = json.loads(txt)["data"]["children"] if txt else []
-        comments = -1
-        if posts:
-            p = posts[0]["data"]["permalink"]
-            s2, t2 = await get(session, f"https://www.reddit.com{p}.json?limit=10&raw_json=1", sem)
-            if t2: comments = len(json.loads(t2)[1]["data"]["children"])
-        RESULTS.append({"kind": "REDDIT", "name": "r/" + sub, "http": status, "items": len(posts),
-                        "comments": comments, "ok": status == 200 and len(posts) > 0 and comments >= 0})
+        status, txt = await get(session, f"https://www.reddit.com/r/{sub}/new/.rss", sem)
+        n = len(feedparser.parse(txt).entries) if txt else 0
+        RESULTS.append({"kind": "REDDIT", "name": "r/" + sub, "http": status, "items": n,
+                        "comments": 0, "ok": status == 200 and n > 0})
     except Exception as e:
         RESULTS.append({"kind": "REDDIT", "name": "r/" + sub, "http": "ERR", "items": 0,
-                        "comments": -1, "ok": False, "err": str(e)[:80]})
+                        "comments": 0, "ok": False, "err": str(e)[:80]})
 
 async def check_gh(session, repo, sem):
     try:
