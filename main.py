@@ -21,7 +21,11 @@ def load(n):
     with open(os.path.join(BASE, "config", n), encoding="utf-8") as f: return json.load(f)
 
 RAW = load("sources.json"); REDDIT = load("reddit.json"); WATCH = load("watchlist.json")
-KEYWORDS_DATA = load("keywords.json")
+_kw = load("keywords.json")
+KEYWORDS_DATA = _kw["clusters"] if isinstance(_kw, dict) else _kw
+PRIO_SCORE = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
+for e in KEYWORDS_DATA:
+    e["phrases"] = [p.lower() for p in e.get("phrases", [])]
 TICK_RAW = load("tickers.json") + [{"t": x, "c": x, "s": "Watchlist"} for x in WATCH.get("tickers", [])]
 T_BY_SYM = {d["t"].upper(): d for d in TICK_RAW}
 SYMS = [t for t in T_BY_SYM if len(t) >= 3 and t not in CASHTAG_ONLY]
@@ -43,11 +47,8 @@ def mark_seen(us):
 CASHTAG = re.compile(r"\$([A-Za-z]{1,6})\b")
 
 def find_matches(text):
-    low = text.lower(); cats = set()
-    for e in KEYWORDS_DATA:
-        ph = [e["Primary_Keyword"].lower()] + [p.lower() for p in e.get("Possible_Iterations", [])]
-        if any(p in low for p in ph): cats.add(f"{e['Category']} > {e['Subcategory']}")
-    return cats
+    low = text.lower()
+    return [e for e in KEYWORDS_DATA if any(p in low for p in e["phrases"])]
 
 def score_item(i):
     text = i["title"] + " " + i["text"]; low = text.lower()
@@ -60,13 +61,15 @@ def score_item(i):
         if re.search(rf"\b{re.escape(t)}\b", text, re.I): score += 2; hits.append(t)
     for name, d in NAMES:
         if name in low: score += 3; hits.append(d["t"])
-    cats = find_matches(text)
-    if cats: score += 3
+        kws = find_matches(text)
+    for e in kws: score += PRIO_SCORE.get(e.get("prio", "Medium"), 2)
+    i["keyword_ids"] = [e["id"] for e in kws]
+    i["keyword_tags"] = sorted({t for e in kws for t in e.get("tags", [])})
     labels = []
     for h in dict.fromkeys(hits):
         d = T_BY_SYM.get(h)
         labels.append(f"{h} ({d['c']} · {d['s']})" if d else h)
-    labels += sorted(cats)
+    labels += [f"{e['id']} · {e['sub']}" for e in kws]
     return score, labels
 
 async def fetch_text(session, url, sem, headers=None):
