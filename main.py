@@ -80,27 +80,18 @@ async def fetch_text(session, url, sem, headers=None):
         except Exception: pass
     return None
 
-async def fetch_rss(session, src, sem):
-    txt = await fetch_text(session, src["_url"], sem); out = []
-    if txt:
-        for e in feedparser.parse(txt).entries[:MAX_PER_SOURCE]:
-            out.append({"source_type": "rss", "source_name": src.get("Source_name", ""),
-                "category": src.get("Category", ""), "url": e.get("link", ""),
-                "title": e.get("title", ""), "text": re.sub("<[^>]+>", "", e.get("summary", "")),
-                "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
-    return out
-
 async def fetch_reddit(session, r, sem):
-    txt = await fetch_text(session, f"https://www.reddit.com/r/{r['sub']}/new.json?limit={PRIO_LIMIT.get(r['priority'],3)}&raw_json=1", sem)
+    # Use RSS to bypass Reddit's JSON API datacenter blocks
+    txt = await fetch_text(session, f"https://www.reddit.com/r/{r['sub']}/new/.rss", sem)
     out = []
     if txt:
-        try:
-            for c in json.loads(txt)["data"]["children"]:
-                d = c["data"]
-                out.append({"source_type": "reddit", "source_name": "r/" + r["sub"], "category": "Reddit",
-                    "url": "https://www.reddit.com" + d["permalink"], "title": d["title"],
-                    "text": (d.get("selftext") or "")[:4000], "ts": d["created_utc"]})
-        except Exception as e: print("reddit err", r["sub"], e)
+        parsed = feedparser.parse(txt)
+        for entry in parsed.entries[:PRIO_LIMIT.get(r['priority'],3)]:
+            title = entry.get("title", "").split(" :: ")[0]
+            out.append({"source_type": "reddit", "source_name": "r/" + r["sub"], "category": "Reddit",
+                "url": entry.get("link", ""), "title": title,
+                "text": re.sub("<[^>]+>", "", entry.get("summary", "")),
+                "ts": calendar.timegm(entry.published_parsed) if entry.get("published_parsed") else time.time()})
     return out
 
 async def fetch_github(session, repo, sem, since_iso):
