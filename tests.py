@@ -108,7 +108,7 @@ for i in [i1, i2]:
 check("confluence detected", ticker_counts.get("NVDA", 0) >= 2, f"{ticker_counts}")
 
 print("[T14] L4 Front-Page Floor")
-check("floor is 5", main.FRONT_PAGE_FLOOR == 6)
+check("floor is 5", main.FRONT_PAGE_FLOOR == 5)
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
