@@ -95,8 +95,10 @@ check("mover gets +4 boost", sc >= 7, f"score={sc}") # 3 (cashtag) + 4 (mover) =
 main.MOVERS = {}
 
 print("[T13] L3 Confluence Boost")
-i1 = item("NVDA earnings beat", "$NVDA is up"); main.score_item(i1)
-i2 = item("Nvidia reports record", "Nvidia wins"); main.score_item(i2)
+i1 = item("NVDA earnings beat", "$NVDA is up")
+sc1, labels1 = main.score_item(i1); i1["matched_categories"] = labels1
+i2 = item("Nvidia reports record", "Nvidia wins")
+sc2, labels2 = main.score_item(i2); i2["matched_categories"] = labels2
 # Simulate main loop confluence logic
 ticker_counts = {}
 for i in [i1, i2]:
