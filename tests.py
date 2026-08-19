@@ -1,7 +1,7 @@
 """Correctness baseline for AggregateIT POC. Run: python tests.py"""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import main
+import main, tv
 
 PASS = 0; FAIL = 0
 
@@ -50,6 +50,27 @@ check("ME-04 matched", any("ME-04" in l for l in labels), f"labels={labels}")
 print("[T6] Priority sources get boosted")
 sc, labels = main.score_item(item("Press release", "Routine announcement", source="Federal Reserve"))
 check("Fed boosted", sc >= 5, f"score={sc}")
+
+print("[T7] TradingView 'Load More' pagination reaches totalCount")
+def fake_post(body):
+    start, end = body["range"]; total = 2500
+    rows = [{"s": f"T{i}", "d": [f"Company {i}", "Technology", 1e9, 1.0, 1.0, 1e6]}
+            for i in range(start, min(end, total))]
+    return {"totalCount": total, "data": rows}
+uni, total = tv.fetch_universe(post_fn=fake_post)
+check("paginates to end", len(uni) == 2500 and total == 2500, f"len={len(uni)} total={total}")
+
+print("[T8] Movers scans merge and dedupe")
+calls = []
+def fake_post2(body):
+    calls.append(body)
+    f = body.get("filter", [])
+    if f and f[0]["operation"] == "less":
+        return {"totalCount": 1, "data": [{"s": "BBB", "d": ["B Co", "Tech", 1e9, -9.0, 2.5, 1e6]}]}
+    return {"totalCount": 1, "data": [{"s": "AAA", "d": ["A Co", "Tech", 1e9, 8.0, 3.0, 1e6]}]}
+mv = tv.fetch_movers(post_fn=fake_post2)
+check("movers merged", set(mv) == {"AAA", "BBB"}, f"{sorted(mv)}")
+check("3 scans issued", len(calls) == 3, f"{len(calls)}")
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
