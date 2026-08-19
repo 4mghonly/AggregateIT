@@ -1,7 +1,5 @@
 """TradingView US market universe + pulse.
-Emulates the 'Load More' XHR loop of the TradingView market-movers page.
-v4: sort+predicate scans (no server-side filters), clean primary mapping,
-    movement-based validity gate."""
+v5: adds raw PROBE output to identify the live change-column key/position."""
 import os, json, time, argparse
 import requests
 
@@ -27,7 +25,7 @@ def _post(body):
 
 def _row(row):
     d = row.get("d", [])
-    ticker = row.get("s", "").split(":")[-1]  # strip exchange prefix
+    ticker = row.get("s", "").split(":")[-1]
     def g(i, default):
         return d[i] if len(d) > i and d[i] is not None else default
     return {"t": ticker, "c": g(1, ""), "s": g(2, "") or "US Market",
@@ -36,7 +34,6 @@ def _row(row):
             "primary": bool(g(7, 1))}
 
 def fetch_universe(post_fn=_post):
-    """'Load More' until the end; primary listings only."""
     out = []; start = 0; total = 0
     while True:
         resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
@@ -53,7 +50,6 @@ def fetch_universe(post_fn=_post):
     return out, total
 
 def _top(post_fn, sort, cap, pred):
-    """Sorted scan + client-side predicate. No server-side filters (they are unreliable)."""
     try:
         resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                         "sort": {"sortBy": sort[0], "sortOrder": sort[1]}, "range": [0, cap * 4]})
@@ -68,7 +64,6 @@ def _top(post_fn, sort, cap, pred):
         return []
 
 def fetch_movers(post_fn=_post, cap=300):
-    """Significant movers for the Signal Stack L2 boost (±4% or 2x volume)."""
     movers = {}
     def add(m): movers[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
     for m in _top(post_fn, ("change_percent", "desc"), cap, lambda x: x["pct"] >= 4): add(m)
@@ -77,7 +72,6 @@ def fetch_movers(post_fn=_post, cap=300):
     return movers
 
 def fetch_pulse(post_fn=_post, cap=20):
-    """Session snapshot: mega-cap board + top gainers/losers + validity gate."""
     mega = []
     resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                     "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"},
@@ -93,7 +87,6 @@ def fetch_pulse(post_fn=_post, cap=20):
     for m in _top(post_fn, ("change_percent", "desc"), 150, lambda x: x["pct"] >= 3): add_sig(m)
     for m in _top(post_fn, ("change_percent", "asc"), 150, lambda x: x["pct"] <= -3): add_sig(m)
     for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), 150, lambda x: x["relvol"] >= 2): add_sig(m)
-    # Valid only if at least one mega-cap shows real movement (US session 13:30-20:00 UTC)
     valid = any(abs(m["pct"]) > 0.005 for m in mega)
     return {"updated": time.time(), "valid": valid,
             "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig}
@@ -127,6 +120,15 @@ def main():
 
     if args.pulse:
         try:
+            # --- PROBE: raw row with every candidate change-column (diagnostic) ---
+            probe_cols = ["ticker", "change", "change_percent", "close", "gap",
+                          "volume", "relative_volume_10d_calc"]
+            pr = _post({"columns": probe_cols, "options": {"lang": "en"}, "markets": ["america"],
+                        "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"}, "range": [0, 2]})
+            print("PROBE-COLS", json.dumps(probe_cols))
+            for row in pr.get("data", [])[:2]:
+                print("PROBE", row.get("s"), json.dumps(row.get("d", [])))
+            # --- end probe ---
             pulse = fetch_pulse()
             save("market_pulse.json", pulse)
             save("movers.json", {"updated": pulse["updated"], "movers": pulse.get("sig", {})})
