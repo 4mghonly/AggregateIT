@@ -17,11 +17,9 @@ def load_json(path):
         with open(path, encoding="utf-8") as f: return json.load(f)
     except Exception: return None
 
-def load_history(hours):
-    data = load_json(os.path.join(DATA, "news_history.json"))
-    if not data: return []
-    cutoff = time.time() - hours * 3600
-    return [i for i in data.get("items", []) if i.get("ts", 0) >= cutoff]
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: state-backup, path: data/ }
 
 def theme_counts(items):
     counts = {}
