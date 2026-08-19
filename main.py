@@ -389,6 +389,51 @@ def _post_discord(wh, payload):
     if r.status_code >= 400:
         raise RuntimeError(f"Discord HTTP {r.status_code}: {r.text[:120]}")
 
+# ================= MARKET PULSE (validity-gated) =================
+def load_market_pulse():
+    try:
+        with open(os.path.join(DATA, "market_pulse.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def _fmt_row(m):
+    arrow = "🟢" if m["pct"] > 0.005 else ("🔴" if m["pct"] < -0.005 else "⚪")
+    rv = f" · {m['relvol']:.1f}×" if m.get("relvol", 0) >= 1.5 else ""
+    return f"{arrow} {m['t']} {m['pct']:+.2f}%{rv}"
+
+def build_pulse_embed(pulse):
+    ts = datetime.fromtimestamp(pulse["updated"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    if not pulse.get("valid"):
+        return {"title": "💹 Market Pulse", "color": 0x95A5A6,
+                "description": f"🏛️ US market closed — no live movement.\nLast snapshot: {ts}"}
+    fields = [
+        {"name": "🚀 Top Movers", "value": "\n".join(_fmt_row(m) for m in pulse.get("gainers", [])[:5]) or "—", "inline": True},
+        {"name": "📉 Top Fallers", "value": "\n".join(_fmt_row(m) for m in pulse.get("losers", [])[:5]) or "—", "inline": True},
+    ]
+    fields.append({"name": "🏛️ Mega-Cap Scoreboard (Top 20 primary)",
+                   "value": " | ".join(_fmt_row(m) for m in pulse.get("mega_caps", [])[:20]) or "—", "inline": False})
+    return {"title": "💹 Market Pulse", "color": 0x2ECC71,
+            "description": f"Live US session snapshot · as of {ts}", "fields": fields}
+
+def send_market_pulse():
+    """Post the pulse once per fresh snapshot; never present zeros as live data."""
+    wh = os.environ.get("DISCORD_WEBHOOK")
+    pulse = load_market_pulse()
+    if not wh or not pulse: return
+    marker = os.path.join(DATA, ".last_pulse")
+    last = 0.0
+    try:
+        with open(marker) as f: last = float(f.read().strip() or 0)
+    except Exception: pass
+    if pulse.get("updated", 0) <= last: return
+    try:
+        _post_discord(wh, {"embeds": [build_pulse_embed(pulse)]})
+        with open(marker, "w") as f: f.write(str(pulse["updated"]))
+        HEALTH["discord_ok"] += 1
+    except Exception as e:
+        HEALTH["discord_fail"] += 1; print("Discord pulse err:", type(e).__name__, str(e)[:200])
+
 def send_digest(digest_items, report):
     wh = os.environ.get("DISCORD_WEBHOOK")
     if not digest_items:
@@ -564,6 +609,9 @@ async def main():
         await asyncio.sleep(1)
 
     send_digest(digest_items, report)
+    send_market_pulse()
+
+    store.record_run(report["fetched"], report["new"], report["matched"], len(report["events"]))
 
     store.record_run(report["fetched"], report["new"], report["matched"], len(report["events"]))
     store_stats = store.stats()
