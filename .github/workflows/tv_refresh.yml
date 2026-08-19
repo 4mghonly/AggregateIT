@@ -19,7 +19,7 @@ jobs:
           key: seen-db-${{ github.run_id }}
           restore-keys: |
             seen-db-
-      - name: Universe (weekly Monday)
+      - name: Universe (weekly Monday + manual)
         if: github.event.schedule == '30 12 * * 1' || github.event_name == 'workflow_dispatch'
         run: python tv.py --universe
       - name: Pulse (intraday snapshots)
