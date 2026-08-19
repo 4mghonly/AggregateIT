@@ -14,9 +14,9 @@ ALWAYS_ANALYZE = ["federal reserve", "european central bank", "cisa"]
 PRIO_LIMIT = {"Very High": 10, "High": 5, "Medium": 3}
 UA = {"User-Agent": "NewsIntelEngine/0.1 (personal research)"}
 
-# ===== SIGNAL STACK tuning =====
-MIN_DIGEST_SCORE = 5   # L4 floor: only items scoring >= this reach the digest / Qwen
-DIGEST_CAP = 10        # L4 cap: max items analyzed + shown per run (token control)
+MIN_DIGEST_SCORE = 5
+DIGEST_CAP = 10
+DAILY_QWEN_CAP = 50  # Black Swan circuit breaker
 
 CASHTAG_ONLY = {
     "ALL","ARE","CAT","KEY","LOW","FIX","TAP","MAS","LIN","GEN","HAL","DOW","MET",
@@ -40,7 +40,6 @@ T_BY_SYM = {d["t"].upper(): d for d in TICK_RAW}
 SYMS = [t for t in T_BY_SYM if len(t) >= 3 and t not in CASHTAG_ONLY]
 NAMES = [(d["c"].lower(), d) for d in TICK_RAW if len(d["c"]) >= 6]
 
-# ===== Load TradingView universe + movers (graceful degradation) =====
 TV_UNIVERSE = []; MOVERS = {}
 try:
     _tvp = os.path.join(DATA, "tv_universe.json")
@@ -52,12 +51,10 @@ try:
 except Exception as e:
     print("TV data load err:", type(e).__name__)
 
-# L1a: full-universe ticker set for $CASHTAG matching
 ALL_TICKS = set(T_BY_SYM.keys()); TV_BY_TICK = {}
 for _r in TV_UNIVERSE:
     _t = _r["t"].upper(); ALL_TICKS.add(_t); TV_BY_TICK[_t] = _r
 
-# L1c: expand company-name matching with today's movers ("the market is voting")
 _mover_names = {}
 for _tick in MOVERS:
     _r = TV_BY_TICK.get(_tick.upper())
@@ -81,6 +78,9 @@ for s in RAW:
 con = sqlite3.connect(os.path.join(DATA, "seen.db"))
 con.execute("CREATE TABLE IF NOT EXISTS seen(url TEXT PRIMARY KEY, ts REAL)")
 con.execute("CREATE TABLE IF NOT EXISTS seen_titles(title_hash TEXT PRIMARY KEY, url TEXT, ts REAL)")
+con.execute("CREATE TABLE IF NOT EXISTS history(url TEXT PRIMARY KEY, ts REAL, title TEXT, source TEXT, score REAL, triggers TEXT, importance TEXT, sentiment TEXT, summary TEXT)")
+con.execute("CREATE TABLE IF NOT EXISTS health(url TEXT PRIMARY KEY, fails INTEGER, last_status INTEGER, last_checked REAL, quarantined_until REAL)")
+con.execute("CREATE TABLE IF NOT EXISTS budget(day TEXT PRIMARY KEY, calls INTEGER)")
 
 def is_seen(u): return con.execute("SELECT 1 FROM seen WHERE url=?", (u,)).fetchone()
 def mark_seen(us):
@@ -103,6 +103,38 @@ def mark_title_seen(items):
     if rows:
         con.executemany("INSERT OR IGNORE INTO seen_titles(title_hash,url,ts) VALUES (?,?,?)", rows); con.commit()
 
+# ===== Source health & quarantine (F-11/F-12) =====
+def is_quarantined(url):
+    row = con.execute("SELECT quarantined_until FROM health WHERE url=?", (url,)).fetchone()
+    return bool(row and row[0] > time.time())
+
+def health_hit(url, ok, status):
+    now = time.time()
+    row = con.execute("SELECT fails FROM health WHERE url=?", (url,)).fetchone()
+    fails = 0 if ok else (row[0] if row else 0) + 1
+    q = now + 24*3600 if fails >= 3 else 0
+    con.execute("INSERT INTO health(url,fails,last_status,last_checked,quarantined_until) VALUES (?,?,?,?,?) "
+                "ON CONFLICT(url) DO UPDATE SET fails=?,last_status=?,last_checked=?,quarantined_until=?",
+                (url, fails, status, now, q, fails, status, now, q))
+    con.commit()
+
+def dump_health():
+    rows = con.execute("SELECT url,fails,last_status,quarantined_until FROM health").fetchall()
+    with open(os.path.join(REPORTS, "source_health.json"), "w", encoding="utf-8") as f:
+        json.dump([{"url": r[0], "fails": r[1], "last_status": r[2], "quarantined": r[3] > time.time()} for r in rows], f, indent=2)
+
+# ===== Qwen daily budget (circuit breaker) =====
+def qwen_budget_ok():
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    row = con.execute("SELECT calls FROM budget WHERE day=?", (day,)).fetchone()
+    return (row[0] if row else 0) < DAILY_QWEN_CAP
+
+def qwen_budget_use():
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    con.execute("INSERT INTO budget(day,calls) VALUES (?,1) ON CONFLICT(day) DO UPDATE SET calls=calls+1", (day,))
+    con.execute("DELETE FROM budget WHERE day != ?", (day,))
+    con.commit()
+
 CASHTAG = re.compile(r"\$([A-Za-z]{1,6})\b")
 
 def find_matches(text):
@@ -114,23 +146,18 @@ def score_item(i):
     score = 0; hits = []; matched = set()
     if any(a in i["source_name"].lower() for a in ALWAYS_ANALYZE):
         score += 5; hits.append("Priority Source")
-    # L1a: $CASHTAG against full universe
     for sym in set(c.upper() for c in CASHTAG.findall(text)):
         if sym in ALL_TICKS:
             score += 3; hits.append(sym); matched.add(sym)
-    # L1b: bare ticker word — S&P + watchlist only
     for t in SYMS:
         if re.search(rf"\b{re.escape(t)}\b", text, re.I):
             score += 2; hits.append(t); matched.add(t)
-    # L1c: company name — S&P + watchlist + today's movers
     for name, d in ALL_NAMES:
         if name in low:
             score += 3; hits.append(d["t"]); matched.add(d["t"].upper())
-    # L2: market-movers boost — once per unique matched mover
     for t in matched:
         if t.upper() in MOVERS:
             score += 4; hits.append(f"🔥 {t} MOVER")
-    # Keyword clusters
     kws = find_matches(text)
     for e in kws: score += PRIO_SCORE.get(e.get("prio", "Medium"), 2)
     i["keyword_ids"] = [e["id"] for e in kws]
@@ -149,12 +176,16 @@ async def fetch_text(session, url, sem, headers=None):
     async with sem:
         try:
             async with session.get(url, timeout=aiohttp.ClientTimeout(total=20), headers=headers) as r:
-                if r.status == 200: return await r.text()
+                if r.status == 200: return 200, await r.text()
+                return r.status, None
         except Exception: pass
-    return None
+    return 0, None
 
 async def fetch_rss(session, src, sem):
-    txt = await fetch_text(session, src["_url"], sem); out = []
+    url = src["_url"]; out = []
+    if is_quarantined(url): return out
+    status, txt = await fetch_text(session, url, sem)
+    health_hit(url, status == 200 and bool(txt), status)
     if txt:
         for e in feedparser.parse(txt).entries[:MAX_PER_SOURCE]:
             out.append({"source_type": "rss", "source_name": src.get("Source_name", ""),
@@ -164,7 +195,10 @@ async def fetch_rss(session, src, sem):
     return out
 
 async def fetch_reddit(session, r, sem):
-    txt = await fetch_text(session, f"https://www.reddit.com/r/{r['sub']}/new/.rss", sem)
+    url = f"https://www.reddit.com/r/{r['sub']}/new/.rss"
+    if is_quarantined(url): return []
+    status, txt = await fetch_text(session, url, sem)
+    health_hit(url, status == 200 and bool(txt), status)
     out = []
     if txt:
         parsed = feedparser.parse(txt)
@@ -188,7 +222,7 @@ async def fetch_github(session, repo, sem, since_iso):
     if os.environ.get("GITHUB_TOKEN"): hdrs["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
     out = []
     for ep, kind in (("releases?per_page=5", "release"), (f"commits?per_page=5&since={since_iso}", "commit")):
-        txt = await fetch_text(session, f"https://api.github.com/repos/{repo}/{ep}", sem, hdrs)
+        status, txt = await fetch_text(session, f"https://api.github.com/repos/{repo}/{ep}", sem, hdrs)
         if txt:
             try:
                 data = json.loads(txt)
@@ -296,55 +330,31 @@ def send_digest(digest_items, report):
         print("Discord digest err:", e)
 
 def append_history(report):
-    """Rolling 72h news history — powers the briefings."""
-    path = os.path.join(DATA, "news_history.json")
-    items = []
-    try:
-        if os.path.exists(path):
-            items = json.load(open(path, encoding="utf-8")).get("items", [])
-    except Exception:
-        items = []
+    """Rolling 72h intelligence history in SQLite (F-15)."""
     now = time.time()
-    items = [i for i in items if now - i.get("ts", 0) < 72 * 3600]
-    entries = []
+    rows = []
     for a in report.get("analyzed", []):
         an = a.get("analysis", {}) or {}
-        entries.append({"ts": now, "url": a["url"], "title": a["title"], "source": a["source"],
-                        "score": a["score"], "triggers": a["triggers"],
-                        "importance": an.get("importance"), "sentiment": an.get("sentiment"),
-                        "summary": an.get("summary")})
+        rows.append((a["url"], now, a["title"], a["source"], a["score"], json.dumps(a["triggers"]),
+                     an.get("importance"), an.get("sentiment"), an.get("summary")))
     for w in report.get("wire", []):
-        entries.append({"ts": now, "url": w["url"], "title": w["title"], "source": w["source"],
-                        "score": w["score"], "triggers": w["triggers"],
-                        "importance": None, "sentiment": None, "summary": None})
+        rows.append((w["url"], now, w["title"], w["source"], w["score"], json.dumps(w["triggers"]), None, None, None))
     if DRY_RUN:
         for a in report.get("would_analyze", []):
-            entries.append({"ts": now, "url": a["url"], "title": a["title"], "source": a["source"],
-                            "score": a["score"], "triggers": a["triggers"],
-                            "importance": None, "sentiment": None, "summary": None})
-    known = {i.get("url") for i in items}
-    items += [e for e in entries if e["url"] not in known]
-    items.sort(key=lambda x: -x.get("ts", 0))
-    try:
-        with open(path, "w", encoding="utf-8") as f: json.dump({"items": items}, f)
-    except Exception as e:
-        print("history write err:", e)
-    if DRY_RUN:
-        for a in report.get("would_analyze", []):
-            entries.append({"ts": now, "url": a["url"], "title": a["title"], "source": a["source"],
-                            "score": a["score"], "triggers": a["triggers"],
-                            "importance": None, "sentiment": None, "summary": None})
-    known = {i.get("url") for i in items}
-    items += [e for e in entries if e["url"] not in known]
-    items.sort(key=lambda x: -x.get("ts", 0))
-    try:
-        with open(path, "w", encoding="utf-8") as f: json.dump({"items": items}, f)
-    except Exception as e:
-        print("history write err:", e)
+            rows.append((a["url"], now, a["title"], a["source"], a["score"], json.dumps(a["triggers"]), None, None, None))
+    con.executemany("INSERT OR REPLACE INTO history(url,ts,title,source,score,triggers,importance,sentiment,summary) VALUES (?,?,?,?,?,?,?,?,?)", rows)
+    con.execute("DELETE FROM history WHERE ts < ?", (now - 72*3600,))
+    con.execute("DELETE FROM seen WHERE ts < ?", (now - 7*24*3600,))
+    con.execute("DELETE FROM seen_titles WHERE ts < ?", (now - 7*24*3600,))
+    con.commit()
 
 async def main():
     if not DRY_RUN and not os.environ.get("QWEN_API_KEY"):
         raise SystemExit("FATAL: QWEN_API_KEY secret is not set.")
+
+    seen_n = con.execute("SELECT COUNT(*) FROM seen").fetchone()[0]
+    hist_n = con.execute("SELECT COUNT(*) FROM history").fetchone()[0]
+    print(f"STATE: seen={seen_n} history={hist_n}" + (" (FRESH STATE — no prior DB!)" if seen_n == 0 else ""))
 
     sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
     since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
@@ -367,7 +377,6 @@ async def main():
         mark_seen([i["url"] for i in filtered_out]); mark_title_seen(filtered_out)
 
     scored.sort(key=lambda x: -x["score"])
-    # L4: Front-page curation — only digest-worthy items spend Qwen tokens
     above_floor = [x for x in scored if x["score"] >= MIN_DIGEST_SCORE]
     front_page = above_floor[:DIGEST_CAP]
     fp_ids = {id(x) for x in front_page}
@@ -381,14 +390,21 @@ async def main():
                                "score": i["score"], "triggers": i["matched_categories"]})
 
     processed_urls = []; processed_items = []; digest_items = []
+    budget_hit = False
     for i in front_page:
         if i["source_type"] == "rss": i["text"] = full_text(i["url"], i["text"])
         if DRY_RUN:
             report["would_analyze"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
                                             "score": i["score"], "triggers": i["matched_categories"]})
             processed_urls.append(i["url"]); processed_items.append(i); continue
+        if not qwen_budget_ok():
+            if not budget_hit:
+                print(f"BUDGET: daily Qwen cap ({DAILY_QWEN_CAP}) reached — remaining items archived to Wire only.")
+                budget_hit = True
+            continue
         a = analyze(i)
         if a:
+            qwen_budget_use()
             report["analyzed"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
                                        "score": i["score"], "triggers": i["matched_categories"], "analysis": a})
             digest_items.append({"item": i, "analysis": a})
@@ -400,8 +416,8 @@ async def main():
     if processed_urls:
         mark_seen(processed_urls); mark_title_seen(processed_items)
 
-        append_history(report)
-
+    append_history(report)
+    dump_health()
     send_digest(digest_items, report)
     with open(os.path.join(REPORTS, "run.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=2)
     extra = f" | WOULD_ANALYZE {len(report['would_analyze'])}" if DRY_RUN else ""
