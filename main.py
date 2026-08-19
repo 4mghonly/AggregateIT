@@ -296,7 +296,7 @@ def send_digest(digest_items, report):
         print("Discord digest err:", e)
 
 def append_history(report):
-    """Rolling 48h news history — powers the briefings."""
+    """Rolling 72h news history — powers the briefings."""
     path = os.path.join(DATA, "news_history.json")
     items = []
     try:
@@ -313,6 +313,22 @@ def append_history(report):
                         "score": a["score"], "triggers": a["triggers"],
                         "importance": an.get("importance"), "sentiment": an.get("sentiment"),
                         "summary": an.get("summary")})
+    for w in report.get("wire", []):
+        entries.append({"ts": now, "url": w["url"], "title": w["title"], "source": w["source"],
+                        "score": w["score"], "triggers": w["triggers"],
+                        "importance": None, "sentiment": None, "summary": None})
+    if DRY_RUN:
+        for a in report.get("would_analyze", []):
+            entries.append({"ts": now, "url": a["url"], "title": a["title"], "source": a["source"],
+                            "score": a["score"], "triggers": a["triggers"],
+                            "importance": None, "sentiment": None, "summary": None})
+    known = {i.get("url") for i in items}
+    items += [e for e in entries if e["url"] not in known]
+    items.sort(key=lambda x: -x.get("ts", 0))
+    try:
+        with open(path, "w", encoding="utf-8") as f: json.dump({"items": items}, f)
+    except Exception as e:
+        print("history write err:", e)
     if DRY_RUN:
         for a in report.get("would_analyze", []):
             entries.append({"ts": now, "url": a["url"], "title": a["title"], "source": a["source"],
