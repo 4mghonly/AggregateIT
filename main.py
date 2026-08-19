@@ -1,4 +1,4 @@
-import os, re, json, time, sqlite3, asyncio, calendar
+import os, re, json, time, sqlite3, asyncio, calendar, hashlib, sys
 import feedparser, aiohttp, requests, trafilatura
 from datetime import datetime, timezone, timedelta
 
@@ -6,16 +6,23 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data"); REPORTS = os.path.join(BASE, "reports")
 os.makedirs(DATA, exist_ok=True); os.makedirs(REPORTS, exist_ok=True)
 
+# --- Runtime mode ---
+DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
+
 LOOKBACK_H = int(os.environ.get("LOOKBACK_HOURS", "6"))
 MAX_PER_SOURCE = 5
 MAX_ANALYZE = 15  # hard cap on LLM calls per run = cost guard
 ALWAYS_ANALYZE = ["federal reserve", "european central bank", "cisa"]
 PRIO_LIMIT = {"Very High": 10, "High": 5, "Medium": 3}
 UA = {"User-Agent": "NewsIntelEngine/0.1 (personal research)"}
-# Common-word tickers: matched ONLY when written with $ (e.g. $CAT). Bare word ignored.
-CASHTAG_ONLY = {"ALL","ARE","CAT","KEY","LOW","FIX","TAP","MAS","LIN","GEN","HAL","DOW","MET",
-                "ION","ARM","USB","GPS","KEYS","FAST","FLEX","LITE","DASH","FANG","COIN",
-                "SNOW","JOBS","CARS","BEER","DECK"}
+
+# F-02 FIX: common-word tickers matched ONLY with $ prefix. Expanded blocklist.
+CASHTAG_ONLY = {
+    "ALL","ARE","CAT","KEY","LOW","FIX","TAP","MAS","LIN","GEN","HAL","DOW","MET",
+    "ION","ARM","USB","GPS","KEYS","FAST","FLEX","LITE","DASH","FANG","COIN",
+    "SNOW","JOBS","CARS","BEER","DECK",
+    "HAS","APP","TECH","NOW","COST","BALL","WELL","POOL","ICE","AMP","DOC","FOX","PARA"
+}
 
 def load(n):
     with open(os.path.join(BASE, "config", n), encoding="utf-8") as f: return json.load(f)
@@ -39,11 +46,33 @@ for s in RAW:
     seen_u.add(u)
     (GH if "github.com/" in u else RSS).append({**s, "_url": u})
 
+# --- Persistent state ---
 con = sqlite3.connect(os.path.join(DATA, "seen.db"))
 con.execute("CREATE TABLE IF NOT EXISTS seen(url TEXT PRIMARY KEY, ts REAL)")
+# F-05 FIX: title-based dedup table
+con.execute("CREATE TABLE IF NOT EXISTS seen_titles(title_hash TEXT PRIMARY KEY, url TEXT, ts REAL)")
+
 def is_seen(u): return con.execute("SELECT 1 FROM seen WHERE url=?", (u,)).fetchone()
 def mark_seen(us):
     con.executemany("INSERT OR IGNORE INTO seen(url,ts) VALUES (?,?)", [(u, time.time()) for u in us]); con.commit()
+
+# F-05 FIX: normalized-title helpers
+def normalize_title(title):
+    t = re.sub(r'[^\w\s]', '', (title or "").lower())
+    return re.sub(r'\s+', ' ', t).strip()
+
+def title_hash(title):
+    return hashlib.md5(normalize_title(title).encode()).hexdigest()
+
+def is_title_seen(item):
+    th = title_hash(item.get("title", ""))
+    if th == hashlib.md5(b"").hexdigest(): return False
+    return con.execute("SELECT 1 FROM seen_titles WHERE title_hash=?", (th,)).fetchone()
+
+def mark_title_seen(items):
+    rows = [(title_hash(i.get("title","")), i.get("url",""), time.time()) for i in items if i.get("title")]
+    if rows:
+        con.executemany("INSERT OR IGNORE INTO seen_titles(title_hash,url,ts) VALUES (?,?,?)", rows); con.commit()
 
 CASHTAG = re.compile(r"\$([A-Za-z]{1,6})\b")
 
@@ -92,7 +121,6 @@ async def fetch_rss(session, src, sem):
     return out
 
 async def fetch_reddit(session, r, sem):
-    # Use RSS to bypass Reddit's JSON API datacenter blocks
     txt = await fetch_text(session, f"https://www.reddit.com/r/{r['sub']}/new/.rss", sem)
     out = []
     if txt:
@@ -105,20 +133,32 @@ async def fetch_reddit(session, r, sem):
                 "ts": calendar.timegm(entry.published_parsed) if entry.get("published_parsed") else time.time()})
     return out
 
+# F-04 FIX: parse ISO timestamps to epoch
+def parse_iso_ts(ts_str):
+    if not ts_str: return None
+    try:
+        return datetime.fromisoformat(ts_str.replace("Z", "+00:00")).timestamp()
+    except Exception:
+        return None
+
 async def fetch_github(session, repo, sem, since_iso):
     hdrs = dict(UA)
     if os.environ.get("GITHUB_TOKEN"): hdrs["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
     out = []
-    for ep in ("releases?per_page=5", f"commits?per_page=5&since={since_iso}"):
+    for ep, kind in (("releases?per_page=5", "release"), (f"commits?per_page=5&since={since_iso}", "commit")):
         txt = await fetch_text(session, f"https://api.github.com/repos/{repo}/{ep}", sem, hdrs)
         if txt:
             try:
                 data = json.loads(txt)
                 if isinstance(data, list):
                     for it in data:
+                        if kind == "release":
+                            ts = parse_iso_ts(it.get("published_at") or it.get("created_at")) or time.time()
+                        else:
+                            ts = parse_iso_ts(it.get("commit", {}).get("committer", {}).get("date")) or time.time()
                         out.append({"source_type": "github", "source_name": repo, "category": "GitHub",
                             "url": it.get("html_url", ""), "title": (it.get("name") or it.get("commit", {}).get("message") or "")[:200],
-                            "text": (it.get("body") or it.get("commit", {}).get("message") or "")[:4000], "ts": time.time()})
+                            "text": (it.get("body") or it.get("commit", {}).get("message") or "")[:4000], "ts": ts})
             except Exception: pass
     return out
 
@@ -163,6 +203,10 @@ def alert(i, a):
             {"name": "Triggered By", "value": ", ".join(i.get("matched_categories", []))[:500], "inline": False}]}]})
 
 async def main():
+    # D-01 FIX: fail fast if secrets missing (skip check in DRY_RUN)
+    if not DRY_RUN and not os.environ.get("QWEN_API_KEY"):
+        raise SystemExit("FATAL: QWEN_API_KEY secret is not set. Add it in Settings > Secrets and variables > Actions.")
+
     sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
     since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
     async with aiohttp.ClientSession(headers=UA) as s:
@@ -171,25 +215,51 @@ async def main():
             *[fetch_reddit(s, x, sem_rd) for x in REDDIT],
             *[fetch_github(s, x["_url"].split("github.com/")[1], sem, since.isoformat()) for x in GH])
     items = [i for b in batches if b for i in b]
-    new = [i for i in items if i["ts"] >= since.timestamp() and i["url"] and not is_seen(i["url"])]
-    mark_seen([i["url"] for i in new])
-    scored = []
+    # F-05 FIX: also filter by title dedup
+    new = [i for i in items if i["ts"] >= since.timestamp() and i["url"] and not is_seen(i["url"]) and not is_title_seen(i)]
+
+    scored = []; filtered_out = []
     for i in new:
         sc, labels = score_item(i)
         if sc > 0:
             i["matched_categories"] = labels; i["score"] = sc; i["cats"] = ", ".join(labels); scored.append(i)
+        else:
+            filtered_out.append(i)
+
+    # F-06 FIX: mark filtered-out items seen now; matched items only after success
+    if filtered_out:
+        mark_seen([i["url"] for i in filtered_out]); mark_title_seen(filtered_out)
+
     scored.sort(key=lambda x: -x["score"])
-    report = {"run": datetime.now(timezone.utc).isoformat(), "fetched": len(items),
-              "new": len(new), "matched": len(scored), "analyzed": []}
-    for i in scored[:MAX_ANALYZE]:
+    report = {"run": datetime.now(timezone.utc).isoformat(), "dry_run": DRY_RUN,
+              "fetched": len(items), "new": len(new), "matched": len(scored),
+              "analyzed": [], "would_analyze": []}
+
+    processed_urls = []; processed_items = []
+    for idx, i in enumerate(scored):
+        if idx >= MAX_ANALYZE:
+            processed_urls.append(i["url"]); processed_items.append(i); continue
         if i["source_type"] == "rss": i["text"] = full_text(i["url"], i["text"])
+        if DRY_RUN:
+            report["would_analyze"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
+                                            "score": i["score"], "triggers": i["matched_categories"]})
+            processed_urls.append(i["url"]); processed_items.append(i); continue
         a = analyze(i)
         if a:
             report["analyzed"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
                                        "score": i["score"], "triggers": i["matched_categories"], "analysis": a})
             alert(i, a)
-        time.sleep(1)
-    with open(os.path.join(REPORTS, "run.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=2)
-    print(f"FETCHED {report['fetched']} | NEW {report['new']} | MATCHED {report['matched']} | ANALYZED {len(report['analyzed'])}")
+            processed_urls.append(i["url"]); processed_items.append(i)
+        # F-06 FIX: failed analysis NOT marked seen -> retries next run
+        await asyncio.sleep(1)  # F-10 FIX
 
-asyncio.run(main())
+    if processed_urls:
+        mark_seen(processed_urls); mark_title_seen(processed_items)
+
+    with open(os.path.join(REPORTS, "run.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=2)
+    extra = f" | WOULD_ANALYZE {len(report['would_analyze'])}" if DRY_RUN else ""
+    mode = " [DRY RUN]" if DRY_RUN else ""
+    print(f"FETCHED {report['fetched']} | NEW {report['new']} | MATCHED {report['matched']} | ANALYZED {len(report['analyzed'])}{extra}{mode}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
