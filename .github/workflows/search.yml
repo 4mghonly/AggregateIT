@@ -1,0 +1,24 @@
+name: Ticker Search
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: "Ticker or company name (e.g. nvidia)"
+        required: true
+        type: string
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: seen-db-${{ github.run_id }}
+          restore-keys: |
+            seen-db-
+      - name: Search
+        run: python tv.py --search "${{ github.event.inputs.query }}"
