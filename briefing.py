@@ -106,7 +106,7 @@ def headlines(items, n=5):
 def build_exec(mode):
     uni = load_json(os.path.join(DATA, "tv_universe.json"))
     movers = (load_json(os.path.join(DATA, "movers.json")) or {}).get("movers", {})
-    hours = 16 if mode == "MORNING" else 9
+    hours = 24
     items = load_history(hours)
     ml = [{"t": k, **v} for k, v in movers.items()]
     gainers = sorted([m for m in ml if m.get("pct", 0) > 0], key=lambda x: x["pct"], reverse=True)[:4]
