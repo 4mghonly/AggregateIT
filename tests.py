@@ -49,13 +49,13 @@ def fake_post(body):
 uni, total = tv.fetch_universe(post_fn=fake_post)
 check("paginates to end", len(uni) == 2500 and total == 2500)
 
-print("[T8] Movers scans merge")
+print("[T8] Movers scans merge by sort direction")
 def fake_post2(body):
-    f = body.get("filter", [])
-    if f and f[0]["operation"] == "less": return {"totalCount": 1, "data": [{"s": "BBB", "d": ["B", "T", 1, -9, 2, 1]}]}
-    return {"totalCount": 1, "data": [{"s": "AAA", "d": ["A", "T", 1, 8, 3, 1]}]}
+    if body["sort"]["sortOrder"] == "asc":
+        return {"totalCount": 1, "data": [{"s": "BBB", "d": ["B", "T", 1, -9, 2, 1, 100000, 1]}]}
+    return {"totalCount": 1, "data": [{"s": "AAA", "d": ["A", "T", 1, 8, 3, 1, 100000, 1]}]}
 mv = tv.fetch_movers(post_fn=fake_post2)
-check("movers merged", set(mv) == {"AAA", "BBB"})
+check("movers merged", set(mv) == {"AAA", "BBB"}, sorted(mv))
 
 print("[T9] Qwen schema validation")
 valid = {"event": "Fed holds", "event_type": "macro", "facts": ["held"], "assessment": "pause",
