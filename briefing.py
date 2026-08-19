@@ -41,10 +41,6 @@ def load_json(path):
         with open(path, encoding="utf-8") as f: return json.load(f)
     except Exception: return None
 
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with: { name: state-backup, path: data/ }
-
 def theme_counts(items):
     counts = {}
     for i in items:
