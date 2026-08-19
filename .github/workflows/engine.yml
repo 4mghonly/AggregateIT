@@ -1,4 +1,5 @@
 name: News Intelligence Engine
+
 on:
   schedule:
     - cron: "0 * * * *"
@@ -7,43 +8,57 @@ on:
       dry_run:
         description: "Dry run (no Qwen calls, zero tokens)"
         type: choice
-        default: "true"
+        default: "false"
         options: ["true", "false"]
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with:
+          python-version: "3.11"
       - run: pip install -r requirements.txt
       - run: python tests.py
+
   run:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with:
+          python-version: "3.11"
+
       - uses: actions/cache@v4
         with:
           path: data
           key: seen-db-${{ github.run_id }}
           restore-keys: |
             seen-db-
+
       - run: pip install -r requirements.txt
+
       - name: Run engine
         env:
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          LOOKBACK_HOURS: "6"
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           GITHUB_TOKEN: ${{ github.token }}
         run: python main.py
+
       - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: intel-report, path: reports/ }
-              - uses: actions/upload-artifact@v4
+        with:
+          name: intel-report
+          path: reports/
+
+      - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: state-backup, path: data/ }
+        with:
+          name: state-backup
+          path: data/
