@@ -32,7 +32,7 @@ def fetch_stocktwits(tickers):
                     radar.append(f"{emoji} **{t}** ({bull}B/{bear}S)")
         except Exception:
             pass
-        time.sleep(0.25)  # Politeness to avoid rate limits
+        time.sleep(0.25)
     return sentiments, radar
 
 def load_json(path):
@@ -40,6 +40,22 @@ def load_json(path):
     try:
         with open(path, encoding="utf-8") as f: return json.load(f)
     except Exception: return None
+
+def load_history(hours):
+    import sqlite3
+    path = os.path.join(DATA, "seen.db")
+    if not os.path.exists(path): return []
+    cutoff = time.time() - hours * 3600
+    try:
+        c = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        rows = c.execute("SELECT url, ts, title, source, score, triggers, importance, sentiment, summary "
+                         "FROM history WHERE ts >= ?", (cutoff,)).fetchall()
+        c.close()
+    except Exception:
+        return []
+    return [{"url": r[0], "ts": r[1], "title": r[2], "source": r[3], "score": r[4],
+             "triggers": json.loads(r[5] or "[]"), "importance": r[6], "sentiment": r[7],
+             "summary": r[8]} for r in rows]
 
 def theme_counts(items):
     counts = {}
@@ -102,97 +118,4 @@ def insights(items, gainers, losers, hits):
     if crit:
         out.append(f"⚠️ Risk flag: {len(crit)} critical-severity story(ies) in window.")
     if not out: out.append("Quiet cycle — no major signals in window.")
-    return "\n".join(f"**{n}.** {t}" for n, t in enumerate(out[:4], 1))
-
-def findings(items, hours):
-    if not items:
-        return f"Quiet cycle over the last {hours}h. No front-page signals; watch the theme chart for early movement."
-    tc = theme_counts(items)
-    top_theme = DOMAIN_NAMES.get(sorted(tc.items(), key=lambda x: -x[1])[0][0], "Mixed") if tc else "Mixed"
-    top = max(items, key=lambda x: x.get("score", 0))
-    lines = [f"The last {hours}h were dominated by **{top_theme}** coverage.",
-             f"Highest-impact signal: **{top.get('title', '')[:80]}** ({top.get('source', '')})."]
-    crit = [i for i in items if i.get("importance") == "Critical"]
-    if crit: lines.append(f"⚠️ {len(crit)} critical story(ies) require attention.")
-    return "\n".join(lines)
-
-def headlines(items, n=5):
-    if not items: return "No major headlines in window."
-    top = sorted(items, key=lambda x: -x.get("score", 0))[:n]
-    return "\n".join(f"{IMP_EMOJI.get(i.get('importance'), '📰')} [{i.get('title', '')[:70]}]({i.get('url', '')})" for i in top)
-
-def build_exec(mode):
-    uni = load_json(os.path.join(DATA, "tv_universe.json"))
-    movers = (load_json(os.path.join(DATA, "movers.json")) or {}).get("movers", {})
-    hours = 24
-    items = load_history(hours)
-    ml = [{"t": k, **v} for k, v in movers.items()]
-    gainers = sorted([m for m in ml if m.get("pct", 0) > 0], key=lambda x: x["pct"], reverse=True)[:4]
-    losers = sorted([m for m in ml if m.get("pct", 0) < 0], key=lambda x: x["pct"])[:4]
-    hits = watch_hits(items, movers)
-    # Fetch live retail sentiment for Movers + Watchlist
-    st_tickers = [m['t'] for m in gainers + losers] + hits
-    st_rolls, st_radar = fetch_stocktwits(st_tickers)
-    label = "MORNING DESK" if mode == "MORNING" else "CLOSING BELL"
-    color = 0xF1C40F if mode == "MORNING" else 0x3498DB
-    now = datetime.now(timezone.utc).strftime("%a %Y-%m-%d %H:%M UTC")
-
-    e1 = {"title": f"📋 EXECUTIVE BRIEFING · {label}",
-          "description": f"{now} • Window: last {hours}h • **{len(items)}** relevant stories",
-          "color": color,
-          "fields": [
-              {"name": "🎯 Mission", "value": "Surface market-moving geopolitical & corporate signals before consensus.", "inline": True},
-              {"name": "🧩 Scope", "value": "95 news sources · 32 subreddits · 20k US tickers · 40+ intel clusters", "inline": True}]}
-
-    mega = "—"
-    if uni:
-        top20 = sorted([r for r in uni.get("rows", []) if r.get("mcap", 0) > 0], key=lambda x: x["mcap"], reverse=True)[:20]
-        fmt = lambda r: f"{'🟢' if r.get('pct', 0) >= 0 else '🔴'} {r['t']} {r.get('pct', 0):+.1f}%"
-        mega = " | ".join(fmt(r) for r in top20[:10]) + "\n" + " | ".join(fmt(r) for r in top20[10:])
-
-    e2 = {"title": "💹 Market Pulse", "color": color, "fields": [
-        {"name": "🚀 Top Movers", "value": "\n".join(f"**{m['t']}** +{m['pct']:.1f}% ({m.get('relvol', 0):.1f}x)" for m in gainers) or "—", "inline": True},
-        {"name": "📉 Top Fallers", "value": "\n".join(f"**{m['t']}** {m['pct']:.1f}% ({m.get('relvol', 0):.1f}x)" for m in losers) or "—", "inline": True},
-        {"name": "🏛️ Mega-Cap Scoreboard (Top 20)", "value": mega, "inline": False}]}
-
-    e3 = {"title": "🔢 Data Insights", "color": color,
-          "fields": [{"name": "Key signals this window", "value": insights(items, gainers, losers, hits), "inline": False}]}
-
-    e4 = {"title": "📊 Theme Activity & Sentiment", "color": color, "fields": [
-        {"name": "Intel cluster activity", "value": theme_chart(items), "inline": True},
-        {"name": "News Sentiment (AI)", "value": sentiment_gauge(items), "inline": True},
-        {"name": "🗣️ Retail Crowd Radar (StockTwits)", "value": "\n".join(st_radar[:6]) if st_radar else "No strong retail consensus on movers.", "inline": False}]}
-
-    e5 = {"title": "🧾 Summary of Findings", "color": color,
-          "description": findings(items, hours),
-          "fields": [{"name": "📰 Top Headlines", "value": headlines(items, 5), "inline": False}],
-          "footer": {"text": "AggregateIT Intelligence Terminal"},
-          "timestamp": datetime.now(timezone.utc).isoformat()}
-    return [e1, e2, e3, e4, e5]
-
-def build_mini():
-    items = load_history(24)
-    return [{"title": "🌅 AGGREGATEIT · OVERNIGHT WIRE (08:00 UAE)",
-             "description": findings(items, 24), "color": 0xE67E22,
-             "fields": [
-                 {"name": "📰 Major Headlines", "value": headlines(items, 6), "inline": False},
-                 {"name": "🧭 Theme Activity", "value": theme_chart(items), "inline": True},
-                 {"name": "📊 Sentiment", "value": sentiment_gauge(items), "inline": True}],
-             "footer": {"text": "AggregateIT Intelligence Terminal"},
-             "timestamp": datetime.now(timezone.utc).isoformat()}]
-
-def main():
-    mode = os.environ.get("BRIEFING_MODE", "MORNING").upper()
-    webhook = os.environ.get("DISCORD_WEBHOOK")
-    if not webhook:
-        print("FATAL: DISCORD_WEBHOOK secret is not set."); return
-    embeds = build_mini() if mode == "MINI" else build_exec(mode)
-    try:
-        r = requests.post(webhook, json={"embeds": embeds})
-        r.raise_for_status()
-        print(f"✅ {mode} executive briefing delivered ({len(embeds)} panels)!")
-    except Exception as e:
-        print(f"Failed to send briefing: {e}")
-
-if __name__ == "__main__":
-    main()
+    return "\n".join(f
