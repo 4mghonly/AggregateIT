@@ -1,22 +1,19 @@
 import os, re, json, time, sqlite3, asyncio, calendar, hashlib, sys
 import feedparser, aiohttp, requests, trafilatura
 from datetime import datetime, timezone, timedelta
+from storage import SQLiteStore, DATA
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(BASE, "data"); REPORTS = os.path.join(BASE, "reports")
+REPORTS = os.path.join(BASE, "reports")
 os.makedirs(DATA, exist_ok=True); os.makedirs(REPORTS, exist_ok=True)
 
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
-
 LOOKBACK_H = int(os.environ.get("LOOKBACK_HOURS", "6"))
 MAX_PER_SOURCE = 5
+MAX_ANALYZE = 25
 ALWAYS_ANALYZE = ["federal reserve", "european central bank", "cisa"]
 PRIO_LIMIT = {"Very High": 10, "High": 5, "Medium": 3}
-UA = {"User-Agent": "NewsIntelEngine/0.1 (personal research)"}
-
-MIN_DIGEST_SCORE = 5
-DIGEST_CAP = 10
-DAILY_QWEN_CAP = 50  # Black Swan circuit breaker
+UA = {"User-Agent": "NewsIntelEngine/0.2 (personal research)"}
 
 CASHTAG_ONLY = {
     "ALL","ARE","CAT","KEY","LOW","FIX","TAP","MAS","LIN","GEN","HAL","DOW","MET",
@@ -24,6 +21,10 @@ CASHTAG_ONLY = {
     "SNOW","JOBS","CARS","BEER","DECK",
     "HAS","APP","TECH","NOW","COST","BALL","WELL","POOL","ICE","AMP","DOC","FOX","PARA"
 }
+
+# --- system health counters (F-09: failures are visible, never silent) ---
+HEALTH = {"rss_ok":0,"rss_fail":0,"reddit_ok":0,"reddit_fail":0,"github_ok":0,"github_fail":0,
+          "qwen_ok":0,"qwen_fail":0,"qwen_invalid":0,"discord_ok":0,"discord_fail":0,"discord_skipped":0}
 
 def load(n):
     with open(os.path.join(BASE, "config", n), encoding="utf-8") as f: return json.load(f)
@@ -40,34 +41,6 @@ T_BY_SYM = {d["t"].upper(): d for d in TICK_RAW}
 SYMS = [t for t in T_BY_SYM if len(t) >= 3 and t not in CASHTAG_ONLY]
 NAMES = [(d["c"].lower(), d) for d in TICK_RAW if len(d["c"]) >= 6]
 
-TV_UNIVERSE = []; MOVERS = {}
-try:
-    _tvp = os.path.join(DATA, "tv_universe.json")
-    if os.path.exists(_tvp):
-        TV_UNIVERSE = json.load(open(_tvp, encoding="utf-8"))["rows"]
-    _mvp = os.path.join(DATA, "movers.json")
-    if os.path.exists(_mvp):
-        MOVERS = json.load(open(_mvp, encoding="utf-8"))["movers"]
-except Exception as e:
-    print("TV data load err:", type(e).__name__)
-
-ALL_TICKS = set(T_BY_SYM.keys()); TV_BY_TICK = {}
-for _r in TV_UNIVERSE:
-    _t = _r["t"].upper(); ALL_TICKS.add(_t); TV_BY_TICK[_t] = _r
-
-_mover_names = {}
-for _tick in MOVERS:
-    _r = TV_BY_TICK.get(_tick.upper())
-    if _r:
-        _nm = (_r.get("c") or "").lower().strip()
-        if len(_nm) >= 6:
-            _mover_names[_nm] = {"t": _r["t"], "c": _r.get("c",""), "s": _r.get("s","")}
-_existing_names = {n for n, _ in NAMES}
-ALL_NAMES = list(NAMES) + [(nm, d) for nm, d in _mover_names.items() if nm not in _existing_names]
-
-def _tick_info(sym):
-    return T_BY_SYM.get(sym.upper()) or TV_BY_TICK.get(sym.upper())
-
 seen_u = set(); RSS = []; GH = []
 for s in RAW:
     u = s.get("Url", "").replace("http://", "https://").rstrip("/")
@@ -75,16 +48,7 @@ for s in RAW:
     seen_u.add(u)
     (GH if "github.com/" in u else RSS).append({**s, "_url": u})
 
-con = sqlite3.connect(os.path.join(DATA, "seen.db"))
-con.execute("CREATE TABLE IF NOT EXISTS seen(url TEXT PRIMARY KEY, ts REAL)")
-con.execute("CREATE TABLE IF NOT EXISTS seen_titles(title_hash TEXT PRIMARY KEY, url TEXT, ts REAL)")
-con.execute("CREATE TABLE IF NOT EXISTS history(url TEXT PRIMARY KEY, ts REAL, title TEXT, source TEXT, score REAL, triggers TEXT, importance TEXT, sentiment TEXT, summary TEXT)")
-con.execute("CREATE TABLE IF NOT EXISTS health(url TEXT PRIMARY KEY, fails INTEGER, last_status INTEGER, last_checked REAL, quarantined_until REAL)")
-con.execute("CREATE TABLE IF NOT EXISTS budget(day TEXT PRIMARY KEY, calls INTEGER)")
-
-def is_seen(u): return con.execute("SELECT 1 FROM seen WHERE url=?", (u,)).fetchone()
-def mark_seen(us):
-    con.executemany("INSERT OR IGNORE INTO seen(url,ts) VALUES (?,?)", [(u, time.time()) for u in us]); con.commit()
+store = SQLiteStore()
 
 def normalize_title(title):
     t = re.sub(r'[^\w\s]', '', (title or "").lower())
@@ -92,48 +56,6 @@ def normalize_title(title):
 
 def title_hash(title):
     return hashlib.md5(normalize_title(title).encode()).hexdigest()
-
-def is_title_seen(item):
-    th = title_hash(item.get("title", ""))
-    if th == hashlib.md5(b"").hexdigest(): return False
-    return con.execute("SELECT 1 FROM seen_titles WHERE title_hash=?", (th,)).fetchone()
-
-def mark_title_seen(items):
-    rows = [(title_hash(i.get("title","")), i.get("url",""), time.time()) for i in items if i.get("title")]
-    if rows:
-        con.executemany("INSERT OR IGNORE INTO seen_titles(title_hash,url,ts) VALUES (?,?,?)", rows); con.commit()
-
-# ===== Source health & quarantine (F-11/F-12) =====
-def is_quarantined(url):
-    row = con.execute("SELECT quarantined_until FROM health WHERE url=?", (url,)).fetchone()
-    return bool(row and row[0] > time.time())
-
-def health_hit(url, ok, status):
-    now = time.time()
-    row = con.execute("SELECT fails FROM health WHERE url=?", (url,)).fetchone()
-    fails = 0 if ok else (row[0] if row else 0) + 1
-    q = now + 24*3600 if fails >= 3 else 0
-    con.execute("INSERT INTO health(url,fails,last_status,last_checked,quarantined_until) VALUES (?,?,?,?,?) "
-                "ON CONFLICT(url) DO UPDATE SET fails=?,last_status=?,last_checked=?,quarantined_until=?",
-                (url, fails, status, now, q, fails, status, now, q))
-    con.commit()
-
-def dump_health():
-    rows = con.execute("SELECT url,fails,last_status,quarantined_until FROM health").fetchall()
-    with open(os.path.join(REPORTS, "source_health.json"), "w", encoding="utf-8") as f:
-        json.dump([{"url": r[0], "fails": r[1], "last_status": r[2], "quarantined": r[3] > time.time()} for r in rows], f, indent=2)
-
-# ===== Qwen daily budget (circuit breaker) =====
-def qwen_budget_ok():
-    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    row = con.execute("SELECT calls FROM budget WHERE day=?", (day,)).fetchone()
-    return (row[0] if row else 0) < DAILY_QWEN_CAP
-
-def qwen_budget_use():
-    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    con.execute("INSERT INTO budget(day,calls) VALUES (?,1) ON CONFLICT(day) DO UPDATE SET calls=calls+1", (day,))
-    con.execute("DELETE FROM budget WHERE day != ?", (day,))
-    con.commit()
 
 CASHTAG = re.compile(r"\$([A-Za-z]{1,6})\b")
 
@@ -143,32 +65,23 @@ def find_matches(text):
 
 def score_item(i):
     text = i["title"] + " " + i["text"]; low = text.lower()
-    score = 0; hits = []; matched = set()
+    score = 0; hits = []
     if any(a in i["source_name"].lower() for a in ALWAYS_ANALYZE):
         score += 5; hits.append("Priority Source")
     for sym in set(c.upper() for c in CASHTAG.findall(text)):
-        if sym in ALL_TICKS:
-            score += 3; hits.append(sym); matched.add(sym)
+        if sym in T_BY_SYM: score += 3; hits.append(sym)
     for t in SYMS:
-        if re.search(rf"\b{re.escape(t)}\b", text, re.I):
-            score += 2; hits.append(t); matched.add(t)
-    for name, d in ALL_NAMES:
-        if name in low:
-            score += 3; hits.append(d["t"]); matched.add(d["t"].upper())
-    for t in matched:
-        if t.upper() in MOVERS:
-            score += 4; hits.append(f"🔥 {t} MOVER")
+        if re.search(rf"\b{re.escape(t)}\b", text, re.I): score += 2; hits.append(t)
+    for name, d in NAMES:
+        if name in low: score += 3; hits.append(d["t"])
     kws = find_matches(text)
     for e in kws: score += PRIO_SCORE.get(e.get("prio", "Medium"), 2)
     i["keyword_ids"] = [e["id"] for e in kws]
     i["keyword_tags"] = sorted({t for e in kws for t in e.get("tags", [])})
     labels = []
     for h in dict.fromkeys(hits):
-        if h == "Priority Source" or "MOVER" in h:
-            labels.append(h)
-        else:
-            d = _tick_info(h)
-            labels.append(f"{h} ({d['c']} · {d.get('s','')})" if d else h)
+        d = T_BY_SYM.get(h)
+        labels.append(f"{h} ({d['c']} · {d['s']})" if d else h)
     labels += [f"{e['id']} · {e['sub']}" for e in kws]
     return score, labels
 
@@ -176,29 +89,23 @@ async def fetch_text(session, url, sem, headers=None):
     async with sem:
         try:
             async with session.get(url, timeout=aiohttp.ClientTimeout(total=20), headers=headers) as r:
-                if r.status == 200: return 200, await r.text()
-                return r.status, None
+                if r.status == 200: return await r.text()
         except Exception: pass
-    return 0, None
+    return None
 
 async def fetch_rss(session, src, sem):
-    url = src["_url"]; out = []
-    if is_quarantined(url): return out
-    status, txt = await fetch_text(session, url, sem)
-    health_hit(url, status == 200 and bool(txt), status)
+    txt = await fetch_text(session, src["_url"], sem); out = []
     if txt:
         for e in feedparser.parse(txt).entries[:MAX_PER_SOURCE]:
             out.append({"source_type": "rss", "source_name": src.get("Source_name", ""),
                 "category": src.get("Category", ""), "url": e.get("link", ""),
                 "title": e.get("title", ""), "text": re.sub("<[^>]+>", "", e.get("summary", "")),
                 "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
+    HEALTH["rss_ok" if out else "rss_fail"] += 1
     return out
 
 async def fetch_reddit(session, r, sem):
-    url = f"https://www.reddit.com/r/{r['sub']}/new/.rss"
-    if is_quarantined(url): return []
-    status, txt = await fetch_text(session, url, sem)
-    health_hit(url, status == 200 and bool(txt), status)
+    txt = await fetch_text(session, f"https://www.reddit.com/r/{r['sub']}/new/.rss", sem)
     out = []
     if txt:
         parsed = feedparser.parse(txt)
@@ -208,6 +115,7 @@ async def fetch_reddit(session, r, sem):
                 "url": entry.get("link", ""), "title": title,
                 "text": re.sub("<[^>]+>", "", entry.get("summary", "")),
                 "ts": calendar.timegm(entry.published_parsed) if entry.get("published_parsed") else time.time()})
+    HEALTH["reddit_ok" if out else "reddit_fail"] += 1
     return out
 
 def parse_iso_ts(ts_str):
@@ -222,7 +130,7 @@ async def fetch_github(session, repo, sem, since_iso):
     if os.environ.get("GITHUB_TOKEN"): hdrs["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
     out = []
     for ep, kind in (("releases?per_page=5", "release"), (f"commits?per_page=5&since={since_iso}", "commit")):
-        status, txt = await fetch_text(session, f"https://api.github.com/repos/{repo}/{ep}", sem, hdrs)
+        txt = await fetch_text(session, f"https://api.github.com/repos/{repo}/{ep}", sem, hdrs)
         if txt:
             try:
                 data = json.loads(txt)
@@ -236,6 +144,7 @@ async def fetch_github(session, repo, sem, since_iso):
                             "url": it.get("html_url", ""), "title": (it.get("name") or it.get("commit", {}).get("message") or "")[:200],
                             "text": (it.get("body") or it.get("commit", {}).get("message") or "")[:4000], "ts": ts})
             except Exception: pass
+    HEALTH["github_ok" if out else "github_fail"] += 1
     return out
 
 def full_text(url, fallback):
@@ -246,27 +155,102 @@ def full_text(url, fallback):
     except Exception: pass
     return fallback[:4000]
 
-PROMPT_T = """You are a precise intelligence analyst. Treat the text as sole source of truth. Output ONLY valid JSON with keys:
-summary, category, importance (Low/Medium/High/Critical), keywords (list), entities (list), tickers (list), sentiment (bullish/bearish/neutral/na), event_type, countries (list), key_developments, unconfirmed_or_missing
+# ================= QWEN INTELLIGENCE CONTRACT =================
+PROMPT_T = """You are a disciplined intelligence analyst. Strict tradecraft rules:
+- FACTS must be directly supported by the source text. Never present inference as fact.
+- ASSESSMENT is your interpretation, always separated from facts.
+- CONFIDENCE 0-100 must reflect evidence quality; single-source claims stay at or below 60.
+- If information is missing, record it in "gaps". Never invent it.
+- Only include tickers that literally appear in the text.
 
-TRIGGER CONTEXT: This article was flagged because it relates to: {cats}
+Output ONLY one valid JSON object with exactly these keys:
+{{
+  "event": "one-sentence description of the event",
+  "event_type": "earnings|regulation|geopolitical|market_move|security|macro|other",
+  "facts": ["statement directly supported by the text"],
+  "assessment": "analytical interpretation, clearly opinion not fact",
+  "importance": "Low|Medium|High|Critical",
+  "confidence": 0,
+  "sentiment": "bullish|bearish|neutral|na",
+  "entities": ["companies, people, organizations, countries"],
+  "tickers": ["VALID symbols only"],
+  "evidence": ["short verbatim quotes supporting key claims"],
+  "corroboration": "none|single-source|multi-source",
+  "source_reliability": "High|Medium|Low",
+  "gaps": ["what is missing or unconfirmed"]
+}}
+
+TRIGGER CONTEXT: This item was flagged because it relates to: {cats}
 SOURCE: {source_name} ({category})
 TITLE: {title}
 TEXT:
 {text}"""
 
-def analyze(i):
-    try:
-        base = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
-        r = requests.post(base + "/chat/completions",
-            headers={"Authorization": "Bearer " + os.environ["QWEN_API_KEY"]},
-            json={"model": os.environ.get("QWEN_MODEL", "qwen3.7-flash-2026-07-15"), "temperature": 0.2,
-                  "messages": [{"role": "user", "content": PROMPT_T.format(**i)}]}, timeout=120)
-        m = re.search(r"\{[\s\S]*\}", r.json()["choices"][0]["message"]["content"])
-        return json.loads(m.group(0)) if m else None
-    except Exception as e:
-        print("LLM err:", e); return None
+ENUM_IMP = {"Low","Medium","High","Critical"}
+ENUM_SENT = {"bullish","bearish","neutral","na"}
+ENUM_REL = {"High","Medium","Low"}
+TICK_RE = re.compile(r"^[A-Z.\-]{1,6}$")
 
+def validate_analysis(obj):
+    """F-08: valid JSON is NOT automatically valid intelligence. Returns (ok, obj, errors)."""
+    errs = []
+    if not isinstance(obj, dict): return False, None, ["response is not a JSON object"]
+    for k in ("event","assessment","event_type","corroboration","source_reliability"):
+        if not isinstance(obj.get(k), str) or not obj.get(k).strip(): errs.append(f"missing/invalid '{k}'")
+    for k in ("facts","entities","tickers","evidence","gaps"):
+        v = obj.get(k)
+        if not isinstance(v, list): errs.append(f"'{k}' must be a list")
+        elif not all(isinstance(x, str) for x in v): errs.append(f"'{k}' items must be strings")
+    if obj.get("importance") not in ENUM_IMP: errs.append("importance not in Low|Medium|High|Critical")
+    if obj.get("sentiment") not in ENUM_SENT: errs.append("sentiment not in enum")
+    if obj.get("source_reliability") not in ENUM_REL: errs.append("source_reliability not in enum")
+    c = obj.get("confidence")
+    if not isinstance(c, (int, float)) or not (0 <= c <= 100): errs.append("confidence must be 0-100")
+    if errs: return False, obj, errs
+    obj["tickers"] = [t.upper().strip() for t in obj["tickers"] if TICK_RE.match(t.upper().strip())][:10]
+    if obj.get("corroboration") == "none" and obj["confidence"] > 60:
+        obj["confidence"] = 60  # single-source ceiling: never present inference as confirmed fact
+    return True, obj, []
+
+def _qwen_call(messages):
+    base = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
+    r = requests.post(base + "/chat/completions",
+        headers={"Authorization": "Bearer " + os.environ["QWEN_API_KEY"]},
+        json={"model": os.environ.get("QWEN_MODEL", "qwen-plus"), "temperature": 0.2, "messages": messages},
+        timeout=120)
+    r.raise_for_status()
+    return r.json()["choices"][0]["message"]["content"]
+
+def analyze(i):
+    """F-07: bounded repair-retry + strict validation. Returns (analysis|None, error|None)."""
+    prompt = PROMPT_T.format(**i)
+    for attempt in (1, 2):
+        try:
+            content = _qwen_call([{"role": "user", "content": prompt}])
+            m = re.search(r"\{[\s\S]*\}", content)
+            if not m: raise ValueError("no JSON object in response")
+            obj = json.loads(m.group(0))
+            ok, cleaned, errs = validate_analysis(obj)
+            if ok:
+                HEALTH["qwen_ok"] += 1
+                return cleaned, None
+            if attempt == 1:
+                HEALTH["qwen_invalid"] += 1
+                prompt += "\n\nYour previous response was INVALID (" + "; ".join(errs) + "). Return ONLY the corrected JSON object."
+                continue
+            HEALTH["qwen_invalid"] += 1
+            return None, "schema invalid: " + "; ".join(errs)
+        except requests.exceptions.Timeout:
+            if attempt == 1: continue
+            HEALTH["qwen_fail"] += 1
+            return None, "timeout"
+        except Exception as e:
+            if attempt == 1: time.sleep(2); continue
+            HEALTH["qwen_fail"] += 1
+            return None, f"{type(e).__name__}: {str(e)[:120]}"
+    return None, "unknown"
+
+# ================= DISCORD DIGEST =================
 SENT_EMOJI = {"bullish": "🟢 Bullish", "bearish": "🔴 Bearish", "neutral": "⚪ Neutral", "na": "➖ N/A"}
 IMP_EMOJI = {"Critical": "🚨", "High": "🔥", "Medium": "📌", "Low": "ℹ️"}
 IMP_COLOR = {"Critical": 0xE74C3C, "High": 0xE67E22, "Medium": 0xF1C40F, "Low": 0x95A5A6}
@@ -279,26 +263,25 @@ def build_item_embed(i, a):
     imp = a.get("importance", "Low")
     sent = (a.get("sentiment") or "na").lower()
     tag = "💬" if i["source_type"] == "reddit" else "📰"
+    desc = _truncate(f"**{a.get('event','')}**\n{a.get('assessment','')}", 900)
     fields = [
         {"name": "Sentiment", "value": SENT_EMOJI.get(sent, sent), "inline": True},
         {"name": "Importance", "value": f"{IMP_EMOJI.get(imp, '')} {imp}", "inline": True},
+        {"name": "Confidence", "value": f"{a.get('confidence', '?')}%", "inline": True},
         {"name": "Tickers", "value": _truncate(", ".join(a.get("tickers") or []) or "-", 200), "inline": True},
     ]
     if a.get("event_type"):
         fields.append({"name": "Event Type", "value": _truncate(str(a["event_type"]), 150), "inline": True})
     fields.append({"name": "Triggered By", "value": _truncate(", ".join(i.get("matched_categories", [])) or "-", 400), "inline": False})
-    return {
-        "title": _truncate(f"{tag} {i['title']}", 250),
-        "url": i["url"],
-        "description": _truncate(a.get("summary") or "No summary available.", 900),
-        "color": IMP_COLOR.get(imp, 0x95A5A6),
-        "fields": fields,
-        "footer": {"text": f"{i['source_name']} · relevance score {i.get('score', 0)}"},
-    }
+    return {"title": _truncate(f"{tag} {i['title']}", 250), "url": i["url"], "description": desc,
+            "color": IMP_COLOR.get(imp, 0x95A5A6), "fields": fields,
+            "footer": {"text": f"{i['source_name']} · score {i.get('score', 0)} · rel. {a.get('source_reliability', '?')}"}}
 
 def send_digest(digest_items, report):
     wh = os.environ.get("DISCORD_WEBHOOK")
-    if not wh or not digest_items: return
+    if not wh or not digest_items:
+        HEALTH["discord_skipped"] += 1
+        return
     news = [x for x in digest_items if x["item"]["source_type"] != "reddit"]
     social = [x for x in digest_items if x["item"]["source_type"] == "reddit"]
     rolls = {"bullish": 0, "bearish": 0, "neutral": 0, "na": 0}
@@ -307,7 +290,7 @@ def send_digest(digest_items, report):
         rolls[s if s in rolls else "na"] += 1
     header = {
         "title": "🧠 AggregateIT Intelligence Digest",
-        "description": f"**{report['new']}** new → **{report['matched']}** matched → **{len(digest_items)}** on the front page",
+        "description": f"**{report['new']}** new items scanned → **{report['matched']}** matched → **{len(digest_items)}** analyzed by Qwen",
         "color": 0x5865F2,
         "fields": [
             {"name": "📰 News items", "value": str(len(news)), "inline": True},
@@ -326,35 +309,30 @@ def send_digest(digest_items, report):
             requests.post(wh, json={"content": "**💬 SOCIAL NETWORKS**", "embeds": social_embeds[:4]})
             for k in range(4, len(social_embeds), 4):
                 requests.post(wh, json={"embeds": social_embeds[k:k+4]})
+        HEALTH["discord_ok"] += len(digest_items)
     except Exception as e:
-        print("Discord digest err:", e)
+        HEALTH["discord_fail"] += 1
+        print("Discord digest err:", type(e).__name__, str(e)[:120])
 
-def append_history(report):
-    """Rolling 72h intelligence history in SQLite (F-15)."""
-    now = time.time()
-    rows = []
-    for a in report.get("analyzed", []):
-        an = a.get("analysis", {}) or {}
-        rows.append((a["url"], now, a["title"], a["source"], a["score"], json.dumps(a["triggers"]),
-                     an.get("importance"), an.get("sentiment"), an.get("summary")))
-    for w in report.get("wire", []):
-        rows.append((w["url"], now, w["title"], w["source"], w["score"], json.dumps(w["triggers"]), None, None, None))
-    if DRY_RUN:
-        for a in report.get("would_analyze", []):
-            rows.append((a["url"], now, a["title"], a["source"], a["score"], json.dumps(a["triggers"]), None, None, None))
-    con.executemany("INSERT OR REPLACE INTO history(url,ts,title,source,score,triggers,importance,sentiment,summary) VALUES (?,?,?,?,?,?,?,?,?)", rows)
-    con.execute("DELETE FROM history WHERE ts < ?", (now - 72*3600,))
-    con.execute("DELETE FROM seen WHERE ts < ?", (now - 7*24*3600,))
-    con.execute("DELETE FROM seen_titles WHERE ts < ?", (now - 7*24*3600,))
-    con.commit()
+def build_health(report, store_stats):
+    degraded = []
+    if HEALTH["rss_fail"]: degraded.append(f"{HEALTH['rss_fail']} RSS feeds failed")
+    if HEALTH["reddit_fail"]: degraded.append(f"{HEALTH['reddit_fail']} subreddits failed")
+    if HEALTH["github_fail"]: degraded.append(f"{HEALTH['github_fail']} GitHub repos failed")
+    if HEALTH["qwen_fail"]: degraded.append(f"{HEALTH['qwen_fail']} Qwen API failures")
+    if HEALTH["qwen_invalid"]: degraded.append(f"{HEALTH['qwen_invalid']} Qwen outputs rejected by schema")
+    if HEALTH["discord_fail"]: degraded.append("Discord delivery failed")
+    if not os.path.exists(os.path.join(DATA, "movers.json")): degraded.append("TradingView movers missing (run TV refresh)")
+    if store_stats.get("fresh_init"): degraded.append("state DB freshly initialized (previous state may be lost)")
+    hard_fail = (not DRY_RUN) and HEALTH["qwen_fail"] > HEALTH["qwen_ok"]
+    overall = "RED" if hard_fail else ("YELLOW" if degraded else "GREEN")
+    return {"run": report["run"], "overall": overall, "dry_run": DRY_RUN,
+            "degraded": degraded, "counters": dict(HEALTH), "store": store_stats}
 
+# ================= MAIN =================
 async def main():
     if not DRY_RUN and not os.environ.get("QWEN_API_KEY"):
-        raise SystemExit("FATAL: QWEN_API_KEY secret is not set.")
-
-    seen_n = con.execute("SELECT COUNT(*) FROM seen").fetchone()[0]
-    hist_n = con.execute("SELECT COUNT(*) FROM history").fetchone()[0]
-    print(f"STATE: seen={seen_n} history={hist_n}" + (" (FRESH STATE — no prior DB!)" if seen_n == 0 else ""))
+        raise SystemExit("FATAL: QWEN_API_KEY secret is not set. Add it in Settings > Secrets and variables > Actions.")
 
     sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
     since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
@@ -364,65 +342,66 @@ async def main():
             *[fetch_reddit(s, x, sem_rd) for x in REDDIT],
             *[fetch_github(s, x["_url"].split("github.com/")[1], sem, since.isoformat()) for x in GH])
     items = [i for b in batches if b for i in b]
-    new = [i for i in items if i["ts"] >= since.timestamp() and i["url"] and not is_seen(i["url"]) and not is_title_seen(i)]
 
-    scored = []; filtered_out = []
+    new = []
+    for i in items:
+        if i["ts"] < since.timestamp() or not i["url"]: continue
+        if not store.url_active(i["url"]): continue
+        if not store.title_active(title_hash(i.get("title", ""))): continue
+        new.append(i)
+
+    scored = []
     for i in new:
         sc, labels = score_item(i)
+        i["thash"] = title_hash(i.get("title", ""))
         if sc > 0:
-            i["matched_categories"] = labels; i["score"] = sc; i["cats"] = ", ".join(labels); scored.append(i)
+            i["matched_categories"] = labels; i["score"] = sc; i["cats"] = ", ".join(labels)
+            scored.append(i)
+            if not DRY_RUN: store.register(i["url"], i["thash"], "discovered", sc)
         else:
-            filtered_out.append(i)
-    if filtered_out:
-        mark_seen([i["url"] for i in filtered_out]); mark_title_seen(filtered_out)
+            if not DRY_RUN: store.register(i["url"], i["thash"], "filtered", 0)  # terminal: no retry value
 
     scored.sort(key=lambda x: -x["score"])
-    above_floor = [x for x in scored if x["score"] >= MIN_DIGEST_SCORE]
-    front_page = above_floor[:DIGEST_CAP]
-    fp_ids = {id(x) for x in front_page}
-    wire = [x for x in scored if id(x) not in fp_ids]
-
     report = {"run": datetime.now(timezone.utc).isoformat(), "dry_run": DRY_RUN,
               "fetched": len(items), "new": len(new), "matched": len(scored),
-              "front_page": len(front_page), "wire": [], "analyzed": [], "would_analyze": []}
-    for i in wire:
-        report["wire"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
-                               "score": i["score"], "triggers": i["matched_categories"]})
+              "analyzed": [], "would_analyze": [], "quarantined": []}
 
-    processed_urls = []; processed_items = []; digest_items = []
-    budget_hit = False
-    for i in front_page:
+    digest_items = []
+    for idx, i in enumerate(scored):
+        if idx >= MAX_ANALYZE:
+            if not DRY_RUN: store.succeed(i["url"], i["thash"], "capped")  # considered, cost-capped
+            continue
         if i["source_type"] == "rss": i["text"] = full_text(i["url"], i["text"])
         if DRY_RUN:
             report["would_analyze"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
                                             "score": i["score"], "triggers": i["matched_categories"]})
-            processed_urls.append(i["url"]); processed_items.append(i); continue
-        if not qwen_budget_ok():
-            if not budget_hit:
-                print(f"BUDGET: daily Qwen cap ({DAILY_QWEN_CAP}) reached — remaining items archived to Wire only.")
-                budget_hit = True
             continue
-        a = analyze(i)
+        a, err = analyze(i)
         if a:
-            qwen_budget_use()
             report["analyzed"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
                                        "score": i["score"], "triggers": i["matched_categories"], "analysis": a})
             digest_items.append({"item": i, "analysis": a})
-            processed_urls.append(i["url"]); processed_items.append(i)
+            store.succeed(i["url"], i["thash"], "analyzed", json.dumps(a))  # terminal AFTER success (F-06)
+        else:
+            report["quarantined"].append({"url": i["url"], "title": i["title"], "error": err})
+            store.fail(i["url"])  # retriable next run
+            print("QUARANTINED:", i["url"], "|", err)
         await asyncio.sleep(1)
 
-    if wire:
-        mark_seen([i["url"] for i in wire]); mark_title_seen(wire)
-    if processed_urls:
-        mark_seen(processed_urls); mark_title_seen(processed_items)
-
-    append_history(report)
-    dump_health()
     send_digest(digest_items, report)
+
+    store.record_run(report["fetched"], report["new"], report["matched"], len(report["analyzed"]))
+    store_stats = store.stats()
+    health = build_health(report, store_stats)
     with open(os.path.join(REPORTS, "run.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=2)
+    with open(os.path.join(REPORTS, "health.json"), "w", encoding="utf-8") as f: json.dump(health, f, indent=2)
+
     extra = f" | WOULD_ANALYZE {len(report['would_analyze'])}" if DRY_RUN else ""
+    quar = f" | QUARANTINED {len(report['quarantined'])}" if report["quarantined"] else ""
     mode = " [DRY RUN]" if DRY_RUN else ""
-    print(f"FETCHED {report['fetched']} | NEW {report['new']} | MATCHED {report['matched']} | FRONT {report['front_page']} | ANALYZED {len(report['analyzed'])}{extra}{mode}")
+    print(f"FETCHED {report['fetched']} | NEW {report['new']} | MATCHED {report['matched']} | ANALYZED {len(report['analyzed'])}{extra}{quar}{mode}")
+    note = (" — " + "; ".join(health["degraded"])) if health["degraded"] else ""
+    print(f"HEALTH: {health['overall']}{note}")
 
 if __name__ == "__main__":
     asyncio.run(main())
