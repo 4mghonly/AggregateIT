@@ -1,0 +1,28 @@
+name: TradingView Universe Refresh
+on:
+  schedule:
+    - cron: "30 12 * * 1-5"
+  workflow_dispatch:
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: seen-db-${{ github.run_id }}
+          restore-keys: |
+            seen-db-
+      - run: python tv.py --universe --movers
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tv-data
+          path: |
+            data/tv_universe.json
+            data/movers.json
+          if-no-files-found: warn
