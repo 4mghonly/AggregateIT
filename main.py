@@ -384,10 +384,18 @@ def build_event_embed(c, a, prior):
             "color": IMP_COLOR.get(imp, 0x95A5A6), "fields": fields,
             "footer": {"text": footer}}
 
+def _post_discord(wh, payload):
+    r = requests.post(wh, json=payload, timeout=30)
+    if r.status_code >= 400:
+        raise RuntimeError(f"Discord HTTP {r.status_code}: {r.text[:120]}")
+
 def send_digest(digest_items, report):
     wh = os.environ.get("DISCORD_WEBHOOK")
-    if not wh or not digest_items:
+    if not digest_items:
         HEALTH["discord_skipped"] += 1; return
+    if not wh:
+        HEALTH["discord_fail"] += 1
+        print("DISCORD: webhook secret missing - digest NOT delivered"); return
     news, social = [], []
     for x in digest_items:
         (social if all(it["source_type"] == "reddit" for it in x["cluster"]["items"]) else news).append(x)
@@ -410,15 +418,14 @@ def send_digest(digest_items, report):
     try:
         news_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"]) for x in news]
         social_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"]) for x in social]
-        requests.post(wh, json={"content": "**📰 NEWS SOURCES**", "embeds": [header] + news_embeds[:3]})
-        for k in range(3, len(news_embeds), 4): requests.post(wh, json={"embeds": news_embeds[k:k+4]})
+        _post_discord(wh, {"content": "**📰 NEWS SOURCES**", "embeds": [header] + news_embeds[:3]})
+        for k in range(3, len(news_embeds), 4): _post_discord(wh, {"embeds": news_embeds[k:k+4]})
         if social_embeds:
-            requests.post(wh, json={"content": "**💬 SOCIAL NETWORKS**", "embeds": social_embeds[:4]})
-            for k in range(4, len(social_embeds), 4): requests.post(wh, json={"embeds": social_embeds[k:k+4]})
+            _post_discord(wh, {"content": "**💬 SOCIAL NETWORKS**", "embeds": social_embeds[:4]})
+            for k in range(4, len(social_embeds), 4): _post_discord(wh, {"embeds": social_embeds[k:k+4]})
         HEALTH["discord_ok"] += len(digest_items)
     except Exception as e:
-        HEALTH["discord_fail"] += 1; print("Discord err:", type(e).__name__, str(e)[:120])
-
+        HEALTH["discord_fail"] += 1; print("Discord err:", type(e).__name__, str(e)[:200])
 def build_health(report, store_stats):
     degraded = []
     if HEALTH["rss_fail"]: degraded.append(f"{HEALTH['rss_fail']} RSS feeds failed")
