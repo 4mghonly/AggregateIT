@@ -73,7 +73,7 @@ def sentiment_gauge(items):
         s = (i.get("sentiment") or "").lower()
         if s in rolls: rolls[s] += 1
     total = sum(rolls.values())
-    if not total: return "➖ No sentiment data in window."
+    if not total: return "➖ No news sentiment in window."
     bar = "".join(f"{e}{'█' * round(rolls[k] / total * 10)}"
                   for k, e in (("bullish", "🟢"), ("neutral", "⚪"), ("bearish", "🔴")))
     return f"{bar}  (🟢{rolls['bullish']} ⚪{rolls['neutral']} 🔴{rolls['bearish']})"
@@ -134,6 +134,9 @@ def build_exec(mode):
     gainers = sorted([m for m in ml if m.get("pct", 0) > 0], key=lambda x: x["pct"], reverse=True)[:4]
     losers = sorted([m for m in ml if m.get("pct", 0) < 0], key=lambda x: x["pct"])[:4]
     hits = watch_hits(items, movers)
+    # Fetch live retail sentiment for Movers + Watchlist
+    st_tickers = [m['t'] for m in gainers + losers] + hits
+    st_rolls, st_radar = fetch_stocktwits(st_tickers)
     label = "MORNING DESK" if mode == "MORNING" else "CLOSING BELL"
     color = 0xF1C40F if mode == "MORNING" else 0x3498DB
     now = datetime.now(timezone.utc).strftime("%a %Y-%m-%d %H:%M UTC")
@@ -161,7 +164,8 @@ def build_exec(mode):
 
     e4 = {"title": "📊 Theme Activity & Sentiment", "color": color, "fields": [
         {"name": "Intel cluster activity", "value": theme_chart(items), "inline": True},
-        {"name": "Sentiment gauge", "value": sentiment_gauge(items), "inline": True}]}
+        {"name": "News Sentiment (AI)", "value": sentiment_gauge(items), "inline": True},
+        {"name": "🗣️ Retail Crowd Radar (StockTwits)", "value": "\n".join(st_radar[:6]) if st_radar else "No strong retail consensus on movers.", "inline": False}]}
 
     e5 = {"title": "🧾 Summary of Findings", "color": color,
           "description": findings(items, hours),
