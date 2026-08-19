@@ -1,7 +1,9 @@
 name: TradingView Universe Refresh
 on:
   schedule:
-    - cron: "30 12 * * 1-5"
+    - cron: "30 12 * * 1"
+    - cron: "0 15,18 * * 1-5"
+    - cron: "30 20 * * 1-5"
   workflow_dispatch:
 jobs:
   refresh:
@@ -17,7 +19,11 @@ jobs:
           key: seen-db-${{ github.run_id }}
           restore-keys: |
             seen-db-
-      - run: python tv.py --universe --movers
+      - name: Universe (weekly Monday)
+        if: github.event.schedule == '30 12 * * 1' || github.event_name == 'workflow_dispatch'
+        run: python tv.py --universe
+      - name: Pulse (intraday snapshots)
+        run: python tv.py --pulse
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -25,4 +31,5 @@ jobs:
           path: |
             data/tv_universe.json
             data/movers.json
+            data/market_pulse.json
           if-no-files-found: warn
