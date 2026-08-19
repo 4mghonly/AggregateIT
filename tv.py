@@ -1,6 +1,7 @@
 """TradingView US market universe + pulse.
 Emulates the 'Load More' XHR loop of the TradingView market-movers page.
-v3: fixed column mapping (volume idx 6, is_primary idx 7) + volume-aware validity gate."""
+v4: sort+predicate scans (no server-side filters), clean primary mapping,
+    movement-based validity gate."""
 import os, json, time, argparse
 import requests
 
@@ -51,15 +52,15 @@ def fetch_universe(post_fn=_post):
         time.sleep(0.75)
     return out, total
 
-def _scan(post_fn, flt, sort, cap):
+def _top(post_fn, sort, cap, pred):
+    """Sorted scan + client-side predicate. No server-side filters (they are unreliable)."""
     try:
         resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
-                        "filter": flt, "sort": {"sortBy": sort[0], "sortOrder": sort[1]},
-                        "range": [0, cap * 3]})
+                        "sort": {"sortBy": sort[0], "sortOrder": sort[1]}, "range": [0, cap * 4]})
         out = []
         for r in resp.get("data", []):
             m = _row(r)
-            if m["primary"]: out.append(m)
+            if m["primary"] and pred(m): out.append(m)
             if len(out) >= cap: break
         return out
     except Exception as e:
@@ -67,16 +68,12 @@ def _scan(post_fn, flt, sort, cap):
         return []
 
 def fetch_movers(post_fn=_post, cap=300):
+    """Significant movers for the Signal Stack L2 boost (±4% or 2x volume)."""
     movers = {}
-    jobs = [
-        ([{"left": "change_percent", "operation": "greater", "right": 4}], ("change_percent", "desc")),
-        ([{"left": "change_percent", "operation": "less", "right": -4}], ("change_percent", "asc")),
-        ([{"left": "relative_volume_10d_calc", "operation": "greater", "right": 2}], ("relative_volume_10d_calc", "desc")),
-    ]
-    for flt, sort in jobs:
-        for m in _scan(post_fn, flt, sort, cap):
-            movers[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
-        time.sleep(0.5)
+    def add(m): movers[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
+    for m in _top(post_fn, ("change_percent", "desc"), cap, lambda x: x["pct"] >= 4): add(m)
+    for m in _top(post_fn, ("change_percent", "asc"), cap, lambda x: x["pct"] <= -4): add(m)
+    for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), cap, lambda x: x["relvol"] >= 2): add(m)
     return movers
 
 def fetch_pulse(post_fn=_post, cap=20):
@@ -89,12 +86,17 @@ def fetch_pulse(post_fn=_post, cap=20):
         m = _row(r)
         if m["primary"]: mega.append(m)
         if len(mega) >= cap: break
-    gainers = _scan(post_fn, [{"left": "change_percent", "operation": "greater", "right": 3}], ("change_percent", "desc"), 5)
-    losers = _scan(post_fn, [{"left": "change_percent", "operation": "less", "right": -3}], ("change_percent", "asc"), 5)
-    # Valid if there is price movement OR real trading volume (market open)
-    valid = any(abs(m["pct"]) > 0.005 or m.get("vol", 0) > 1000 for m in mega)
+    gainers = _top(post_fn, ("change_percent", "desc"), 5, lambda x: x["pct"] > 0)
+    losers = _top(post_fn, ("change_percent", "asc"), 5, lambda x: x["pct"] < 0)
+    sig = {}
+    def add_sig(m): sig[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
+    for m in _top(post_fn, ("change_percent", "desc"), 150, lambda x: x["pct"] >= 3): add_sig(m)
+    for m in _top(post_fn, ("change_percent", "asc"), 150, lambda x: x["pct"] <= -3): add_sig(m)
+    for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), 150, lambda x: x["relvol"] >= 2): add_sig(m)
+    # Valid only if at least one mega-cap shows real movement (US session 13:30-20:00 UTC)
+    valid = any(abs(m["pct"]) > 0.005 for m in mega)
     return {"updated": time.time(), "valid": valid,
-            "mega_caps": mega, "gainers": gainers, "losers": losers}
+            "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig}
 
 def save(name, obj):
     with open(os.path.join(DATA, name), "w", encoding="utf-8") as f: json.dump(obj, f)
@@ -127,12 +129,11 @@ def main():
         try:
             pulse = fetch_pulse()
             save("market_pulse.json", pulse)
-            movers = {m["t"]: {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
-                      for m in pulse["gainers"] + pulse["losers"]}
-            save("movers.json", {"updated": pulse["updated"], "movers": movers})
-            state = "OK" if pulse["valid"] else "INVALID (market likely closed)"
+            save("movers.json", {"updated": pulse["updated"], "movers": pulse.get("sig", {})})
+            state = "OK" if pulse["valid"] else "INVALID (US market closed; session is 13:30-20:00 UTC)"
             print(f"TV PULSE {state}: {len(pulse['mega_caps'])} mega caps, "
-                  f"{len(pulse['gainers'])} gainers, {len(pulse['losers'])} losers")
+                  f"{len(pulse['gainers'])} gainers, {len(pulse['losers'])} losers, "
+                  f"{len(pulse.get('sig', {}))} significant movers")
         except Exception as e:
             print("TV PULSE FAIL:", type(e).__name__, str(e)[:120])
 
