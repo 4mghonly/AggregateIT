@@ -25,13 +25,14 @@ def _post(body):
             time.sleep(2)
 
 def _row(row):
-    d = row.get("d", [])
-    ticker = row.get("s", "").split(":")[-1]  # strip exchange prefix
-    def g(i, default):
-        return d[i] if len(d) > i and d[i] is not None else default
-    return {"t": ticker, "c": g(1, ""), "s": g(2, "") or "US Market",
-            "mcap": g(3, 0), "pct": g(4, 0), "relvol": g(5, 0),
-            "primary": bool(g(6, 1))}
+       d = row.get("d", [])
+       ticker = row.get("s", "").split(":")[-1]
+       def g(i, default):
+           return d[i] if len(d) > i and d[i] is not None else default
+       return {"t": ticker, "c": g(1, ""), "s": g(2, "") or "US Market",
+               "mcap": g(3, 0), "pct": g(4, 0), "relvol": g(5, 0),
+               "vol": g(6, 0),
+               "primary": bool(g(7, 1))}
 
 def fetch_universe(post_fn=_post):
     """'Load More' until the end; primary listings only."""
