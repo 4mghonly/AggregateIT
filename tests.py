@@ -157,8 +157,8 @@ check("different topic not matched", main.resolve_prior_event(cl2, st2) is None)
 print("[T19] Primary-listing filter removes preferreds/duplicate classes")
 def fake_post3(body):
     return {"totalCount": 2, "data": [
-        {"s": "NYSE:JPM", "d": ["", "JPMorgan", "Finance", 6e11, 1.0, 1.0, 1]},
-        {"s": "NYSE:JPM.PM", "d": ["", "JPMorgan Pfd", "Finance", 1e9, 0.5, 0.5, 0]}]}
+        {"s": "NYSE:JPM", "d": ["", "JPMorgan", "Finance", 6e11, 1.0, 1.0, 500000, 1]},
+        {"s": "NYSE:JPM.PM", "d": ["", "JPMorgan Pfd", "Finance", 1e9, 0.5, 0.5, 100, 0]}]}
 p3 = tv.fetch_pulse(post_fn=fake_post3, cap=20)
 check("non-primary excluded", all(m["t"] != "JPM.PM" for m in p3["mega_caps"]))
 check("primary kept", any(m["t"] == "JPM" for m in p3["mega_caps"]))
@@ -166,19 +166,19 @@ check("primary kept", any(m["t"] == "JPM" for m in p3["mega_caps"]))
 print("[T20] Zero-snapshot validity gate")
 def fake_post_zero(body):
     return {"totalCount": 2, "data": [
-        {"s": "X1", "d": ["", "A", "T", 1e12, 0, 1.0, 1]},
-        {"s": "X2", "d": ["", "B", "T", 9e11, 0, 1.0, 1]}]}
+        {"s": "X1", "d": ["", "A", "T", 1e12, 0, 1.0, 0, 1]},
+        {"s": "X2", "d": ["", "B", "T", 9e11, 0, 1.0, 0, 1]}]}
 check("all-zero snapshot invalid", tv.fetch_pulse(post_fn=fake_post_zero)["valid"] is False)
 def fake_post_live(body):
     return {"totalCount": 2, "data": [
-        {"s": "X1", "d": ["", "A", "T", 1e12, 2.5, 1.0, 1]},
-        {"s": "X2", "d": ["", "B", "T", 9e11, -1.0, 1.0, 1]}]}
+        {"s": "X1", "d": ["", "A", "T", 1e12, 2.5, 1.0, 50000, 1]},
+        {"s": "X2", "d": ["", "B", "T", 9e11, -1.0, 1.0, 50000, 1]}]}
 check("live snapshot valid", tv.fetch_pulse(post_fn=fake_post_live)["valid"] is True)
 
 print("[T21] Pulse mega-cap selection capped and sorted")
 def fake_post_big(body):
     if body["sort"]["sortBy"] == "market_cap_calc":
-        return {"totalCount": 30, "data": [{"s": f"S{i}", "d": ["", f"Co{i}", "T", 1e12 - i * 1e9, 1.0, 1.0, 1]} for i in range(30)]}
+        return {"totalCount": 30, "data": [{"s": f"S{i}", "d": ["", f"Co{i}", "T", 1e12 - i * 1e9, 1.0, 1.0, 10000, 1]} for i in range(30)]}
     return {"totalCount": 0, "data": []}
 p4 = tv.fetch_pulse(post_fn=fake_post_big, cap=20)
 check("20 mega caps", len(p4["mega_caps"]) == 20, len(p4["mega_caps"]))
