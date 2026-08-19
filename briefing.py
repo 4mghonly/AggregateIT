@@ -11,6 +11,30 @@ DOMAIN_NAMES = {"ME": "🌍 Middle East", "GG": "🌐 Geopolitics", "US": "🏛�
                 "RN": "🎯 Retail", "EN": "⚡ Energy", "EL": "🗳️ Elections"}
 IMP_EMOJI = {"Critical": "🚨", "High": "🔥", "Medium": "📌", "Low": "ℹ️"}
 
+def fetch_stocktwits(tickers):
+    """Fetches live retail sentiment from StockTwits for top movers/watchlist."""
+    sentiments = {"bullish": 0, "bearish": 0, "neutral": 0}
+    radar = []
+    for t in set(tickers):
+        try:
+            url = f"https://api.stocktwits.com/api/2/streams/symbol/{t}.json"
+            r = requests.get(url, timeout=5, headers={"User-Agent": "AggregateIT/1.0"})
+            if r.status_code == 200:
+                msgs = r.json().get("messages", [])[:15]
+                bull = sum(1 for m in msgs if m.get("entities", {}).get("sentiment", {}).get("basic") == "Bullish")
+                bear = sum(1 for m in msgs if m.get("entities", {}).get("sentiment", {}).get("basic") == "Bearish")
+                sentiments["bullish"] += bull
+                sentiments["bearish"] += bear
+                sentiments["neutral"] += (len(msgs) - bull - bear)
+                if bull + bear >= 2:
+                    ratio = bull / (bull + bear)
+                    emoji = "🟢" if ratio > 0.6 else ("🔴" if ratio < 0.4 else "⚪")
+                    radar.append(f"{emoji} **{t}** ({bull}B/{bear}S)")
+        except Exception:
+            pass
+        time.sleep(0.25)  # Politeness to avoid rate limits
+    return sentiments, radar
+
 def load_json(path):
     if not os.path.exists(path): return None
     try:
