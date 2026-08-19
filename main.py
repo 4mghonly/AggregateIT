@@ -10,11 +10,12 @@ os.makedirs(DATA, exist_ok=True); os.makedirs(REPORTS, exist_ok=True)
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
 LOOKBACK_H = int(os.environ.get("LOOKBACK_HOURS", "6"))
 MAX_PER_SOURCE = 5
-MAX_ANALYZE = 25
-FRONT_PAGE_FLOOR = 5  # L4: Minimum score to justify Qwen token spend
+MAX_ANALYZE = 25      # max articles admitted to the front page per run
+MAX_EVENTS = 10       # max event clusters analyzed per run (token cap)
+FRONT_PAGE_FLOOR = 5  # L4: minimum score to justify Qwen token spend
 ALWAYS_ANALYZE = ["federal reserve", "european central bank", "cisa"]
 PRIO_LIMIT = {"Very High": 10, "High": 5, "Medium": 3}
-UA = {"User-Agent": "NewsIntelEngine/0.3 (personal research)"}
+UA = {"User-Agent": "NewsIntelEngine/0.4 (personal research)"}
 
 CASHTAG_ONLY = {
     "ALL","ARE","CAT","KEY","LOW","FIX","TAP","MAS","LIN","GEN","HAL","DOW","MET",
@@ -25,7 +26,7 @@ CASHTAG_ONLY = {
 
 HEALTH = {"rss_ok":0,"rss_fail":0,"reddit_ok":0,"reddit_fail":0,"github_ok":0,"github_fail":0,
           "qwen_ok":0,"qwen_fail":0,"qwen_invalid":0,"discord_ok":0,"discord_fail":0,"discord_skipped":0,
-          "tv_movers_loaded":0, "tv_universe_loaded":0}
+          "tv_movers_loaded":0,"tv_universe_loaded":0}
 
 def load(n):
     with open(os.path.join(BASE, "config", n), encoding="utf-8") as f: return json.load(f)
@@ -37,29 +38,22 @@ PRIO_SCORE = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
 for e in KEYWORDS_DATA:
     e["phrases"] = [p.lower() for p in e.get("phrases", [])]
 
-# Base S&P 500 + Watchlist (Safe for bare-word matching)
 TICK_RAW = load("tickers.json") + [{"t": x, "c": x, "s": "Watchlist"} for x in WATCH.get("tickers", [])]
 T_BY_SYM = {d["t"].upper(): d for d in TICK_RAW}
 SYMS = [t for t in T_BY_SYM if len(t) >= 3 and t not in CASHTAG_ONLY]
 NAMES = [(d["c"].lower(), d) for d in TICK_RAW if len(d["c"]) >= 6]
 
-# --- L1/L2: Load TradingView Market Context (Spec #10) ---
 def load_market_context():
-    movers = {}
-    uni_tickers = set()
-    uni_names = {}
+    movers, uni_tickers, uni_names = {}, set(), {}
     try:
         with open(os.path.join(DATA, "movers.json"), encoding="utf-8") as f:
-            m_data = json.load(f).get("movers", {})
-            for t, meta in m_data.items():
-                movers[t.upper()] = meta
+            for t, meta in json.load(f).get("movers", {}).items(): movers[t.upper()] = meta
             HEALTH["tv_movers_loaded"] = len(movers)
     except Exception: pass
     try:
         with open(os.path.join(DATA, "tv_universe.json"), encoding="utf-8") as f:
             for row in json.load(f).get("rows", []):
-                t = row.get("t", "").upper()
-                c = row.get("c", "")
+                t = row.get("t", "").upper(); c = row.get("c", "")
                 if t: uni_tickers.add(t)
                 if c and len(c) >= 6: uni_names[c.lower()] = t
             HEALTH["tv_universe_loaded"] = len(uni_tickers)
@@ -93,37 +87,28 @@ def find_matches(text):
 def score_item(i):
     text = i["title"] + " " + i["text"]; low = text.lower()
     score = 0; hits = []
-    
-    # Priority Source Boost
     if any(a in i["source_name"].lower() for a in ALWAYS_ANALYZE):
         score += 5; hits.append("Priority Source")
-        
-    # Base S&P 500 / Watchlist Matching
     for sym in set(c.upper() for c in CASHTAG.findall(text)):
-        if sym in T_BY_SYM: 
+        if sym in T_BY_SYM:
             score += 3; hits.append(sym)
-            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)") # L2 Boost
+            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)")
     for t in SYMS:
         if re.search(rf"\b{re.escape(t)}\b", text, re.I): score += 2; hits.append(t)
     for name, d in NAMES:
         if name in low: score += 3; hits.append(d["t"])
-        
-    # L1: TradingView Long-Tail Matching (Cashtag or Full Name only to prevent false positives)
     for sym in set(c.upper() for c in CASHTAG.findall(text)):
         if sym in TV_TICKERS and sym not in T_BY_SYM:
             score += 2; hits.append(f"{sym} (TV)")
-            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)") # L2 Boost
+            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)")
     for name, t in TV_NAMES.items():
         if name in low and t not in T_BY_SYM:
             score += 2; hits.append(f"{t} (TV)")
-            if t in MOVERS: score += 4; hits.append(f"{t} (Mover)") # L2 Boost
-
-    # Keyword Clusters
+            if t in MOVERS: score += 4; hits.append(f"{t} (Mover)")
     kws = find_matches(text)
     for e in kws: score += PRIO_SCORE.get(e.get("prio", "Medium"), 2)
     i["keyword_ids"] = [e["id"] for e in kws]
     i["keyword_tags"] = sorted({t for e in kws for t in e.get("tags", [])})
-    
     labels = []
     for h in dict.fromkeys(hits):
         d = T_BY_SYM.get(h)
@@ -196,20 +181,80 @@ def full_text(url, fallback):
     except Exception: pass
     return fallback[:4000]
 
-# ================= QWEN INTELLIGENCE CONTRACT =================
-PROMPT_T = """You are a disciplined intelligence analyst. Strict tradecraft rules:
-- FACTS must be directly supported by the source text. Never present inference as fact.
+# ================= EVENT CLUSTERING (Spec #8) =================
+STOPWORDS = {"the","a","an","of","in","on","for","to","and","or","is","are","was","were",
+             "as","at","by","with","from","over","under","after","before","amid","its","it",
+             "that","this","these","those","be","been","has","have","had","will","would","can",
+             "could","says","said","say","new","vs","versus","per","their","his","her","your",
+             "our","into","about","up","out","off","more","less","than","then","so","not","no",
+             "but","if","how","why","what","when","where","who","which","all","any","some","one"}
+
+def title_tokens(title):
+    return {t for t in re.findall(r"[a-z0-9]{2,}", normalize_title(title)) if t not in STOPWORDS}
+
+def jaccard(a, b):
+    if not a or not b: return 0.0
+    return len(a & b) / len(a | b)
+
+def containment(new_tokens, stored_tokens):
+    """Asymmetric overlap: fraction of the NEW topic already present in stored event."""
+    if not new_tokens: return 0.0
+    return len(new_tokens & stored_tokens) / len(new_tokens)
+
+def primary_entity(i):
+    for label in i.get("matched_categories", []):
+        t = label.split(" ")[0]
+        if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
+            return t.upper()
+    kws = i.get("keyword_ids", [])
+    if kws: return kws[0]
+    return "GEN"
+
+def cluster_events(items):
+    """Group front-page items into event clusters: same entity + similar topic."""
+    clusters = []
+    for i in sorted(items, key=lambda x: -x.get("score", 0)):
+        toks = title_tokens(i.get("title", ""))
+        ent = primary_entity(i)
+        placed = False
+        for c in clusters:
+            if c["entity"] == ent and jaccard(toks, c["tokens"]) >= 0.35:
+                c["items"].append(i); c["tokens"] |= toks; placed = True; break
+        if not placed:
+            clusters.append({"entity": ent, "tokens": toks, "items": [i], "event_id": None})
+    for c in clusters:
+        seed = c["entity"] + "|" + " ".join(sorted(c["items"][0] and title_tokens(c["items"][0]["title"])))
+        c["event_id"] = hashlib.md5(seed.encode()).hexdigest()[:12]
+        c["source_names"] = sorted({it["source_name"] for it in c["items"]})
+        # Spec #6: syndicated copies do NOT count as independent corroboration
+        c["independent_sources"] = len(c["source_names"])
+    return clusters
+
+def resolve_prior_event(c, store, hours=72):
+    """Cross-run continuity: does this cluster match an event we already track?"""
+    for ev in store.recent_events(c["entity"], hours=hours):
+        try: stored = set(json.loads(ev.get("tokens_json") or "[]"))
+        except Exception: continue
+        if containment(c["tokens"], stored) >= 0.5: return ev
+    return None
+
+# ================= QWEN EVENT-LEVEL CONTRACT =================
+EVENT_PROMPT_T = """You are a disciplined intelligence analyst performing EVENT-LEVEL analysis.
+You receive multiple reports that appear to cover the SAME underlying event. Strict tradecraft rules:
+- FACTS must be directly supported by at least one report. Never present inference as fact.
 - ASSESSMENT is your interpretation, always separated from facts.
-- CONFIDENCE 0-100 must reflect evidence quality; single-source claims stay at or below 60.
+- Independent DISTINCT sources strengthen corroboration; multiple articles from the same source do not.
+- CONFIDENCE 0-100 must reflect evidence quality and corroboration.
 - If information is missing, record it in "gaps". Never invent it.
-- Only include tickers that literally appear in the text.
+- Only include tickers that literally appear in the reports.
 
 Output ONLY one valid JSON object with exactly these keys:
 {{
-  "event": "one-sentence description of the event",
+  "event": "one-sentence description of the underlying event",
   "event_type": "earnings|regulation|geopolitical|market_move|security|macro|other",
-  "facts": ["statement directly supported by the text"],
+  "facts": ["statements directly supported by the reports"],
   "assessment": "analytical interpretation, clearly opinion not fact",
+  "what_changed": "what is NEW compared to prior coverage (or 'New event - no prior coverage')",
   "importance": "Low|Medium|High|Critical",
   "confidence": 0,
   "sentiment": "bullish|bearish|neutral|na",
@@ -221,11 +266,12 @@ Output ONLY one valid JSON object with exactly these keys:
   "gaps": ["what is missing or unconfirmed"]
 }}
 
-TRIGGER CONTEXT: This item was flagged because it relates to: {cats}
-SOURCE: {source_name} ({category})
-TITLE: {title}
-TEXT:
-{text}"""
+TRIGGER CONTEXT: flagged because it relates to: {cats}
+PRIOR EVENT STATE:
+{prior_state}
+
+REPORTS ({n_sources} distinct source(s)):
+{sources_block}"""
 
 ENUM_IMP = {"Low","Medium","High","Critical"}
 ENUM_SENT = {"bullish","bearish","neutral","na"}
@@ -235,7 +281,7 @@ TICK_RE = re.compile(r"^[A-Z.\-]{1,6}$")
 def validate_analysis(obj):
     errs = []
     if not isinstance(obj, dict): return False, None, ["response is not a JSON object"]
-    for k in ("event","assessment","event_type","corroboration","source_reliability"):
+    for k in ("event","assessment","event_type","corroboration","source_reliability","what_changed"):
         if not isinstance(obj.get(k), str) or not obj.get(k).strip(): errs.append(f"missing/invalid '{k}'")
     for k in ("facts","entities","tickers","evidence","gaps"):
         v = obj.get(k)
@@ -259,8 +305,26 @@ def _qwen_call(messages):
     r.raise_for_status()
     return r.json()["choices"][0]["message"]["content"]
 
-def analyze(i):
-    prompt = PROMPT_T.format(**i)
+def build_sources_block(c):
+    lines = []
+    for idx, it in enumerate(c["items"][:5], 1):
+        ts = datetime.fromtimestamp(it["ts"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        lines.append(f"[{idx}] SOURCE: {it['source_name']} | PUBLISHED: {ts}\nTITLE: {it['title']}\nTEXT: {it['text'][:1200]}")
+    return "\n\n".join(lines)
+
+def analyze_event(c, prior):
+    """Event-level analysis with bounded repair-retry + strict validation."""
+    if prior:
+        prior_state = (f"Event {prior['event_id']} tracked since "
+                       f"{datetime.fromtimestamp(prior['first_seen'], timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} | "
+                       f"previous title: \"{prior['title']}\" | previous assessment: {(prior['assessment'] or '')[:300]} | "
+                       f"previous confidence: {prior['confidence']} | sources so far: {prior['source_count']}")
+    else:
+        prior_state = "NEW EVENT — no prior coverage."
+    prompt = EVENT_PROMPT_T.format(cats=c["items"][0].get("cats", ""),
+                                   prior_state=prior_state,
+                                   n_sources=c["independent_sources"],
+                                   sources_block=build_sources_block(c))
     for attempt in (1, 2):
         try:
             content = _qwen_call([{"role": "user", "content": prompt}])
@@ -294,49 +358,58 @@ def _truncate(s, n):
     s = (s or "").strip()
     return s if len(s) <= n else s[:n-1] + "…"
 
-def build_item_embed(i, a):
+def build_event_embed(c, a, prior):
     imp = a.get("importance", "Low")
     sent = (a.get("sentiment") or "na").lower()
-    tag = "💬" if i["source_type"] == "reddit" else "📰"
-    desc = _truncate(f"**{a.get('event','')}**\n{a.get('assessment','')}", 900)
+    all_reddit = all(it["source_type"] == "reddit" for it in c["items"])
+    tag = "💬" if all_reddit else "📰"
+    desc = f"**{a.get('event','')}**\n{a.get('assessment','')}"
+    if a.get("what_changed"): desc += f"\n🔄 *What changed: {a['what_changed']}*"
     fields = [
         {"name": "Sentiment", "value": SENT_EMOJI.get(sent, sent), "inline": True},
         {"name": "Importance", "value": f"{IMP_EMOJI.get(imp, '')} {imp}", "inline": True},
         {"name": "Confidence", "value": f"{a.get('confidence', '?')}%", "inline": True},
         {"name": "Tickers", "value": _truncate(", ".join(a.get("tickers") or []) or "-", 200), "inline": True},
     ]
-    if a.get("event_type"): fields.append({"name": "Event Type", "value": _truncate(str(a["event_type"]), 150), "inline": True})
-    fields.append({"name": "Triggered By", "value": _truncate(", ".join(i.get("matched_categories", [])) or "-", 400), "inline": False})
-    return {"title": _truncate(f"{tag} {i['title']}", 250), "url": i["url"], "description": desc,
+    if a.get("event_type"):
+        fields.append({"name": "Event Type", "value": _truncate(str(a["event_type"]), 150), "inline": True})
+    fields.append({"name": f"Sources ({c['independent_sources']} distinct)",
+                   "value": _truncate(", ".join(c["source_names"]), 300), "inline": False})
+    fields.append({"name": "Triggered By",
+                   "value": _truncate(", ".join(c["items"][0].get("matched_categories", [])) or "-", 400), "inline": False})
+    footer = f"event {c['event_id']} · score {c['items'][0].get('score', 0)}"
+    if prior: footer += f" · updated (prev conf {prior.get('confidence', '?')}%)"
+    return {"title": _truncate(f"{tag} {a.get('event') or c['items'][0]['title']}", 250),
+            "url": c["items"][0]["url"], "description": _truncate(desc, 900),
             "color": IMP_COLOR.get(imp, 0x95A5A6), "fields": fields,
-            "footer": {"text": f"{i['source_name']} · score {i.get('score', 0)} · rel. {a.get('source_reliability', '?')}"}}
+            "footer": {"text": footer}}
 
 def send_digest(digest_items, report):
     wh = os.environ.get("DISCORD_WEBHOOK")
     if not wh or not digest_items:
         HEALTH["discord_skipped"] += 1; return
-    news = [x for x in digest_items if x["item"]["source_type"] != "reddit"]
-    social = [x for x in digest_items if x["item"]["source_type"] == "reddit"]
+    news, social = [], []
+    for x in digest_items:
+        (social if all(it["source_type"] == "reddit" for it in x["cluster"]["items"]) else news).append(x)
     rolls = {"bullish": 0, "bearish": 0, "neutral": 0, "na": 0}
-    for x in digest_items: rolls[(x["analysis"].get("sentiment") or "na").lower() if (x["analysis"].get("sentiment") or "na").lower() in rolls else "na"] += 1
-    
-    fp_count = len(report.get("front_page", []))
-    wire_count = len(report.get("wire", []))
-    
+    for x in digest_items:
+        s = (x["analysis"].get("sentiment") or "na").lower()
+        rolls[s if s in rolls else "na"] += 1
+    es = report.get("events_summary", {})
     header = {
         "title": "🧠 AggregateIT Intelligence Digest",
-        "description": f"**{report['new']}** new items → **{report['matched']}** matched → **{fp_count}** Front Page / **{wire_count}** Wire",
+        "description": f"**{report['new']}** new items → **{report['matched']}** matched → **{len(digest_items)}** events on the Front Page",
         "color": 0x5865F2,
         "fields": [
-            {"name": "📰 News", "value": str(len(news)), "inline": True},
-            {"name": "💬 Social", "value": str(len(social)), "inline": True},
+            {"name": "🆕 New events", "value": str(es.get("new", 0)), "inline": True},
+            {"name": "🔄 Updated", "value": str(es.get("updated", 0)), "inline": True},
             {"name": "📊 Sentiment", "value": f"🟢 {rolls['bullish']} · 🔴 {rolls['bearish']} · ⚪ {rolls['neutral']}", "inline": True},
         ],
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
     try:
-        news_embeds = [build_item_embed(x["item"], x["analysis"]) for x in news]
-        social_embeds = [build_item_embed(x["item"], x["analysis"]) for x in social]
+        news_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"]) for x in news]
+        social_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"]) for x in social]
         requests.post(wh, json={"content": "**📰 NEWS SOURCES**", "embeds": [header] + news_embeds[:3]})
         for k in range(3, len(news_embeds), 4): requests.post(wh, json={"embeds": news_embeds[k:k+4]})
         if social_embeds:
@@ -393,17 +466,16 @@ async def main():
         else:
             if not DRY_RUN: store.register(i["url"], i["thash"], "filtered", 0)
 
-    # --- L3: Confluence Boost (Spec #7) ---
+    # L3: Confluence boost
     ticker_counts = {}
     for i in scored:
-        for t in i.get("keyword_tags", []): ticker_counts[t] = ticker_counts.get(t, 0) + 1
         for label in i.get("matched_categories", []):
             t = label.split(" ")[0]
-            if len(t) <= 5 and t.isalpha(): ticker_counts[t] = ticker_counts.get(t, 0) + 1
-            
+            if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
+                ticker_counts[t.upper()] = ticker_counts.get(t.upper(), 0) + 1
     for i in scored:
         for label in i.get("matched_categories", []):
-            t = label.split(" ")[0]
+            t = label.split(" ")[0].upper()
             if ticker_counts.get(t, 0) >= 2:
                 i["score"] += 2
                 if "Confluence" not in i["matched_categories"]: i["matched_categories"].append("Confluence")
@@ -412,50 +484,89 @@ async def main():
     scored.sort(key=lambda x: -x["score"])
     report = {"run": datetime.now(timezone.utc).isoformat(), "dry_run": DRY_RUN,
               "fetched": len(items), "new": len(new), "matched": len(scored),
-              "front_page": [], "wire": [], "quarantined": []}
+              "events": [], "events_summary": {"clusters": 0, "new": 0, "updated": 0},
+              "wire": [], "quarantined": []}
+
+    front_page = []
+    for i in scored:
+        if i["score"] < FRONT_PAGE_FLOOR:
+            report["wire"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
+                                   "score": i["score"], "triggers": i["matched_categories"]})
+            if not DRY_RUN: store.succeed(i["url"], i["thash"], "capped")
+            continue
+        if len(front_page) >= MAX_ANALYZE:
+            if not DRY_RUN: store.succeed(i["url"], i["thash"], "capped")
+            continue
+        if i["source_type"] == "rss": i["text"] = full_text(i["url"], i["text"])
+        front_page.append(i)
+
+    clusters = cluster_events(front_page)
+    report["events_summary"]["clusters"] = len(clusters)
+
+    for c in clusters[MAX_EVENTS:]:
+        if not DRY_RUN:
+            for it in c["items"]: store.succeed(it["url"], it["thash"], "capped")
 
     digest_items = []
-    for idx, i in enumerate(scored):
-        # --- L4: Front-Page Floor (Spec #7) ---
-        if i["score"] < FRONT_PAGE_FLOOR:
-            report["wire"].append({"url": i["url"], "title": i["title"], "source": i["source_name"], "score": i["score"], "triggers": i["matched_categories"]})
-            if not DRY_RUN: store.succeed(i["url"], i["thash"], "capped")
-            continue
-            
-        if idx >= MAX_ANALYZE + len(report["wire"]): # Adjust index cap for wire items
-            if not DRY_RUN: store.succeed(i["url"], i["thash"], "capped")
-            continue
-            
-        if i["source_type"] == "rss": i["text"] = full_text(i["url"], i["text"])
-        
+    for c in clusters[:MAX_EVENTS]:
+        prior = resolve_prior_event(c, store)
         if DRY_RUN:
-            report["front_page"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
-                                         "score": i["score"], "triggers": i["matched_categories"]})
+            report["events"].append({"event_id": c["event_id"], "entity": c["entity"], "preview": True,
+                                     "new_event": prior is None,
+                                     "independent_sources": c["independent_sources"],
+                                     "triggers": c["items"][0].get("matched_categories", []),
+                                     "sources": [{"name": it["source_name"], "url": it["url"], "title": it["title"]} for it in c["items"]]})
             continue
-            
-        a, err = analyze(i)
+        a, err = analyze_event(c, prior)
         if a:
-            report["front_page"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
-                                         "score": i["score"], "triggers": i["matched_categories"], "analysis": a})
-            digest_items.append({"item": i, "analysis": a})
-            store.succeed(i["url"], i["thash"], "analyzed", json.dumps(a))
+            now = time.time()
+            if prior:
+                c["event_id"] = prior["event_id"]
+                try: old_tokens = set(json.loads(prior.get("tokens_json") or "[]"))
+                except Exception: old_tokens = set()
+                c["tokens"] = set(sorted(c["tokens"] | old_tokens)[:60])
+                report["events_summary"]["updated"] += 1
+            else:
+                report["events_summary"]["new"] += 1
+            ev = {"event_id": c["event_id"], "entity": c["entity"],
+                  "tokens_json": json.dumps(sorted(c["tokens"])),
+                  "title": a["event"], "event_type": a["event_type"], "status": "active",
+                  "severity": a["importance"], "confidence": int(a["confidence"]),
+                  "source_count": (prior["source_count"] if prior else 0) + c["independent_sources"],
+                  "assessment": a["assessment"], "what_changed": a["what_changed"],
+                  "urls_json": json.dumps([it["url"] for it in c["items"]]),
+                  "first_seen": prior["first_seen"] if prior else now, "last_updated": now}
+            store.upsert_event(ev)
+            report["events"].append({"event_id": c["event_id"], "entity": c["entity"],
+                                     "new_event": prior is None, "title": a["event"],
+                                     "importance": a["importance"], "confidence": a["confidence"],
+                                     "what_changed": a["what_changed"],
+                                     "independent_sources": c["independent_sources"],
+                                     "sources": [{"name": it["source_name"], "url": it["url"], "title": it["title"],
+                                                  "published": datetime.fromtimestamp(it["ts"], timezone.utc).isoformat(),
+                                                  "retrieved": report["run"]} for it in c["items"]],
+                                     "analysis": a})
+            digest_items.append({"cluster": c, "analysis": a, "prior": prior})
+            for it in c["items"]:
+                store.succeed(it["url"], it["thash"], "analyzed", json.dumps({"event_id": c["event_id"]}))
         else:
-            report["quarantined"].append({"url": i["url"], "title": i["title"], "error": err})
-            store.fail(i["url"])
-            print("QUARANTINED:", i["url"], "|", err)
+            report["quarantined"].append({"event_id": c["event_id"], "entity": c["entity"],
+                                          "title": c["items"][0]["title"], "error": err})
+            for it in c["items"]: store.fail(it["url"])
+            print("QUARANTINED EVENT:", c["event_id"], "|", err)
         await asyncio.sleep(1)
 
     send_digest(digest_items, report)
 
-    store.record_run(report["fetched"], report["new"], report["matched"], len(report["front_page"]))
+    store.record_run(report["fetched"], report["new"], report["matched"], len(report["events"]))
     store_stats = store.stats()
     health = build_health(report, store_stats)
     with open(os.path.join(REPORTS, "run.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=2)
     with open(os.path.join(REPORTS, "health.json"), "w", encoding="utf-8") as f: json.dump(health, f, indent=2)
 
-    fp = len(report["front_page"]); wire = len(report["wire"]); quar = len(report["quarantined"])
+    es = report["events_summary"]
     mode = " [DRY RUN]" if DRY_RUN else ""
-    print(f"FETCHED {report['fetched']} | NEW {report['new']} | MATCHED {report['matched']} | FRONT PAGE {fp} | WIRE {wire} | QUARANTINED {quar}{mode}")
+    print(f"FETCHED {report['fetched']} | NEW {report['new']} | MATCHED {report['matched']} | FP ARTICLES {len(front_page)} | EVENTS {es['clusters']} (new {es['new']} / upd {es['updated']}) | WIRE {len(report['wire'])} | QUARANTINED {len(report['quarantined'])}{mode}")
     note = (" — " + "; ".join(health["degraded"])) if health["degraded"] else ""
     print(f"HEALTH: {health['overall']}{note}")
 
