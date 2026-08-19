@@ -26,6 +26,7 @@ KEYWORDS_DATA = _kw["clusters"] if isinstance(_kw, dict) else _kw
 PRIO_SCORE = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
 for e in KEYWORDS_DATA:
     e["phrases"] = [p.lower() for p in e.get("phrases", [])]
+
 TICK_RAW = load("tickers.json") + [{"t": x, "c": x, "s": "Watchlist"} for x in WATCH.get("tickers", [])]
 T_BY_SYM = {d["t"].upper(): d for d in TICK_RAW}
 SYMS = [t for t in T_BY_SYM if len(t) >= 3 and t not in CASHTAG_ONLY]
@@ -61,7 +62,7 @@ def score_item(i):
         if re.search(rf"\b{re.escape(t)}\b", text, re.I): score += 2; hits.append(t)
     for name, d in NAMES:
         if name in low: score += 3; hits.append(d["t"])
-        kws = find_matches(text)
+    kws = find_matches(text)
     for e in kws: score += PRIO_SCORE.get(e.get("prio", "Medium"), 2)
     i["keyword_ids"] = [e["id"] for e in kws]
     i["keyword_tags"] = sorted({t for e in kws for t in e.get("tags", [])})
@@ -80,13 +81,23 @@ async def fetch_text(session, url, sem, headers=None):
         except Exception: pass
     return None
 
+async def fetch_rss(session, src, sem):
+    txt = await fetch_text(session, src["_url"], sem); out = []
+    if txt:
+        for e in feedparser.parse(txt).entries[:MAX_PER_SOURCE]:
+            out.append({"source_type": "rss", "source_name": src.get("Source_name", ""),
+                "category": src.get("Category", ""), "url": e.get("link", ""),
+                "title": e.get("title", ""), "text": re.sub("<[^>]+>", "", e.get("summary", "")),
+                "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
+    return out
+
 async def fetch_reddit(session, r, sem):
     # Use RSS to bypass Reddit's JSON API datacenter blocks
     txt = await fetch_text(session, f"https://www.reddit.com/r/{r['sub']}/new/.rss", sem)
     out = []
     if txt:
         parsed = feedparser.parse(txt)
-        for entry in parsed.entries[:PRIO_LIMIT.get(r['priority'],3)]:
+        for entry in parsed.entries[:PRIO_LIMIT.get(r["priority"], 3)]:
             title = entry.get("title", "").split(" :: ")[0]
             out.append({"source_type": "reddit", "source_name": "r/" + r["sub"], "category": "Reddit",
                 "url": entry.get("link", ""), "title": title,
@@ -101,10 +112,14 @@ async def fetch_github(session, repo, sem, since_iso):
     for ep in ("releases?per_page=5", f"commits?per_page=5&since={since_iso}"):
         txt = await fetch_text(session, f"https://api.github.com/repos/{repo}/{ep}", sem, hdrs)
         if txt:
-            for it in json.loads(txt):
-                out.append({"source_type": "github", "source_name": repo, "category": "GitHub",
-                    "url": it.get("html_url", ""), "title": (it.get("name") or it.get("commit", {}).get("message") or "")[:200],
-                    "text": (it.get("body") or it.get("commit", {}).get("message") or "")[:4000], "ts": time.time()})
+            try:
+                data = json.loads(txt)
+                if isinstance(data, list):
+                    for it in data:
+                        out.append({"source_type": "github", "source_name": repo, "category": "GitHub",
+                            "url": it.get("html_url", ""), "title": (it.get("name") or it.get("commit", {}).get("message") or "")[:200],
+                            "text": (it.get("body") or it.get("commit", {}).get("message") or "")[:4000], "ts": time.time()})
+            except Exception: pass
     return out
 
 def full_text(url, fallback):
@@ -119,7 +134,7 @@ PROMPT_T = """You are a precise intelligence analyst. Treat the text as sole sou
 summary, category, importance (Low/Medium/High/Critical), keywords (list), entities (list), tickers (list), sentiment (bullish/bearish/neutral/na), event_type, countries (list), key_developments, unconfirmed_or_missing
 
 TRIGGER CONTEXT: This article was flagged because it relates to: {cats}
-SOURCE: {name} ({cat})
+SOURCE: {source_name} ({category})
 TITLE: {title}
 TEXT:
 {text}"""
