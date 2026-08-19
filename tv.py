@@ -27,8 +27,20 @@ def _post(body):
 
 def _row(row):
     d = row.get("d", [])
-    return {"t": row.get("s", ""), "c": d[0] or "", "s": d[1] or "US Market",
-            "mcap": d[2] or 0, "pct": d[3] or 0, "relvol": d[4] or 0, "vol": d[5] or 0}
+    # TradingView returns the symbol with an exchange prefix (e.g. "NASDAQ:NVDA").
+    # Strip it so tickers match the bare symbols used by the scoring engine.
+    ticker = row.get("s", "").split(":")[-1]
+    # Empirical mapping from scanner.tradingview.com/america/scan responses:
+    #   d[0] = description (returned empty), d[1] = company name, d[2] = sector,
+    #   d[3] = market cap, d[4] = change %, d[5] = relative volume (10d).
+    def g(i, default):
+        return d[i] if len(d) > i and d[i] is not None else default
+    return {"t": ticker,
+            "c": g(1, ""),
+            "s": g(2, "") or "US Market",
+            "mcap": g(3, 0),
+            "pct": g(4, 0),
+            "relvol": g(5, 0)}
 
 def fetch_universe(post_fn=_post):
     """'Load More' until the end: page by CHUNK until totalCount reached."""
