@@ -295,6 +295,37 @@ def send_digest(digest_items, report):
     except Exception as e:
         print("Discord digest err:", e)
 
+def append_history(report):
+    """Rolling 48h news history — powers the briefings."""
+    path = os.path.join(DATA, "news_history.json")
+    items = []
+    try:
+        if os.path.exists(path):
+            items = json.load(open(path, encoding="utf-8")).get("items", [])
+    except Exception:
+        items = []
+    now = time.time()
+    items = [i for i in items if now - i.get("ts", 0) < 48 * 3600]
+    entries = []
+    for a in report.get("analyzed", []):
+        an = a.get("analysis", {}) or {}
+        entries.append({"ts": now, "url": a["url"], "title": a["title"], "source": a["source"],
+                        "score": a["score"], "triggers": a["triggers"],
+                        "importance": an.get("importance"), "sentiment": an.get("sentiment"),
+                        "summary": an.get("summary")})
+    if DRY_RUN:
+        for a in report.get("would_analyze", []):
+            entries.append({"ts": now, "url": a["url"], "title": a["title"], "source": a["source"],
+                            "score": a["score"], "triggers": a["triggers"],
+                            "importance": None, "sentiment": None, "summary": None})
+    known = {i.get("url") for i in items}
+    items += [e for e in entries if e["url"] not in known]
+    items.sort(key=lambda x: -x.get("ts", 0))
+    try:
+        with open(path, "w", encoding="utf-8") as f: json.dump({"items": items}, f)
+    except Exception as e:
+        print("history write err:", e)
+
 async def main():
     if not DRY_RUN and not os.environ.get("QWEN_API_KEY"):
         raise SystemExit("FATAL: QWEN_API_KEY secret is not set.")
@@ -352,6 +383,8 @@ async def main():
         mark_seen([i["url"] for i in wire]); mark_title_seen(wire)
     if processed_urls:
         mark_seen(processed_urls); mark_title_seen(processed_items)
+
+        append_history(report)
 
     send_digest(digest_items, report)
     with open(os.path.join(REPORTS, "run.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=2)
