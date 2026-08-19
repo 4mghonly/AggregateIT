@@ -1,76 +1,110 @@
-"""Correctness baseline for AggregateIT POC. Run: python tests.py"""
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import main, tv
+"""TradingView US market universe + movers.
+Emulates the 'Load More' XHR loop of
+https://www.tradingview.com/markets/stocks-usa/market-movers-all-stocks/
+by paging the page's own scanner backend until totalCount is reached."""
+import os, json, time, argparse
+import requests
 
-PASS = 0; FAIL = 0
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.join(BASE_DIR, "data")
+os.makedirs(DATA, exist_ok=True)
 
-def check(name, cond, detail=""):
-    global PASS, FAIL
-    if cond: PASS += 1; print(f"  [PASS] {name}")
-    else: FAIL += 1; print(f"  [FAIL] {name} :: {detail}")
+SCAN_URL = "https://scanner.tradingview.com/america/scan"
+CHUNK = 1000
+COLS = ["ticker", "description", "sector", "market_cap_calc",
+        "change_percent", "relative_volume_10d_calc", "volume"]
 
-def item(title, text="", source="Test Source"):
-    return {"title": title, "text": text, "source_name": source,
-            "source_type": "rss", "url": "http://example.com/t"}
+def _post(body):
+    for attempt in (1, 2):
+        try:
+            r = requests.post(SCAN_URL, json=body, timeout=30,
+                              headers={"User-Agent": "Mozilla/5.0 (personal research)"})
+            r.raise_for_status()
+            return r.json()
+        except Exception:
+            if attempt == 2: raise
+            time.sleep(2)
 
-print("[T1] Common-word ticker false positives must score 0")
-for txt in ["The app has a pool near the well",
-            "Ice cream cost a lot now",
-            "The tech doc was on the ball",
-            "We saw a fox in the para"]:
-    sc, labels = main.score_item(item(txt, txt))
-    check(f"'{txt[:40]}'", sc == 0, f"score={sc} labels={labels}")
+def _row(row):
+    d = row.get("d", [])
+    return {"t": row.get("s", ""), "c": d[0] or "", "s": d[1] or "US Market",
+            "mcap": d[2] or 0, "pct": d[3] or 0, "relvol": d[4] or 0, "vol": d[5] or 0}
 
-print("[T2] $TICKER cashtags must match")
-for txt, sym in [("$NVDA jumps on earnings", "NVDA"),
-                 ("Breaking: $TSLA recall news", "TSLA"),
-                 ("$GME squeeze again", "GME")]:
-    sc, labels = main.score_item(item(txt, txt))
-    check(f"'{txt[:40]}'", sc > 0 and any(sym in l for l in labels), f"score={sc} labels={labels}")
+def fetch_universe(post_fn=_post):
+    """'Load More' until the end: page by CHUNK until totalCount reached."""
+    out = []; start = 0; total = 0
+    while True:
+        resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
+                        "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"},
+                        "range": [start, start + CHUNK]})
+        total = resp.get("totalCount", 0)
+        rows = resp.get("data", [])
+        out += [_row(r) for r in rows]
+        start += CHUNK
+        if not rows or start >= total: break
+        time.sleep(0.75)  # politeness
+    return out, total
 
-print("[T3] Company names must match")
-for txt in ["Nvidia reports record revenue", "Microsoft announces AI features"]:
-    sc, labels = main.score_item(item(txt, txt))
-    check(f"'{txt[:40]}'", sc > 0, f"score={sc} labels={labels}")
+def fetch_movers(post_fn=_post, cap=300):
+    """Today's gainers / losers / unusual volume = 'the market is voting'."""
+    movers = {}
+    jobs = [
+        ([{"left": "change_percent", "operation": "greater", "right": 4}], ("change_percent", "desc")),
+        ([{"left": "change_percent", "operation": "less", "right": -4}], ("change_percent", "asc")),
+        ([{"left": "relative_volume_10d_calc", "operation": "greater", "right": 2}], ("relative_volume_10d_calc", "desc")),
+    ]
+    for flt, sort in jobs:
+        try:
+            resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
+                            "filter": flt, "sort": {"sortBy": sort[0], "sortOrder": sort[1]},
+                            "range": [0, cap]})
+            for r in resp.get("data", []):
+                m = _row(r); movers[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
+        except Exception as e:
+            print("TV movers scan err:", type(e).__name__)
+        time.sleep(0.5)
+    return movers
 
-print("[T4] Title normalization and dedup hashing")
-a = main.normalize_title("Breaking: NVDA Jumps 5% on Earnings!")
-b = main.normalize_title("breaking  nvda jumps 5% on earnings")
-check("normalize equal", a == b, f"'{a}' vs '{b}'")
-check("hash equal", main.title_hash("Oil prices surge on OPEC cuts") ==
-                     main.title_hash("oil prices  surge on opec cuts!"))
-check("hash differs", main.title_hash("Oil prices surge") != main.title_hash("Gold prices fall"))
+def save(name, obj):
+    with open(os.path.join(DATA, name), "w", encoding="utf-8") as f: json.dump(obj, f)
 
-print("[T5] Keyword clusters match independently (F-03)")
-sc, labels = main.score_item(item("Strait of Hormuz blockade feared",
-                                  "Tanker seizures reported amid rising tensions"))
-check("ME-04 matched", any("ME-04" in l for l in labels), f"labels={labels}")
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--universe", action="store_true")
+    ap.add_argument("--movers", action="store_true")
+    ap.add_argument("--search", nargs="+")
+    args = ap.parse_args()
 
-print("[T6] Priority sources get boosted")
-sc, labels = main.score_item(item("Press release", "Routine announcement", source="Federal Reserve"))
-check("Fed boosted", sc >= 5, f"score={sc}")
+    if args.universe:
+        try:
+            uni, total = fetch_universe()
+            save("tv_universe.json", {"updated": time.time(), "total": total, "rows": uni})
+            print(f"TV UNIVERSE OK: {len(uni)} rows (totalCount {total})")
+        except Exception as e:
+            print("TV UNIVERSE FAIL:", type(e).__name__, str(e)[:120])
 
-print("[T7] TradingView 'Load More' pagination reaches totalCount")
-def fake_post(body):
-    start, end = body["range"]; total = 2500
-    rows = [{"s": f"T{i}", "d": [f"Company {i}", "Technology", 1e9, 1.0, 1.0, 1e6]}
-            for i in range(start, min(end, total))]
-    return {"totalCount": total, "data": rows}
-uni, total = tv.fetch_universe(post_fn=fake_post)
-check("paginates to end", len(uni) == 2500 and total == 2500, f"len={len(uni)} total={total}")
+    if args.movers:
+        try:
+            mv = fetch_movers()
+            save("movers.json", {"updated": time.time(), "movers": mv})
+            print(f"TV MOVERS OK: {len(mv)} movers")
+        except Exception as e:
+            print("TV MOVERS FAIL:", type(e).__name__, str(e)[:120])
 
-print("[T8] Movers scans merge and dedupe")
-calls = []
-def fake_post2(body):
-    calls.append(body)
-    f = body.get("filter", [])
-    if f and f[0]["operation"] == "less":
-        return {"totalCount": 1, "data": [{"s": "BBB", "d": ["B Co", "Tech", 1e9, -9.0, 2.5, 1e6]}]}
-    return {"totalCount": 1, "data": [{"s": "AAA", "d": ["A Co", "Tech", 1e9, 8.0, 3.0, 1e6]}]}
-mv = tv.fetch_movers(post_fn=fake_post2)
-check("movers merged", set(mv) == {"AAA", "BBB"}, f"{sorted(mv)}")
-check("3 scans issued", len(calls) == 3, f"{len(calls)}")
+    if args.search:
+        q = " ".join(args.search).lower()
+        p = os.path.join(DATA, "tv_universe.json")
+        if not os.path.exists(p):
+            print("No universe file yet. Run the 'TradingView Universe Refresh' workflow first.")
+            return
+        uni = json.load(open(p, encoding="utf-8"))["rows"]
+        pm = os.path.join(DATA, "movers.json")
+        mv = json.load(open(pm, encoding="utf-8"))["movers"] if os.path.exists(pm) else {}
+        hits = [r for r in uni if q in r["t"].lower() or q in r["c"].lower()][:20]
+        if not hits: print(f"No matches for '{q}'.")
+        for r in hits:
+            flag = " 🔥 MOVER" if r["t"] in mv else ""
+            print(f"{r['t']:8} | {r['c'][:36]:38} | {str(r['s'])[:16]:16} | mcap {r['mcap']/1e9:8.1f}B | {r['pct']:+6.2f}% | relvol {r['relvol']:5.2f}{flag}")
 
-print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
-sys.exit(1 if FAIL else 0)
+if __name__ == "__main__":
+    main()
