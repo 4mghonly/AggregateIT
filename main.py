@@ -305,7 +305,7 @@ def append_history(report):
     except Exception:
         items = []
     now = time.time()
-    items = [i for i in items if now - i.get("ts", 0) < 48 * 3600]
+    items = [i for i in items if now - i.get("ts", 0) < 72 * 3600]
     entries = []
     for a in report.get("analyzed", []):
         an = a.get("analysis", {}) or {}
