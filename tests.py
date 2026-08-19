@@ -1,5 +1,5 @@
 """Correctness baseline for AggregateIT POC. Run: python tests.py"""
-import sys, os, tempfile
+import sys, os, json, tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import main, tv
 from storage import SQLiteStore
@@ -59,6 +59,7 @@ check("movers merged", set(mv) == {"AAA", "BBB"})
 
 print("[T9] Qwen schema validation")
 valid = {"event": "Fed holds", "event_type": "macro", "facts": ["held"], "assessment": "pause",
+         "what_changed": "New event - no prior coverage",
          "importance": "High", "confidence": 80, "sentiment": "neutral", "entities": ["Fed"],
          "tickers": ["NVDA"], "evidence": ["held"], "corroboration": "multi-source",
          "source_reliability": "High", "gaps": []}
@@ -91,7 +92,7 @@ check("degraded = YELLOW", h["overall"] == "YELLOW")
 print("[T12] L2 Market-Movers Boost")
 main.MOVERS = {"XYZ": {"pct": 15.0}}
 sc, labels = main.score_item(item("XYZ stock explodes today", "$XYZ is up"))
-check("mover gets +4 boost", sc >= 7, f"score={sc}") # 3 (cashtag) + 4 (mover) = 7
+check("mover gets +4 boost", sc >= 7, f"score={sc}")
 main.MOVERS = {}
 
 print("[T13] L3 Confluence Boost")
@@ -99,7 +100,6 @@ i1 = item("NVDA earnings beat", "$NVDA is up")
 sc1, labels1 = main.score_item(i1); i1["matched_categories"] = labels1
 i2 = item("Nvidia reports record", "Nvidia wins")
 sc2, labels2 = main.score_item(i2); i2["matched_categories"] = labels2
-# Simulate main loop confluence logic
 ticker_counts = {}
 for i in [i1, i2]:
     for label in i.get("matched_categories", []):
@@ -108,7 +108,50 @@ for i in [i1, i2]:
 check("confluence detected", ticker_counts.get("NVDA", 0) >= 2, f"{ticker_counts}")
 
 print("[T14] L4 Front-Page Floor")
-check("floor is 5", main.FRONT_PAGE_FLOOR == 5)
+check("floor is 5", main.FRONT_PAGE_FLOOR == 5, f"actual={main.FRONT_PAGE_FLOOR}")
+
+print("[T15] Event clustering groups same-topic reports")
+a1 = {"title": "Nvidia earnings beat estimates on data center demand", "source_name": "Reuters",
+      "url": "http://x/1", "ts": 1, "source_type": "rss", "text": "", "score": 8,
+      "matched_categories": ["NVDA"], "keyword_ids": []}
+a2 = {"title": "Nvidia earnings beat estimates as data center demand surges", "source_name": "Bloomberg",
+      "url": "http://x/2", "ts": 2, "source_type": "rss", "text": "", "score": 7,
+      "matched_categories": ["NVDA"], "keyword_ids": []}
+a3 = {"title": "Nvidia faces new export restrictions in Asia", "source_name": "WSJ",
+      "url": "http://x/3", "ts": 3, "source_type": "rss", "text": "", "score": 7,
+      "matched_categories": ["NVDA"], "keyword_ids": []}
+clusters = main.cluster_events([a1, a2, a3])
+check("same topic clustered", any(len(c["items"]) == 2 for c in clusters), f"{len(clusters)} clusters")
+check("different topic separate", len(clusters) == 2, f"{len(clusters)} clusters")
+
+print("[T16] Syndicated copies don't inflate corroboration")
+b1 = dict(a1, url="http://y/1")
+b2 = dict(a1, url="http://y/2", title="Nvidia earnings beat estimates on data center demand ")
+c1 = main.cluster_events([b1, b2])
+check("same source = 1 independent", c1[0]["independent_sources"] == 1, c1[0]["independent_sources"])
+b3 = dict(a1, source_name="Bloomberg", url="http://y/3")
+c2 = main.cluster_events([b1, b3])
+check("two sources = 2 independent", c2[0]["independent_sources"] == 2, c2[0]["independent_sources"])
+
+print("[T17] Event store continuity")
+tmp2 = tempfile.mktemp(suffix=".db")
+st2 = SQLiteStore(path=tmp2)
+ev = {"event_id": "evt1", "entity": "NVDA", "tokens_json": json.dumps(["nvidia", "earnings"]),
+      "title": "NVDA earnings", "event_type": "earnings", "status": "active", "severity": "High",
+      "confidence": 70, "source_count": 2, "assessment": "strong", "what_changed": "new",
+      "urls_json": "[]", "first_seen": 1000.0, "last_updated": 1000.0}
+st2.upsert_event(ev)
+st2.upsert_event(dict(ev, confidence=85, source_count=5, last_updated=2000.0))
+rows = st2.recent_events("NVDA", hours=10**9)
+check("first_seen preserved", rows[0]["first_seen"] == 1000.0, rows[0]["first_seen"])
+check("updated fields persist", rows[0]["confidence"] == 85 and rows[0]["source_count"] == 5)
+
+print("[T18] Cross-run event resolution")
+cl1 = {"entity": "NVDA", "tokens": {"nvidia", "earnings", "beat"}, "items": [a1], "event_id": "x"}
+match = main.resolve_prior_event(cl1, st2)
+check("similar stored event found", match is not None and match["event_id"] == "evt1", match)
+cl2 = {"entity": "NVDA", "tokens": {"nvidia", "export", "restrictions", "asia"}, "items": [a3], "event_id": "y"}
+check("different topic not matched", main.resolve_prior_event(cl2, st2) is None)
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
