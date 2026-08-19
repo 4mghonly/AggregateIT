@@ -1,6 +1,6 @@
 """TradingView US market universe + pulse.
 Emulates the 'Load More' XHR loop of the TradingView market-movers page.
-v2: primary-listing filter, intraday pulse snapshots, zero-data validity gate."""
+v3: fixed column mapping (volume idx 6, is_primary idx 7) + volume-aware validity gate."""
 import os, json, time, argparse
 import requests
 
@@ -25,14 +25,14 @@ def _post(body):
             time.sleep(2)
 
 def _row(row):
-       d = row.get("d", [])
-       ticker = row.get("s", "").split(":")[-1]
-       def g(i, default):
-           return d[i] if len(d) > i and d[i] is not None else default
-       return {"t": ticker, "c": g(1, ""), "s": g(2, "") or "US Market",
-               "mcap": g(3, 0), "pct": g(4, 0), "relvol": g(5, 0),
-               "vol": g(6, 0),
-               "primary": bool(g(7, 1))}
+    d = row.get("d", [])
+    ticker = row.get("s", "").split(":")[-1]  # strip exchange prefix
+    def g(i, default):
+        return d[i] if len(d) > i and d[i] is not None else default
+    return {"t": ticker, "c": g(1, ""), "s": g(2, "") or "US Market",
+            "mcap": g(3, 0), "pct": g(4, 0), "relvol": g(5, 0),
+            "vol": g(6, 0),
+            "primary": bool(g(7, 1))}
 
 def fetch_universe(post_fn=_post):
     """'Load More' until the end; primary listings only."""
@@ -91,7 +91,8 @@ def fetch_pulse(post_fn=_post, cap=20):
         if len(mega) >= cap: break
     gainers = _scan(post_fn, [{"left": "change_percent", "operation": "greater", "right": 3}], ("change_percent", "desc"), 5)
     losers = _scan(post_fn, [{"left": "change_percent", "operation": "less", "right": -3}], ("change_percent", "asc"), 5)
-    valid = any(abs(m["pct"]) > 0.005 for m in mega)  # all-zero = market closed/pre-open
+    # Valid if there is price movement OR real trading volume (market open)
+    valid = any(abs(m["pct"]) > 0.005 or m.get("vol", 0) > 1000 for m in mega)
     return {"updated": time.time(), "valid": valid,
             "mega_caps": mega, "gainers": gainers, "losers": losers}
 
