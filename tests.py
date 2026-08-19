@@ -71,6 +71,15 @@ def fake_post2(body):
 mv = tv.fetch_movers(post_fn=fake_post2)
 check("movers merged", set(mv) == {"AAA", "BBB"}, f"{sorted(mv)}")
 check("3 scans issued", len(calls) == 3, f"{len(calls)}")
+print("[T9] v3 Taxonomy: AI & Central Bank clusters match")
+sc, labels = main.score_item(item("Hyperscaler capex drives GPU shortage", "TSMC fab capacity maxed out"))
+check("AI-01/AI-03 matched", any("AI-0" in l for l in labels), f"labels={labels}")
+sc, labels = main.score_item(item("Powell speech signals FOMC minutes", "Sticky inflation metrics remain"))
+check("CB-01/CB-02 matched", any("CB-0" in l for l in labels), f"labels={labels}")
+
+print("[T10] v3 Taxonomy: Retail squeeze cluster matches")
+sc, labels = main.score_item(item("Short squeeze setup for GME", "Massive short interest reported"))
+check("RN-01 matched", any("RN-01" in l for l in labels), f"labels={labels}")
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
