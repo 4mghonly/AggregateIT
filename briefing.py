@@ -149,9 +149,9 @@ def build_exec(mode):
     return [e1, e2, e3, e4, e5]
 
 def build_mini():
-    items = load_history(16)
+    items = load_history(24)
     return [{"title": "🌅 AGGREGATEIT · OVERNIGHT WIRE (08:00 UAE)",
-             "description": findings(items, 16), "color": 0xE67E22,
+             "description": findings(items, 24), "color": 0xE67E22,
              "fields": [
                  {"name": "📰 Major Headlines", "value": headlines(items, 6), "inline": False},
                  {"name": "🧭 Theme Activity", "value": theme_chart(items), "inline": True},
