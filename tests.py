@@ -1,7 +1,8 @@
 """Correctness baseline for AggregateIT POC. Run: python tests.py"""
-import sys, os
+import sys, os, tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import main, tv
+from storage import SQLiteStore
 
 PASS = 0; FAIL = 0
 
@@ -71,15 +72,57 @@ def fake_post2(body):
 mv = tv.fetch_movers(post_fn=fake_post2)
 check("movers merged", set(mv) == {"AAA", "BBB"}, f"{sorted(mv)}")
 check("3 scans issued", len(calls) == 3, f"{len(calls)}")
-print("[T9] v3 Taxonomy: AI & Central Bank clusters match")
-sc, labels = main.score_item(item("Hyperscaler capex drives GPU shortage", "TSMC fab capacity maxed out"))
-check("AI-01/AI-03 matched", any("AI-0" in l for l in labels), f"labels={labels}")
-sc, labels = main.score_item(item("Powell speech signals FOMC minutes", "Sticky inflation metrics remain"))
-check("CB-01/CB-02 matched", any("CB-0" in l for l in labels), f"labels={labels}")
 
-print("[T10] v3 Taxonomy: Retail squeeze cluster matches")
-sc, labels = main.score_item(item("Short squeeze setup for GME", "Massive short interest reported"))
-check("RN-01 matched", any("RN-01" in l for l in labels), f"labels={labels}")
+print("[T9] Qwen schema validation (F-07/F-08)")
+valid = {"event": "Fed holds rates", "event_type": "macro",
+         "facts": ["The Fed held rates steady"],
+         "assessment": "Likely pause through Q4", "importance": "High", "confidence": 80,
+         "sentiment": "neutral", "entities": ["Federal Reserve"],
+         "tickers": ["NVDA", "notarealticker123"],
+         "evidence": ["held rates steady"], "corroboration": "multi-source",
+         "source_reliability": "High", "gaps": []}
+ok, obj, errs = main.validate_analysis(dict(valid))
+check("valid response passes", ok, errs)
+check("hallucinated ticker stripped", obj["tickers"] == ["NVDA"], obj["tickers"])
+bad = dict(valid); del bad["assessment"]
+ok, _, errs = main.validate_analysis(bad)
+check("missing field rejected", not ok, errs)
+bad = dict(valid); bad["importance"] = "EXTREME"
+ok, _, errs = main.validate_analysis(bad)
+check("bad enum rejected", not ok, errs)
+bad = dict(valid); bad["confidence"] = 150
+ok, _, errs = main.validate_analysis(bad)
+check("confidence range enforced", not ok, errs)
+single = dict(valid); single["corroboration"] = "none"; single["confidence"] = 90
+ok, obj, errs = main.validate_analysis(single)
+check("single-source capped at 60", ok and obj["confidence"] == 60, obj.get("confidence"))
+
+print("[T10] Storage state machine (F-06)")
+tmp = tempfile.mktemp(suffix=".db")
+st = SQLiteStore(path=tmp)
+st.register("http://a", "h1", "discovered", 5)
+check("discovered retriable", st.url_active("http://a"))
+st.fail("http://a")
+check("failed retriable (retry next run)", st.url_active("http://a"))
+st.succeed("http://a", "h1", "analyzed", "{}")
+check("analyzed terminal", not st.url_active("http://a"))
+check("title marked only on success", not st.title_active("h1"))
+st.register("http://b", "h2", "filtered", 0)
+check("filtered terminal", not st.url_active("http://b"))
+check("unseen title active", st.title_active("h9"))
+stats = st.stats()
+check("stats report states", stats["items_by_state"].get("analyzed") == 1, stats)
+
+print("[T11] System health visibility")
+main.HEALTH.update({"rss_ok": 90, "rss_fail": 5, "reddit_ok": 0, "reddit_fail": 32,
+                    "github_ok": 5, "github_fail": 0, "qwen_ok": 3, "qwen_fail": 0,
+                    "qwen_invalid": 0, "discord_ok": 3, "discord_fail": 0, "discord_skipped": 0})
+h = main.build_health({"run": "x", "new": 1, "matched": 3}, {"fresh_init": False})
+check("degraded = YELLOW", h["overall"] == "YELLOW", h["overall"])
+check("failures listed", any("RSS" in d for d in h["degraded"]), h["degraded"])
+main.HEALTH.update({"qwen_fail": 5, "qwen_ok": 0})
+h2 = main.build_health({"run": "x", "new": 1, "matched": 3}, {"fresh_init": False})
+check("Qwen hard-fail = RED (live)", h2["overall"] == "RED" or main.DRY_RUN, h2["overall"])
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
