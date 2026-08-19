@@ -136,14 +136,15 @@ check("two sources = 2 independent", c2[0]["independent_sources"] == 2, c2[0]["i
 print("[T17] Event store continuity")
 tmp2 = tempfile.mktemp(suffix=".db")
 st2 = SQLiteStore(path=tmp2)
+t0 = time.time() - 3600  # event first seen 1 hour ago
 ev = {"event_id": "evt1", "entity": "NVDA", "tokens_json": json.dumps(["nvidia", "earnings"]),
       "title": "NVDA earnings", "event_type": "earnings", "status": "active", "severity": "High",
       "confidence": 70, "source_count": 2, "assessment": "strong", "what_changed": "new",
-      "urls_json": "[]", "first_seen": 1000.0, "last_updated": 1000.0}
+      "urls_json": "[]", "first_seen": t0, "last_updated": t0}
 st2.upsert_event(ev)
-st2.upsert_event(dict(ev, confidence=85, source_count=5, last_updated=2000.0))
-rows = st2.recent_events("NVDA", hours=10**9)
-check("first_seen preserved", rows[0]["first_seen"] == 1000.0, rows[0]["first_seen"])
+st2.upsert_event(dict(ev, confidence=85, source_count=5, last_updated=time.time()))
+rows = st2.recent_events("NVDA", hours=72)
+check("first_seen preserved", abs(rows[0]["first_seen"] - t0) < 1, rows[0]["first_seen"])
 check("updated fields persist", rows[0]["confidence"] == 85 and rows[0]["source_count"] == 5)
 
 print("[T18] Cross-run event resolution")
