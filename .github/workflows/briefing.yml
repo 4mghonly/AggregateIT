@@ -1,0 +1,35 @@
+name: Intelligence Briefings
+on:
+  schedule:
+    - cron: "0 4 * * *"
+    - cron: "40 14 * * 1-5"
+    - cron: "0 21 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Briefing Type"
+        type: choice
+        default: "MORNING"
+        options: ["MINI", "MORNING", "CLOSING"]
+jobs:
+  briefing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: seen-db-${{ github.run_id }}
+          restore-keys: |
+            seen-db-
+      - name: Refresh TradingView Data
+        if: ${{ github.event.inputs.mode != 'MINI' }}
+        run: python tv.py --universe --movers
+      - name: Send Discord Briefing
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          BRIEFING_MODE: ${{ github.event.inputs.mode || (github.event.schedule == '0 4 * * *' && 'MINI' || (github.event.schedule == '40 14 * * 1-5' && 'MORNING' || 'CLOSING')) }}
+        run: python briefing.py
