@@ -11,7 +11,7 @@ DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
 LOOKBACK_H = int(os.environ.get("LOOKBACK_HOURS", "6"))
 MAX_PER_SOURCE = 5
 MAX_ANALYZE = 25
-FRONT_PAGE_FLOOR = 6  # L4: Minimum score to justify Qwen token spend
+FRONT_PAGE_FLOOR = 5  # L4: Minimum score to justify Qwen token spend
 ALWAYS_ANALYZE = ["federal reserve", "european central bank", "cisa"]
 PRIO_LIMIT = {"Very High": 10, "High": 5, "Medium": 3}
 UA = {"User-Agent": "NewsIntelEngine/0.3 (personal research)"}
