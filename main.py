@@ -151,4 +151,160 @@ async def fetch_github(session, repo, sem, since_iso):
                         else:
                             ts = parse_iso_ts(it.get("commit", {}).get("committer", {}).get("date")) or time.time()
                         out.append({"source_type": "github", "source_name": repo, "category": "GitHub",
-                            "url": it.get("html_url", ""), "title": (it.get("name") or it.get("commit", {}).get("message") or "")[:200
+                            "url": it.get("html_url", ""), "title": (it.get("name") or it.get("commit", {}).get("message") or "")[:200],
+                            "text": (it.get("body") or it.get("commit", {}).get("message") or "")[:4000], "ts": ts})
+            except Exception: pass
+    return out
+
+def full_text(url, fallback):
+    try:
+        raw = trafilatura.fetch_url(url)
+        txt = trafilatura.extract(raw, include_comments=False)
+        if txt and len(txt) > 400: return txt[:4000]
+    except Exception: pass
+    return fallback[:4000]
+
+PROMPT_T = """You are a precise intelligence analyst. Treat the text as sole source of truth. Output ONLY valid JSON with keys:
+summary, category, importance (Low/Medium/High/Critical), keywords (list), entities (list), tickers (list), sentiment (bullish/bearish/neutral/na), event_type, countries (list), key_developments, unconfirmed_or_missing
+
+TRIGGER CONTEXT: This article was flagged because it relates to: {cats}
+SOURCE: {source_name} ({category})
+TITLE: {title}
+TEXT:
+{text}"""
+
+def analyze(i):
+    try:
+        base = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
+        r = requests.post(base + "/chat/completions",
+            headers={"Authorization": "Bearer " + os.environ["QWEN_API_KEY"]},
+            json={"model": os.environ.get("QWEN_MODEL", "qwen3.7-flash-2026-07-15"), "temperature": 0.2,
+                  "messages": [{"role": "user", "content": PROMPT_T.format(**i)}]}, timeout=120)
+        m = re.search(r"\{[\s\S]*\}", r.json()["choices"][0]["message"]["content"])
+        return json.loads(m.group(0)) if m else None
+    except Exception as e:
+        print("LLM err:", e); return None
+
+# ================= DISCORD DIGEST =================
+SENT_EMOJI = {"bullish": "🟢 Bullish", "bearish": "🔴 Bearish", "neutral": "⚪ Neutral", "na": "➖ N/A"}
+IMP_EMOJI = {"Critical": "🚨", "High": "🔥", "Medium": "📌", "Low": "ℹ️"}
+IMP_COLOR = {"Critical": 0xE74C3C, "High": 0xE67E22, "Medium": 0xF1C40F, "Low": 0x95A5A6}
+
+def _truncate(s, n):
+    s = (s or "").strip()
+    return s if len(s) <= n else s[:n-1] + "…"
+
+def build_item_embed(i, a):
+    imp = a.get("importance", "Low")
+    sent = (a.get("sentiment") or "na").lower()
+    tag = "💬" if i["source_type"] == "reddit" else "📰"
+    fields = [
+        {"name": "Sentiment", "value": SENT_EMOJI.get(sent, sent), "inline": True},
+        {"name": "Importance", "value": f"{IMP_EMOJI.get(imp, '')} {imp}", "inline": True},
+        {"name": "Tickers", "value": _truncate(", ".join(a.get("tickers") or []) or "-", 200), "inline": True},
+    ]
+    if a.get("event_type"):
+        fields.append({"name": "Event Type", "value": _truncate(str(a["event_type"]), 150), "inline": True})
+    fields.append({"name": "Triggered By", "value": _truncate(", ".join(i.get("matched_categories", [])) or "-", 400), "inline": False})
+    return {
+        "title": _truncate(f"{tag} {i['title']}", 250),
+        "url": i["url"],
+        "description": _truncate(a.get("summary") or "No summary available.", 900),
+        "color": IMP_COLOR.get(imp, 0x95A5A6),
+        "fields": fields,
+        "footer": {"text": f"{i['source_name']} · relevance score {i.get('score', 0)}"},
+    }
+
+def send_digest(digest_items, report):
+    wh = os.environ.get("DISCORD_WEBHOOK")
+    if not wh or not digest_items: return
+    news = [x for x in digest_items if x["item"]["source_type"] != "reddit"]
+    social = [x for x in digest_items if x["item"]["source_type"] == "reddit"]
+    rolls = {"bullish": 0, "bearish": 0, "neutral": 0, "na": 0}
+    for x in digest_items:
+        s = (x["analysis"].get("sentiment") or "na").lower()
+        rolls[s if s in rolls else "na"] += 1
+    header = {
+        "title": "🧠 AggregateIT Intelligence Digest",
+        "description": f"**{report['new']}** new items scanned → **{report['matched']}** matched → **{len(digest_items)}** analyzed by Qwen",
+        "color": 0x5865F2,
+        "fields": [
+            {"name": "📰 News items", "value": str(len(news)), "inline": True},
+            {"name": "💬 Social items", "value": str(len(social)), "inline": True},
+            {"name": "📊 Sentiment rollup", "value": f"🟢 {rolls['bullish']} · 🔴 {rolls['bearish']} · ⚪ {rolls['neutral']}", "inline": True},
+        ],
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        news_embeds = [build_item_embed(x["item"], x["analysis"]) for x in news]
+        social_embeds = [build_item_embed(x["item"], x["analysis"]) for x in social]
+        requests.post(wh, json={"content": "**📰 NEWS SOURCES**", "embeds": [header] + news_embeds[:3]})
+        for k in range(3, len(news_embeds), 4):
+            requests.post(wh, json={"embeds": news_embeds[k:k+4]})
+        if social_embeds:
+            requests.post(wh, json={"content": "**💬 SOCIAL NETWORKS**", "embeds": social_embeds[:4]})
+            for k in range(4, len(social_embeds), 4):
+                requests.post(wh, json={"embeds": social_embeds[k:k+4]})
+    except Exception as e:
+        print("Discord digest err:", e)
+# ===================================================
+
+async def main():
+    if not DRY_RUN and not os.environ.get("QWEN_API_KEY"):
+        raise SystemExit("FATAL: QWEN_API_KEY secret is not set. Add it in Settings > Secrets and variables > Actions.")
+
+    sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
+    since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
+    async with aiohttp.ClientSession(headers=UA) as s:
+        batches = await asyncio.gather(
+            *[fetch_rss(s, x, sem) for x in RSS],
+            *[fetch_reddit(s, x, sem_rd) for x in REDDIT],
+            *[fetch_github(s, x["_url"].split("github.com/")[1], sem, since.isoformat()) for x in GH])
+    items = [i for b in batches if b for i in b]
+    new = [i for i in items if i["ts"] >= since.timestamp() and i["url"] and not is_seen(i["url"]) and not is_title_seen(i)]
+
+    scored = []; filtered_out = []
+    for i in new:
+        sc, labels = score_item(i)
+        if sc > 0:
+            i["matched_categories"] = labels; i["score"] = sc; i["cats"] = ", ".join(labels); scored.append(i)
+        else:
+            filtered_out.append(i)
+
+    if filtered_out:
+        mark_seen([i["url"] for i in filtered_out]); mark_title_seen(filtered_out)
+
+    scored.sort(key=lambda x: -x["score"])
+    report = {"run": datetime.now(timezone.utc).isoformat(), "dry_run": DRY_RUN,
+              "fetched": len(items), "new": len(new), "matched": len(scored),
+              "analyzed": [], "would_analyze": []}
+
+    processed_urls = []; processed_items = []; digest_items = []
+    for idx, i in enumerate(scored):
+        if idx >= MAX_ANALYZE:
+            processed_urls.append(i["url"]); processed_items.append(i); continue
+        if i["source_type"] == "rss": i["text"] = full_text(i["url"], i["text"])
+        if DRY_RUN:
+            report["would_analyze"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
+                                            "score": i["score"], "triggers": i["matched_categories"]})
+            processed_urls.append(i["url"]); processed_items.append(i); continue
+        a = analyze(i)
+        if a:
+            report["analyzed"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
+                                       "score": i["score"], "triggers": i["matched_categories"], "analysis": a})
+            digest_items.append({"item": i, "analysis": a})
+            processed_urls.append(i["url"]); processed_items.append(i)
+        await asyncio.sleep(1)
+
+    if processed_urls:
+        mark_seen(processed_urls); mark_title_seen(processed_items)
+
+    send_digest(digest_items, report)
+
+    with open(os.path.join(REPORTS, "run.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=2)
+    extra = f" | WOULD_ANALYZE {len(report['would_analyze'])}" if DRY_RUN else ""
+    mode = " [DRY RUN]" if DRY_RUN else ""
+    print(f"FETCHED {report['fetched']} | NEW {report['new']} | MATCHED {report['matched']} | ANALYZED {len(report['analyzed'])}{extra}{mode}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
