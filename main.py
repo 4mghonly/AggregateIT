@@ -556,8 +556,8 @@ def send_digest(digest_items, report):
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
     try:
-        news_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"]) for x in news]
-        social_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"]) for x in social]
+        news_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"], x.get("status", "NEW"), x.get("timeline")) for x in news]
+        social_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"], x.get("status", "NEW"), x.get("timeline")) for x in social]
         _post_discord(wh, {"content": "**📰 NEWS SOURCES**", "embeds": [header] + news_embeds[:3]})
         for k in range(3, len(news_embeds), 4): _post_discord(wh, {"embeds": news_embeds[k:k+4]})
         if social_embeds:
