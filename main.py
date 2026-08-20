@@ -4,6 +4,7 @@ from datetime import datetime, timezone, timedelta
 from urllib.parse import urlparse
 from storage import SQLiteStore, DATA
 from market import load_market_pulse, build_pulse_embed
+from alerts import load_rules, match_rules
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 REPORTS = os.path.join(BASE, "reports")
