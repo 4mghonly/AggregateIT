@@ -316,5 +316,45 @@ a_obj = {"corroboration": "multi-source", "confidence": 90}
 main.apply_corroboration_policy(a_obj, {"independent_sources": 1})
 check("downgraded + capped", a_obj["corroboration"] == "single-source" and a_obj["confidence"] == 70, a_obj)
 
+print("[T39] Proportional health thresholds")
+saved = dict(main.HEALTH)
+main.HEALTH.update({k: 0 for k in main.HEALTH})
+main.HEALTH.update({"rss_ok": 96, "rss_fail": 4, "tv_movers_loaded": 10})
+h = main.build_health({"run": "x"}, {"fresh_init": False})
+check("96% rss = GREEN", h["overall"] == "GREEN", h)
+main.HEALTH.update({"rss_ok": 90, "rss_fail": 10})
+h = main.build_health({"run": "x"}, {"fresh_init": False})
+check("90% rss = YELLOW", h["overall"] == "YELLOW", h)
+main.HEALTH.update({"rss_ok": 40, "rss_fail": 60})
+h = main.build_health({"run": "x"}, {"fresh_init": False})
+check("40% rss = RED", h["overall"] == "RED", h)
+main.HEALTH.clear(); main.HEALTH.update(saved)
+
+print("[T40] Event history search")
+import history
+tmp6 = tempfile.mktemp(suffix=".db")
+st6 = SQLiteStore(path=tmp6)
+st6.upsert_event({"event_id": "evtH", "entity": "NVDA", "tokens_json": json.dumps(["nvidia"]),
+                  "title": "Nvidia rally continues", "event_type": "market_move", "status": "DEVELOPING",
+                  "severity": "High", "confidence": 70, "source_count": 2, "assessment": "strong",
+                  "what_changed": "new", "urls_json": "[]", "first_seen": time.time(),
+                  "last_updated": time.time(), "sentiment": "bullish",
+                  "triggers_json": json.dumps(["NVDA"]), "sources_json": "[]", "score": 8})
+res = history.search_events(st6, ticker="NVDA")
+check("ticker search finds event", len(res) == 1 and res[0]["event_id"] == "evtH", res)
+res2 = history.search_events(st6, ticker="TSLA")
+check("unrelated ticker empty", len(res2) == 0, res2)
+
+print("[T41] Custom alert rules")
+import alerts
+rules = {"rules": [{"type": "importance", "value": "Critical", "mention": True},
+                   {"type": "ticker", "value": "TSLA", "mention": False}]}
+a_crit = {"importance": "Critical", "tickers": ["NVDA"], "event": "X"}
+a_tsla = {"importance": "Low", "tickers": ["TSLA"], "event": "Y"}
+a_none = {"importance": "Low", "tickers": ["NVDA"], "event": "Z"}
+check("critical rule fires", len(alerts.match_rules(a_crit, {}, rules)) == 1)
+check("ticker rule fires", len(alerts.match_rules(a_tsla, {}, rules)) == 1)
+check("no false alert", len(alerts.match_rules(a_none, {}, rules)) == 0)
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
