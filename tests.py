@@ -274,5 +274,38 @@ check("deferred is retriable", st4.url_active("http://defer"))
 st4.register("http://filt", "h_filt", "filtered", 0)
 check("filtered is terminal", not st4.url_active("http://filt"))
 
+print("[T32] Multi-signal clustering (ticker + keyword + time)")
+i1 = {"title": "Nvidia earnings beat estimates", "source_name": "Reuters", "url": "http://x/1", 
+      "ts": time.time(), "source_type": "rss", "text": "", "score": 8,
+      "matched_categories": ["NVDA", "MK-01 · Mega-Cap Earnings"], "keyword_ids": ["MK-01"]}
+i2 = {"title": "Nvidia reports strong data center demand", "source_name": "Bloomberg", "url": "http://x/2",
+      "ts": time.time() + 3600, "source_type": "rss", "text": "", "score": 7,
+      "matched_categories": ["NVDA", "MK-01 · Mega-Cap Earnings"], "keyword_ids": ["MK-01"]}
+clusters = main.cluster_events([i1, i2])
+check("same ticker+keyword clustered", len(clusters) == 1 and len(clusters[0]["items"]) == 2, f"{len(clusters)} clusters")
+
+print("[T33] Anti-drift guard prevents chain-merging")
+a = {"title": "Apple iPhone sales strong", "source_name": "Reuters", "url": "http://a/1",
+     "ts": time.time(), "source_type": "rss", "text": "", "score": 8,
+     "matched_categories": ["AAPL"], "keyword_ids": ["MK-01"]}
+b = {"title": "Tech sector earnings overview", "source_name": "Bloomberg", "url": "http://b/1",
+     "ts": time.time() + 1800, "source_type": "rss", "text": "", "score": 7,
+     "matched_categories": ["AAPL", "MSFT"], "keyword_ids": ["MK-01"]}
+c = {"title": "Microsoft Azure cloud growth", "source_name": "WSJ", "url": "http://c/1",
+     "ts": time.time() + 3600, "source_type": "rss", "text": "", "score": 7,
+     "matched_categories": ["MSFT"], "keyword_ids": ["MK-01"]}
+clusters = main.cluster_events([a, b, c])
+check("A and C stay separate", len(clusters) >= 2, f"{len(clusters)} clusters")
+
+print("[T34] Time proximity bonus in clustering")
+i_old = {"title": "Fed rate decision", "source_name": "Reuters", "url": "http://old/1",
+         "ts": time.time() - 86400, "source_type": "rss", "text": "", "score": 8,
+         "matched_categories": ["CB-01 · Fed Communications"], "keyword_ids": ["CB-01"]}
+i_new = {"title": "Federal Reserve holds rates", "source_name": "Bloomberg", "url": "http://new/1",
+         "ts": time.time(), "source_type": "rss", "text": "", "score": 7,
+         "matched_categories": ["CB-01 · Fed Communications"], "keyword_ids": ["CB-01"]}
+clusters = main.cluster_events([i_old, i_new])
+check("24h-apart items cluster with strong signals", len(clusters) == 1, f"{len(clusters)} clusters")
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
