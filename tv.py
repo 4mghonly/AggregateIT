@@ -187,9 +187,9 @@ def main():
     ap.add_argument("--universe", action="store_true")
     ap.add_argument("--movers", action="store_true")
     ap.add_argument("--pulse", action="store_true")
+    ap.add_argument("--macro", action="store_true")
     ap.add_argument("--search", nargs="+")
     args = ap.parse_args()
-
     if args.universe:
         try:
             uni, total = fetch_universe()
@@ -226,7 +226,18 @@ def main():
                 print("RAW SAMPLE ROW:", json.dumps(pulse.get("sample", {}))[:400])
         except Exception as e:
             print("TV PULSE FAIL:", type(e).__name__, str(e)[:120])
-
+if args.macro:
+        try:
+            macro = fetch_macro()
+            save("macro_pulse.json", macro)
+            if not macro["valid"]:
+                state = "INVALID (no reliable data)"
+            else:
+                state = "OK"
+            print(f"TV MACRO {state}: {len(macro['instruments'])} instruments fetched")
+        except Exception as e:
+            print("TV MACRO FAIL:", type(e).__name__, str(e)[:120])
+                
     if args.search:
         q = " ".join(args.search).lower()
         p = os.path.join(DATA, "tv_universe.json")
