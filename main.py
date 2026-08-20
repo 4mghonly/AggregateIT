@@ -324,7 +324,9 @@ def cluster_events(items):
         seed = c["entity"] + "|" + " ".join(sorted(title_tokens(c["items"][0]["title"])))
         c["event_id"] = hashlib.md5(seed.encode()).hexdigest()[:12]
         c["source_names"] = sorted({it["source_name"] for it in c["items"]})
-        c["independent_sources"] = len(c["source_names"])
+        c["domains"] = sorted({canonical_domain(it["url"]) for it in c["items"]})
+        c["families"] = sorted({source_family(d) for d in c["domains"]})
+        c["independent_sources"] = len(c["families"])
     return clusters
 
 def resolve_prior_event(c, store, hours=72):
