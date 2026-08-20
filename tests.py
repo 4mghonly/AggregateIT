@@ -203,5 +203,30 @@ p5 = tv.fetch_pulse(post_fn=fake_post5, cap=20)
 check("gainers sorted desc", [m["t"] for m in p5["gainers"]] == ["B", "A", "C"],
       [m["t"] for m in p5["gainers"]])
 
+print("[T24] Engine->briefing integration (schema contract)")
+tmp3 = tempfile.mktemp(suffix=".db")
+st3 = SQLiteStore(path=tmp3)
+ev3 = {"event_id": "evt9", "entity": "NVDA", "tokens_json": json.dumps(["nvidia"]),
+       "title": "Nvidia beats estimates", "event_type": "earnings", "status": "active",
+       "severity": "High", "confidence": 75, "source_count": 2,
+       "assessment": "Strong beat", "what_changed": "new", "urls_json": json.dumps(["http://z/1"]),
+       "first_seen": time.time(), "last_updated": time.time(),
+       "sentiment": "bullish", "triggers_json": json.dumps(["NVDA", "MK-01 · Mega-Cap Earnings"]),
+       "sources_json": json.dumps([{"name": "Reuters", "url": "http://z/1", "title": "Nvidia beats"}]),
+       "score": 9}
+st3.upsert_event(ev3)
+bi = briefing.load_events(st3, 24)
+check("briefing consumes engine events", len(bi) == 1 and bi[0]["title"] == "Nvidia beats estimates", bi)
+check("triggers flow to theme chart", briefing.theme_counts(bi).get("MK") == 1, briefing.theme_counts(bi))
+check("sentiment flows to gauge", "🟢" in briefing.sentiment_gauge(bi), briefing.sentiment_gauge(bi))
+
+print("[T25] Shared market pulse embed honesty")
+p_invalid = {"updated": time.time(), "valid": False, "session_open": False,
+             "mega_caps": [], "gainers": [], "losers": []}
+check("invalid -> grey no-data", market.build_pulse_embed(p_invalid)["color"] == 0x95A5A6)
+p_closed = {"updated": time.time(), "valid": True, "session_open": False,
+            "mega_caps": [{"t": "NVDA", "pct": 1.0, "relvol": 1.0}], "gainers": [], "losers": []}
+check("closed -> previous session label", "previous session" in market.build_pulse_embed(p_closed)["description"])
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
