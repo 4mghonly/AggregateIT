@@ -1,5 +1,10 @@
+"""briefing.py — AggregateIT executive briefings (MINI / MORNING / CLOSING).
+v2: consumes the canonical event store (state.db) and the shared market pulse
+(market_pulse.json). seen.db/history are gone."""
 import os, json, re, time, requests
 from datetime import datetime, timezone
+from storage import SQLiteStore
+import market
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
@@ -11,8 +16,14 @@ DOMAIN_NAMES = {"ME": "🌍 Middle East", "GG": "🌐 Geopolitics", "US": "🏛�
                 "RN": "🎯 Retail", "EN": "⚡ Energy", "EL": "🗳️ Elections"}
 IMP_EMOJI = {"Critical": "🚨", "High": "🔥", "Medium": "📌", "Low": "ℹ️"}
 
+def load_json(path):
+    if not os.path.exists(path): return None
+    try:
+        with open(path, encoding="utf-8") as f: return json.load(f)
+    except Exception: return None
+
 def fetch_stocktwits(tickers):
-    """Fetches live retail sentiment from StockTwits for top movers/watchlist."""
+    """Best-effort live retail sentiment (optional enrichment; failures tolerated)."""
     sentiments = {"bullish": 0, "bearish": 0, "neutral": 0}
     radar = []
     for t in set(tickers):
@@ -29,33 +40,30 @@ def fetch_stocktwits(tickers):
                 if bull + bear >= 2:
                     ratio = bull / (bull + bear)
                     emoji = "🟢" if ratio > 0.6 else ("🔴" if ratio < 0.4 else "⚪")
-                    radar.append(f"{emoji} **{t}** ({bull}B/{bear}S)")
+                    radar.append(f"{emoji} {t} ({bull}B/{bear}S)")
         except Exception:
             pass
         time.sleep(0.25)
     return sentiments, radar
 
-def load_json(path):
-    if not os.path.exists(path): return None
-    try:
-        with open(path, encoding="utf-8") as f: return json.load(f)
-    except Exception: return None
-
-def load_history(hours):
-    import sqlite3
-    path = os.path.join(DATA, "seen.db")
-    if not os.path.exists(path): return []
-    cutoff = time.time() - hours * 3600
-    try:
-        c = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
-        rows = c.execute("SELECT url, ts, title, source, score, triggers, importance, sentiment, summary "
-                         "FROM history WHERE ts >= ?", (cutoff,)).fetchall()
-        c.close()
-    except Exception:
-        return []
-    return [{"url": r[0], "ts": r[1], "title": r[2], "source": r[3], "score": r[4],
-             "triggers": json.loads(r[5] or "[]"), "importance": r[6], "sentiment": r[7],
-             "summary": r[8]} for r in rows]
+def load_events(store, hours):
+    """Canonical reader: engine-written events -> briefing item shape."""
+    items = []
+    for ev in store.recent_all_events(hours=hours):
+        try: urls = json.loads(ev.get("urls_json") or "[]")
+        except Exception: urls = []
+        try: srcs = json.loads(ev.get("sources_json") or "[]")
+        except Exception: srcs = []
+        src = srcs[0].get("name", "Unknown") if srcs else "Unknown"
+        if len(srcs) > 1: src += f" +{len(srcs) - 1} more"
+        items.append({"url": urls[0] if urls else "", "ts": ev.get("last_updated") or 0,
+                      "title": ev.get("title") or "Untitled event", "source": src,
+                      "score": ev.get("score") or 0,
+                      "triggers": json.loads(ev.get("triggers_json") or "[]"),
+                      "importance": ev.get("severity") or "Low",
+                      "sentiment": ev.get("sentiment") or "na",
+                      "summary": ev.get("assessment") or ""})
+    return items
 
 def theme_counts(items):
     counts = {}
@@ -86,9 +94,9 @@ def sentiment_gauge(items):
         if s in rolls: rolls[s] += 1
     total = sum(rolls.values())
     if not total: return "➖ No news sentiment in window."
-    bar = "".join(f"{e}{'█' * round(rolls[k] / total * 10)}"
-                  for k, e in (("bullish", "🟢"), ("neutral", "⚪"), ("bearish", "🔴")))
-    return f"{bar}  (🟢{rolls['bullish']} ⚪{rolls['neutral']} 🔴{rolls['bearish']})"
+    bar = " ".join(f"{e}{'█' * round(rolls[k] / total * 10)}"
+                   for k, e in (("bullish", "🟢"), ("neutral", "⚪"), ("bearish", "🔴")))
+    return f"{bar} (🟢{rolls['bullish']} ⚪{rolls['neutral']} 🔴{rolls['bearish']})"
 
 def watch_hits(items, movers):
     watch = (load_json(os.path.join(CONFIG, "watchlist.json")) or {}).get("tickers", [])
@@ -100,6 +108,14 @@ def watch_hits(items, movers):
                 hits.add(tu)
     return sorted(hits)
 
+def scope_line():
+    n_src = len(load_json(os.path.join(CONFIG, "sources.json")) or [])
+    n_red = len(load_json(os.path.join(CONFIG, "reddit.json")) or [])
+    kw = load_json(os.path.join(CONFIG, "keywords.json")) or {}
+    uni = load_json(os.path.join(DATA, "tv_universe.json")) or {}
+    return (f"{n_src} news sources · {n_red} subreddits · "
+            f"{uni.get('total', '—')} US stocks · {len(kw.get('clusters', []))} intel clusters")
+
 def insights(items, gainers, losers, hits):
     out = []
     tc = theme_counts(items)
@@ -108,17 +124,17 @@ def insights(items, gainers, losers, hits):
         out.append(f"{DOMAIN_NAMES.get(k, k)} is the dominant theme ({v} stories).")
     if items:
         top = max(items, key=lambda x: x.get("score", 0))
-        out.append(f"Top signal: [{top.get('title', '')[:60]}]({top.get('url', '')}) · *{top.get('source', '')}*.")
+        out.append(f"Top signal: [{top.get('title', '')[:60]}]({top.get('url', '')}) · {top.get('source', '')}.")
     if gainers:
-        lag = f"; **{losers[0]['t']}** {losers[0]['pct']:.1f}% lags" if losers else ""
-        out.append(f"Market leadership: **{gainers[0]['t']}** +{gainers[0]['pct']:.1f}% leads{lag}.")
+        lag = f"; {losers[0]['t']} {losers[0]['pct']:.1f}% lags" if losers else ""
+        out.append(f"Market leadership: {gainers[0]['t']} +{gainers[0]['pct']:.1f}% leads{lag}.")
     if hits:
         out.append(f"Watchlist radar: {', '.join(hits)} in play.")
     crit = [i for i in items if i.get("importance") == "Critical"]
     if crit:
         out.append(f"⚠️ Risk flag: {len(crit)} critical-severity story(ies) in window.")
     if not out: out.append("Quiet cycle — no major signals in window.")
-    return "\n".join(f"**{n}.** {t}" for n, t in enumerate(out[:4], 1))
+    return "\n".join(f"{n}. {t}" for n, t in enumerate(out[:4], 1))
 
 def findings(items, hours):
     if not items:
@@ -126,8 +142,8 @@ def findings(items, hours):
     tc = theme_counts(items)
     top_theme = DOMAIN_NAMES.get(sorted(tc.items(), key=lambda x: -x[1])[0][0], "Mixed") if tc else "Mixed"
     top = max(items, key=lambda x: x.get("score", 0))
-    lines = [f"The last {hours}h were dominated by **{top_theme}** coverage.",
-             f"Highest-impact signal: **{top.get('title', '')[:80]}** ({top.get('source', '')})."]
+    lines = [f"The last {hours}h were dominated by {top_theme} coverage.",
+             f"Highest-impact signal: {top.get('title', '')[:80]} ({top.get('source', '')})."]
     crit = [i for i in items if i.get("importance") == "Critical"]
     if crit: lines.append(f"⚠️ {len(crit)} critical story(ies) require attention.")
     return "\n".join(lines)
@@ -138,49 +154,33 @@ def headlines(items, n=5):
     return "\n".join(f"{IMP_EMOJI.get(i.get('importance'), '📰')} [{i.get('title', '')[:70]}]({i.get('url', '')})" for i in top)
 
 def build_exec(mode):
-    uni = load_json(os.path.join(DATA, "tv_universe.json"))
-    movers = (load_json(os.path.join(DATA, "movers.json")) or {}).get("movers", {})
+    pulse = market.load_market_pulse()
     hours = 24
-    items = load_history(hours)
-    ml = [{"t": k, **v} for k, v in movers.items()]
-    gainers = sorted([m for m in ml if m.get("pct", 0) > 0], key=lambda x: x["pct"], reverse=True)[:4]
-    losers = sorted([m for m in ml if m.get("pct", 0) < 0], key=lambda x: x["pct"])[:4]
-    hits = watch_hits(items, movers)
-
-    # Fetch live retail sentiment for Movers + Watchlist
-    st_tickers = [m['t'] for m in gainers + losers] + hits
-    st_rolls, st_radar = fetch_stocktwits(st_tickers)
-
+    items = load_events(SQLiteStore(), hours)
+    gainers = (pulse or {}).get("gainers", [])[:4]
+    losers = (pulse or {}).get("losers", [])[:4]
+    hits = watch_hits(items, (pulse or {}).get("sig", {}))
+    st_rolls, st_radar = fetch_stocktwits([m["t"] for m in gainers + losers] + hits)
     label = "MORNING DESK" if mode == "MORNING" else "CLOSING BELL"
     color = 0xF1C40F if mode == "MORNING" else 0x3498DB
     now = datetime.now(timezone.utc).strftime("%a %Y-%m-%d %H:%M UTC")
-
     e1 = {"title": f"📋 EXECUTIVE BRIEFING · {label}",
-          "description": f"{now} • Window: last {hours}h • **{len(items)}** relevant stories",
+          "description": f"{now} • Window: last {hours}h • **{len(items)}** tracked events",
           "color": color,
           "fields": [
               {"name": "🎯 Mission", "value": "Surface market-moving geopolitical & corporate signals before consensus.", "inline": True},
-              {"name": "🧩 Scope", "value": "95 news sources · 32 subreddits · 20k US tickers · 40+ intel clusters", "inline": True}]}
-
-    mega = "—"
-    if uni:
-        top20 = sorted([r for r in uni.get("rows", []) if r.get("mcap", 0) > 0], key=lambda x: x["mcap"], reverse=True)[:20]
-        fmt = lambda r: f"{'🟢' if r.get('pct', 0) >= 0 else '🔴'} {r['t']} {r.get('pct', 0):+.1f}%"
-        mega = " | ".join(fmt(r) for r in top20[:10]) + "\n" + " | ".join(fmt(r) for r in top20[10:])
-
-    e2 = {"title": "💹 Market Pulse", "color": color, "fields": [
-        {"name": "🚀 Top Movers", "value": "\n".join(f"**{m['t']}** +{m['pct']:.1f}% ({m.get('relvol', 0):.1f}x)" for m in gainers) or "—", "inline": True},
-        {"name": "📉 Top Fallers", "value": "\n".join(f"**{m['t']}** {m['pct']:.1f}% ({m.get('relvol', 0):.1f}x)" for m in losers) or "—", "inline": True},
-        {"name": "🏛️ Mega-Cap Scoreboard (Top 20)", "value": mega, "inline": False}]}
-
+              {"name": "🧩 Scope", "value": scope_line(), "inline": True}]}
+    if pulse:
+        e2 = market.build_pulse_embed(pulse, color=color)
+    else:
+        e2 = {"title": "💹 Market Pulse", "color": color,
+              "description": "No market snapshot available yet (run TradingView refresh)."}
     e3 = {"title": "🔢 Data Insights", "color": color,
           "fields": [{"name": "Key signals this window", "value": insights(items, gainers, losers, hits), "inline": False}]}
-
     e4 = {"title": "📊 Theme Activity & Sentiment", "color": color, "fields": [
         {"name": "Intel cluster activity", "value": theme_chart(items), "inline": True},
         {"name": "News Sentiment (AI)", "value": sentiment_gauge(items), "inline": True},
         {"name": "🗣️ Retail Crowd Radar (StockTwits)", "value": "\n".join(st_radar[:6]) if st_radar else "No strong retail consensus on movers.", "inline": False}]}
-
     e5 = {"title": "🧾 Summary of Findings", "color": color,
           "description": findings(items, hours),
           "fields": [{"name": "📰 Top Headlines", "value": headlines(items, 5), "inline": False}],
@@ -189,7 +189,7 @@ def build_exec(mode):
     return [e1, e2, e3, e4, e5]
 
 def build_mini():
-    items = load_history(24)
+    items = load_events(SQLiteStore(), 24)
     return [{"title": "🌅 AGGREGATEIT · OVERNIGHT WIRE (08:00 UAE)",
              "description": findings(items, 24), "color": 0xE67E22,
              "fields": [
