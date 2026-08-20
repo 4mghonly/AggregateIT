@@ -472,14 +472,18 @@ def _truncate(s, n):
     s = (s or "").strip()
     return s if len(s) <= n else s[:n-1] + "…"
 
-def build_event_embed(c, a, prior):
+def build_event_embed(c, a, prior, status="NEW", timeline=None):
     imp = a.get("importance", "Low")
     sent = (a.get("sentiment") or "na").lower()
     all_reddit = all(it["source_type"] == "reddit" for it in c["items"])
     tag = "💬" if all_reddit else "📰"
     desc = f"**{a.get('event','')}**\n{a.get('assessment','')}"
     if a.get("what_changed"): desc += f"\n🔄 *What changed: {a['what_changed']}*"
+    
+    status_emoji = {"NEW": "🆕", "DEVELOPING": "🔄", "CONFIRMED": "✅", "STABLE": "⚓", "RESOLVED": "🏁", "RETRACTED": "❌"}
+    
     fields = [
+        {"name": "Status", "value": f"{status_emoji.get(status, '🔹')} {status}", "inline": True},
         {"name": "Sentiment", "value": SENT_EMOJI.get(sent, sent), "inline": True},
         {"name": "Importance", "value": f"{IMP_EMOJI.get(imp, '')} {imp}", "inline": True},
         {"name": "Confidence", "value": f"{a.get('confidence', '?')}%", "inline": True},
@@ -491,6 +495,11 @@ def build_event_embed(c, a, prior):
                    "value": _truncate(", ".join(c["source_names"]), 300), "inline": False})
     fields.append({"name": "Triggered By",
                    "value": _truncate(", ".join(c["items"][0].get("matched_categories", [])) or "-", 400), "inline": False})
+                   
+    if timeline and len(timeline) > 1:
+        tl_text = "\n".join(f"• {datetime.fromtimestamp(t['ts'], timezone.utc).strftime('%H:%M UTC')} {t['type']}" for t in timeline[-3:])
+        fields.append({"name": "🕒 Timeline", "value": tl_text, "inline": False})
+
     footer = f"event {c['event_id']} · score {c['items'][0].get('score', 0)}"
     if prior: footer += f" · updated (prev conf {prior.get('confidence', '?')}%)"
     return {"title": _truncate(f"{tag} {a.get('event') or c['items'][0]['title']}", 250),
