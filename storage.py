@@ -1,7 +1,7 @@
-"""storage.py — AggregateIT persistence layer (F-15/F-16).
-SQLite is the single source of truth during execution. Cross-run durability
-on GitHub Actions = rolling cache (primary) + artifact backup (recovery).
-Swap SQLiteStore for PostgresStore later without touching main.py."""
+"""storage.py — AggregateIT persistence layer.
+v3: events schema extended (sentiment/triggers/sources/score) so the briefing
+consumes the same canonical event records as the digest. state.db is the single
+source of truth; swap SQLiteStore for PostgresStore later without touching main.py."""
 import os, sqlite3, time
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -10,6 +10,10 @@ DB_PATH = os.path.join(DATA, "state.db")
 
 # Item lifecycle (F-06). Only TERMINAL states count as "done".
 TERMINAL = {"filtered", "analyzed", "alerted", "capped"}
+
+EVENT_COLS = ["event_id", "entity", "tokens_json", "title", "event_type", "status", "severity",
+              "confidence", "source_count", "assessment", "what_changed", "urls_json",
+              "first_seen", "last_updated", "sentiment", "triggers_json", "sources_json", "score"]
 
 class SQLiteStore:
     def __init__(self, path=DB_PATH):
@@ -33,8 +37,14 @@ class SQLiteStore:
             title TEXT, event_type TEXT, status TEXT, severity TEXT,
             confidence INTEGER, source_count INTEGER,
             assessment TEXT, what_changed TEXT, urls_json TEXT,
-            first_seen REAL, last_updated REAL);
+            first_seen REAL, last_updated REAL,
+            sentiment TEXT, triggers_json TEXT, sources_json TEXT, score REAL DEFAULT 0);
         """)
+        # migration for DBs created before v3
+        for col, ddl in (("sentiment", "TEXT"), ("triggers_json", "TEXT"),
+                         ("sources_json", "TEXT"), ("score", "REAL DEFAULT 0")):
+            try: self.con.execute(f"ALTER TABLE events ADD COLUMN {col} {ddl}")
+            except Exception: pass
         self.con.commit()
         self.fresh = self._meta("created") is None
         if self.fresh:
@@ -69,31 +79,20 @@ class SQLiteStore:
         self.con.execute("UPDATE items SET state='failed', updated=? WHERE url=?", (time.time(), url))
         self.con.commit()
 
-    # --- event store (Spec #8) ---
+    # --- event store (canonical; consumed by digest AND briefing) ---
+    def _event_rows(self, where, params):
+        rows = self.con.execute(f"SELECT {', '.join(EVENT_COLS)} FROM events {where}", params).fetchall()
+        return [dict(zip(EVENT_COLS, r)) for r in rows]
     def recent_events(self, entity, hours=72, limit=25):
-        cutoff = time.time() - hours * 3600
-        rows = self.con.execute(
-            "SELECT event_id, entity, tokens_json, title, event_type, status, severity,"
-            " confidence, source_count, assessment, what_changed, urls_json,"
-            " first_seen, last_updated FROM events"
-            " WHERE entity=? AND last_updated > ? ORDER BY last_updated DESC LIMIT ?",
-            (entity, cutoff, limit)).fetchall()
-        cols = ["event_id","entity","tokens_json","title","event_type","status","severity",
-                "confidence","source_count","assessment","what_changed","urls_json",
-                "first_seen","last_updated"]
-        return [dict(zip(cols, r)) for r in rows]
-
+        return self._event_rows("WHERE entity=? AND last_updated > ? ORDER BY last_updated DESC LIMIT ?",
+                                (entity, time.time() - hours * 3600, limit))
+    def recent_all_events(self, hours=24, limit=100):
+        return self._event_rows("WHERE last_updated > ? ORDER BY last_updated DESC LIMIT ?",
+                                (time.time() - hours * 3600, limit))
     def upsert_event(self, e):
-        self.con.execute("""INSERT OR REPLACE INTO events(
-            event_id, entity, tokens_json, title, event_type, status, severity,
-            confidence, source_count, assessment, what_changed, urls_json,
-            first_seen, last_updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-            (e["event_id"], e["entity"], e["tokens_json"], e["title"], e["event_type"],
-             e["status"], e["severity"], e["confidence"], e["source_count"],
-             e["assessment"], e["what_changed"], e["urls_json"],
-             e["first_seen"], e["last_updated"]))
+        self.con.execute(f"INSERT OR REPLACE INTO events({', '.join(EVENT_COLS)}) VALUES ({','.join('?' * len(EVENT_COLS))})",
+                         tuple(e.get(k) for k in EVENT_COLS))
         self.con.commit()
-
     def event_count(self):
         return self.con.execute("SELECT COUNT(*) FROM events").fetchone()[0]
 
