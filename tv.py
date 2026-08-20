@@ -1,6 +1,6 @@
 """TradingView US market universe + pulse + macro.
-v15: v14 (direct percents + $0.50 floor) plus a curated macro layer
-(indices, futures, forex, bonds) fetched via a symbols query."""
+v16: v15 + macro fetched from the GLOBAL scanner (cross-exchange symbols),
+minimal macro columns, america fallback, raw-sample diagnostics."""
 import os, json, time, argparse
 import requests
 from datetime import datetime, timezone, timedelta
@@ -10,15 +10,17 @@ DATA = os.path.join(BASE_DIR, "data")
 os.makedirs(DATA, exist_ok=True)
 
 SCAN_URL = "https://scanner.tradingview.com/america/scan"
+MACRO_SCAN_URL = "https://scanner.tradingview.com/global/scan"
 CHUNK = 1000
 MIN_PRICE = 0.5  # movers must trade at $0.50+ (sub-half-dollar shells are percent-noise)
 COLS = ["ticker", "description", "sector", "market_cap_calc", "change_percent",
         "relative_volume_10d_calc", "volume", "is_primary", "change", "close", "type"]
+MACRO_COLS = ["description", "change", "close"]
 
-def _post(body):
+def _post(body, url=SCAN_URL):
     for attempt in (1, 2):
         try:
-            r = requests.post(SCAN_URL, json=body, timeout=30,
+            r = requests.post(url, json=body, timeout=30,
                               headers={"User-Agent": "Mozilla/5.0 (personal research)"})
             r.raise_for_status()
             return r.json()
@@ -122,28 +124,35 @@ def fetch_pulse(post_fn=_post, cap=20):
     return {"updated": time.time(), "valid": valid, "session_open": us_session_open(),
             "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig, "sample": sample}
 
-def fetch_macro(post_fn=_post):
-    """Fetch curated macro instruments (indices, futures, forex, bonds)."""
+def fetch_macro(post_fn=None):
+    """Curated macro instruments via the GLOBAL scanner (cross-exchange symbols)."""
     try:
         with open(os.path.join(BASE_DIR, "config", "macro.json"), encoding="utf-8") as f:
             cfg = json.load(f)
     except Exception:
-        return {"updated": time.time(), "valid": False, "instruments": []}
+        return {"updated": time.time(), "valid": False, "instruments": [], "raw_sample": {}, "rows_returned": 0}
 
     symbols = []
     for cat in ("indices", "futures", "forex", "bonds"):
         for item in cfg.get(cat, []):
             symbols.append(item["sym"])
     if not symbols:
-        return {"updated": time.time(), "valid": False, "instruments": []}
+        return {"updated": time.time(), "valid": False, "instruments": [], "raw_sample": {}, "rows_returned": 0}
 
-    resp = post_fn({"symbols": {"tickers": symbols}, "columns": COLS, "options": {"lang": "en"}})
-    rows = resp.get("data", [])
+    body = {"symbols": {"tickers": symbols}, "columns": MACRO_COLS, "options": {"lang": "en"}}
+    if post_fn is None:
+        resp = _post(body, url=MACRO_SCAN_URL)
+        rows = resp.get("data", [])
+        if not rows:  # fallback to america endpoint
+            resp = _post(body)
+            rows = resp.get("data", [])
+    else:
+        resp = post_fn(body)
+        rows = resp.get("data", [])
 
     instruments = []
     for r in rows:
-        d = r.get("d", [])
-        data = dict(zip(COLS, d))
+        data = dict(zip(MACRO_COLS, r.get("d", [])))
         raw_sym = r.get("s", "")
         raw_pct = data.get("change")
         pct = float(raw_pct) if isinstance(raw_pct, (int, float)) else None
@@ -160,7 +169,9 @@ def fetch_macro(post_fn=_post):
                                 "type": meta["type"], "pct": pct, "price": price})
 
     valid = len(instruments) > 0 and any(i["pct"] is not None for i in instruments)
-    return {"updated": time.time(), "valid": valid, "instruments": instruments}
+    sample = dict(zip(MACRO_COLS, rows[0].get("d", []))) if rows else {}
+    return {"updated": time.time(), "valid": valid, "instruments": instruments,
+            "raw_sample": sample, "rows_returned": len(rows)}
 
 def save(name, obj):
     with open(os.path.join(DATA, name), "w", encoding="utf-8") as f: json.dump(obj, f)
@@ -216,7 +227,10 @@ def main():
             macro = fetch_macro()
             save("macro_pulse.json", macro)
             state = "OK" if macro["valid"] else "INVALID (no reliable data)"
-            print(f"TV MACRO {state}: {len(macro['instruments'])} instruments fetched")
+            print(f"TV MACRO {state}: {len(macro['instruments'])} instruments "
+                  f"({macro.get('rows_returned', 0)} rows returned)")
+            if macro.get("rows_returned") and not macro["valid"]:
+                print("RAW MACRO SAMPLE:", json.dumps(macro.get("raw_sample", {}))[:300])
         except Exception as e:
             print("TV MACRO FAIL:", type(e).__name__, str(e)[:120])
 
