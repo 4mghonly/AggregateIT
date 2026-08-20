@@ -227,13 +227,35 @@ def build_exec(mode):
           "fields": [
               {"name": "🎯 Mission", "value": "Surface market-moving geopolitical & corporate signals before consensus.", "inline": True},
               {"name": "🧩 Scope", "value": scope_line(), "inline": True}]}
-    if pulse:
+if pulse:
         e2 = market.build_pulse_embed(pulse, color=color)
     else:
         e2 = {"title": "💹 Market Pulse", "color": color,
               "description": "No market snapshot available yet (run TradingView refresh)."}
+    
+    macro = load_macro_pulse()
+    regime = compute_regime(macro) if macro else {}
+    macro_embed = build_macro_embed(macro, regime, color=color) if macro else None
+    
+    macro_read = None
+    if macro and macro.get("valid") and mode in ("MORNING", "CLOSING"):
+        macro_read = generate_macro_read(macro, regime)
+    
     e3 = {"title": "🔢 Data Insights", "color": color,
           "fields": [{"name": "Key signals this window", "value": insights(items, gainers, losers, hits), "inline": False}]}
+    e3 = {"title": "🔢 Data Insights", "color": color,
+          "fields": [{"name": "Key signals this window", "value": insights(items, gainers, losers, hits), "inline": False}]}
+    embeds_list = [e1, e2]
+    if macro_embed: embeds_list.append(macro_embed)
+    if macro_read:
+        embeds_list.append({"title": "🧠 Macro Read", "color": color,
+            "fields": [
+                {"name": "Risk Appetite", "value": macro_read.get("risk_appetite", "—"), "inline": True},
+                {"name": "Rates & FX", "value": macro_read.get("rates_fx", "—"), "inline": False},
+                {"name": "Commodities", "value": macro_read.get("commodities", "—"), "inline": False},
+                {"name": "⚠️ Key Risk", "value": macro_read.get("key_risk", "—"), "inline": False}
+            ]})
+    embeds_list.append(e3)
     e4 = {"title": "📊 Theme Activity & Sentiment", "color": color, "fields": [
         {"name": "Intel cluster activity", "value": theme_chart(items), "inline": True},
         {"name": "News Sentiment (AI)", "value": sentiment_gauge(items), "inline": True},
@@ -243,7 +265,8 @@ def build_exec(mode):
           "fields": [{"name": "📰 Top Headlines", "value": headlines(items, 5), "inline": False}],
           "footer": {"text": "AggregateIT Intelligence Terminal"},
           "timestamp": datetime.now(timezone.utc).isoformat()}
-    return [e1, e2, e3, e4, e5]
+embeds_list.extend([e4, e5])
+    return embeds_list
 
 def build_mini():
     items = load_events(SQLiteStore(), 24)
