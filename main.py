@@ -487,7 +487,7 @@ def build_event_embed(c, a, prior):
     ]
     if a.get("event_type"):
         fields.append({"name": "Event Type", "value": _truncate(str(a["event_type"]), 150), "inline": True})
-    fields.append({"name": f"Sources ({c['independent_sources']} distinct)",
+    fields.append({"name": f"Sources ({c['independent_sources']} independent)",
                    "value": _truncate(", ".join(c["source_names"]), 300), "inline": False})
     fields.append({"name": "Triggered By",
                    "value": _truncate(", ".join(c["items"][0].get("matched_categories", [])) or "-", 400), "inline": False})
