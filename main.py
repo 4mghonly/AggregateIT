@@ -659,6 +659,9 @@ async def main():
             continue
         a, err = analyze_event(c, prior)
         if a:
+            a = apply_corroboration_policy(a, c)
+            now = time.time()
+        if a:
             now = time.time()
         if a:
             now = time.time()
