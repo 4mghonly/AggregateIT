@@ -188,9 +188,35 @@ def full_text(url, fallback):
     return fallback[:4000]
 
 # ================= EVENT CLUSTERING v2 =================
+STOPWORDS = {"the","a","an","of","in","on","for","to","and","or","is","are","was","were",
+             "as","at","by","with","from","over","under","after","before","amid","its","it",
+             "that","this","these","those","be","been","has","have","had","will","would","can",
+             "could","says","said","say","new","vs","versus","per","their","his","her","your",
+             "our","into","about","up","out","off","more","less","than","then","so","not","no",
+             "but","if","how","why","what","when","where","who","which","all","any","some","one"}
+
+def title_tokens(title):
+    return {t for t in re.findall(r"[a-z0-9]{2,}", normalize_title(title)) if t not in STOPWORDS}
+
+def jaccard(a, b):
+    if not a or not b: return 0.0
+    return len(a & b) / len(a | b)
+
+def containment(new_tokens, stored_tokens):
+    if not new_tokens: return 0.0
+    return len(new_tokens & stored_tokens) / len(new_tokens)
+
+def primary_entity(i):
+    for label in i.get("matched_categories", []):
+        t = label.split(" ")[0]
+        if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
+            return t.upper()
+    kws = i.get("keyword_ids", [])
+    if kws: return kws[0]
+    return "GEN"
+
 def cluster_similarity(new_item, cluster):
-    """Multi-signal similarity score for clustering decisions.
-    Returns (score, reasons) where score is 0-1."""
+    """Multi-signal similarity score for clustering decisions."""
     score = 0.0
     reasons = []
     
@@ -238,7 +264,7 @@ def cluster_similarity(new_item, cluster):
     if jacc > 0.1:
         reasons.append(f"title({jacc:.2f})")
     
-    # Signal 5: Time proximity (bonus for close timestamps)
+    # Signal 5: Time proximity
     new_ts = new_item.get("ts", 0)
     cluster_ts = max(item.get("ts", 0) for item in cluster["items"])
     hours_apart = abs(new_ts - cluster_ts) / 3600.0
@@ -260,15 +286,13 @@ def cluster_events(items):
         placed = False
         
         for c in clusters:
-            # Check similarity with cluster
             sim, reasons = cluster_similarity(i, c)
             
-            # Anti-drift guard: also check similarity with SEED (first item)
+            # Anti-drift guard: check similarity with SEED (first item)
             seed = c["items"][0]
             seed_cluster = {"entity": c["entity"], "tokens": title_tokens(seed.get("title", "")), "items": [seed]}
             seed_sim, _ = cluster_similarity(i, seed_cluster)
             
-            # Cluster if: overall similarity >= 0.4 AND seed similarity >= 0.3
             if sim >= 0.4 and seed_sim >= 0.3:
                 c["items"].append(i)
                 c["tokens"] |= title_tokens(i.get("title", ""))
@@ -283,7 +307,6 @@ def cluster_events(items):
                 "event_id": None
             })
     
-    # Generate event IDs and compute source counts
     for c in clusters:
         seed = c["entity"] + "|" + " ".join(sorted(title_tokens(c["items"][0]["title"])))
         c["event_id"] = hashlib.md5(seed.encode()).hexdigest()[:12]
@@ -291,6 +314,14 @@ def cluster_events(items):
         c["independent_sources"] = len(c["source_names"])
     
     return clusters
+
+def resolve_prior_event(c, store, hours=72):
+    """Cross-run continuity: does this cluster match an event we already track?"""
+    for ev in store.recent_events(c["entity"], hours=hours):
+        try: stored = set(json.loads(ev.get("tokens_json") or "[]"))
+        except Exception: continue
+        if containment(c["tokens"], stored) >= 0.5: return ev
+    return None
 
 # ================= QWEN EVENT-LEVEL CONTRACT (hardened) =================
 EVENT_SYSTEM_PROMPT = """You are a disciplined intelligence analyst performing EVENT-LEVEL analysis.
