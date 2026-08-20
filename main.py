@@ -406,15 +406,19 @@ def build_pulse_embed(pulse):
     ts = datetime.fromtimestamp(pulse["updated"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     if not pulse.get("valid"):
         return {"title": "💹 Market Pulse", "color": 0x95A5A6,
-                "description": f"🏛️ US market closed — no live movement.\nLast snapshot: {ts}"}
+                "description": f"🏛️ No reliable market data.\nLast snapshot: {ts}"}
+    if pulse.get("session_open"):
+        label = f"Live US session snapshot · as of {ts}"
+    else:
+        label = f"US market closed — previous session data · as of {ts}"
     fields = [
         {"name": "🚀 Top Movers", "value": "\n".join(_fmt_row(m) for m in pulse.get("gainers", [])[:5]) or "—", "inline": True},
         {"name": "📉 Top Fallers", "value": "\n".join(_fmt_row(m) for m in pulse.get("losers", [])[:5]) or "—", "inline": True},
     ]
-    fields.append({"name": "🏛️ Mega-Cap Scoreboard (Top 20 primary)",
+    fields.append({"name": "🏛️ Mega-Cap Scoreboard (Top 20 stocks)",
                    "value": " | ".join(_fmt_row(m) for m in pulse.get("mega_caps", [])[:20]) or "—", "inline": False})
-    return {"title": "💹 Market Pulse", "color": 0x2ECC71,
-            "description": f"Live US session snapshot · as of {ts}", "fields": fields}
+    return {"title": "💹 Market Pulse", "color": 0x2ECC71 if pulse.get("session_open") else 0xF1C40F,
+            "description": label, "fields": fields}
 
 def send_market_pulse():
     """Post the pulse once per fresh snapshot; never present zeros as live data."""
