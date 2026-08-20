@@ -8,7 +8,6 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
 DB_PATH = os.path.join(DATA, "state.db")
 
-# Item lifecycle (F-06). Only TERMINAL states count as "done".
 TERMINAL = {"filtered", "analyzed", "alerted", "capped"}
 
 EVENT_COLS = ["event_id", "entity", "tokens_json", "title", "event_type", "status", "severity",
@@ -40,7 +39,6 @@ class SQLiteStore:
             first_seen REAL, last_updated REAL,
             sentiment TEXT, triggers_json TEXT, sources_json TEXT, score REAL DEFAULT 0);
         """)
-        # migration for DBs created before v3
         for col, ddl in (("sentiment", "TEXT"), ("triggers_json", "TEXT"),
                          ("sources_json", "TEXT"), ("score", "REAL DEFAULT 0")):
             try: self.con.execute(f"ALTER TABLE events ADD COLUMN {col} {ddl}")
@@ -56,7 +54,6 @@ class SQLiteStore:
     def _set_meta(self, k, v):
         self.con.execute("INSERT OR REPLACE INTO meta(key,value) VALUES (?,?)", (k, v)); self.con.commit()
 
-    # --- item state (F-06) ---
     def url_active(self, url):
         r = self.con.execute("SELECT state FROM items WHERE url=?", (url,)).fetchone()
         return r is None or r[0] not in TERMINAL
@@ -79,7 +76,6 @@ class SQLiteStore:
         self.con.execute("UPDATE items SET state='failed', updated=? WHERE url=?", (time.time(), url))
         self.con.commit()
 
-    # --- event store (canonical; consumed by digest AND briefing) ---
     def _event_rows(self, where, params):
         rows = self.con.execute(f"SELECT {', '.join(EVENT_COLS)} FROM events {where}", params).fetchall()
         return [dict(zip(EVENT_COLS, r)) for r in rows]
@@ -96,7 +92,6 @@ class SQLiteStore:
     def event_count(self):
         return self.con.execute("SELECT COUNT(*) FROM events").fetchone()[0]
 
-    # --- reporting ---
     def record_run(self, fetched, new, matched, analyzed):
         self.con.execute("INSERT INTO runs(ts,fetched,new,matched,analyzed) VALUES (?,?,?,?,?)",
                          (time.time(), fetched, new, matched, analyzed))
