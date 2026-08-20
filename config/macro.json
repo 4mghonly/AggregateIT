@@ -1,6 +1,8 @@
 {
   "indices": [
+    {"sym": "SP:SPX", "name": "S&P 500", "type": "index"},
     {"sym": "TVC:SPX", "name": "S&P 500", "type": "index"},
+    {"sym": "NASDAQ:NDX", "name": "Nasdaq 100", "type": "index"},
     {"sym": "TVC:NDX", "name": "Nasdaq 100", "type": "index"},
     {"sym": "TVC:DJI", "name": "Dow Jones", "type": "index"},
     {"sym": "TVC:RUT", "name": "Russell 2000", "type": "index"},
@@ -13,7 +15,10 @@
     {"sym": "CBOT:YM1!", "name": "Dow E-mini", "type": "future"},
     {"sym": "COMEX:GC1!", "name": "Gold", "type": "future"},
     {"sym": "NYMEX:CL1!", "name": "WTI Crude", "type": "future"},
-    {"sym": "NYMEX:NG1!", "name": "Natural Gas", "type": "future"}
+    {"sym": "NYMEX:NG1!", "name": "Natural Gas", "type": "future"},
+    {"sym": "OANDA:SPX500USD", "name": "S&P 500 (CFD)", "type": "future"},
+    {"sym": "OANDA:NAS100USD", "name": "Nasdaq 100 (CFD)", "type": "future"},
+    {"sym": "OANDA:US30USD", "name": "Dow (CFD)", "type": "future"}
   ],
   "forex": [
     {"sym": "OANDA:EURUSD", "name": "EUR/USD", "type": "forex"},
