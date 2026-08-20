@@ -27,7 +27,7 @@ jobs:
             seen-db-
       - name: Fresh pulse immediately before briefing (safety net vs cron drift)
         if: github.event.schedule != '0 4 * * *' && github.event.inputs.mode != 'MINI'
-        run: python tv.py --pulse
+        run: python tv.py --pulse --macro
       - name: Send Discord Briefing
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
