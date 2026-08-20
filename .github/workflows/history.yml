@@ -1,0 +1,37 @@
+name: Event History Search
+on:
+  workflow_dispatch:
+    inputs:
+      ticker:
+        description: "Ticker filter (e.g. NVDA)"
+        required: false
+        type: string
+      query:
+        description: "Free-text search"
+        required: false
+        type: string
+      hours:
+        description: "Lookback hours"
+        required: false
+        type: string
+        default: "168"
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: seen-db-${{ github.run_id }}
+          restore-keys: |
+            seen-db-
+      - name: Search
+        run: |
+          ARGS="--hours ${{ github.event.inputs.hours }}"
+          [ -n "${{ github.event.inputs.ticker }}" ] && ARGS="$ARGS --ticker ${{ github.event.inputs.ticker }}"
+          [ -n "${{ github.event.inputs.query }}" ] && ARGS="$ARGS --query ${{ github.event.inputs.query }}"
+          python history.py $ARGS
