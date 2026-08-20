@@ -2,6 +2,7 @@
 v3: events schema extended (sentiment/triggers/sources/score) so the briefing
 consumes the same canonical event records as the digest. state.db is the single
 source of truth; swap SQLiteStore for PostgresStore later without touching main.py."""
+import json
 import os, sqlite3, time
 
 BASE = os.path.dirname(os.path.abspath(__file__))
