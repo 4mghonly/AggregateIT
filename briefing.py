@@ -152,6 +152,63 @@ def headlines(items, n=5):
     top = sorted(items, key=lambda x: -x.get("score", 0))[:n]
     return "\n".join(f"{IMP_EMOJI.get(i.get('importance'), '📰')} [{i.get('title', '')[:70]}]({i.get('url', '')})" for i in top)
 
+  MACRO_READ_PROMPT = """You are a macro strategist analyzing the current market backdrop.
+Provide a concise macro read based on the data below. Strict rules:
+- Be specific and quantitative.
+- Identify risk appetite (risk-on / risk-off / mixed).
+- Note any divergences (e.g., stocks up but yields falling).
+- Flag one key risk or opportunity.
+
+Output ONLY one valid JSON object:
+{
+  "risk_appetite": "risk-on|risk-off|mixed",
+  "rates_fx": "one-sentence read on rates and FX",
+  "commodities": "one-sentence read on commodities",
+  "key_risk": "one key risk or opportunity"
+}
+
+MACRO DATA:
+{macro_text}"""
+
+def generate_macro_read(macro, regime):
+    """Generate a Qwen macro read (schema-validated, injection-shield)."""
+    import requests, re, json, os
+    
+    if not macro or not macro.get("valid"):
+        return None
+    
+    inst_map = {i["sym"]: i for i in macro.get("instruments", [])}
+    lines = []
+    for sym in ["TVC:SPX", "TVC:NDX", "CBOE:VIX", "TVC:US10Y", "TVC:US02Y", "TVC:DXY", "NYMEX:CL1!", "COMEX:GC1!"]:
+        inst = inst_map.get(sym)
+        if inst and inst["pct"] is not None:
+            lines.append(f"{inst['name']}: {inst['pct']:+.2f}%")
+    
+    if regime:
+        for k, v in regime.items():
+            lines.append(f"Regime: {k} = {v}")
+    
+    macro_text = "\n".join(lines)
+    
+    sys_msg = {"role": "system", "content": "You are a disciplined macro strategist. Output ONLY valid JSON."}
+    usr_msg = {"role": "user", "content": MACRO_READ_PROMPT.format(macro_text=macro_text)}
+    
+    try:
+        base = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
+        r = requests.post(base + "/chat/completions",
+            headers={"Authorization": "Bearer " + os.environ["QWEN_API_KEY"]},
+            json={"model": os.environ.get("QWEN_MODEL", "qwen-plus"), "temperature": 0.3, "messages": [sys_msg, usr_msg]}, timeout=60)
+        r.raise_for_status()
+        content = r.json()["choices"][0]["message"]["content"]
+        m = re.search(r"\{[\s\S]*\}", content)
+        if not m: return None
+        obj = json.loads(m.group(0))
+        if all(k in obj for k in ("risk_appetite", "rates_fx", "commodities", "key_risk")):
+            return obj
+    except Exception:
+        pass
+    return None
+
 def build_exec(mode):
     pulse = market.load_market_pulse()
     hours = 24
