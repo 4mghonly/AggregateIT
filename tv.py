@@ -1,8 +1,8 @@
 """TradingView US market universe + pulse.
-v9 FINAL: mega-cap board never depends on percent availability.
-Percents are taken DIRECTLY from change_percent (no derivation, no caps).
-Gainers/losers require a present percent. Validity requires real movement.
-Diagnostics: prints pct coverage and one raw row when coverage is zero."""
+v10 FINAL: the scanner returns change_percent=NULL but real change/close.
+Percent is derived as change / (close - change) * 100 — provably correct when
+columns are zip-aligned (verified against raw sample 2026-08-20).
+No arbitrary caps. Missing change/close -> pct None (row leaves percent lists)."""
 import os, json, time, argparse
 import requests
 from datetime import datetime, timezone, timedelta
@@ -31,8 +31,11 @@ def _row(row):
     d = row.get("d", [])
     data = dict(zip(COLS, d))
     ticker = row.get("s", "").split(":")[-1]
-    raw_pct = data.get("change_percent")
-    pct = float(raw_pct) if isinstance(raw_pct, (int, float)) else None
+    chg = data.get("change")
+    cls = data.get("close")
+    pct = None
+    if isinstance(chg, (int, float)) and isinstance(cls, (int, float)) and (cls - chg) != 0:
+        pct = (chg / (cls - chg)) * 100  # previous close = close - change
     return {
         "t": ticker,
         "c": data.get("description") or ticker,
@@ -96,8 +99,7 @@ def fetch_movers(post_fn=_post, cap=300):
     return movers
 
 def fetch_pulse(post_fn=_post, cap=20):
-    """Session snapshot. Mega board = market-cap sorted stocks (pct-independent).
-    Gainers/losers = real percents only. Validity = real movement present."""
+    """Session snapshot: honest labeling, client-side sorting, derived percents."""
     mega = []; sample = {}
     resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                     "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"},
