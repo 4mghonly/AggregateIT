@@ -25,9 +25,6 @@ jobs:
           key: seen-db-${{ github.run_id }}
           restore-keys: |
             seen-db-
-      - name: Refresh TradingView Data
-        if: ${{ github.event.inputs.mode != 'MINI' }}
-        run: python tv.py --universe --movers
       - name: Send Discord Briefing
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
