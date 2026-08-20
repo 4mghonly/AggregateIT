@@ -1,8 +1,6 @@
-"""TradingView US market universe + pulse.
-v14: percent taken directly from the scanner's `change` column (authoritative).
-MIN_PRICE = 0.5 gates EVERY movers/sig list (pct scans AND relvol scans) so
-sub-half-dollar shells (percent-noise like +9900% / -99%) can never hijack the
-boards or earn the L2 movers boost. Mega-cap board and universe unaffected."""
+"""TradingView US market universe + pulse + macro.
+v15: v14 (direct percents + $0.50 floor) plus a curated macro layer
+(indices, futures, forex, bonds) fetched via a symbols query."""
 import os, json, time, argparse
 import requests
 from datetime import datetime, timezone, timedelta
@@ -125,30 +123,23 @@ def fetch_pulse(post_fn=_post, cap=20):
             "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig, "sample": sample}
 
 def fetch_macro(post_fn=_post):
-    """Fetch curated macro instruments (indices, futures, forex, bonds).
-    Uses symbols query instead of markets to span exchanges."""
+    """Fetch curated macro instruments (indices, futures, forex, bonds)."""
     try:
-        with open(os.path.join(os.path.dirname(__file__), "config", "macro.json"), encoding="utf-8") as f:
+        with open(os.path.join(BASE_DIR, "config", "macro.json"), encoding="utf-8") as f:
             cfg = json.load(f)
     except Exception:
         return {"updated": time.time(), "valid": False, "instruments": []}
-    
+
     symbols = []
     for cat in ("indices", "futures", "forex", "bonds"):
         for item in cfg.get(cat, []):
             symbols.append(item["sym"])
-    
     if not symbols:
         return {"updated": time.time(), "valid": False, "instruments": []}
-    
-    body = {
-        "symbols": symbols,
-        "columns": COLS,
-        "options": {"lang": "en"}
-    }
-    resp = post_fn(body)
+
+    resp = post_fn({"symbols": {"tickers": symbols}, "columns": COLS, "options": {"lang": "en"}})
     rows = resp.get("data", [])
-    
+
     instruments = []
     for r in rows:
         d = r.get("d", [])
@@ -157,8 +148,6 @@ def fetch_macro(post_fn=_post):
         raw_pct = data.get("change")
         pct = float(raw_pct) if isinstance(raw_pct, (int, float)) else None
         price = float(data["close"]) if isinstance(data.get("close"), (int, float)) else None
-        
-        # Map back to config metadata
         meta = None
         for cat in ("indices", "futures", "forex", "bonds"):
             for item in cfg.get(cat, []):
@@ -166,16 +155,10 @@ def fetch_macro(post_fn=_post):
                     meta = item
                     break
             if meta: break
-        
         if meta:
-            instruments.append({
-                "sym": meta["sym"],
-                "name": meta["name"],
-                "type": meta["type"],
-                "pct": pct,
-                "price": price
-            })
-    
+            instruments.append({"sym": meta["sym"], "name": meta["name"],
+                                "type": meta["type"], "pct": pct, "price": price})
+
     valid = len(instruments) > 0 and any(i["pct"] is not None for i in instruments)
     return {"updated": time.time(), "valid": valid, "instruments": instruments}
 
@@ -190,6 +173,7 @@ def main():
     ap.add_argument("--macro", action="store_true")
     ap.add_argument("--search", nargs="+")
     args = ap.parse_args()
+
     if args.universe:
         try:
             uni, total = fetch_universe()
@@ -226,18 +210,16 @@ def main():
                 print("RAW SAMPLE ROW:", json.dumps(pulse.get("sample", {}))[:400])
         except Exception as e:
             print("TV PULSE FAIL:", type(e).__name__, str(e)[:120])
-if args.macro:
+
+    if args.macro:
         try:
             macro = fetch_macro()
             save("macro_pulse.json", macro)
-            if not macro["valid"]:
-                state = "INVALID (no reliable data)"
-            else:
-                state = "OK"
+            state = "OK" if macro["valid"] else "INVALID (no reliable data)"
             print(f"TV MACRO {state}: {len(macro['instruments'])} instruments fetched")
         except Exception as e:
             print("TV MACRO FAIL:", type(e).__name__, str(e)[:120])
-                
+
     if args.search:
         q = " ".join(args.search).lower()
         p = os.path.join(DATA, "tv_universe.json")
