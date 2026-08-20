@@ -403,7 +403,8 @@ check("$0.75 mover +115% kept", any(m["t"] == "MMA" for m in p10["gainers"]), [m
 
 print("[T44] Macro fetcher maps symbols correctly")
 def fake_post_macro(body):
-    syms = body.get("symbols", [])
+    s = body.get("symbols", [])
+    syms = s.get("tickers", []) if isinstance(s, dict) else s
     data = []
     for s in syms:
         data.append({"s": s, "d": [None, "Test", "T", 1e9, None, 1.0, 100000, True, 1.5, 100.0, "index"]})
