@@ -85,49 +85,50 @@ def find_matches(text):
     low = text.lower()
     return [e for e in KEYWORDS_DATA if any(p in low for p in e["phrases"])]
 
+# ================= EXPLAINABLE SCORING (Spec #8) =================
 def score_item(i):
     text = i["title"] + " " + i["text"]; low = text.lower()
     score = 0; hits = []
-    components = {"priority_source": 0, "ticker": 0, "mover": 0, "keyword": 0, "tv": 0, "confluence": 0}
-    
+    comp = {"priority_source": 0, "ticker": 0, "mover": 0, "tv": 0, "keyword": 0, "confluence": 0}
     if any(a in i["source_name"].lower() for a in ALWAYS_ANALYZE):
-        score += 5; hits.append("Priority Source"); components["priority_source"] += 5
-        
+        score += 5; hits.append("Priority Source"); comp["priority_source"] += 5
     for sym in set(c.upper() for c in CASHTAG.findall(text)):
         if sym in T_BY_SYM:
-            score += 3; hits.append(sym); components["ticker"] += 3
-            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)"); components["mover"] += 4
-            
+            score += 3; hits.append(sym); comp["ticker"] += 3
+            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)"); comp["mover"] += 4
     for t in SYMS:
-        if re.search(rf"\b{re.escape(t)}\b", text, re.I): score += 2; hits.append(t); components["ticker"] += 2
-        
+        if re.search(rf"\b{re.escape(t)}\b", text, re.I): score += 2; hits.append(t); comp["ticker"] += 2
     for name, d in NAMES:
-        if name in low: score += 3; hits.append(d["t"]); components["ticker"] += 3
-        
+        if name in low: score += 3; hits.append(d["t"]); comp["ticker"] += 3
     for sym in set(c.upper() for c in CASHTAG.findall(text)):
         if sym in TV_TICKERS and sym not in T_BY_SYM:
-            score += 2; hits.append(f"{sym} (TV)"); components["tv"] += 2
-            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)"); components["mover"] += 4
-            
+            score += 2; hits.append(f"{sym} (TV)"); comp["tv"] += 2
+            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)"); comp["mover"] += 4
     for name, t in TV_NAMES.items():
         if name in low and t not in T_BY_SYM:
-            score += 2; hits.append(f"{t} (TV)"); components["tv"] += 2
-            if t in MOVERS: score += 4; hits.append(f"{t} (Mover)"); components["mover"] += 4
-            
+            score += 2; hits.append(f"{t} (TV)"); comp["tv"] += 2
+            if t in MOVERS: score += 4; hits.append(f"{t} (Mover)"); comp["mover"] += 4
     kws = find_matches(text)
-    kw_score = sum(PRIO_SCORE.get(e.get("prio", "Medium"), 2) for e in kws)
-    score += kw_score; components["keyword"] += kw_score
-    
+    kw = sum(PRIO_SCORE.get(e.get("prio", "Medium"), 2) for e in kws)
+    score += kw; comp["keyword"] += kw
     i["keyword_ids"] = [e["id"] for e in kws]
     i["keyword_tags"] = sorted({t for e in kws for t in e.get("tags", [])})
-    i["score_components"] = components
-    
+    i["score_components"] = comp
     labels = []
     for h in dict.fromkeys(hits):
         d = T_BY_SYM.get(h)
         labels.append(f"{h} ({d['c']} · {d['s']})" if d else h)
     labels += [f"{e['id']} · {e['sub']}" for e in kws]
     return score, labels
+
+# ================= INGESTION =================
+async def fetch_text(session, url, sem, headers=None):
+    async with sem:
+        try:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=20), headers=headers) as r:
+                if r.status == 200: return await r.text()
+        except Exception: pass
+    return None
 
 async def fetch_rss(session, src, sem):
     txt = await fetch_text(session, src["_url"], sem); out = []
@@ -186,7 +187,7 @@ def full_text(url, fallback):
     except Exception: pass
     return fallback[:4000]
 
-# ================= EVENT CLUSTERING (Spec #8) =================
+# ================= EVENT CLUSTERING =================
 STOPWORDS = {"the","a","an","of","in","on","for","to","and","or","is","are","was","were",
              "as","at","by","with","from","over","under","after","before","amid","its","it",
              "that","this","these","those","be","been","has","have","had","will","would","can",
@@ -239,7 +240,7 @@ def resolve_prior_event(c, store, hours=72):
         if containment(c["tokens"], stored) >= 0.5: return ev
     return None
 
-# ================= QWEN EVENT-LEVEL CONTRACT =================
+# ================= QWEN EVENT-LEVEL CONTRACT (hardened) =================
 EVENT_SYSTEM_PROMPT = """You are a disciplined intelligence analyst performing EVENT-LEVEL analysis.
 Strict tradecraft rules:
 - FACTS must be directly supported by at least one report. Never present inference as fact.
@@ -294,26 +295,22 @@ def validate_analysis(obj, evidence_text=""):
         v = obj.get(k)
         if not isinstance(v, list): errs.append(f"'{k}' must be a list")
         elif not all(isinstance(x, str) for x in v): errs.append(f"'{k}' items must be strings")
-    if obj.get("event_type") not in ENUM_EVT: errs.append(f"event_type not in {ENUM_EVT}")
-    if obj.get("corroboration") not in ENUM_COR: errs.append(f"corroboration not in {ENUM_COR}")
+    if obj.get("event_type") not in ENUM_EVT: errs.append("event_type not in enum")
+    if obj.get("corroboration") not in ENUM_COR: errs.append("corroboration not in enum")
     if obj.get("importance") not in ENUM_IMP: errs.append("importance not in Low|Medium|High|Critical")
     if obj.get("sentiment") not in ENUM_SENT: errs.append("sentiment not in enum")
     if obj.get("source_reliability") not in ENUM_REL: errs.append("source_reliability not in enum")
     c = obj.get("confidence")
     if not isinstance(c, (int, float)) or not (0 <= c <= 100): errs.append("confidence must be 0-100")
     if errs: return False, obj, errs
-    
-    # Ticker-in-evidence check: strip hallucinated tickers
     valid_tickers = []
     ev_low = evidence_text.lower()
     for t in obj["tickers"]:
         t_up = t.upper().strip()
         if TICK_RE.match(t_up):
-            # Allow if ticker is in text, or as a cashtag ($NVDA)
             if not evidence_text or t_up.lower() in ev_low or f"${t_up.lower()}" in ev_low:
                 valid_tickers.append(t_up)
     obj["tickers"] = valid_tickers[:10]
-    
     if obj.get("corroboration") == "none" and obj["confidence"] > 60: obj["confidence"] = 60
     return True, obj, []
 
@@ -333,7 +330,6 @@ def build_sources_block(c):
     return "\n\n".join(lines)
 
 def analyze_event(c, prior):
-    """Event-level analysis with bounded repair-retry + strict validation."""
     if prior:
         prior_state = (f"Event {prior['event_id']} tracked since "
                        f"{datetime.fromtimestamp(prior['first_seen'], timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} | "
@@ -341,16 +337,11 @@ def analyze_event(c, prior):
                        f"previous confidence: {prior['confidence']} | sources so far: {prior['source_count']}")
     else:
         prior_state = "NEW EVENT — no prior coverage."
-    
     sources_block = build_sources_block(c)
     sys_msg = {"role": "system", "content": EVENT_SYSTEM_PROMPT}
     usr_msg = {"role": "user", "content": EVENT_USER_PROMPT.format(
-        cats=c["items"][0].get("cats", ""),
-        prior_state=prior_state,
-        n_sources=c["independent_sources"],
-        sources_block=sources_block
-    )}
-    
+        cats=c["items"][0].get("cats", ""), prior_state=prior_state,
+        n_sources=c["independent_sources"], sources_block=sources_block)}
     for attempt in (1, 2):
         try:
             content = _qwen_call([sys_msg, usr_msg])
@@ -416,7 +407,6 @@ def _post_discord(wh, payload):
         raise RuntimeError(f"Discord HTTP {r.status_code}: {r.text[:120]}")
 
 def send_market_pulse():
-    """Post the pulse once per fresh snapshot; never present zeros as live data."""
     wh = os.environ.get("DISCORD_WEBHOOK")
     pulse = load_market_pulse()
     if not wh or not pulse: return
@@ -529,6 +519,7 @@ async def main():
             t = label.split(" ")[0].upper()
             if ticker_counts.get(t, 0) >= 2:
                 i["score"] += 2
+                i.setdefault("score_components", {})["confluence"] = i.get("score_components", {}).get("confluence", 0) + 2
                 if "Confluence" not in i["matched_categories"]: i["matched_categories"].append("Confluence")
                 break
 
@@ -540,11 +531,9 @@ async def main():
 
     front_page = []
     for i in scored:
-            front_page = []
-    for i in scored:
         if i["score"] < FRONT_PAGE_FLOOR:
             report["wire"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
-                                   "score": i["score"], "triggers": i["matched_categories"], 
+                                   "score": i["score"], "triggers": i["matched_categories"],
                                    "components": i.get("score_components", {})})
             if not DRY_RUN: store.register(i["url"], i["thash"], "deferred", i["score"])
             continue
