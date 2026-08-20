@@ -28,19 +28,17 @@ def fetch_stocktwits(tickers):
     radar = []
     for t in set(tickers):
         try:
-            url = f"https://api.stocktwits.com/api/2/streams/symbol/{t}.json"
-            r = requests.get(url, timeout=5, headers={"User-Agent": "AggregateIT/1.0"})
+            r = requests.get(f"https://api.stocktwits.com/api/2/streams/symbol/{t}.json", timeout=5,
+                             headers={"User-Agent": "AggregateIT/1.0"})
             if r.status_code == 200:
                 msgs = r.json().get("messages", [])[:15]
                 bull = sum(1 for m in msgs if m.get("entities", {}).get("sentiment", {}).get("basic") == "Bullish")
                 bear = sum(1 for m in msgs if m.get("entities", {}).get("sentiment", {}).get("basic") == "Bearish")
-                sentiments["bullish"] += bull
-                sentiments["bearish"] += bear
+                sentiments["bullish"] += bull; sentiments["bearish"] += bear
                 sentiments["neutral"] += (len(msgs) - bull - bear)
                 if bull + bear >= 2:
                     ratio = bull / (bull + bear)
-                    emoji = "🟢" if ratio > 0.6 else ("🔴" if ratio < 0.4 else "⚪")
-                    radar.append(f"{emoji} {t} ({bull}B/{bear}S)")
+                    radar.append(f"{'🟢' if ratio > 0.6 else ('🔴' if ratio < 0.4 else '⚪')} {t} ({bull}B/{bear}S)")
         except Exception:
             pass
         time.sleep(0.25)
