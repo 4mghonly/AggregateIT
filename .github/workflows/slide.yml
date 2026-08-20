@@ -1,7 +1,9 @@
-name: Intelligence Slide
+name: Intelligence Slide Deck
 on:
   schedule:
-    - cron: "15 21 * * 1-5"   # daily, 15 min after the CLOSING bell
+    - cron: "30 13-19 * * 1-5"      # hourly during US session
+    - cron: "0 20 * * 1-5"          # closing print
+    - cron: "0 0,3,6,9,12,21 * * *" # every 3h off-hours + weekends
   workflow_dispatch:
 jobs:
   slide:
@@ -17,7 +19,7 @@ jobs:
           key: seen-db-${{ github.run_id }}
           restore-keys: |
             seen-db-
-      - name: Render + send slide
+      - name: Render + send deck
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
@@ -27,5 +29,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: intel-slide
-          path: reports/intel_slide.png
+          name: intel-deck
+          path: |
+            reports/intel_slide_p1.png
+            reports/intel_slide_p2.png
