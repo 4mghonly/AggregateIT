@@ -1,6 +1,6 @@
-"""briefing.py — AggregateIT executive briefings (MINI / MORNING / CLOSING).
-v2: consumes the canonical event store (state.db) and the shared market pulse
-(market_pulse.json). seen.db/history are gone."""
+"""briefing.py — AggregateIT executive briefings (MINI / MORNING / CLOSING / LIVE).
+v3: canonical event store + shared market pulse + macro layer
+(board, regime signals, Qwen macro read)."""
 import os, json, re, time, requests
 from datetime import datetime, timezone
 from storage import SQLiteStore
@@ -24,7 +24,6 @@ def load_json(path):
     except Exception: return None
 
 def fetch_stocktwits(tickers):
-    """Best-effort live retail sentiment (optional enrichment; failures tolerated)."""
     sentiments = {"bullish": 0, "bearish": 0, "neutral": 0}
     radar = []
     for t in set(tickers):
@@ -46,7 +45,6 @@ def fetch_stocktwits(tickers):
     return sentiments, radar
 
 def load_events(store, hours):
-    """Canonical reader: engine-written events -> briefing item shape."""
     items = []
     for ev in store.recent_all_events(hours=hours):
         try: urls = json.loads(ev.get("urls_json") or "[]")
@@ -152,6 +150,8 @@ def headlines(items, n=5):
     top = sorted(items, key=lambda x: -x.get("score", 0))[:n]
     return "\n".join(f"{IMP_EMOJI.get(i.get('importance'), '📰')} [{i.get('title', '')[:70]}]({i.get('url', '')})" for i in top)
 
+# ================= MACRO READ (Qwen) =================
+MACRO_READ_SYSTEM = "You are a disciplined macro strategist. Output ONLY valid JSON."
 MACRO_READ_PROMPT = """You are a macro strategist analyzing the current market backdrop.
 Provide a concise macro read based on the data below. Strict rules:
 - Be specific and quantitative.
@@ -160,44 +160,36 @@ Provide a concise macro read based on the data below. Strict rules:
 - Flag one key risk or opportunity.
 
 Output ONLY one valid JSON object:
-{
+{{
   "risk_appetite": "risk-on|risk-off|mixed",
   "rates_fx": "one-sentence read on rates and FX",
   "commodities": "one-sentence read on commodities",
   "key_risk": "one key risk or opportunity"
-}
+}}
 
 MACRO DATA:
 {macro_text}"""
 
 def generate_macro_read(macro, regime):
-    """Generate a Qwen macro read (schema-validated, injection-shield)."""
-    import requests, re, json, os
-    
-    if not macro or not macro.get("valid"):
-        return None
-    
+    if not macro or not macro.get("valid"): return None
     inst_map = {i["sym"]: i for i in macro.get("instruments", [])}
     lines = []
     for sym in ["TVC:SPX", "TVC:NDX", "CBOE:VIX", "TVC:US10Y", "TVC:US02Y", "TVC:DXY", "NYMEX:CL1!", "COMEX:GC1!"]:
         inst = inst_map.get(sym)
         if inst and inst["pct"] is not None:
             lines.append(f"{inst['name']}: {inst['pct']:+.2f}%")
-    
     if regime:
         for k, v in regime.items():
             lines.append(f"Regime: {k} = {v}")
-    
     macro_text = "\n".join(lines)
-    
-    sys_msg = {"role": "system", "content": "You are a disciplined macro strategist. Output ONLY valid JSON."}
-    usr_msg = {"role": "user", "content": MACRO_READ_PROMPT.format(macro_text=macro_text)}
-    
     try:
         base = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
         r = requests.post(base + "/chat/completions",
             headers={"Authorization": "Bearer " + os.environ["QWEN_API_KEY"]},
-            json={"model": os.environ.get("QWEN_MODEL", "qwen-plus"), "temperature": 0.3, "messages": [sys_msg, usr_msg]}, timeout=60)
+            json={"model": os.environ.get("QWEN_MODEL", "qwen-plus"), "temperature": 0.3,
+                  "messages": [{"role": "system", "content": MACRO_READ_SYSTEM},
+                               {"role": "user", "content": MACRO_READ_PROMPT.format(macro_text=macro_text)}]},
+            timeout=60)
         r.raise_for_status()
         content = r.json()["choices"][0]["message"]["content"]
         m = re.search(r"\{[\s\S]*\}", content)
@@ -209,6 +201,7 @@ def generate_macro_read(macro, regime):
         pass
     return None
 
+# ================= BRIEFING BUILDERS =================
 def build_exec(mode):
     pulse = market.load_market_pulse()
     hours = 24
@@ -227,24 +220,31 @@ def build_exec(mode):
           "fields": [
               {"name": "🎯 Mission", "value": "Surface market-moving geopolitical & corporate signals before consensus.", "inline": True},
               {"name": "🧩 Scope", "value": scope_line(), "inline": True}]}
-if pulse:
+    if pulse:
         e2 = market.build_pulse_embed(pulse, color=color)
     else:
         e2 = {"title": "💹 Market Pulse", "color": color,
               "description": "No market snapshot available yet (run TradingView refresh)."}
-    
+
     macro = load_macro_pulse()
     regime = compute_regime(macro) if macro else {}
     macro_embed = build_macro_embed(macro, regime, color=color) if macro else None
-    
     macro_read = None
     if macro and macro.get("valid") and mode in ("MORNING", "CLOSING"):
         macro_read = generate_macro_read(macro, regime)
-    
+
     e3 = {"title": "🔢 Data Insights", "color": color,
           "fields": [{"name": "Key signals this window", "value": insights(items, gainers, losers, hits), "inline": False}]}
-    e3 = {"title": "🔢 Data Insights", "color": color,
-          "fields": [{"name": "Key signals this window", "value": insights(items, gainers, losers, hits), "inline": False}]}
+    e4 = {"title": "📊 Theme Activity & Sentiment", "color": color, "fields": [
+        {"name": "Intel cluster activity", "value": theme_chart(items), "inline": True},
+        {"name": "News Sentiment (AI)", "value": sentiment_gauge(items), "inline": True},
+        {"name": "🗣️ Retail Crowd Radar (StockTwits)", "value": "\n".join(st_radar[:6]) if st_radar else "No strong retail consensus on movers.", "inline": False}]}
+    e5 = {"title": "🧾 Summary of Findings", "color": color,
+          "description": findings(items, hours),
+          "fields": [{"name": "📰 Top Headlines", "value": headlines(items, 5), "inline": False}],
+          "footer": {"text": "AggregateIT Intelligence Terminal"},
+          "timestamp": datetime.now(timezone.utc).isoformat()}
+
     embeds_list = [e1, e2]
     if macro_embed: embeds_list.append(macro_embed)
     if macro_read:
@@ -255,17 +255,7 @@ if pulse:
                 {"name": "Commodities", "value": macro_read.get("commodities", "—"), "inline": False},
                 {"name": "⚠️ Key Risk", "value": macro_read.get("key_risk", "—"), "inline": False}
             ]})
-    embeds_list.append(e3)
-    e4 = {"title": "📊 Theme Activity & Sentiment", "color": color, "fields": [
-        {"name": "Intel cluster activity", "value": theme_chart(items), "inline": True},
-        {"name": "News Sentiment (AI)", "value": sentiment_gauge(items), "inline": True},
-        {"name": "🗣️ Retail Crowd Radar (StockTwits)", "value": "\n".join(st_radar[:6]) if st_radar else "No strong retail consensus on movers.", "inline": False}]}
-    e5 = {"title": "🧾 Summary of Findings", "color": color,
-          "description": findings(items, hours),
-          "fields": [{"name": "📰 Top Headlines", "value": headlines(items, 5), "inline": False}],
-          "footer": {"text": "AggregateIT Intelligence Terminal"},
-          "timestamp": datetime.now(timezone.utc).isoformat()}
-embeds_list.extend([e4, e5])
+    embeds_list.extend([e3, e4, e5])
     return embeds_list
 
 def build_mini():
