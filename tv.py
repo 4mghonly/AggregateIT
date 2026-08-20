@@ -1,5 +1,8 @@
 """TradingView US market universe + pulse.
-v6: session-aware labeling, client-side mover sorting, stock-only filtering."""
+v7: percents are NEVER derived. A percent is displayed only if the scanner's own
+change_percent is present and, when cross-checkable against change/close,
+self-consistent. Unverifiable rows drop out of percent lists instead of lying.
+No arbitrary caps: genuine violent moves pass when self-consistent."""
 import os, json, time, argparse
 import requests
 from datetime import datetime, timezone, timedelta
@@ -28,11 +31,17 @@ def _row(row):
     d = row.get("d", [])
     data = dict(zip(COLS, d))
     ticker = row.get("s", "").split(":")[-1]
-    pct = data.get("change_percent") or 0
+    raw_pct = data.get("change_percent")
     chg = data.get("change") or 0
     cls = data.get("close") or 0
-    if pct == 0 and chg and cls and (cls - chg) != 0:
-        pct = (chg / (cls - chg)) * 100
+    pct = None
+    if isinstance(raw_pct, (int, float)) and raw_pct:
+        if chg and cls and (cls - chg) != 0:
+            derived = (chg / (cls - chg)) * 100
+            if abs(derived - raw_pct) <= max(0.5, 0.1 * abs(raw_pct)):
+                pct = float(raw_pct)   # self-consistent -> trusted
+        else:
+            pct = float(raw_pct)       # nothing to cross-check; trust the direct value
     return {
         "t": ticker,
         "c": data.get("description") or ticker,
@@ -90,31 +99,30 @@ def _top(post_fn, sort, cap, pred):
 def fetch_movers(post_fn=_post, cap=300):
     movers = {}
     def add(m): movers[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
-    for m in _top(post_fn, ("change_percent", "desc"), cap, lambda x: x["pct"] >= 4): add(m)
-    for m in _top(post_fn, ("change_percent", "asc"), cap, lambda x: x["pct"] <= -4): add(m)
+    for m in _top(post_fn, ("change_percent", "desc"), cap, lambda x: x["pct"] is not None and x["pct"] >= 4): add(m)
+    for m in _top(post_fn, ("change_percent", "asc"), cap, lambda x: x["pct"] is not None and x["pct"] <= -4): add(m)
     for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), cap, lambda x: x["relvol"] >= 2): add(m)
     return movers
 
 def fetch_pulse(post_fn=_post, cap=20):
-    """Session snapshot with honest labeling and client-side mover sorting."""
+    """Session snapshot: honest labeling, client-side sorting, verified percents only."""
     mega = []
     resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                     "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"},
                     "range": [0, cap * 3]})
     for r in resp.get("data", []):
         m = _row(r)
-        if _ok(m): mega.append(m)
+        if _ok(m) and m["pct"] is not None: mega.append(m)
         if len(mega) >= cap: break
-    # Movers: pool = most-traded stocks, then sort CLIENT-side on computed pct
     pool = _top(post_fn, ("volume", "desc"), 400, lambda x: x.get("vol", 0) > 0)
-    gainers = sorted([m for m in pool if m["pct"] > 0], key=lambda x: -x["pct"])[:5]
-    losers = sorted([m for m in pool if m["pct"] < 0], key=lambda x: x["pct"])[:5]
+    gainers = sorted([m for m in pool if m["pct"] is not None and m["pct"] > 0], key=lambda x: -x["pct"])[:5]
+    losers = sorted([m for m in pool if m["pct"] is not None and m["pct"] < 0], key=lambda x: x["pct"])[:5]
     sig = {}
     def add_sig(m): sig[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
-    for m in _top(post_fn, ("change_percent", "desc"), 150, lambda x: x["pct"] >= 3): add_sig(m)
-    for m in _top(post_fn, ("change_percent", "asc"), 150, lambda x: x["pct"] <= -3): add_sig(m)
+    for m in _top(post_fn, ("change_percent", "desc"), 150, lambda x: x["pct"] is not None and x["pct"] >= 3): add_sig(m)
+    for m in _top(post_fn, ("change_percent", "asc"), 150, lambda x: x["pct"] is not None and x["pct"] <= -3): add_sig(m)
     for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), 150, lambda x: x["relvol"] >= 2): add_sig(m)
-    valid = any(abs(m["pct"]) > 0.005 for m in mega)
+    valid = any(m["pct"] is not None and abs(m["pct"]) > 0.005 for m in mega)
     return {"updated": time.time(), "valid": valid, "session_open": us_session_open(),
             "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig}
 
@@ -175,7 +183,8 @@ def main():
         if not hits: print(f"No matches for '{q}'.")
         for r in hits:
             flag = " 🔥 MOVER" if r["t"] in mv else ""
-            print(f"{r['t']:8} | {r['c'][:36]:38} | {str(r['s'])[:16]:16} | mcap {r['mcap']/1e9:8.1f}B | {r['pct']:+6.2f}% | relvol {r['relvol']:5.2f}{flag}")
+            pct_s = f"{r['pct']:+6.2f}%" if r["pct"] is not None else "   n/a"
+            print(f"{r['t']:8} | {r['c'][:36]:38} | {str(r['s'])[:16]:16} | mcap {r['mcap']/1e9:8.1f}B | {pct_s} | relvol {r['relvol']:5.2f}{flag}")
 
 if __name__ == "__main__":
     main()
