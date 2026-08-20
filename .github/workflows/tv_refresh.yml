@@ -24,6 +24,8 @@ jobs:
         run: python tv.py --universe
       - name: Pulse (pre-briefing + post-close snapshots)
         run: python tv.py --pulse
+      - name: Macro (indices, futures, forex, bonds)
+        run: python tv.py --macro
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -32,4 +34,5 @@ jobs:
             data/tv_universe.json
             data/movers.json
             data/market_pulse.json
+            data/macro_pulse.json
           if-no-files-found: warn
