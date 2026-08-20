@@ -10,7 +10,7 @@
   "futures": [
     {"sym": "CME:ES1!", "name": "S&P 500 E-mini", "type": "future"},
     {"sym": "CME:NQ1!", "name": "Nasdaq 100 E-mini", "type": "future"},
-    {"sym": "CME:YM1!", "name": "Dow E-mini", "type": "future"},
+    {"sym": "CBOT:YM1!", "name": "Dow E-mini", "type": "future"},
     {"sym": "COMEX:GC1!", "name": "Gold", "type": "future"},
     {"sym": "NYMEX:CL1!", "name": "WTI Crude", "type": "future"},
     {"sym": "NYMEX:NG1!", "name": "Natural Gas", "type": "future"}
