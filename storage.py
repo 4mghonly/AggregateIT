@@ -8,7 +8,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
 DB_PATH = os.path.join(DATA, "state.db")
 
-TERMINAL = {"filtered", "analyzed", "alerted", "capped"}
+TERMINAL = {"filtered", "analyzed", "alerted"}
 
 EVENT_COLS = ["event_id", "entity", "tokens_json", "title", "event_type", "status", "severity",
               "confidence", "source_count", "assessment", "what_changed", "urls_json",
