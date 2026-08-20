@@ -1,8 +1,7 @@
 """TradingView US market universe + pulse.
-v7: percents are NEVER derived. A percent is displayed only if the scanner's own
-change_percent is present and, when cross-checkable against change/close,
-self-consistent. Unverifiable rows drop out of percent lists instead of lying.
-No arbitrary caps: genuine violent moves pass when self-consistent."""
+v8 FINAL: percents are taken DIRECTLY from the scanner's change_percent.
+No derivation (sign-flips impossible), no arbitrary caps (real >100% moves pass),
+missing percents are None (rows drop out of percent lists instead of lying)."""
 import os, json, time, argparse
 import requests
 from datetime import datetime, timezone, timedelta
@@ -32,16 +31,7 @@ def _row(row):
     data = dict(zip(COLS, d))
     ticker = row.get("s", "").split(":")[-1]
     raw_pct = data.get("change_percent")
-    chg = data.get("change") or 0
-    cls = data.get("close") or 0
-    pct = None
-    if isinstance(raw_pct, (int, float)) and raw_pct:
-        if chg and cls and (cls - chg) != 0:
-            derived = (chg / (cls - chg)) * 100
-            if abs(derived - raw_pct) <= max(0.5, 0.1 * abs(raw_pct)):
-                pct = float(raw_pct)   # self-consistent -> trusted
-        else:
-            pct = float(raw_pct)       # nothing to cross-check; trust the direct value
+    pct = float(raw_pct) if isinstance(raw_pct, (int, float)) else None
     return {
         "t": ticker,
         "c": data.get("description") or ticker,
@@ -105,7 +95,7 @@ def fetch_movers(post_fn=_post, cap=300):
     return movers
 
 def fetch_pulse(post_fn=_post, cap=20):
-    """Session snapshot: honest labeling, client-side sorting, verified percents only."""
+    """Session snapshot: honest labeling, client-side sorting, direct percents only."""
     mega = []
     resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                     "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"},
