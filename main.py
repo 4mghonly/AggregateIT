@@ -670,21 +670,39 @@ async def main():
         if a:
             a = apply_corroboration_policy(a, c)
             now = time.time()
-        if a:
-            now = time.time()
-        if a:
-            now = time.time()
+            
+            # --- LIFECYCLE DETERMINATION ---
             if prior:
                 c["event_id"] = prior["event_id"]
                 try: old_tokens = set(json.loads(prior.get("tokens_json") or "[]"))
                 except Exception: old_tokens = set()
                 c["tokens"] = set(sorted(c["tokens"] | old_tokens)[:60])
                 report["events_summary"]["updated"] += 1
+                
+                old_status = prior.get("status", "NEW")
+                old_sources = prior.get("source_count", 0)
+                
+                if c["independent_sources"] > old_sources:
+                    store.add_event_update(c["event_id"], "corroborated", {"sources": c["independent_sources"]})
+                
+                if a.get("corroboration") == "multi-source" and int(a.get("confidence", 0)) >= 85:
+                    status = "CONFIRMED"
+                elif a.get("corroboration") == "multi-source":
+                    status = "DEVELOPING"
+                else:
+                    status = old_status
+                    
+                if status != old_status:
+                    store.add_event_update(c["event_id"], "status_change", {"from": old_status, "to": status})
             else:
                 report["events_summary"]["new"] += 1
+                status = "DEVELOPING" if c["independent_sources"] >= 2 and a.get("corroboration") == "multi-source" else "NEW"
+                store.add_event_update(c["event_id"], "detected", {"sources": c["independent_sources"]})
+            # -------------------------------
+
             ev = {"event_id": c["event_id"], "entity": c["entity"],
                   "tokens_json": json.dumps(sorted(c["tokens"])),
-                  "title": a["event"], "event_type": a["event_type"], "status": "active",
+                  "title": a["event"], "event_type": a["event_type"], "status": status,
                   "severity": a["importance"], "confidence": int(a["confidence"]),
                   "source_count": (prior["source_count"] if prior else 0) + c["independent_sources"],
                   "assessment": a["assessment"], "what_changed": a["what_changed"],
@@ -695,16 +713,21 @@ async def main():
                   "urls_json": json.dumps([it["url"] for it in c["items"]]),
                   "first_seen": prior["first_seen"] if prior else now, "last_updated": now}
             store.upsert_event(ev)
+            
+            timeline = store.get_event_timeline(c["event_id"])
+            
             report["events"].append({"event_id": c["event_id"], "entity": c["entity"],
                                      "new_event": prior is None, "title": a["event"],
                                      "importance": a["importance"], "confidence": a["confidence"],
-                                     "what_changed": a["what_changed"],
+                                     "what_changed": a["what_changed"], "status": status,
                                      "independent_sources": c["independent_sources"],
                                      "sources": [{"name": it["source_name"], "url": it["url"], "title": it["title"],
                                                   "published": datetime.fromtimestamp(it["ts"], timezone.utc).isoformat(),
                                                   "retrieved": report["run"]} for it in c["items"]],
                                      "analysis": a})
-            digest_items.append({"cluster": c, "analysis": a, "prior": prior})
+            digest_items.append({"cluster": c, "analysis": a, "prior": prior, "status": status, "timeline": timeline})
+            for it in c["items"]:
+                store.succeed(it["url"], it["thash"], "analyzed", json.dumps({"event_id": c["event_id"]}))
             for it in c["items"]:
                 store.succeed(it["url"], it["thash"], "analyzed", json.dumps({"event_id": c["event_id"]}))
         else:
