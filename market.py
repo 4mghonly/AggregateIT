@@ -1,12 +1,13 @@
 """market.py — shared market pulse reader + embed builder.
 Single source of truth for market presentation; consumed by the hourly digest
 (main.py) AND the executive briefings (briefing.py). Honesty-gated:
-never presents zeros as live data."""
-import os, json
+never presents zeros as live, never presents stale snapshots as fresh."""
+import os, json, time
 from datetime import datetime, timezone
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
+MAX_AGE_H = 20  # older than this = stale (pulse refreshes 3x/day on trading days)
 
 def load_market_pulse():
     try:
@@ -22,9 +23,13 @@ def _fmt_row(m):
 
 def build_pulse_embed(pulse, color=None):
     ts = datetime.fromtimestamp(pulse["updated"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    age_h = (time.time() - pulse.get("updated", 0)) / 3600.0
     if not pulse.get("valid"):
         return {"title": "💹 Market Pulse", "color": color or 0x95A5A6,
                 "description": f"🏛️ No reliable market data.\nLast snapshot: {ts}"}
+    if age_h > MAX_AGE_H:
+        return {"title": "💹 Market Pulse", "color": color or 0x95A5A6,
+                "description": f"🏛️ Snapshot STALE ({age_h:.0f}h old) — TV refresh not landing?\nLast snapshot: {ts}"}
     if pulse.get("session_open"):
         label = f"Live US session snapshot · as of {ts}"
     else:
