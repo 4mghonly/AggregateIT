@@ -33,9 +33,6 @@ def collect():
     movers_t = [m["t"] for m in (pulse.get("gainers", []) + pulse.get("losers", []))[:8]]
     st_sent, st_radar = fetch_stocktwits(movers_t)
     reddit = {}
-    for e in events:
-        for s in e.get("triggers", []) or []: pass
-    # reddit chatter = events whose sources are subreddits
     for ev in store.recent_all_events(hours=24):
         try: srcs = json.loads(ev.get("sources_json") or "[]")
         except Exception: srcs = []
@@ -65,32 +62,39 @@ __DATA__"""
 def _data_text(d):
     L = []
     for e in d["events"][:8]:
-        L.append(f"EVENT [{e.get('severity')}/{e.get('status')}] {e.get('title')} (src {e.get('source')})")
+        L.append("EVENT [%s/%s] %s (src %s)" % (e.get("severity"), e.get("status"), e.get("title"), e.get("source")))
     for m in (d["pulse"].get("gainers", []) + d["pulse"].get("losers", []))[:8]:
-        L.append(f"MOVER {m['t']} {m['pct']:+.2f}%")
+        L.append("MOVER %s %+.2f%%" % (m["t"], m["pct"]))
     for i in d["macro"].get("instruments", []):
-        if i.get("pct") is not None: L.append(f"MACRO {i['name']} {i['pct']:+.2f}%")
-    for k, v in d["regime"].items(): L.append(f"REGIME {k}={v}")
+        if i.get("pct") is not None: L.append("MACRO %s %+.2f%%" % (i["name"], i["pct"]))
+    for k, v in d["regime"].items(): L.append("REGIME %s=%s" % (k, v))
     for k, v in sorted(d["themes"].items(), key=lambda x: -x[1])[:5]:
-        L.append(f"THEME {DOMAIN_NAMES.get(k, k)} x{v}")
+        L.append("THEME %s x%d" % (DOMAIN_NAMES.get(k, k), v))
     if d["st_radar"]: L.append("STOCKTWITS " + " | ".join(d["st_radar"][:6]))
-    if d["reddit"]: L.append("REDDIT " + ", ".join(f"{k} x{v}" for k, v in sorted(d["reddit"].items(), key=lambda x: -x[1])[:5]))
+    if d["reddit"]:
+        L.append("REDDIT " + ", ".join("%s x%d" % (k, v) for k, v in sorted(d["reddit"].items(), key=lambda x: -x[1])[:5]))
     return "\n".join(L)
 
 def _fallback_analysis(d):
     ev, pulse, regime = d["events"], d["pulse"], d["regime"]
     g, l = pulse.get("gainers", []), pulse.get("losers", [])
-    mkt = (f"Equities {('led by ' + g[0]['t'] + ' +' + f'{g[0]["pct"]:.1f}%') if g else 'quiet'}"
-           f"{(', while ' + l[0]['t'] + ' ' + f'{l[0]["pct"]:.1f}% lags') if l else ''};"
-           f" VIX {regime.get('vix', 'n/a')}; 2s10s {regime.get('curve_2s10s', 'n/a')}.")
-    news = (f"Dominant cluster: {DOMAIN_NAMES.get(sorted(d['themes'].items(), key=lambda x: -x[1])[0][0], 'Mixed')}"
-            if d["themes"] else "No dominant news cluster in window.")
-    if ev: news += f" Top event: {(ev[0].get('title') or '')[:80]}."
-    soc = (" | ".join(d["st_radar"][:4]) if d["st_radar"] else "No strong retail consensus on movers.")
-    if d["reddit"]: soc += " Reddit: " + ", ".join(f"{k} x{v}" for k, v in sorted(d["reddit"].items(), key=lambda x: -x[1])[:3])
-    summ = f"{news} {mkt}"
-    risk = "Monitor for escalation in the dominant cluster; cross-check against next session open." if ev else "Quiet tape — primary risk is gap-on-open from off-hours news."
-    return {"summary": summ[:600], "news_read": news[:600], "market_read": mkt[:600],
+    lead = ("led by %s +%.1f%%" % (g[0]["t"], g[0]["pct"])) if g else "quiet"
+    lag = (", while %s %.1f%% lags" % (l[0]["t"], l[0]["pct"])) if l else ""
+    mkt = "Equities %s%s; VIX %s; 2s10s %s." % (lead, lag, regime.get("vix", "n/a"), regime.get("curve_2s10s", "n/a"))
+    if d["themes"]:
+        dom = DOMAIN_NAMES.get(sorted(d["themes"].items(), key=lambda x: -x[1])[0][0], "Mixed")
+        news = "Dominant cluster: %s." % dom
+    else:
+        news = "No dominant news cluster in window."
+    if ev:
+        news += " Top event: %s" % (ev[0].get("title") or "")[:80]
+    soc = " | ".join(d["st_radar"][:4]) if d["st_radar"] else "No strong retail consensus on movers."
+    if d["reddit"]:
+        soc += " Reddit: " + ", ".join("%s x%d" % (k, v) for k, v in sorted(d["reddit"].items(), key=lambda x: -x[1])[:3])
+    summ = (news + " " + mkt)[:600]
+    risk = ("Monitor for escalation in the dominant cluster; cross-check against next session open."
+            if ev else "Quiet tape - primary risk is gap-on-open from off-hours news.")
+    return {"summary": summ, "news_read": news[:600], "market_read": mkt[:600],
             "social_read": soc[:600], "key_risk": risk[:600]}
 
 def analyze(d):
@@ -126,10 +130,10 @@ def render_p1(d, a, llm_ok):
     now = datetime.now(timezone.utc).strftime("%a %Y-%m-%d %H:%M UTC")
     session = "LIVE US SESSION" if d["pulse"].get("session_open") else "PREVIOUS SESSION"
     ax.text(0.03, 0.95, "AGGREGATEIT - INTELLIGENCE DECK  ·  PAGE 1/2", color=TXT, fontsize=22, weight="bold")
-    ax.text(0.97, 0.95, f"{now} · {session}", color=MUT, fontsize=11, ha="right")
+    ax.text(0.97, 0.95, "%s · %s" % (now, session), color=MUT, fontsize=11, ha="right")
     ax.add_patch(plt.Rectangle((0.03, 0.928), 0.94, 0.008, color=BLU))
 
-    ax.text(0.03, 0.90, "EXECUTIVE SUMMARY (TENTATIVE" + (")".replace(")", "") if False else "TENTATIVE)", color=BLU, fontsize=13, weight="bold")
+    ax.text(0.03, 0.90, "EXECUTIVE SUMMARY (TENTATIVE)", color=BLU, fontsize=13, weight="bold")
     y = 0.872
     for line in _wrap(a["summary"], 105)[:3]:
         ax.text(0.03, y, line, color=TXT, fontsize=12); y -= 0.026
@@ -144,14 +148,14 @@ def render_p1(d, a, llm_ok):
     ax.text(0.038, y - 0.008, "KEY RISK:", color=RED, fontsize=11, weight="bold")
     ax.text(0.115, y - 0.008, _wrap(a["key_risk"], 80)[0], color=TXT, fontsize=11)
 
-    # right column: events + themes + sentiment/social
     x2 = 0.62; y = 0.90
     ax.text(x2, y, "TOP EVENTS (24H)", color=BLU, fontsize=13, weight="bold"); y -= 0.03
     for ev in d["events"][:5]:
         sev = ev.get("severity") or "Low"
         ax.add_patch(plt.Rectangle((x2, y - 0.011), 0.005, 0.024, color=SEV_COLOR.get(sev, MUT)))
         ax.text(x2 + 0.012, y, _wrap(ev.get("title"), 46)[0], color=TXT, fontsize=10.5, weight="bold")
-        ax.text(x2 + 0.012, y - 0.022, f"{sev} · {ev.get('confidence')}% · {ev.get('status', 'NEW')}", color=MUT, fontsize=8.5)
+        ax.text(x2 + 0.012, y - 0.022, "%s · %s%% · %s" % (sev, ev.get("confidence"), ev.get("status", "NEW")),
+                color=MUT, fontsize=8.5)
         y -= 0.052
     y -= 0.01
     ax.text(x2, y, "THEME ACTIVITY", color=BLU, fontsize=13, weight="bold"); y -= 0.028
@@ -173,18 +177,19 @@ def render_p1(d, a, llm_ok):
     for key, col in (("bullish", GRN), ("neutral", MUT), ("bearish", RED)):
         w = 0.30 * rolls[key] / tot
         ax.add_patch(plt.Rectangle((x, y), max(w, 0.004), 0.014, color=col)); x += w + 0.004
-    ax.text(x + 0.01, y, f"{rolls['bullish']}/{rolls['neutral']}/{rolls['bearish']}", color=MUT, fontsize=9.5)
+    ax.text(x + 0.01, y, "%d/%d/%d" % (rolls["bullish"], rolls["neutral"], rolls["bearish"]), color=MUT, fontsize=9.5)
     y -= 0.028
     for line in (d["st_radar"][:4] or ["No retail consensus on movers."]):
         ax.text(x2, y, line, color=TXT, fontsize=9.5); y -= 0.024
-    ax.text(0.03, 0.02, f"Narrative: {'Qwen (validated)' if llm_ok else 'deterministic fallback'} · charts computed from snapshots · machine-compiled, unverified",
+    mode = "Qwen (validated)" if llm_ok else "deterministic fallback"
+    ax.text(0.03, 0.02, "Narrative: %s · charts computed from snapshots · machine-compiled, unverified" % mode,
             color=MUT, fontsize=9)
     fig.savefig(P1, facecolor=BG); plt.close(fig)
 
 def render_p2(d):
     fig, axs = plt.subplots(2, 2, figsize=(16, 9), dpi=120)
     fig.patch.set_facecolor(BG)
-    fig.suptitle(f"AGGREGATEIT - THE NUMBERS  ·  {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
+    fig.suptitle("AGGREGATEIT - THE NUMBERS  ·  %s" % datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
                  color=TXT, fontsize=16, weight="bold", y=0.97)
     pulse, macro, regime = d["pulse"], d["macro"], d["regime"]
 
@@ -206,31 +211,32 @@ def render_p2(d):
 
     ax = axs[1, 0]; _style_ax(ax); ax.set_title("US YIELD CURVE (levels)")
     im = {i["sym"]: i for i in macro.get("instruments", [])}
-    curve = [(n, im.get(s, {}).get("price")) for n, s in (("2Y", "TVC:US02Y"), ("10Y", "TVC:US10Y"), ("30Y", "TVC:US30Y"))]
-    pts = [(n, p) for n, p in curve if p is not None]
+    pts = [(n, im.get(s, {}).get("price")) for n, s in (("2Y", "TVC:US02Y"), ("10Y", "TVC:US10Y"), ("30Y", "TVC:US30Y"))]
+    pts = [(n, p) for n, p in pts if p is not None]
     if pts:
         ax.plot([n for n, _ in pts], [p for _, p in pts], marker="o", color=AMB, lw=2)
         if len(pts) >= 2:
             spread = (pts[-1][1] - pts[0][1]) * 100
-            ax.set_title(f"US YIELD CURVE · 2s10s {spread:+.0f}bp" + (" INVERTED" if spread < 0 else ""))
+            ax.set_title("US YIELD CURVE · 2s10s %+.0fbp%s" % (spread, " INVERTED" if spread < 0 else ""))
     else: ax.text(0.5, 0.5, "no data", color=MUT, ha="center")
 
     ax = axs[1, 1]; _style_ax(ax); ax.set_title("SIGNIFICANT MOVERS (pct x rel-volume)")
-    sig = [v for v in pulse.get("sig", {}).values() if v.get("pct") is not None and v.get("relvol")]
+    sig = [{"t": k, **v} for k, v in pulse.get("sig", {}).items()
+           if v.get("pct") is not None and v.get("relvol")][:40]
     if sig:
-        sig = sig[:40]
         ax.scatter([v["pct"] for v in sig], [v["relvol"] for v in sig],
                    c=[GRN if v["pct"] > 0 else RED for v in sig], s=22, alpha=0.8)
         for v in sorted(sig, key=lambda x: -x["relvol"])[:3]:
-            ax.annotate(f"{v.get('mcap', 0) and ''}", (0, 0))  # placeholder no-op
+            ax.annotate(v["t"], (v["pct"], v["relvol"]), color=TXT, fontsize=8,
+                        xytext=(4, 4), textcoords="offset points")
     else: ax.text(0.5, 0.5, "no data", color=MUT, ha="center")
 
     foot = " · ".join(filter(None, [
-        f"VIX {regime.get('vix')}" if regime.get("vix") else "",
-        f"DXY {regime.get('dxy')}" if regime.get("dxy") else "",
-        f"oil {regime['oil_spike']}" if regime.get("oil_spike") else "",
-        f"pulse as-of {datetime.fromtimestamp(pulse.get('updated', 0), timezone.utc).strftime('%H:%M') if pulse.get('updated') else 'n/a'}",
-        f"macro {len(macro.get('instruments', []))} inst",
+        "VIX %s" % regime["vix"] if regime.get("vix") else "",
+        "DXY %s" % regime["dxy"] if regime.get("dxy") else "",
+        "oil %s" % regime["oil_spike"] if regime.get("oil_spike") else "",
+        "pulse as-of %s" % datetime.fromtimestamp(pulse["updated"], timezone.utc).strftime("%H:%M") if pulse.get("updated") else "",
+        "macro %d inst" % len(macro.get("instruments", [])),
         "ALL FIGURES COMPUTED FROM SOURCE SNAPSHOTS"]))
     fig.text(0.5, 0.015, foot, color=MUT, fontsize=9.5, ha="center")
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
@@ -240,11 +246,13 @@ def send(pages):
     wh = os.environ.get("DISCORD_WEBHOOK")
     if not wh:
         print("FATAL: DISCORD_WEBHOOK secret is not set."); return
-    files = [(f"files[{i}]", (os.path.basename(p), open(p, "rb"), "image/png")) for i, p in enumerate(pages)]
+    files = []
+    for i, p in enumerate(pages):
+        files.append(("files[%d]" % i, (os.path.basename(p), open(p, "rb"), "image/png")))
     r = requests.post(wh, files=files,
                       data={"payload_json": json.dumps({"content": "📊 **AggregateIT Intelligence Deck** (tentative, machine-compiled)"})})
     if r.status_code >= 400:
-        raise RuntimeError(f"Discord HTTP {r.status_code}: {r.text[:120]}")
+        raise RuntimeError("Discord HTTP %d: %s" % (r.status_code, r.text[:120]))
     print("✅ Deck delivered (2 pages)!")
 
 if __name__ == "__main__":
