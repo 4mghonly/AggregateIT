@@ -228,5 +228,17 @@ p_closed = {"updated": time.time(), "valid": True, "session_open": False,
             "mega_caps": [{"t": "NVDA", "pct": 1.0, "relvol": 1.0}], "gainers": [], "losers": []}
 check("closed -> previous session label", "previous session" in market.build_pulse_embed(p_closed)["description"])
 
+print("[T26] Percents are never derived; inconsistent rows are excluded")
+ROW_OK = {"s": "NVDA", "d": ["", "Nvidia", "Tech", 1e12, -0.45, 1.0, 100000, 1, -0.64, 142.5, "stock"]}
+ROW_NODERIVE = {"s": "MRNA", "d": ["", "Moderna", "Health", 1e10, 0, 34.3, 5000000, 1, 0.29, 20.0, "stock"]}
+ROW_CONFLICT = {"s": "XYZ", "d": ["", "X", "Tech", 1e9, 5.0, 1.0, 100000, 1, -0.5, 10.0, "stock"]}
+def fake_post9(body):
+    return {"totalCount": 3, "data": [ROW_OK, ROW_NODERIVE, ROW_CONFLICT]}
+p9 = tv.fetch_pulse(post_fn=fake_post9, cap=20)
+allm = p9["mega_caps"] + p9["gainers"] + p9["losers"]
+check("self-consistent direct pct kept", any(m["t"] == "NVDA" and abs(m["pct"] + 0.45) < 0.01 for m in allm), allm)
+check("missing pct never derived", all(m["t"] != "MRNA" for m in allm))
+check("conflicting pct excluded", all(m["t"] != "XYZ" for m in allm))
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
