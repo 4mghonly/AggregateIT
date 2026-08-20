@@ -131,7 +131,8 @@ async def fetch_text(session, url, sem, headers=None):
         try:
             async with session.get(url, timeout=aiohttp.ClientTimeout(total=20), headers=headers) as r:
                 if r.status == 200: return await r.text()
-        except Exception: pass
+        except Exception as e:
+            log_failure("http", url, e)
     return None
 
 async def fetch_rss(session, src, sem):
