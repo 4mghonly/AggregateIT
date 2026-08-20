@@ -188,7 +188,7 @@ print("[T22] Funds/ETFs excluded from stock lists")
 def fake_post6(body):
     return {"totalCount": 2, "data": [
         {"s": "NVDA", "d": ["", "Nvidia", "Tech", 1e12, 1.0, 1.0, 100000, 1, 0, 0, "stock"]},
-        {"s": "XPP", "d": ["", "ProShares", "Fund", 1e9, 2.0, 1.0, 100000, 1, 0, 0, "fund"]]}]}
+        {"s": "XPP", "d": ["", "ProShares", "Fund", 1e9, 2.0, 1.0, 100000, 1, 0, 0, "fund"]}]}
 p6 = tv.fetch_pulse(post_fn=fake_post6, cap=20)
 check("fund excluded", all(m["t"] != "XPP" for m in p6["mega_caps"]))
 check("stock kept", any(m["t"] == "NVDA" for m in p6["mega_caps"]))
@@ -198,7 +198,7 @@ def fake_post5(body):
     return {"totalCount": 3, "data": [
         {"s": "A", "d": ["", "A", "T", 1e11, 5.0, 1.0, 900000, 1, 0, 0, "stock"]},
         {"s": "B", "d": ["", "B", "T", 1e11, 9.0, 1.0, 800000, 1, 0, 0, "stock"]},
-        {"s": "C", "d": ["", "C", "T", 1e11, 1.0, 1.0, 700000, 1, 0, 0, "stock"]]}]}
+        {"s": "C", "d": ["", "C", "T", 1e11, 1.0, 1.0, 700000, 1, 0, 0, "stock"]}]}}
 p5 = tv.fetch_pulse(post_fn=fake_post5, cap=20)
 check("gainers sorted desc", [m["t"] for m in p5["gainers"]] == ["B", "A", "C"],
       [m["t"] for m in p5["gainers"]])
