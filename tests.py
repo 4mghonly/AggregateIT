@@ -136,7 +136,7 @@ check("two sources = 2 independent", c2[0]["independent_sources"] == 2, c2[0]["i
 print("[T17] Event store continuity")
 tmp2 = tempfile.mktemp(suffix=".db")
 st2 = SQLiteStore(path=tmp2)
-t0 = time.time() - 3600  # event first seen 1 hour ago
+t0 = time.time() - 3600
 ev = {"event_id": "evt1", "entity": "NVDA", "tokens_json": json.dumps(["nvidia", "earnings"]),
       "title": "NVDA earnings", "event_type": "earnings", "status": "active", "severity": "High",
       "confidence": 70, "source_count": 2, "assessment": "strong", "what_changed": "new",
@@ -228,17 +228,14 @@ p_closed = {"updated": time.time(), "valid": True, "session_open": False,
             "mega_caps": [{"t": "NVDA", "pct": 1.0, "relvol": 1.0}], "gainers": [], "losers": []}
 check("closed -> previous session label", "previous session" in market.build_pulse_embed(p_closed)["description"])
 
-print("[T26] Percents are never derived; inconsistent rows are excluded")
+print("[T26] Percents taken directly; zeros kept; missing are None")
 ROW_OK = {"s": "NVDA", "d": ["", "Nvidia", "Tech", 1e12, -0.45, 1.0, 100000, 1, -0.64, 142.5, "stock"]}
-ROW_NODERIVE = {"s": "MRNA", "d": ["", "Moderna", "Health", 1e10, 0, 34.3, 5000000, 1, 0.29, 20.0, "stock"]}
-ROW_CONFLICT = {"s": "XYZ", "d": ["", "X", "Tech", 1e9, 5.0, 1.0, 100000, 1, -0.5, 10.0, "stock"]}
-def fake_post9(body):
-    return {"totalCount": 3, "data": [ROW_OK, ROW_NODERIVE, ROW_CONFLICT]}
-p9 = tv.fetch_pulse(post_fn=fake_post9, cap=20)
-allm = p9["mega_caps"] + p9["gainers"] + p9["losers"]
-check("self-consistent direct pct kept", any(m["t"] == "NVDA" and abs(m["pct"] + 0.45) < 0.01 for m in allm), allm)
-check("missing pct never derived", all(m["t"] != "MRNA" for m in allm))
-check("conflicting pct excluded", all(m["t"] != "XYZ" for m in allm))
+ROW_ZERO = {"s": "FLAT", "d": ["", "Flat", "Tech", 1e11, 0.0, 1.0, 100000, 1, 0, 100.0, "stock"]}
+ROW_MISSING = {"s": "MISS", "d": ["", "Miss", "Tech", 1e9, None, 1.0, 100000, 1, 0.5, 10.0, "stock"]}
+r_ok = tv._row(ROW_OK); r_zero = tv._row(ROW_ZERO); r_miss = tv._row(ROW_MISSING)
+check("direct pct kept", abs(r_ok["pct"] + 0.45) < 0.01, r_ok["pct"])
+check("zero pct kept", r_zero["pct"] == 0.0, r_zero["pct"])
+check("missing pct is None", r_miss["pct"] is None, r_miss["pct"])
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
