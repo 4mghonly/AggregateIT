@@ -1,6 +1,7 @@
 import os, re, json, time, sqlite3, asyncio, calendar, hashlib, sys
 import feedparser, aiohttp, requests, trafilatura
 from datetime import datetime, timezone, timedelta
+from urllib.parse import urlparse
 from storage import SQLiteStore, DATA
 from market import load_market_pulse, build_pulse_embed
 
@@ -214,6 +215,40 @@ def primary_entity(i):
     kws = i.get("keyword_ids", [])
     if kws: return kws[0]
     return "GEN"
+
+# ================= PROVENANCE (Spec #6) =================
+WIRE_FAMILIES = {
+    "reuters.com": "reuters", "apnews.com": "ap", "bloomberg.com": "bloomberg",
+    "wsj.com": "wsj", "marketwatch.com": "dowjones", "content.dowjones.io": "dowjones",
+    "feeds.a.dj.com": "dowjones", "cnbc.com": "cnbc", "ft.com": "ft",
+    "ftalphaville.ft.com": "ft", "seekingalpha.com": "seekingalpha",
+    "nasdaq.com": "nasdaq", "yahoo.com": "yahoo",
+}
+
+def canonical_domain(url):
+    try:
+        netloc = urlparse(url).netloc.lower()
+        if netloc.startswith("www."): netloc = netloc[4:]
+        for pre in ("feeds.", "rss.", "m.", "amp."):
+            if netloc.startswith(pre): netloc = netloc[len(pre):]
+        return netloc
+    except Exception:
+        return ""
+
+def source_family(domain):
+    if not domain: return "unknown"
+    for d, fam in WIRE_FAMILIES.items():
+        if domain == d or domain.endswith("." + d):
+            return fam
+    return domain
+
+def apply_corroboration_policy(a, cluster):
+    """Confidence must reflect genuinely independent evidence."""
+    if cluster.get("independent_sources", 1) < 2 and a.get("corroboration") == "multi-source":
+        a["corroboration"] = "single-source"
+        a["confidence"] = min(int(a["confidence"]), 70)
+    return a
+
 
 def cluster_similarity(new_item, cluster):
     """Multi-signal similarity. Returns (score, reasons, content_gate).
