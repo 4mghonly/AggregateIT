@@ -406,12 +406,12 @@ def fake_post_macro(body):
     s = body.get("symbols", [])
     syms = s.get("tickers", []) if isinstance(s, dict) else s
     data = []
-    for s in syms:
-        data.append({"s": s, "d": [None, "Test", "T", 1e9, None, 1.0, 100000, True, 1.5, 100.0, "index"]})
+    for x in syms:
+        data.append({"s": x, "d": [None, 1.5, 100.0]})
     return {"data": data}
 m44 = tv.fetch_macro(post_fn=fake_post_macro)
 check("macro fetcher returns instruments", len(m44.get("instruments", [])) > 0, len(m44.get("instruments", [])))
-check("instruments have pct", all(i["pct"] is not None for i in m44["instruments"]), m44["instruments"][0])
+check("instruments have pct", bool(m44.get("instruments")) and all(i["pct"] is not None for i in m44["instruments"]), m44.get("instruments"))
 
 print("[T45] Regime signals computed deterministically")
 import market
