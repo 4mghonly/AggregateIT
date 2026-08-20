@@ -5,6 +5,7 @@ import os, json, re, time, requests
 from datetime import datetime, timezone
 from storage import SQLiteStore
 import market
+from market import load_macro_pulse, compute_regime, build_macro_embed
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
