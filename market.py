@@ -25,6 +25,49 @@ def _fmt_row(m):
     rv = f" · {m['relvol']:.1f}×" if m.get("relvol", 0) >= 1.5 else ""
     return f"{arrow} {m['t']} {p:+.2f}%{rv}"
 
+def load_macro_pulse():
+    try:
+        with open(os.path.join(DATA, "macro_pulse.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def compute_regime(macro):
+    """Deterministic regime signals from macro data (zero tokens)."""
+    regime = {}
+    inst_map = {i["sym"]: i for i in macro.get("instruments", [])}
+    
+    # VIX bands
+    vix = inst_map.get("CBOE:VIX")
+    if vix and vix["price"] is not None:
+        v = vix["price"]
+        if v < 15: regime["vix"] = "complacent (<15)"
+        elif v < 20: regime["vix"] = "normal (15-20)"
+        elif v < 30: regime["vix"] = "elevated (20-30)"
+        else: regime["vix"] = "stress (>30)"
+    
+    # Yield curve 2s10s
+    us2y = inst_map.get("TVC:US02Y")
+    us10y = inst_map.get("TVC:US10Y")
+    if us2y and us10y and us2y["price"] is not None and us10y["price"] is not None:
+        spread_bp = (us10y["price"] - us2y["price"]) * 100
+        regime["curve_2s10s"] = f"{spread_bp:+.1f}bp"
+        if spread_bp < 0: regime["curve_inverted"] = True
+    
+    # DXY direction
+    dxy = inst_map.get("TVC:DXY")
+    if dxy and dxy["pct"] is not None:
+        if dxy["pct"] > 0.5: regime["dxy"] = "strong bid"
+        elif dxy["pct"] < -0.5: regime["dxy"] = "weak"
+        else: regime["dxy"] = "neutral"
+    
+    # Oil spike
+    oil = inst_map.get("NYMEX:CL1!")
+    if oil and oil["pct"] is not None and abs(oil["pct"]) > 3.0:
+        regime["oil_spike"] = f"{oil['pct']:+.1f}%"
+    
+    return regime
+
 def build_pulse_embed(pulse, color=None):
     ts = datetime.fromtimestamp(pulse["updated"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     age_h = (time.time() - pulse.get("updated", 0)) / 3600.0
