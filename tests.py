@@ -133,15 +133,6 @@ b3 = dict(a1, source_name="Bloomberg", url="https://www.bloomberg.com/news/nvda-
 c2 = main.cluster_events([b1, b3])
 check("two families = 2 independent", c2[0]["independent_sources"] == 2, c2[0]["independent_sources"])
 
-print("[T35] Canonical domain strips www/feeds prefixes")
-check("www stripped", main.canonical_domain("https://www.reuters.com/x") == "reuters.com")
-check("feeds maps to family", main.source_family(main.canonical_domain("https://feeds.reuters.com/x")) == "reuters")
-
-print("[T36] Multi-source claims downgraded without independent evidence")
-a_obj = {"corroboration": "multi-source", "confidence": 90}
-main.apply_corroboration_policy(a_obj, {"independent_sources": 1})
-check("downgraded + capped", a_obj["corroboration"] == "single-source" and a_obj["confidence"] == 70, a_obj)
-
 print("[T17] Event store continuity")
 tmp2 = tempfile.mktemp(suffix=".db")
 st2 = SQLiteStore(path=tmp2)
@@ -315,6 +306,15 @@ i_new = {"title": "Federal Reserve holds rates", "source_name": "Bloomberg", "ur
          "matched_categories": ["CB-01 · Fed Communications"], "keyword_ids": ["CB-01"]}
 clusters = main.cluster_events([i_old, i_new])
 check("24h-apart items cluster with strong signals", len(clusters) == 1, f"{len(clusters)} clusters")
+
+print("[T35] Canonical domain strips www/feeds prefixes")
+check("www stripped", main.canonical_domain("https://www.reuters.com/x") == "reuters.com")
+check("feeds maps to family", main.source_family(main.canonical_domain("https://feeds.reuters.com/x")) == "reuters")
+
+print("[T36] Multi-source claims downgraded without independent evidence")
+a_obj = {"corroboration": "multi-source", "confidence": 90}
+main.apply_corroboration_policy(a_obj, {"independent_sources": 1})
+check("downgraded + capped", a_obj["corroboration"] == "single-source" and a_obj["confidence"] == 70, a_obj)
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
