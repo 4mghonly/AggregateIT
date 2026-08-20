@@ -541,6 +541,18 @@ def send_digest(digest_items, report):
     if not wh:
         HEALTH["discord_fail"] += 1
         print("DISCORD: webhook secret missing - digest NOT delivered"); return
+    rules = load_rules()
+    alert_lines = []; mention = False
+    for x in digest_items:
+        for r in match_rules(x["analysis"], x["cluster"], rules):
+            mention = mention or bool(r.get("mention"))
+            alert_lines.append(f"🚨 [{r.get('type')}:{r.get('value')}] {x['analysis'].get('event', '')[:100]}")
+    if alert_lines:
+        prefix = "@here " if (mention and rules.get("mention_role") == "here") else ""
+        try:
+            _post_discord(wh, {"content": (prefix + "\n".join(alert_lines))[:1900]})
+        except Exception as e:
+            HEALTH["discord_fail"] += 1; print("Alert err:", type(e).__name__, str(e)[:120])
     news, social = [], []
     for x in digest_items:
         (social if all(it["source_type"] == "reddit" for it in x["cluster"]["items"]) else news).append(x)
