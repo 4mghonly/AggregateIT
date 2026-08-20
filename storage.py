@@ -89,6 +89,21 @@ class SQLiteStore:
         return self._event_rows("WHERE last_updated > ? ORDER BY last_updated DESC LIMIT ?",
                                 (time.time() - hours * 3600, limit))
     def upsert_event(self, e):
+          def add_event_update(self, event_id, update_type, details=None):
+        self.con.execute("INSERT INTO event_updates(event_id, ts, type, details_json) VALUES (?,?,?,?)",
+                         (event_id, time.time(), update_type, json.dumps(details or {})))
+        self.con.commit()
+
+    def get_event_timeline(self, event_id):
+        rows = self.con.execute(
+            "SELECT ts, type, details_json FROM event_updates WHERE event_id=? ORDER BY ts ASC",
+            (event_id,)).fetchall()
+        out = []
+        for ts, typ, det in rows:
+            try: d = json.loads(det) if det else {}
+            except Exception: d = {}
+            out.append({"ts": ts, "type": typ, "details": d})
+        return out
         self.con.execute(f"INSERT OR REPLACE INTO events({', '.join(EVENT_COLS)}) VALUES ({','.join('?' * len(EVENT_COLS))})",
                          tuple(e.get(k) for k in EVENT_COLS))
         self.con.commit()
