@@ -2,6 +2,7 @@ import os, re, json, time, sqlite3, asyncio, calendar, hashlib, sys
 import feedparser, aiohttp, requests, trafilatura
 from datetime import datetime, timezone, timedelta
 from storage import SQLiteStore, DATA
+from market import load_market_pulse, build_pulse_embed
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 REPORTS = os.path.join(BASE, "reports")
@@ -223,7 +224,7 @@ def cluster_events(items):
         if not placed:
             clusters.append({"entity": ent, "tokens": toks, "items": [i], "event_id": None})
     for c in clusters:
-        seed = c["entity"] + "|" + " ".join(sorted(c["items"][0] and title_tokens(c["items"][0]["title"])))
+        seed = c["entity"] + "|" + " ".join(sorted(title_tokens(c["items"][0]["title"])))
         c["event_id"] = hashlib.md5(seed.encode()).hexdigest()[:12]
         c["source_names"] = sorted({it["source_name"] for it in c["items"]})
         # Spec #6: syndicated copies do NOT count as independent corroboration
@@ -389,37 +390,7 @@ def _post_discord(wh, payload):
     if r.status_code >= 400:
         raise RuntimeError(f"Discord HTTP {r.status_code}: {r.text[:120]}")
 
-# ================= MARKET PULSE (validity-gated) =================
-def load_market_pulse():
-    try:
-        with open(os.path.join(DATA, "market_pulse.json"), encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return None
-
-def _fmt_row(m):
-    arrow = "🟢" if m["pct"] > 0.005 else ("🔴" if m["pct"] < -0.005 else "⚪")
-    rv = f" · {m['relvol']:.1f}×" if m.get("relvol", 0) >= 1.5 else ""
-    return f"{arrow} {m['t']} {m['pct']:+.2f}%{rv}"
-
-def build_pulse_embed(pulse):
-    ts = datetime.fromtimestamp(pulse["updated"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    if not pulse.get("valid"):
-        return {"title": "💹 Market Pulse", "color": 0x95A5A6,
-                "description": f"🏛️ No reliable market data.\nLast snapshot: {ts}"}
-    if pulse.get("session_open"):
-        label = f"Live US session snapshot · as of {ts}"
-    else:
-        label = f"US market closed — previous session data · as of {ts}"
-    fields = [
-        {"name": "🚀 Top Movers", "value": "\n".join(_fmt_row(m) for m in pulse.get("gainers", [])[:5]) or "—", "inline": True},
-        {"name": "📉 Top Fallers", "value": "\n".join(_fmt_row(m) for m in pulse.get("losers", [])[:5]) or "—", "inline": True},
-    ]
-    fields.append({"name": "🏛️ Mega-Cap Scoreboard (Top 20 stocks)",
-                   "value": " | ".join(_fmt_row(m) for m in pulse.get("mega_caps", [])[:20]) or "—", "inline": False})
-    return {"title": "💹 Market Pulse", "color": 0x2ECC71 if pulse.get("session_open") else 0xF1C40F,
-            "description": label, "fields": fields}
-
+# ================= MARKET PULSE (shared module) =================
 def send_market_pulse():
     """Post the pulse once per fresh snapshot; never present zeros as live data."""
     wh = os.environ.get("DISCORD_WEBHOOK")
@@ -475,6 +446,7 @@ def send_digest(digest_items, report):
         HEALTH["discord_ok"] += len(digest_items)
     except Exception as e:
         HEALTH["discord_fail"] += 1; print("Discord err:", type(e).__name__, str(e)[:200])
+
 def build_health(report, store_stats):
     degraded = []
     if HEALTH["rss_fail"]: degraded.append(f"{HEALTH['rss_fail']} RSS feeds failed")
@@ -590,6 +562,10 @@ async def main():
                   "severity": a["importance"], "confidence": int(a["confidence"]),
                   "source_count": (prior["source_count"] if prior else 0) + c["independent_sources"],
                   "assessment": a["assessment"], "what_changed": a["what_changed"],
+                  "sentiment": a.get("sentiment", "na"),
+                  "triggers_json": json.dumps(c["items"][0].get("matched_categories", [])),
+                  "sources_json": json.dumps([{"name": it["source_name"], "url": it["url"], "title": it["title"]} for it in c["items"]]),
+                  "score": c["items"][0].get("score", 0),
                   "urls_json": json.dumps([it["url"] for it in c["items"]]),
                   "first_seen": prior["first_seen"] if prior else now, "last_updated": now}
             store.upsert_event(ev)
@@ -614,8 +590,6 @@ async def main():
 
     send_digest(digest_items, report)
     send_market_pulse()
-
-    store.record_run(report["fetched"], report["new"], report["matched"], len(report["events"]))
 
     store.record_run(report["fetched"], report["new"], report["matched"], len(report["events"]))
     store_stats = store.stats()
