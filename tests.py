@@ -316,6 +316,30 @@ a_obj = {"corroboration": "multi-source", "confidence": 90}
 main.apply_corroboration_policy(a_obj, {"independent_sources": 1})
 check("downgraded + capped", a_obj["corroboration"] == "single-source" and a_obj["confidence"] == 70, a_obj)
 
+print("[T37] Event timeline writes and reads")
+tmp7 = tempfile.mktemp(suffix=".db")
+st7 = SQLiteStore(path=tmp7)
+st7.add_event_update("evtT", "detected", {"sources": 1})
+st7.add_event_update("evtT", "corroborated", {"sources": 2})
+st7.add_event_update("evtT", "status_change", {"from": "DEVELOPING", "to": "CONFIRMED"})
+tl = st7.get_event_timeline("evtT")
+check("timeline records 3 updates", len(tl) == 3, len(tl))
+check("timeline ordered + typed", [t["type"] for t in tl] == ["detected", "corroborated", "status_change"],
+      [t["type"] for t in tl])
+
+print("[T38] Lifecycle status persists on events")
+st7.upsert_event({"event_id": "evtT", "entity": "NVDA", "tokens_json": json.dumps(["nvidia"]),
+                  "title": "Nvidia event", "event_type": "market_move", "status": "CONFIRMED",
+                  "severity": "High", "confidence": 90, "source_count": 3, "assessment": "strong",
+                  "what_changed": "confirmed", "urls_json": "[]", "first_seen": time.time(),
+                  "last_updated": time.time(), "sentiment": "bullish",
+                  "triggers_json": json.dumps(["NVDA"]), "sources_json": "[]", "score": 9})
+rows = st7.recent_events("NVDA", hours=24)
+check("status persisted", bool(rows) and rows[0]["status"] == "CONFIRMED", rows[0]["status"] if rows else "no rows")
+st7.upsert_event(dict(rows[0], status="STABLE", last_updated=time.time()))
+rows2 = st7.recent_events("NVDA", hours=24)
+check("transition persisted", rows2[0]["status"] == "STABLE", rows2[0]["status"])
+
 print("[T39] Proportional health thresholds")
 saved = dict(main.HEALTH)
 main.HEALTH.update({k: 0 for k in main.HEALTH})
