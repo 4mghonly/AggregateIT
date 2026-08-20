@@ -571,20 +571,32 @@ def send_digest(digest_items, report):
     except Exception as e:
         HEALTH["discord_fail"] += 1; print("Discord err:", type(e).__name__, str(e)[:200])
 
+def _ratio(ok, fail):
+    total = ok + fail
+    return 1.0 if total == 0 else ok / total
+
 def build_health(report, store_stats):
-    degraded = []
-    if HEALTH["rss_fail"]: degraded.append(f"{HEALTH['rss_fail']} RSS feeds failed")
-    if HEALTH["reddit_fail"]: degraded.append(f"{HEALTH['reddit_fail']} subreddits failed")
-    if HEALTH["github_fail"]: degraded.append(f"{HEALTH['github_fail']} GitHub repos failed")
+    """Proportional health (Finding #16): ratios per service, stricter for critical paths.
+    GREEN = clean; YELLOW = degraded optional sources; RED = critical failure."""
+    degraded = []; red = []
+    rss_r = _ratio(HEALTH["rss_ok"], HEALTH["rss_fail"])
+    reddit_r = _ratio(HEALTH["reddit_ok"], HEALTH["reddit_fail"])
+    gh_r = _ratio(HEALTH["github_ok"], HEALTH["github_fail"])
+    if HEALTH["rss_fail"]: degraded.append(f"{HEALTH['rss_fail']} RSS feeds failed ({rss_r:.0%} ok)")
+    if (HEALTH["rss_ok"] + HEALTH["rss_fail"]) and rss_r < 0.5: red.append("RSS success below 50%")
+    if (HEALTH["reddit_ok"] + HEALTH["reddit_fail"]) and reddit_r < 0.8: degraded.append(f"Reddit degraded ({reddit_r:.0%} ok)")
+    if (HEALTH["github_ok"] + HEALTH["github_fail"]) and gh_r < 0.8: degraded.append(f"GitHub degraded ({gh_r:.0%} ok)")
     if HEALTH["qwen_fail"]: degraded.append(f"{HEALTH['qwen_fail']} Qwen API failures")
     if HEALTH["qwen_invalid"]: degraded.append(f"{HEALTH['qwen_invalid']} Qwen outputs rejected")
     if HEALTH["discord_fail"]: degraded.append("Discord delivery failed")
     if HEALTH["tv_movers_loaded"] == 0: degraded.append("TradingView movers missing (run TV refresh)")
     if store_stats.get("fresh_init"): degraded.append("state DB freshly initialized")
-    hard_fail = (not DRY_RUN) and HEALTH["qwen_fail"] > HEALTH["qwen_ok"]
-    overall = "RED" if hard_fail else ("YELLOW" if degraded else "GREEN")
+    qwen_total = HEALTH["qwen_ok"] + HEALTH["qwen_fail"]
+    if (not DRY_RUN) and qwen_total and HEALTH["qwen_fail"] > HEALTH["qwen_ok"]:
+        red.append("Qwen failing more than succeeding")
+    overall = "RED" if red else ("YELLOW" if degraded else "GREEN")
     return {"run": report["run"], "overall": overall, "dry_run": DRY_RUN,
-            "degraded": degraded, "counters": dict(HEALTH), "store": store_stats}
+            "degraded": degraded, "red": red, "counters": dict(HEALTH), "store": store_stats}
 
 # ================= MAIN =================
 async def main():
