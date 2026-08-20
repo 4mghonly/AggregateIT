@@ -1,9 +1,9 @@
 name: Intelligence Slide Deck
 on:
   schedule:
-    - cron: "30 13-19 * * 1-5"      # hourly during US session
-    - cron: "0 20 * * 1-5"          # closing print
-    - cron: "0 0,3,6,9,12,21 * * *" # every 3h off-hours + weekends
+    - cron: "30 13-19 * * 1-5"
+    - cron: "0 20 * * 1-5"
+    - cron: "0 0,3,6,9,12,21 * * *"
   workflow_dispatch:
 jobs:
   slide:
@@ -19,6 +19,8 @@ jobs:
           key: seen-db-${{ github.run_id }}
           restore-keys: |
             seen-db-
+      - name: Fresh snapshots for the deck
+        run: python tv.py --pulse --macro
       - name: Render + send deck
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
