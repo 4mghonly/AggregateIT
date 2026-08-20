@@ -1,5 +1,6 @@
 """TradingView US market universe + pulse.
-v5: adds raw PROBE output to identify the live change-column key/position."""
+Emulates the 'Load More' XHR loop of the TradingView market-movers page.
+v5: bulletproof dictionary mapping (immune to column shifts), absolute-change fallback for pct."""
 import os, json, time, argparse
 import requests
 
@@ -9,8 +10,8 @@ os.makedirs(DATA, exist_ok=True)
 
 SCAN_URL = "https://scanner.tradingview.com/america/scan"
 CHUNK = 1000
-COLS = ["ticker", "description", "sector", "market_cap_calc",
-        "change_percent", "relative_volume_10d_calc", "volume", "is_primary"]
+COLS = ["ticker", "description", "sector", "market_cap_calc", "change_percent", 
+        "relative_volume_10d_calc", "volume", "is_primary", "change", "close"]
 
 def _post(body):
     for attempt in (1, 2):
@@ -25,15 +26,30 @@ def _post(body):
 
 def _row(row):
     d = row.get("d", [])
+    # Bulletproof mapping: zip columns to data. Immune to API shifting or dropping columns.
+    data = dict(zip(COLS, d))
     ticker = row.get("s", "").split(":")[-1]
-    def g(i, default):
-        return d[i] if len(d) > i and d[i] is not None else default
-    return {"t": ticker, "c": g(1, ""), "s": g(2, "") or "US Market",
-            "mcap": g(3, 0), "pct": g(4, 0), "relvol": g(5, 0),
-            "vol": g(6, 0),
-            "primary": bool(g(7, 1))}
+    
+    pct = data.get("change_percent") or 0
+    chg = data.get("change") or 0
+    cls = data.get("close") or 0
+    # Fallback: if API nulls the percent, calculate it from absolute change
+    if pct == 0 and chg and cls and (cls - chg) != 0:
+        pct = (chg / (cls - chg)) * 100
+        
+    return {
+        "t": ticker,
+        "c": data.get("description") or ticker,
+        "s": data.get("sector") or "US Market",
+        "mcap": data.get("market_cap_calc") or 0,
+        "pct": pct,
+        "relvol": data.get("relative_volume_10d_calc") or 0,
+        "vol": data.get("volume") or 0,
+        "primary": bool(data.get("is_primary", 1))
+    }
 
 def fetch_universe(post_fn=_post):
+    """'Load More' until the end; primary listings only."""
     out = []; start = 0; total = 0
     while True:
         resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
@@ -50,6 +66,7 @@ def fetch_universe(post_fn=_post):
     return out, total
 
 def _top(post_fn, sort, cap, pred):
+    """Sorted scan + client-side predicate. No server-side filters."""
     try:
         resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                         "sort": {"sortBy": sort[0], "sortOrder": sort[1]}, "range": [0, cap * 4]})
@@ -64,6 +81,7 @@ def _top(post_fn, sort, cap, pred):
         return []
 
 def fetch_movers(post_fn=_post, cap=300):
+    """Significant movers for the Signal Stack L2 boost (±4% or 2x volume)."""
     movers = {}
     def add(m): movers[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
     for m in _top(post_fn, ("change_percent", "desc"), cap, lambda x: x["pct"] >= 4): add(m)
@@ -72,6 +90,7 @@ def fetch_movers(post_fn=_post, cap=300):
     return movers
 
 def fetch_pulse(post_fn=_post, cap=20):
+    """Session snapshot: mega-cap board + top gainers/losers + validity gate."""
     mega = []
     resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                     "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"},
@@ -87,6 +106,7 @@ def fetch_pulse(post_fn=_post, cap=20):
     for m in _top(post_fn, ("change_percent", "desc"), 150, lambda x: x["pct"] >= 3): add_sig(m)
     for m in _top(post_fn, ("change_percent", "asc"), 150, lambda x: x["pct"] <= -3): add_sig(m)
     for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), 150, lambda x: x["relvol"] >= 2): add_sig(m)
+    # Valid only if at least one mega-cap shows real movement (US session 13:30-20:00 UTC)
     valid = any(abs(m["pct"]) > 0.005 for m in mega)
     return {"updated": time.time(), "valid": valid,
             "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig}
@@ -120,15 +140,6 @@ def main():
 
     if args.pulse:
         try:
-            # --- PROBE: raw row with every candidate change-column (diagnostic) ---
-            probe_cols = ["ticker", "change", "change_percent", "close", "gap",
-                          "volume", "relative_volume_10d_calc"]
-            pr = _post({"columns": probe_cols, "options": {"lang": "en"}, "markets": ["america"],
-                        "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"}, "range": [0, 2]})
-            print("PROBE-COLS", json.dumps(probe_cols))
-            for row in pr.get("data", [])[:2]:
-                print("PROBE", row.get("s"), json.dumps(row.get("d", [])))
-            # --- end probe ---
             pulse = fetch_pulse()
             save("market_pulse.json", pulse)
             save("movers.json", {"updated": pulse["updated"], "movers": pulse.get("sig", {})})
