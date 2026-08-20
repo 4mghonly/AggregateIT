@@ -152,7 +152,7 @@ def headlines(items, n=5):
     top = sorted(items, key=lambda x: -x.get("score", 0))[:n]
     return "\n".join(f"{IMP_EMOJI.get(i.get('importance'), '📰')} [{i.get('title', '')[:70]}]({i.get('url', '')})" for i in top)
 
-  MACRO_READ_PROMPT = """You are a macro strategist analyzing the current market backdrop.
+MACRO_READ_PROMPT = """You are a macro strategist analyzing the current market backdrop.
 Provide a concise macro read based on the data below. Strict rules:
 - Be specific and quantitative.
 - Identify risk appetite (risk-on / risk-off / mixed).
