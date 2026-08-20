@@ -198,7 +198,6 @@ def jaccard(a, b):
     return len(a & b) / len(a | b)
 
 def containment(new_tokens, stored_tokens):
-    """Asymmetric overlap: fraction of the NEW topic already present in stored event."""
     if not new_tokens: return 0.0
     return len(new_tokens & stored_tokens) / len(new_tokens)
 
@@ -212,7 +211,6 @@ def primary_entity(i):
     return "GEN"
 
 def cluster_events(items):
-    """Group front-page items into event clusters: same entity + similar topic."""
     clusters = []
     for i in sorted(items, key=lambda x: -x.get("score", 0)):
         toks = title_tokens(i.get("title", ""))
@@ -227,12 +225,10 @@ def cluster_events(items):
         seed = c["entity"] + "|" + " ".join(sorted(title_tokens(c["items"][0]["title"])))
         c["event_id"] = hashlib.md5(seed.encode()).hexdigest()[:12]
         c["source_names"] = sorted({it["source_name"] for it in c["items"]})
-        # Spec #6: syndicated copies do NOT count as independent corroboration
         c["independent_sources"] = len(c["source_names"])
     return clusters
 
 def resolve_prior_event(c, store, hours=72):
-    """Cross-run continuity: does this cluster match an event we already track?"""
     for ev in store.recent_events(c["entity"], hours=hours):
         try: stored = set(json.loads(ev.get("tokens_json") or "[]"))
         except Exception: continue
@@ -314,7 +310,6 @@ def build_sources_block(c):
     return "\n\n".join(lines)
 
 def analyze_event(c, prior):
-    """Event-level analysis with bounded repair-retry + strict validation."""
     if prior:
         prior_state = (f"Event {prior['event_id']} tracked since "
                        f"{datetime.fromtimestamp(prior['first_seen'], timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} | "
@@ -390,7 +385,6 @@ def _post_discord(wh, payload):
     if r.status_code >= 400:
         raise RuntimeError(f"Discord HTTP {r.status_code}: {r.text[:120]}")
 
-# ================= MARKET PULSE (shared module) =================
 def send_market_pulse():
     """Post the pulse once per fresh snapshot; never present zeros as live data."""
     wh = os.environ.get("DISCORD_WEBHOOK")
@@ -494,7 +488,6 @@ async def main():
         else:
             if not DRY_RUN: store.register(i["url"], i["thash"], "filtered", 0)
 
-    # L3: Confluence boost
     ticker_counts = {}
     for i in scored:
         for label in i.get("matched_categories", []):
