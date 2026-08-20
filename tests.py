@@ -45,7 +45,7 @@ check("Fed boosted", sc >= 5, f"score={sc}")
 print("[T7] TradingView 'Load More' pagination")
 def fake_post(body):
     start, end = body["range"]; total = 2500
-    return {"totalCount": total, "data": [{"s": f"T{i}", "d": [f"Co {i}", "Tech", 1e9, 1.0, 1.0, 1e6]} for i in range(start, min(end, total))]}
+    return {"totalCount": total, "data": [{"s": f"T{i}", "d": [f"Co {i}", "Tech", 1e9, 1.0, 1.0, 1e6, 1]} for i in range(start, min(end, total))]}
 uni, total = tv.fetch_universe(post_fn=fake_post)
 check("paginates to end", len(uni) == 2500 and total == 2500)
 
