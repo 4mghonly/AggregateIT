@@ -1,61 +1,92 @@
-# AggregateIT — Financial & Geopolitical Intelligence POC
+# AggregateIT
 
-Hourly OSINT pipeline: scans ~95 RSS sources, 32 subreddits (RSS discovery), and 5 GitHub
-repos → filters against a ticker universe + 61 intelligence keyword clusters → Qwen analyzes
-the most relevant items under a strict, validated schema → structured digests post to Discord.
+«An event-intelligence engine that monitors public sources for geopolitical, macroeconomic,
+corporate, technology, security, and market developments, consolidates reporting into evolving
+events, assessing significance and confidence, and surfacing material changes relevant to
+financial markets.»
 
-## Architecture (current POC coverage)
+Out of scope (by design): automated trading, trade recommendations, price prediction, generic
+news aggregation, full social-media firehose ingestion, multi-user SaaS.
 
-Sources → Normalization → Dedup (URL + normalized title) → Relevance scoring →
-Qwen analysis (fact/assessment separation) → Schema validation → State store → Digest.
-Planned stages: entity resolution, event clustering, evidence/provenance store,
-market-signal scoring.
+## Architecture
 
-## Repository layout
-- `main.py` — engine (fetch, score, analyze, digest, health)
-- `storage.py` — SQLite persistence layer (swap for Postgres later)
-- `tv.py` — TradingView universe/movers fetcher + search CLI
-- `audit.py` — source health audit
-- `tests.py` — correctness baseline (T1–T11)
-- `config/` — sources.json, reddit.json, tickers.json, watchlist.json, keywords.json
-- `data/` — state.db, tv_universe.json, movers.json (generated)
-- `reports/` — run.json, health.json (generated per run)
-
-## Universe scope (documented per audit F-01)
-- **Matching universe:** `config/tickers.json` (S&P 500, curated) + `config/watchlist.json` extras.
-- **TradingView universe:** `data/tv_universe.json` (~20k US-listed securities) is refreshed
-  daily and currently powers `tv.py --search` + movers only. Integration into relevance
-  scoring is a planned stage — the matching universe is NOT yet comprehensive.
-
-## Secrets (Settings → Secrets and variables → Actions)
-| Secret | Purpose |
+| File | Responsibility |
 |---|---|
-| QWEN_API_KEY | LLM authentication |
-| QWEN_BASE_URL | OpenAI-compatible endpoint |
-| QWEN_MODEL | Model name (e.g., qwen-plus) |
-| DISCORD_WEBHOOK | Digest delivery |
+| `main.py` | Orchestration: ingest → score → cluster → analyze → digest → health |
+| `storage.py` | Canonical SQLite schema (`state.db`): items, seen_titles, runs, meta, events, event_updates |
+| `tv.py` | TradingView universe + market pulse (direct percents, honesty gates) |
+| `market.py` | Shared market-pulse embed builder (live / previous-session / stale / no-data) |
+| `briefing.py` | Executive briefings (MINI / MORNING / CLOSING) from `state.db` + pulse |
+| `alerts.py` | Custom alert rules (importance / ticker / keyword) |
+| `history.py` | Searchable event history + timelines (workflow-driven) |
+| `weekly.py` | Weekly intelligence review to Discord |
+| `audit.py` | Source health audit |
+| `tests.py` | Regression gate (runs before every engine run) |
+
+## Pipeline
+
+Source → Document → Signal (score + components) → Event (cluster) → Event Update (timeline)
+→ Assessment (Qwen, schema-validated) → Alert / Digest / Briefing.
+
+## Scoring (explainable)
+
+Components tracked per item: `priority_source`, `ticker`, `mover`, `tv`, `keyword`, `confluence`.
+Front-page floor = 5; below-floor items are `deferred` (retriable), never killed.
+
+## Clustering (v2)
+
+Multi-signal: entity (required) + ticker overlap + keyword-cluster overlap + title Jaccard +
+time proximity, with a content gate and seed anti-drift guard.
+
+## Event lifecycle
+
+NEW → DEVELOPING → CONFIRMED (multi-source + confidence ≥ 85) → STABLE / RESOLVED / RETRACTED.
+Every transition is written to `event_updates` and rendered as a 🕒 Timeline in Discord.
+
+## LLM contract
+
+System role = tradecraft rules; user role = evidence wrapped in `<report>` tags; model is
+instructed to never follow instructions inside source text. Output JSON is schema-validated:
+required fields, enums (event_type, corroboration, importance, sentiment, reliability),
+confidence 0-100, ticker format, ticker-in-evidence, single-source confidence caps.
+
+## Provenance
+
+Canonical domains + source families; syndicated copies count as ONE source.
+Multi-source claims without ≥2 independent families are downgraded and capped.
 
 ## Workflows
-- **News Intelligence Engine** — hourly cron; tests gate; `dry_run` switch; state backup.
-- **Tests** — every push; blocks engine on failure.
-- **TradingView Universe Refresh** — weekdays 12:30 UTC + manual.
-- **Ticker Search** — manual query against the TV universe.
-- **Source Health Audit** — manual source check.
 
-## Persistence & recovery
-SQLite is the single source of truth during a run (WAL + busy_timeout). Cross-run durability:
-rolling Actions cache (primary) → state-backup artifact (recovery) → fresh-init detection.
-State loss is visible in `health.json` — never silent. `concurrency: engine` queues runs so
-two engines never write state simultaneously. Upgrade path: replace `SQLiteStore` with a
-Postgres/Supabase implementation; `main.py` stays untouched.
+| Workflow | Schedule | Purpose |
+|---|---|---|
+| engine.yml | hourly | test gate → ingest/analyze/digest |
+| tv_refresh.yml | 3×/day + weekly | universe + market pulse snapshots |
+| briefing.yml | 04:00 / 14:40 / 21:00 UTC | MINI / MORNING / CLOSING briefings |
+| weekly.yml | Sat 06:00 UTC | weekly review |
+| history.yml | manual | event search |
+| search.yml | manual | ticker search |
+| audit.yml | manual | source health |
 
-## Validation
-- `python tests.py` — scoring, dedup, cashtag rules, TV pagination, Qwen schema, state machine, health.
-- `DRY_RUN=true` — full pipeline, zero tokens, `would_analyze` preview.
-- `reports/health.json` — GREEN/YELLOW/RED + degraded dependency list.
+## Secrets
 
-## Troubleshooting
-- `FATAL: QWEN_API_KEY` → secret missing.
-- `HEALTH: YELLOW — N RSS feeds failed` → normal churn; re-run Source Health Audit.
-- `QUARANTINED` lines → Qwen failed schema twice; item stays retriable, recorded in run.json.
-- Reddit failures → datacenter IP blocks; RSS discovery is best-effort by design.
+`QWEN_API_KEY`, `QWEN_BASE_URL`, `QWEN_MODEL`, `DISCORD_WEBHOOK`, `GITHUB_TOKEN` (auto).
+
+## Persistence
+
+GitHub Actions: rolling cache (primary) + `state-backup` artifact (recovery).
+Swap `SQLiteStore` for a hosted DB later without touching `main.py`.
+
+## Testing
+
+`python tests.py` — scoring, clustering, provenance, lifecycle, validation, storage,
+briefing integration, market-data honesty gates.
+
+## Limitations
+
+Reddit is frequently blocked (degraded-optional). TradingView percents are previous-session
+outside 13:30–20:00 UTC. No embeddings yet (deterministic clustering first).
+
+## Roadmap
+
+Phase 1 reliability ✅ · Phase 2 intelligence ✅ · Phase 3 UX (this drop) ·
+Next: claim-level evidence, embeddings if clustering plateaus, hosted dashboard.
