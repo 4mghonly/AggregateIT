@@ -89,3 +89,47 @@ def build_pulse_embed(pulse, color=None):
                    "value": " | ".join(_fmt_row(m) for m in pulse.get("mega_caps", [])[:20]) or "—", "inline": False})
     auto = 0x2ECC71 if pulse.get("session_open") else 0xF1C40F
     return {"title": "💹 Market Pulse", "color": color or auto, "description": label, "fields": fields}
+
+def build_macro_embed(macro, regime=None, color=None):
+    """Build the macro panel for briefings."""
+    if not macro or not macro.get("valid"):
+        return {"title": "🌐 Macro & Rates", "color": color or 0x95A5A6,
+                "description": "No macro data available."}
+    
+    ts = datetime.fromtimestamp(macro["updated"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    inst_map = {i["sym"]: i for i in macro.get("instruments", [])}
+    
+    def fmt(sym_key):
+        inst = inst_map.get(sym_key)
+        if not inst or inst["pct"] is None: return "—"
+        arrow = "🟢" if inst["pct"] > 0 else ("🔴" if inst["pct"] < 0 else "⚪")
+        return f"{arrow} {inst['name']} {inst['pct']:+.2f}%"
+    
+    fields = [
+        {"name": "📈 Indices", "value": "\n".join([
+            fmt("TVC:SPX"), fmt("TVC:NDX"), fmt("TVC:DJI"), fmt("TVC:RUT")
+        ]), "inline": True},
+        {"name": "📊 Futures", "value": "\n".join([
+            fmt("CME:ES1!"), fmt("CME:NQ1!"), fmt("COMEX:GC1!"), fmt("NYMEX:CL1!")
+        ]), "inline": True},
+        {"name": "💱 Forex", "value": "\n".join([
+            fmt("OANDA:EURUSD"), fmt("OANDA:GBPUSD"), fmt("OANDA:USDJPY")
+        ]), "inline": True},
+        {"name": "🏦 Rates", "value": "\n".join([
+            fmt("TVC:US02Y"), fmt("TVC:US10Y"), fmt("TVC:US30Y")
+        ]), "inline": True},
+    ]
+    
+    if regime:
+        regime_lines = []
+        if "vix" in regime: regime_lines.append(f"VIX: {regime['vix']}")
+        if "curve_2s10s" in regime:
+            inv = " ⚠️ INVERTED" if regime.get("curve_inverted") else ""
+            regime_lines.append(f"2s10s: {regime['curve_2s10s']}{inv}")
+        if "dxy" in regime: regime_lines.append(f"DXY: {regime['dxy']}")
+        if "oil_spike" in regime: regime_lines.append(f"Oil spike: {regime['oil_spike']}")
+        if regime_lines:
+            fields.append({"name": "🎯 Regime Signals", "value": "\n".join(regime_lines), "inline": False})
+    
+    return {"title": "🌐 Macro & Rates", "color": color or 0x9B59B6,
+            "description": f"Macro snapshot · as of {ts}", "fields": fields}
