@@ -540,13 +540,16 @@ async def main():
 
     front_page = []
     for i in scored:
+            front_page = []
+    for i in scored:
         if i["score"] < FRONT_PAGE_FLOOR:
             report["wire"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
-                                   "score": i["score"], "triggers": i["matched_categories"]})
-            if not DRY_RUN: store.succeed(i["url"], i["thash"], "capped")
+                                   "score": i["score"], "triggers": i["matched_categories"], 
+                                   "components": i.get("score_components", {})})
+            if not DRY_RUN: store.register(i["url"], i["thash"], "deferred", i["score"])
             continue
         if len(front_page) >= MAX_ANALYZE:
-            if not DRY_RUN: store.succeed(i["url"], i["thash"], "capped")
+            if not DRY_RUN: store.register(i["url"], i["thash"], "deferred", i["score"])
             continue
         if i["source_type"] == "rss": i["text"] = full_text(i["url"], i["text"])
         front_page.append(i)
