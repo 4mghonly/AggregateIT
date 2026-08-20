@@ -1,8 +1,8 @@
 """TradingView US market universe + pulse.
-Emulates the 'Load More' XHR loop of the TradingView market-movers page.
-v5: bulletproof dictionary mapping (immune to column shifts), absolute-change fallback for pct."""
+v6: session-aware labeling, client-side mover sorting, stock-only filtering."""
 import os, json, time, argparse
 import requests
+from datetime import datetime, timezone, timedelta
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE_DIR, "data")
@@ -10,8 +10,8 @@ os.makedirs(DATA, exist_ok=True)
 
 SCAN_URL = "https://scanner.tradingview.com/america/scan"
 CHUNK = 1000
-COLS = ["ticker", "description", "sector", "market_cap_calc", "change_percent", 
-        "relative_volume_10d_calc", "volume", "is_primary", "change", "close"]
+COLS = ["ticker", "description", "sector", "market_cap_calc", "change_percent",
+        "relative_volume_10d_calc", "volume", "is_primary", "change", "close", "type"]
 
 def _post(body):
     for attempt in (1, 2):
@@ -26,17 +26,13 @@ def _post(body):
 
 def _row(row):
     d = row.get("d", [])
-    # Bulletproof mapping: zip columns to data. Immune to API shifting or dropping columns.
     data = dict(zip(COLS, d))
     ticker = row.get("s", "").split(":")[-1]
-    
     pct = data.get("change_percent") or 0
     chg = data.get("change") or 0
     cls = data.get("close") or 0
-    # Fallback: if API nulls the percent, calculate it from absolute change
     if pct == 0 and chg and cls and (cls - chg) != 0:
         pct = (chg / (cls - chg)) * 100
-        
     return {
         "t": ticker,
         "c": data.get("description") or ticker,
@@ -45,11 +41,23 @@ def _row(row):
         "pct": pct,
         "relvol": data.get("relative_volume_10d_calc") or 0,
         "vol": data.get("volume") or 0,
-        "primary": bool(data.get("is_primary", 1))
+        "primary": bool(data.get("is_primary", 1)),
+        "type": (data.get("type") or "stock"),
     }
 
+def _ok(m):
+    """Primary listing AND common stock (no ETFs/funds/warrants)."""
+    return m["primary"] and m.get("type", "stock") == "stock"
+
+def us_session_open(ts=None):
+    """Mon-Fri 13:30-20:00 UTC (ignores holidays; acceptable for POC)."""
+    dt = datetime.fromtimestamp(ts or time.time(), timezone.utc)
+    if dt.weekday() > 4: return False
+    midnight = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    elapsed = dt - midnight
+    return timedelta(hours=13, minutes=30) <= elapsed < timedelta(hours=20)
+
 def fetch_universe(post_fn=_post):
-    """'Load More' until the end; primary listings only."""
     out = []; start = 0; total = 0
     while True:
         resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
@@ -59,21 +67,20 @@ def fetch_universe(post_fn=_post):
         rows = resp.get("data", [])
         for r in rows:
             m = _row(r)
-            if m["primary"]: out.append(m)
+            if _ok(m): out.append(m)
         start += CHUNK
         if not rows or start >= total: break
         time.sleep(0.75)
     return out, total
 
 def _top(post_fn, sort, cap, pred):
-    """Sorted scan + client-side predicate. No server-side filters."""
     try:
         resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                         "sort": {"sortBy": sort[0], "sortOrder": sort[1]}, "range": [0, cap * 4]})
         out = []
         for r in resp.get("data", []):
             m = _row(r)
-            if m["primary"] and pred(m): out.append(m)
+            if _ok(m) and pred(m): out.append(m)
             if len(out) >= cap: break
         return out
     except Exception as e:
@@ -81,7 +88,6 @@ def _top(post_fn, sort, cap, pred):
         return []
 
 def fetch_movers(post_fn=_post, cap=300):
-    """Significant movers for the Signal Stack L2 boost (±4% or 2x volume)."""
     movers = {}
     def add(m): movers[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
     for m in _top(post_fn, ("change_percent", "desc"), cap, lambda x: x["pct"] >= 4): add(m)
@@ -90,25 +96,26 @@ def fetch_movers(post_fn=_post, cap=300):
     return movers
 
 def fetch_pulse(post_fn=_post, cap=20):
-    """Session snapshot: mega-cap board + top gainers/losers + validity gate."""
+    """Session snapshot with honest labeling and client-side mover sorting."""
     mega = []
     resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                     "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"},
                     "range": [0, cap * 3]})
     for r in resp.get("data", []):
         m = _row(r)
-        if m["primary"]: mega.append(m)
+        if _ok(m): mega.append(m)
         if len(mega) >= cap: break
-    gainers = _top(post_fn, ("change_percent", "desc"), 5, lambda x: x["pct"] > 0)
-    losers = _top(post_fn, ("change_percent", "asc"), 5, lambda x: x["pct"] < 0)
+    # Movers: pool = most-traded stocks, then sort CLIENT-side on computed pct
+    pool = _top(post_fn, ("volume", "desc"), 400, lambda x: x.get("vol", 0) > 0)
+    gainers = sorted([m for m in pool if m["pct"] > 0], key=lambda x: -x["pct"])[:5]
+    losers = sorted([m for m in pool if m["pct"] < 0], key=lambda x: x["pct"])[:5]
     sig = {}
     def add_sig(m): sig[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
     for m in _top(post_fn, ("change_percent", "desc"), 150, lambda x: x["pct"] >= 3): add_sig(m)
     for m in _top(post_fn, ("change_percent", "asc"), 150, lambda x: x["pct"] <= -3): add_sig(m)
     for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), 150, lambda x: x["relvol"] >= 2): add_sig(m)
-    # Valid only if at least one mega-cap shows real movement (US session 13:30-20:00 UTC)
     valid = any(abs(m["pct"]) > 0.005 for m in mega)
-    return {"updated": time.time(), "valid": valid,
+    return {"updated": time.time(), "valid": valid, "session_open": us_session_open(),
             "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig}
 
 def save(name, obj):
@@ -126,7 +133,7 @@ def main():
         try:
             uni, total = fetch_universe()
             save("tv_universe.json", {"updated": time.time(), "total": total, "rows": uni})
-            print(f"TV UNIVERSE OK: {len(uni)} primary rows (totalCount {total})")
+            print(f"TV UNIVERSE OK: {len(uni)} primary stock rows (totalCount {total})")
         except Exception as e:
             print("TV UNIVERSE FAIL:", type(e).__name__, str(e)[:120])
 
@@ -143,7 +150,12 @@ def main():
             pulse = fetch_pulse()
             save("market_pulse.json", pulse)
             save("movers.json", {"updated": pulse["updated"], "movers": pulse.get("sig", {})})
-            state = "OK" if pulse["valid"] else "INVALID (US market closed; session is 13:30-20:00 UTC)"
+            if not pulse["valid"]:
+                state = "INVALID (no reliable data)"
+            elif pulse["session_open"]:
+                state = "OK (LIVE session)"
+            else:
+                state = "OK (previous session data)"
             print(f"TV PULSE {state}: {len(pulse['mega_caps'])} mega caps, "
                   f"{len(pulse['gainers'])} gainers, {len(pulse['losers'])} losers, "
                   f"{len(pulse.get('sig', {}))} significant movers")
