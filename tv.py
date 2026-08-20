@@ -124,6 +124,61 @@ def fetch_pulse(post_fn=_post, cap=20):
     return {"updated": time.time(), "valid": valid, "session_open": us_session_open(),
             "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig, "sample": sample}
 
+def fetch_macro(post_fn=_post):
+    """Fetch curated macro instruments (indices, futures, forex, bonds).
+    Uses symbols query instead of markets to span exchanges."""
+    try:
+        with open(os.path.join(os.path.dirname(__file__), "config", "macro.json"), encoding="utf-8") as f:
+            cfg = json.load(f)
+    except Exception:
+        return {"updated": time.time(), "valid": False, "instruments": []}
+    
+    symbols = []
+    for cat in ("indices", "futures", "forex", "bonds"):
+        for item in cfg.get(cat, []):
+            symbols.append(item["sym"])
+    
+    if not symbols:
+        return {"updated": time.time(), "valid": False, "instruments": []}
+    
+    body = {
+        "symbols": symbols,
+        "columns": COLS,
+        "options": {"lang": "en"}
+    }
+    resp = post_fn(body)
+    rows = resp.get("data", [])
+    
+    instruments = []
+    for r in rows:
+        d = r.get("d", [])
+        data = dict(zip(COLS, d))
+        raw_sym = r.get("s", "")
+        raw_pct = data.get("change")
+        pct = float(raw_pct) if isinstance(raw_pct, (int, float)) else None
+        price = float(data["close"]) if isinstance(data.get("close"), (int, float)) else None
+        
+        # Map back to config metadata
+        meta = None
+        for cat in ("indices", "futures", "forex", "bonds"):
+            for item in cfg.get(cat, []):
+                if item["sym"] == raw_sym:
+                    meta = item
+                    break
+            if meta: break
+        
+        if meta:
+            instruments.append({
+                "sym": meta["sym"],
+                "name": meta["name"],
+                "type": meta["type"],
+                "pct": pct,
+                "price": price
+            })
+    
+    valid = len(instruments) > 0 and any(i["pct"] is not None for i in instruments)
+    return {"updated": time.time(), "valid": valid, "instruments": instruments}
+
 def save(name, obj):
     with open(os.path.join(DATA, name), "w", encoding="utf-8") as f: json.dump(obj, f)
 
