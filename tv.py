@@ -1,6 +1,6 @@
 """TradingView US market universe + pulse + macro.
-v16: v15 + macro fetched from the GLOBAL scanner (cross-exchange symbols),
-minimal macro columns, america fallback, raw-sample diagnostics."""
+v17: v16 + missing-symbol diagnostics in the macro log so config
+fixes are data-driven, never guesswork."""
 import os, json, time, argparse
 import requests
 from datetime import datetime, timezone, timedelta
@@ -130,14 +130,16 @@ def fetch_macro(post_fn=None):
         with open(os.path.join(BASE_DIR, "config", "macro.json"), encoding="utf-8") as f:
             cfg = json.load(f)
     except Exception:
-        return {"updated": time.time(), "valid": False, "instruments": [], "raw_sample": {}, "rows_returned": 0}
+        return {"updated": time.time(), "valid": False, "instruments": [],
+                "raw_sample": {}, "rows_returned": 0, "missing": []}
 
     symbols = []
     for cat in ("indices", "futures", "forex", "bonds"):
         for item in cfg.get(cat, []):
             symbols.append(item["sym"])
     if not symbols:
-        return {"updated": time.time(), "valid": False, "instruments": [], "raw_sample": {}, "rows_returned": 0}
+        return {"updated": time.time(), "valid": False, "instruments": [],
+                "raw_sample": {}, "rows_returned": 0, "missing": []}
 
     body = {"symbols": {"tickers": symbols}, "columns": MACRO_COLS, "options": {"lang": "en"}}
     if post_fn is None:
@@ -168,10 +170,12 @@ def fetch_macro(post_fn=None):
             instruments.append({"sym": meta["sym"], "name": meta["name"],
                                 "type": meta["type"], "pct": pct, "price": price})
 
+    returned = {i["sym"] for i in instruments}
+    missing = [s for s in symbols if s not in returned]
     valid = len(instruments) > 0 and any(i["pct"] is not None for i in instruments)
     sample = dict(zip(MACRO_COLS, rows[0].get("d", []))) if rows else {}
     return {"updated": time.time(), "valid": valid, "instruments": instruments,
-            "raw_sample": sample, "rows_returned": len(rows)}
+            "raw_sample": sample, "rows_returned": len(rows), "missing": missing}
 
 def save(name, obj):
     with open(os.path.join(DATA, name), "w", encoding="utf-8") as f: json.dump(obj, f)
@@ -227,8 +231,10 @@ def main():
             macro = fetch_macro()
             save("macro_pulse.json", macro)
             state = "OK" if macro["valid"] else "INVALID (no reliable data)"
+            miss = macro.get("missing", [])
             print(f"TV MACRO {state}: {len(macro['instruments'])} instruments "
-                  f"({macro.get('rows_returned', 0)} rows returned)")
+                  f"({macro.get('rows_returned', 0)} rows returned)"
+                  + (f" | missing: {', '.join(miss)}" if miss else ""))
             if macro.get("rows_returned") and not macro["valid"]:
                 print("RAW MACRO SAMPLE:", json.dumps(macro.get("raw_sample", {}))[:300])
         except Exception as e:
