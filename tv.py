@@ -1,7 +1,8 @@
 """TradingView US market universe + pulse.
-v8 FINAL: percents are taken DIRECTLY from the scanner's change_percent.
-No derivation (sign-flips impossible), no arbitrary caps (real >100% moves pass),
-missing percents are None (rows drop out of percent lists instead of lying)."""
+v9 FINAL: mega-cap board never depends on percent availability.
+Percents are taken DIRECTLY from change_percent (no derivation, no caps).
+Gainers/losers require a present percent. Validity requires real movement.
+Diagnostics: prints pct coverage and one raw row when coverage is zero."""
 import os, json, time, argparse
 import requests
 from datetime import datetime, timezone, timedelta
@@ -95,14 +96,17 @@ def fetch_movers(post_fn=_post, cap=300):
     return movers
 
 def fetch_pulse(post_fn=_post, cap=20):
-    """Session snapshot: honest labeling, client-side sorting, direct percents only."""
-    mega = []
+    """Session snapshot. Mega board = market-cap sorted stocks (pct-independent).
+    Gainers/losers = real percents only. Validity = real movement present."""
+    mega = []; sample = {}
     resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                     "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"},
                     "range": [0, cap * 3]})
-    for r in resp.get("data", []):
+    rows = resp.get("data", [])
+    if rows: sample = dict(zip(COLS, rows[0].get("d", [])))
+    for r in rows:
         m = _row(r)
-        if _ok(m) and m["pct"] is not None: mega.append(m)
+        if _ok(m): mega.append(m)
         if len(mega) >= cap: break
     pool = _top(post_fn, ("volume", "desc"), 400, lambda x: x.get("vol", 0) > 0)
     gainers = sorted([m for m in pool if m["pct"] is not None and m["pct"] > 0], key=lambda x: -x["pct"])[:5]
@@ -114,7 +118,7 @@ def fetch_pulse(post_fn=_post, cap=20):
     for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), 150, lambda x: x["relvol"] >= 2): add_sig(m)
     valid = any(m["pct"] is not None and abs(m["pct"]) > 0.005 for m in mega)
     return {"updated": time.time(), "valid": valid, "session_open": us_session_open(),
-            "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig}
+            "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig, "sample": sample}
 
 def save(name, obj):
     with open(os.path.join(DATA, name), "w", encoding="utf-8") as f: json.dump(obj, f)
@@ -154,9 +158,13 @@ def main():
                 state = "OK (LIVE session)"
             else:
                 state = "OK (previous session data)"
+            present = sum(1 for m in pulse["mega_caps"] if m["pct"] is not None)
             print(f"TV PULSE {state}: {len(pulse['mega_caps'])} mega caps, "
                   f"{len(pulse['gainers'])} gainers, {len(pulse['losers'])} losers, "
-                  f"{len(pulse.get('sig', {}))} significant movers")
+                  f"{len(pulse.get('sig', {}))} significant movers, "
+                  f"pct coverage {present}/{len(pulse['mega_caps'])}")
+            if pulse["mega_caps"] and present == 0:
+                print("RAW SAMPLE ROW:", json.dumps(pulse.get("sample", {}))[:400])
         except Exception as e:
             print("TV PULSE FAIL:", type(e).__name__, str(e)[:120])
 
