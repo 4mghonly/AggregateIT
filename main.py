@@ -187,58 +187,110 @@ def full_text(url, fallback):
     except Exception: pass
     return fallback[:4000]
 
-# ================= EVENT CLUSTERING =================
-STOPWORDS = {"the","a","an","of","in","on","for","to","and","or","is","are","was","were",
-             "as","at","by","with","from","over","under","after","before","amid","its","it",
-             "that","this","these","those","be","been","has","have","had","will","would","can",
-             "could","says","said","say","new","vs","versus","per","their","his","her","your",
-             "our","into","about","up","out","off","more","less","than","then","so","not","no",
-             "but","if","how","why","what","when","where","who","which","all","any","some","one"}
-
-def title_tokens(title):
-    return {t for t in re.findall(r"[a-z0-9]{2,}", normalize_title(title)) if t not in STOPWORDS}
-
-def jaccard(a, b):
-    if not a or not b: return 0.0
-    return len(a & b) / len(a | b)
-
-def containment(new_tokens, stored_tokens):
-    if not new_tokens: return 0.0
-    return len(new_tokens & stored_tokens) / len(new_tokens)
-
-def primary_entity(i):
-    for label in i.get("matched_categories", []):
+# ================= EVENT CLUSTERING v2 =================
+def cluster_similarity(new_item, cluster):
+    """Multi-signal similarity score for clustering decisions.
+    Returns (score, reasons) where score is 0-1."""
+    score = 0.0
+    reasons = []
+    
+    # Signal 1: Entity match (required baseline)
+    new_entity = primary_entity(new_item)
+    if new_entity != cluster["entity"]:
+        return 0.0, ["entity mismatch"]
+    score += 0.2
+    reasons.append("entity")
+    
+    # Signal 2: Ticker overlap
+    new_tickers = set()
+    for label in new_item.get("matched_categories", []):
         t = label.split(" ")[0]
         if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
-            return t.upper()
-    kws = i.get("keyword_ids", [])
-    if kws: return kws[0]
-    return "GEN"
+            new_tickers.add(t.upper())
+    
+    cluster_tickers = set()
+    for item in cluster["items"]:
+        for label in item.get("matched_categories", []):
+            t = label.split(" ")[0]
+            if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
+                cluster_tickers.add(t.upper())
+    
+    if new_tickers & cluster_tickers:
+        overlap = len(new_tickers & cluster_tickers) / max(len(new_tickers | cluster_tickers), 1)
+        score += 0.3 * overlap
+        reasons.append(f"ticker({overlap:.2f})")
+    
+    # Signal 3: Keyword cluster overlap
+    new_kws = set(new_item.get("keyword_ids", []))
+    cluster_kws = set()
+    for item in cluster["items"]:
+        cluster_kws.update(item.get("keyword_ids", []))
+    
+    if new_kws & cluster_kws:
+        overlap = len(new_kws & cluster_kws) / max(len(new_kws | cluster_kws), 1)
+        score += 0.25 * overlap
+        reasons.append(f"keyword({overlap:.2f})")
+    
+    # Signal 4: Title token Jaccard
+    new_toks = title_tokens(new_item.get("title", ""))
+    jacc = jaccard(new_toks, cluster["tokens"])
+    score += 0.2 * jacc
+    if jacc > 0.1:
+        reasons.append(f"title({jacc:.2f})")
+    
+    # Signal 5: Time proximity (bonus for close timestamps)
+    new_ts = new_item.get("ts", 0)
+    cluster_ts = max(item.get("ts", 0) for item in cluster["items"])
+    hours_apart = abs(new_ts - cluster_ts) / 3600.0
+    if hours_apart < 1:
+        score += 0.05
+        reasons.append("time(<1h)")
+    elif hours_apart < 6:
+        score += 0.02
+        reasons.append("time(<6h)")
+    
+    return score, reasons
 
 def cluster_events(items):
+    """Group front-page items into event clusters using multi-signal similarity.
+    Anti-drift: requires minimum similarity with cluster seed (first item)."""
     clusters = []
+    
     for i in sorted(items, key=lambda x: -x.get("score", 0)):
-        toks = title_tokens(i.get("title", ""))
-        ent = primary_entity(i)
         placed = False
+        
         for c in clusters:
-            if c["entity"] == ent and jaccard(toks, c["tokens"]) >= 0.35:
-                c["items"].append(i); c["tokens"] |= toks; placed = True; break
+            # Check similarity with cluster
+            sim, reasons = cluster_similarity(i, c)
+            
+            # Anti-drift guard: also check similarity with SEED (first item)
+            seed = c["items"][0]
+            seed_cluster = {"entity": c["entity"], "tokens": title_tokens(seed.get("title", "")), "items": [seed]}
+            seed_sim, _ = cluster_similarity(i, seed_cluster)
+            
+            # Cluster if: overall similarity >= 0.4 AND seed similarity >= 0.3
+            if sim >= 0.4 and seed_sim >= 0.3:
+                c["items"].append(i)
+                c["tokens"] |= title_tokens(i.get("title", ""))
+                placed = True
+                break
+        
         if not placed:
-            clusters.append({"entity": ent, "tokens": toks, "items": [i], "event_id": None})
+            clusters.append({
+                "entity": primary_entity(i),
+                "tokens": title_tokens(i.get("title", "")),
+                "items": [i],
+                "event_id": None
+            })
+    
+    # Generate event IDs and compute source counts
     for c in clusters:
         seed = c["entity"] + "|" + " ".join(sorted(title_tokens(c["items"][0]["title"])))
         c["event_id"] = hashlib.md5(seed.encode()).hexdigest()[:12]
         c["source_names"] = sorted({it["source_name"] for it in c["items"]})
         c["independent_sources"] = len(c["source_names"])
+    
     return clusters
-
-def resolve_prior_event(c, store, hours=72):
-    for ev in store.recent_events(c["entity"], hours=hours):
-        try: stored = set(json.loads(ev.get("tokens_json") or "[]"))
-        except Exception: continue
-        if containment(c["tokens"], stored) >= 0.5: return ev
-    return None
 
 # ================= QWEN EVENT-LEVEL CONTRACT (hardened) =================
 EVENT_SYSTEM_PROMPT = """You are a disciplined intelligence analyst performing EVENT-LEVEL analysis.
