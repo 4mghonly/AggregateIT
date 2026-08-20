@@ -1,0 +1,31 @@
+name: Intelligence Slide
+on:
+  schedule:
+    - cron: "15 21 * * 1-5"   # daily, 15 min after the CLOSING bell
+  workflow_dispatch:
+jobs:
+  slide:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests matplotlib
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: seen-db-${{ github.run_id }}
+          restore-keys: |
+            seen-db-
+      - name: Render + send slide
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+          QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
+          QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
+        run: python slide.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: intel-slide
+          path: reports/intel_slide.png
