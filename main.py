@@ -88,42 +88,46 @@ def find_matches(text):
 def score_item(i):
     text = i["title"] + " " + i["text"]; low = text.lower()
     score = 0; hits = []
+    components = {"priority_source": 0, "ticker": 0, "mover": 0, "keyword": 0, "tv": 0, "confluence": 0}
+    
     if any(a in i["source_name"].lower() for a in ALWAYS_ANALYZE):
-        score += 5; hits.append("Priority Source")
+        score += 5; hits.append("Priority Source"); components["priority_source"] += 5
+        
     for sym in set(c.upper() for c in CASHTAG.findall(text)):
         if sym in T_BY_SYM:
-            score += 3; hits.append(sym)
-            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)")
+            score += 3; hits.append(sym); components["ticker"] += 3
+            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)"); components["mover"] += 4
+            
     for t in SYMS:
-        if re.search(rf"\b{re.escape(t)}\b", text, re.I): score += 2; hits.append(t)
+        if re.search(rf"\b{re.escape(t)}\b", text, re.I): score += 2; hits.append(t); components["ticker"] += 2
+        
     for name, d in NAMES:
-        if name in low: score += 3; hits.append(d["t"])
+        if name in low: score += 3; hits.append(d["t"]); components["ticker"] += 3
+        
     for sym in set(c.upper() for c in CASHTAG.findall(text)):
         if sym in TV_TICKERS and sym not in T_BY_SYM:
-            score += 2; hits.append(f"{sym} (TV)")
-            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)")
+            score += 2; hits.append(f"{sym} (TV)"); components["tv"] += 2
+            if sym in MOVERS: score += 4; hits.append(f"{sym} (Mover)"); components["mover"] += 4
+            
     for name, t in TV_NAMES.items():
         if name in low and t not in T_BY_SYM:
-            score += 2; hits.append(f"{t} (TV)")
-            if t in MOVERS: score += 4; hits.append(f"{t} (Mover)")
+            score += 2; hits.append(f"{t} (TV)"); components["tv"] += 2
+            if t in MOVERS: score += 4; hits.append(f"{t} (Mover)"); components["mover"] += 4
+            
     kws = find_matches(text)
-    for e in kws: score += PRIO_SCORE.get(e.get("prio", "Medium"), 2)
+    kw_score = sum(PRIO_SCORE.get(e.get("prio", "Medium"), 2) for e in kws)
+    score += kw_score; components["keyword"] += kw_score
+    
     i["keyword_ids"] = [e["id"] for e in kws]
     i["keyword_tags"] = sorted({t for e in kws for t in e.get("tags", [])})
+    i["score_components"] = components
+    
     labels = []
     for h in dict.fromkeys(hits):
         d = T_BY_SYM.get(h)
         labels.append(f"{h} ({d['c']} · {d['s']})" if d else h)
     labels += [f"{e['id']} · {e['sub']}" for e in kws]
     return score, labels
-
-async def fetch_text(session, url, sem, headers=None):
-    async with sem:
-        try:
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=20), headers=headers) as r:
-                if r.status == 200: return await r.text()
-        except Exception: pass
-    return None
 
 async def fetch_rss(session, src, sem):
     txt = await fetch_text(session, src["_url"], sem); out = []
