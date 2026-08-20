@@ -159,8 +159,9 @@ def build_exec(mode):
     losers = (pulse or {}).get("losers", [])[:4]
     hits = watch_hits(items, (pulse or {}).get("sig", {}))
     st_rolls, st_radar = fetch_stocktwits([m["t"] for m in gainers + losers] + hits)
-    label = "MORNING DESK" if mode == "MORNING" else "CLOSING BELL"
-    color = 0xF1C40F if mode == "MORNING" else 0x3498DB
+    label = {"MORNING": "MORNING DESK", "CLOSING": "CLOSING BELL",
+             "LIVE": "LIVE DESK · US SESSION"}.get(mode, "LIVE DESK · US SESSION")
+    color = {"MORNING": 0xF1C40F, "CLOSING": 0x3498DB, "LIVE": 0x2ECC71}.get(mode, 0x2ECC71)
     now = datetime.now(timezone.utc).strftime("%a %Y-%m-%d %H:%M UTC")
     e1 = {"title": f"📋 EXECUTIVE BRIEFING · {label}",
           "description": f"{now} • Window: last {hours}h • **{len(items)}** tracked events",
