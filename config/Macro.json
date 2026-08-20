@@ -1,0 +1,29 @@
+{
+  "indices": [
+    {"sym": "TVC:SPX", "name": "S&P 500", "type": "index"},
+    {"sym": "TVC:NDX", "name": "Nasdaq 100", "type": "index"},
+    {"sym": "TVC:DJI", "name": "Dow Jones", "type": "index"},
+    {"sym": "TVC:RUT", "name": "Russell 2000", "type": "index"},
+    {"sym": "CBOE:VIX", "name": "VIX", "type": "index"},
+    {"sym": "TVC:DXY", "name": "US Dollar Index", "type": "index"}
+  ],
+  "futures": [
+    {"sym": "CME:ES1!", "name": "S&P 500 E-mini", "type": "future"},
+    {"sym": "CME:NQ1!", "name": "Nasdaq 100 E-mini", "type": "future"},
+    {"sym": "CME:YM1!", "name": "Dow E-mini", "type": "future"},
+    {"sym": "COMEX:GC1!", "name": "Gold", "type": "future"},
+    {"sym": "NYMEX:CL1!", "name": "WTI Crude", "type": "future"},
+    {"sym": "NYMEX:NG1!", "name": "Natural Gas", "type": "future"}
+  ],
+  "forex": [
+    {"sym": "OANDA:EURUSD", "name": "EUR/USD", "type": "forex"},
+    {"sym": "OANDA:GBPUSD", "name": "GBP/USD", "type": "forex"},
+    {"sym": "OANDA:USDJPY", "name": "USD/JPY", "type": "forex"},
+    {"sym": "OANDA:USDCNH", "name": "USD/CNH", "type": "forex"}
+  ],
+  "bonds": [
+    {"sym": "TVC:US02Y", "name": "US 2Y Yield", "type": "bond"},
+    {"sym": "TVC:US10Y", "name": "US 10Y Yield", "type": "bond"},
+    {"sym": "TVC:US30Y", "name": "US 30Y Yield", "type": "bond"}
+  ]
+}
