@@ -380,5 +380,26 @@ check("critical rule fires", len(alerts.match_rules(a_crit, {}, rules)) == 1)
 check("ticker rule fires", len(alerts.match_rules(a_tsla, {}, rules)) == 1)
 check("no false alert", len(alerts.match_rules(a_none, {}, rules)) == 0)
 
+print("[T42] Price floor also gates relvol scans (L2 boost hygiene)")
+ROW_RV_JUNK = {"s": "RVJ", "d": [None, "Relvol Junk", "T", 1e7, None, 9.0, 5000000, True, 5.0, 0.05, "stock"]}
+ROW_RV_OK = {"s": "RVO", "d": [None, "Relvol Real", "T", 1e9, None, 6.0, 5000000, True, 8.0, 12.0, "stock"]}
+def fake_post11(body):
+    return {"totalCount": 2, "data": [ROW_RV_JUNK, ROW_RV_OK]}
+mv11 = tv.fetch_movers(post_fn=fake_post11)
+check("sub-$0.50 relvol spike excluded", "RVJ" not in mv11, sorted(mv11))
+check("$12 relvol spike kept", "RVO" in mv11, sorted(mv11))
+
+print("[T43] Price floor 0.5: shells excluded, $0.50+ violent movers kept")
+ROW_JUNK = {"s": "JUNK", "d": [None, "Junk Shell", "T", 1e7, None, 5.0, 900000, True, 9900.0, 0.01, "stock"]}
+ROW_SUB = {"s": "SUBX", "d": [None, "Sub Half", "T", 1e7, None, 4.0, 800000, True, 45.0, 0.40, "stock"]}
+ROW_MMA = {"s": "MMA", "d": [None, "Mega Matrix", "T", 1e8, None, 1700.0, 500000, True, 115.79, 0.75, "stock"]}
+def fake_post10(body):
+    return {"totalCount": 3, "data": [ROW_JUNK, ROW_SUB, ROW_MMA]}
+p10 = tv.fetch_pulse(post_fn=fake_post10, cap=20)
+allm = p10["gainers"] + p10["losers"]
+check("sub-cent +9900% excluded", all(m["t"] != "JUNK" for m in allm), [m["t"] for m in allm])
+check("$0.40 mover excluded", all(m["t"] != "SUBX" for m in allm), [m["t"] for m in allm])
+check("$0.75 mover +115% kept", any(m["t"] == "MMA" for m in p10["gainers"]), [m["t"] for m in p10["gainers"]])
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
