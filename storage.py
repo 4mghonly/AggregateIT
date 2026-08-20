@@ -38,7 +38,10 @@ class SQLiteStore:
             assessment TEXT, what_changed TEXT, urls_json TEXT,
             first_seen REAL, last_updated REAL,
             sentiment TEXT, triggers_json TEXT, sources_json TEXT, score REAL DEFAULT 0);
-        """)
+                CREATE TABLE IF NOT EXISTS event_updates(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id TEXT, ts REAL, type TEXT, details_json TEXT);
+        CREATE INDEX IF NOT EXISTS idx_updates_event ON event_updates(event_id, ts);""")
         for col, ddl in (("sentiment", "TEXT"), ("triggers_json", "TEXT"),
                          ("sources_json", "TEXT"), ("score", "REAL DEFAULT 0")):
             try: self.con.execute(f"ALTER TABLE events ADD COLUMN {col} {ddl}")
