@@ -1,0 +1,23 @@
+name: Weekly Intelligence Review
+on:
+  schedule:
+    - cron: "0 6 * * 6"
+  workflow_dispatch:
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: seen-db-${{ github.run_id }}
+          restore-keys: |
+            seen-db-
+      - name: Send weekly review
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: python weekly.py
