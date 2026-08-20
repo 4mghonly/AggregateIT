@@ -1,6 +1,6 @@
 """TradingView US market universe + pulse + macro.
-v17: v16 + missing-symbol diagnostics in the macro log so config
-fixes are data-driven, never guesswork."""
+v18: macro fetch is two-pass (global, then america for whatever global missed)
+with suffix-normalized symbol matching (YM1 == YM1!)."""
 import os, json, time, argparse
 import requests
 from datetime import datetime, timezone, timedelta
@@ -16,6 +16,9 @@ MIN_PRICE = 0.5  # movers must trade at $0.50+ (sub-half-dollar shells are perce
 COLS = ["ticker", "description", "sector", "market_cap_calc", "change_percent",
         "relative_volume_10d_calc", "volume", "is_primary", "change", "close", "type"]
 MACRO_COLS = ["description", "change", "close"]
+
+def _norm_sym(s):
+    return (s or "").rstrip("!")
 
 def _post(body, url=SCAN_URL):
     for attempt in (1, 2):
@@ -125,7 +128,7 @@ def fetch_pulse(post_fn=_post, cap=20):
             "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig, "sample": sample}
 
 def fetch_macro(post_fn=None):
-    """Curated macro instruments via the GLOBAL scanner (cross-exchange symbols)."""
+    """Curated macro instruments: global scanner first, america for the leftovers."""
     try:
         with open(os.path.join(BASE_DIR, "config", "macro.json"), encoding="utf-8") as f:
             cfg = json.load(f)
@@ -134,44 +137,41 @@ def fetch_macro(post_fn=None):
                 "raw_sample": {}, "rows_returned": 0, "missing": []}
 
     symbols = []
+    index = {}
     for cat in ("indices", "futures", "forex", "bonds"):
         for item in cfg.get(cat, []):
             symbols.append(item["sym"])
+            index[_norm_sym(item["sym"])] = item
     if not symbols:
         return {"updated": time.time(), "valid": False, "instruments": [],
                 "raw_sample": {}, "rows_returned": 0, "missing": []}
 
-    body = {"symbols": {"tickers": symbols}, "columns": MACRO_COLS, "options": {"lang": "en"}}
     if post_fn is None:
-        resp = _post(body, url=MACRO_SCAN_URL)
+        resp = _post({"symbols": {"tickers": symbols}, "columns": MACRO_COLS, "options": {"lang": "en"}},
+                     url=MACRO_SCAN_URL)
         rows = resp.get("data", [])
-        if not rows:  # fallback to america endpoint
-            resp = _post(body)
-            rows = resp.get("data", [])
+        got = {_norm_sym(r.get("s", "")) for r in rows}
+        leftovers = [s for s in symbols if _norm_sym(s) not in got]
+        if leftovers:  # america carries US equity-index futures & some indices
+            resp2 = _post({"symbols": {"tickers": leftovers}, "columns": MACRO_COLS, "options": {"lang": "en"}})
+            rows = rows + resp2.get("data", [])
     else:
-        resp = post_fn(body)
+        resp = post_fn({"symbols": {"tickers": symbols}, "columns": MACRO_COLS, "options": {"lang": "en"}})
         rows = resp.get("data", [])
 
     instruments = []
     for r in rows:
         data = dict(zip(MACRO_COLS, r.get("d", [])))
-        raw_sym = r.get("s", "")
+        meta = index.get(_norm_sym(r.get("s", "")))
+        if not meta: continue
         raw_pct = data.get("change")
         pct = float(raw_pct) if isinstance(raw_pct, (int, float)) else None
         price = float(data["close"]) if isinstance(data.get("close"), (int, float)) else None
-        meta = None
-        for cat in ("indices", "futures", "forex", "bonds"):
-            for item in cfg.get(cat, []):
-                if item["sym"] == raw_sym:
-                    meta = item
-                    break
-            if meta: break
-        if meta:
-            instruments.append({"sym": meta["sym"], "name": meta["name"],
-                                "type": meta["type"], "pct": pct, "price": price})
+        instruments.append({"sym": meta["sym"], "name": meta["name"],
+                            "type": meta["type"], "pct": pct, "price": price})
 
-    returned = {i["sym"] for i in instruments}
-    missing = [s for s in symbols if s not in returned]
+    returned = {_norm_sym(i["sym"]) for i in instruments}
+    missing = [s for s in symbols if _norm_sym(s) not in returned]
     valid = len(instruments) > 0 and any(i["pct"] is not None for i in instruments)
     sample = dict(zip(MACRO_COLS, rows[0].get("d", []))) if rows else {}
     return {"updated": time.time(), "valid": valid, "instruments": instruments,
