@@ -1,7 +1,8 @@
 """TradingView US market universe + pulse.
-v12 FINAL: the scanner's `change` column IS the percent change vs previous close
-(verified against raw sample: NVDA change=-0.992 => -0.99%). `change_percent`
-returns null and is ignored. No derivation, no caps, no sign flips possible."""
+v14: percent taken directly from the scanner's `change` column (authoritative).
+MIN_PRICE = 0.5 gates EVERY movers/sig list (pct scans AND relvol scans) so
+sub-half-dollar shells (percent-noise like +9900% / -99%) can never hijack the
+boards or earn the L2 movers boost. Mega-cap board and universe unaffected."""
 import os, json, time, argparse
 import requests
 from datetime import datetime, timezone, timedelta
@@ -12,6 +13,7 @@ os.makedirs(DATA, exist_ok=True)
 
 SCAN_URL = "https://scanner.tradingview.com/america/scan"
 CHUNK = 1000
+MIN_PRICE = 0.5  # movers must trade at $0.50+ (sub-half-dollar shells are percent-noise)
 COLS = ["ticker", "description", "sector", "market_cap_calc", "change_percent",
         "relative_volume_10d_calc", "volume", "is_primary", "change", "close", "type"]
 
@@ -38,6 +40,7 @@ def _row(row):
         "s": data.get("sector") or "US Market",
         "mcap": data.get("market_cap_calc") or 0,
         "pct": pct,
+        "price": float(data["close"]) if isinstance(data.get("close"), (int, float)) else 0.0,
         "relvol": data.get("relative_volume_10d_calc") or 0,
         "vol": data.get("volume") or 0,
         "primary": bool(data.get("is_primary", 1)),
@@ -87,15 +90,16 @@ def _top(post_fn, sort, cap, pred):
         return []
 
 def fetch_movers(post_fn=_post, cap=300):
+    """Movers for the L2 boost: price floor applies to pct AND relvol scans."""
     movers = {}
     def add(m): movers[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
-    for m in _top(post_fn, ("change_percent", "desc"), cap, lambda x: x["pct"] is not None and x["pct"] >= 4): add(m)
-    for m in _top(post_fn, ("change_percent", "asc"), cap, lambda x: x["pct"] is not None and x["pct"] <= -4): add(m)
-    for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), cap, lambda x: x["relvol"] >= 2): add(m)
+    for m in _top(post_fn, ("change_percent", "desc"), cap, lambda x: x["pct"] is not None and x["price"] >= MIN_PRICE and x["pct"] >= 4): add(m)
+    for m in _top(post_fn, ("change_percent", "asc"), cap, lambda x: x["pct"] is not None and x["price"] >= MIN_PRICE and x["pct"] <= -4): add(m)
+    for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), cap, lambda x: x["price"] >= MIN_PRICE and x["relvol"] >= 2): add(m)
     return movers
 
 def fetch_pulse(post_fn=_post, cap=20):
-    """Session snapshot: honest labeling, client-side sorting, direct percents."""
+    """Session snapshot: honest labeling, client-side sorting, $0.50+ movers only."""
     mega = []; sample = {}
     resp = post_fn({"columns": COLS, "options": {"lang": "en"}, "markets": ["america"],
                     "sort": {"sortBy": "market_cap_calc", "sortOrder": "desc"},
@@ -107,13 +111,15 @@ def fetch_pulse(post_fn=_post, cap=20):
         if _ok(m) and m["pct"] is not None: mega.append(m)
         if len(mega) >= cap: break
     pool = _top(post_fn, ("volume", "desc"), 400, lambda x: x.get("vol", 0) > 0)
-    gainers = sorted([m for m in pool if m["pct"] is not None and m["pct"] > 0], key=lambda x: -x["pct"])[:5]
-    losers = sorted([m for m in pool if m["pct"] is not None and m["pct"] < 0], key=lambda x: x["pct"])[:5]
+    gainers = sorted([m for m in pool if m["pct"] is not None and m["pct"] > 0 and m["price"] >= MIN_PRICE],
+                     key=lambda x: -x["pct"])[:5]
+    losers = sorted([m for m in pool if m["pct"] is not None and m["pct"] < 0 and m["price"] >= MIN_PRICE],
+                    key=lambda x: x["pct"])[:5]
     sig = {}
     def add_sig(m): sig[m["t"]] = {"pct": m["pct"], "relvol": m["relvol"], "mcap": m["mcap"]}
-    for m in _top(post_fn, ("change_percent", "desc"), 150, lambda x: x["pct"] is not None and x["pct"] >= 3): add_sig(m)
-    for m in _top(post_fn, ("change_percent", "asc"), 150, lambda x: x["pct"] is not None and x["pct"] <= -3): add_sig(m)
-    for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), 150, lambda x: x["relvol"] >= 2): add_sig(m)
+    for m in _top(post_fn, ("change_percent", "desc"), 150, lambda x: x["pct"] is not None and x["price"] >= MIN_PRICE and x["pct"] >= 3): add_sig(m)
+    for m in _top(post_fn, ("change_percent", "asc"), 150, lambda x: x["pct"] is not None and x["price"] >= MIN_PRICE and x["pct"] <= -3): add_sig(m)
+    for m in _top(post_fn, ("relative_volume_10d_calc", "desc"), 150, lambda x: x["price"] >= MIN_PRICE and x["relvol"] >= 2): add_sig(m)
     valid = any(m["pct"] is not None and abs(m["pct"]) > 0.005 for m in mega)
     return {"updated": time.time(), "valid": valid, "session_open": us_session_open(),
             "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig, "sample": sample}
@@ -180,7 +186,7 @@ def main():
         for r in hits:
             flag = " 🔥 MOVER" if r["t"] in mv else ""
             pct_s = f"{r['pct']:+6.2f}%" if r["pct"] is not None else "   n/a"
-            print(f"{r['t']:8} | {r['c'][:36]:38} | {str(r['s'])[:16]:16} | mcap {r['mcap']/1e9:8.1f}B | {pct_s} | relvol {r['relvol']:5.2f}{flag}")
+            print(f"{r['t']:8} | {r['c'][:36]:38} | {str(r['s'])[:16]:16} | mcap {r['mcap']/1e9:8.1f}B | ${r['price']:7.2f} | {pct_s} | relvol {r['relvol']:5.2f}{flag}")
 
 if __name__ == "__main__":
     main()
