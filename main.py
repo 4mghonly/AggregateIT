@@ -216,103 +216,80 @@ def primary_entity(i):
     return "GEN"
 
 def cluster_similarity(new_item, cluster):
-    """Multi-signal similarity score for clustering decisions."""
+    """Multi-signal similarity. Returns (score, reasons, content_gate).
+    content_gate requires real topical overlap (title or keyword cluster),
+    preventing same-ticker/different-topic stories from merging."""
     score = 0.0
     reasons = []
-    
-    # Signal 1: Entity match (required baseline)
     new_entity = primary_entity(new_item)
     if new_entity != cluster["entity"]:
-        return 0.0, ["entity mismatch"]
+        return 0.0, ["entity mismatch"], False
     score += 0.2
     reasons.append("entity")
-    
-    # Signal 2: Ticker overlap
-    new_tickers = set()
-    for label in new_item.get("matched_categories", []):
-        t = label.split(" ")[0]
-        if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
-            new_tickers.add(t.upper())
-    
-    cluster_tickers = set()
-    for item in cluster["items"]:
-        for label in item.get("matched_categories", []):
+
+    def tickers_of(it):
+        out = set()
+        for label in it.get("matched_categories", []):
             t = label.split(" ")[0]
             if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
-                cluster_tickers.add(t.upper())
-    
+                out.add(t.upper())
+        return out
+
+    new_tickers = tickers_of(new_item)
+    cluster_tickers = set()
+    for item in cluster["items"]: cluster_tickers |= tickers_of(item)
     if new_tickers & cluster_tickers:
-        overlap = len(new_tickers & cluster_tickers) / max(len(new_tickers | cluster_tickers), 1)
-        score += 0.3 * overlap
-        reasons.append(f"ticker({overlap:.2f})")
-    
-    # Signal 3: Keyword cluster overlap
+        ov = len(new_tickers & cluster_tickers) / max(len(new_tickers | cluster_tickers), 1)
+        score += 0.3 * ov
+        reasons.append(f"ticker({ov:.2f})")
+
     new_kws = set(new_item.get("keyword_ids", []))
     cluster_kws = set()
-    for item in cluster["items"]:
-        cluster_kws.update(item.get("keyword_ids", []))
-    
+    for item in cluster["items"]: cluster_kws.update(item.get("keyword_ids", []))
+    kw_ov = 0.0
     if new_kws & cluster_kws:
-        overlap = len(new_kws & cluster_kws) / max(len(new_kws | cluster_kws), 1)
-        score += 0.25 * overlap
-        reasons.append(f"keyword({overlap:.2f})")
-    
-    # Signal 4: Title token Jaccard
+        kw_ov = len(new_kws & cluster_kws) / max(len(new_kws | cluster_kws), 1)
+        score += 0.25 * kw_ov
+        reasons.append(f"keyword({kw_ov:.2f})")
+
     new_toks = title_tokens(new_item.get("title", ""))
     jacc = jaccard(new_toks, cluster["tokens"])
     score += 0.2 * jacc
-    if jacc > 0.1:
-        reasons.append(f"title({jacc:.2f})")
-    
-    # Signal 5: Time proximity
+    if jacc > 0.1: reasons.append(f"title({jacc:.2f})")
+
     new_ts = new_item.get("ts", 0)
     cluster_ts = max(item.get("ts", 0) for item in cluster["items"])
     hours_apart = abs(new_ts - cluster_ts) / 3600.0
-    if hours_apart < 1:
-        score += 0.05
-        reasons.append("time(<1h)")
-    elif hours_apart < 6:
-        score += 0.02
-        reasons.append("time(<6h)")
-    
-    return score, reasons
+    if hours_apart < 1: score += 0.05; reasons.append("time(<1h)")
+    elif hours_apart < 6: score += 0.02; reasons.append("time(<6h)")
+
+    content_gate = (jacc >= 0.3) or (kw_ov > 0)
+    return score, reasons, content_gate
 
 def cluster_events(items):
-    """Group front-page items into event clusters using multi-signal similarity.
-    Anti-drift: requires minimum similarity with cluster seed (first item)."""
+    """Multi-signal clustering with anti-drift seed guard + content gate."""
     clusters = []
-    
     for i in sorted(items, key=lambda x: -x.get("score", 0)):
         placed = False
-        
         for c in clusters:
-            sim, reasons = cluster_similarity(i, c)
-            
-            # Anti-drift guard: check similarity with SEED (first item)
+            sim, reasons, content = cluster_similarity(i, c)
             seed = c["items"][0]
             seed_cluster = {"entity": c["entity"], "tokens": title_tokens(seed.get("title", "")), "items": [seed]}
-            seed_sim, _ = cluster_similarity(i, seed_cluster)
-            
-            if sim >= 0.4 and seed_sim >= 0.3:
+            seed_sim, _, _ = cluster_similarity(i, seed_cluster)
+            if content and sim >= 0.4 and seed_sim >= 0.3:
                 c["items"].append(i)
                 c["tokens"] |= title_tokens(i.get("title", ""))
                 placed = True
                 break
-        
         if not placed:
-            clusters.append({
-                "entity": primary_entity(i),
-                "tokens": title_tokens(i.get("title", "")),
-                "items": [i],
-                "event_id": None
-            })
-    
+            clusters.append({"entity": primary_entity(i),
+                             "tokens": title_tokens(i.get("title", "")),
+                             "items": [i], "event_id": None})
     for c in clusters:
         seed = c["entity"] + "|" + " ".join(sorted(title_tokens(c["items"][0]["title"])))
         c["event_id"] = hashlib.md5(seed.encode()).hexdigest()[:12]
         c["source_names"] = sorted({it["source_name"] for it in c["items"]})
         c["independent_sources"] = len(c["source_names"])
-    
     return clusters
 
 def resolve_prior_event(c, store, hours=72):
