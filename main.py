@@ -660,6 +660,8 @@ async def main():
         a, err = analyze_event(c, prior)
         if a:
             now = time.time()
+        if a:
+            now = time.time()
             if prior:
                 c["event_id"] = prior["event_id"]
                 try: old_tokens = set(json.loads(prior.get("tokens_json") or "[]"))
