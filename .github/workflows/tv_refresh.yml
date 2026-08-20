@@ -2,7 +2,7 @@ name: TradingView Universe Refresh
 on:
   schedule:
     - cron: "30 12 * * 1"
-    - cron: "0 15,18 * * 1-5"
+    - cron: "59 13-19 * * 1-5"
     - cron: "30 20 * * 1-5"
   workflow_dispatch:
 jobs:
@@ -22,7 +22,7 @@ jobs:
       - name: Universe (weekly Monday + manual)
         if: github.event.schedule == '30 12 * * 1' || github.event_name == 'workflow_dispatch'
         run: python tv.py --universe
-      - name: Pulse (intraday snapshots)
+      - name: Pulse (pre-briefing + post-close snapshots)
         run: python tv.py --pulse
       - uses: actions/upload-artifact@v4
         if: always()
