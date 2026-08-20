@@ -376,6 +376,8 @@ EVENT_USER_PROMPT = """TRIGGER CONTEXT: flagged because it relates to: {cats}
 PRIOR EVENT STATE:
 {prior_state}
 
+{macro_context}
+
 REPORTS ({n_sources} distinct source(s)):
 <reports>
 {sources_block}
@@ -430,6 +432,25 @@ def build_sources_block(c):
         ts = datetime.fromtimestamp(it["ts"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
         lines.append(f"<report index=\"{idx}\">\nSOURCE: {it['source_name']} | PUBLISHED: {ts}\nTITLE: {it['title']}\nTEXT: {it['text'][:1200]}\n</report>")
     return "\n\n".join(lines)
+    
+def get_macro_context():
+    """Build a macro context string for event analysis."""
+    try:
+        from market import load_macro_pulse, compute_regime
+        macro = load_macro_pulse()
+        if not macro or not macro.get("valid"): return ""
+        regime = compute_regime(macro)
+        inst_map = {i["sym"]: i for i in macro.get("instruments", [])}
+        lines = ["Current macro backdrop:"]
+        for sym in ["TVC:SPX", "CBOE:VIX", "TVC:US10Y", "TVC:DXY", "NYMEX:CL1!"]:
+            inst = inst_map.get(sym)
+            if inst and inst["pct"] is not None:
+                lines.append(f"- {inst['name']}: {inst['pct']:+.2f}%")
+        if regime.get("curve_inverted"): lines.append("- ⚠️ Yield curve inverted")
+        if regime.get("oil_spike"): lines.append(f"- Oil spike: {regime['oil_spike']}")
+        return "\n".join(lines)
+    except Exception:
+        return ""
 
 def analyze_event(c, prior):
     if prior:
