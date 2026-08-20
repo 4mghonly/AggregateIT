@@ -429,4 +429,352 @@ def get_macro_context():
         if not macro or not macro.get("valid"): return ""
         regime = compute_regime(macro)
         inst_map = {i["sym"]: i for i in macro.get("instruments", [])}
-        lines =
+        lines = ["Current macro backdrop:"]
+        for sym in ["TVC:SPX", "CBOE:VIX", "TVC:US10Y", "TVC:DXY", "NYMEX:CL1!"]:
+            inst = inst_map.get(sym)
+            if inst and inst["pct"] is not None:
+                lines.append(f"- {inst['name']}: {inst['pct']:+.2f}%")
+        if regime.get("curve_inverted"): lines.append("- ⚠️ Yield curve inverted")
+        if regime.get("oil_spike"): lines.append(f"- Oil spike: {regime['oil_spike']}")
+        return "\n".join(lines)
+    except Exception:
+        return ""
+
+def analyze_event(c, prior):
+    if prior:
+        prior_state = (f"Event {prior['event_id']} tracked since "
+                       f"{datetime.fromtimestamp(prior['first_seen'], timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} | "
+                       f"previous title: \"{prior['title']}\" | previous assessment: {(prior['assessment'] or '')[:300]} | "
+                       f"previous confidence: {prior['confidence']} | sources so far: {prior['source_count']}")
+    else:
+        prior_state = "NEW EVENT — no prior coverage."
+    sources_block = build_sources_block(c)
+    macro_context = get_macro_context()
+    sys_msg = {"role": "system", "content": EVENT_SYSTEM_PROMPT}
+    usr_msg = {"role": "user", "content": EVENT_USER_PROMPT.format(
+        cats=c["items"][0].get("cats", ""), prior_state=prior_state,
+        macro_context=macro_context, n_sources=c["independent_sources"], sources_block=sources_block)}
+    for attempt in (1, 2):
+        try:
+            content = _qwen_call([sys_msg, usr_msg])
+            m = re.search(r"\{[\s\S]*\}", content)
+            if not m: raise ValueError("no JSON object in response")
+            obj = json.loads(m.group(0))
+            ok, cleaned, errs = validate_analysis(obj, evidence_text=sources_block)
+            if ok:
+                HEALTH["qwen_ok"] += 1
+                return cleaned, None
+            if attempt == 1:
+                HEALTH["qwen_invalid"] += 1
+                usr_msg["content"] += "\n\nYour previous response was INVALID (" + "; ".join(errs) + "). Return ONLY the corrected JSON object."
+                continue
+            HEALTH["qwen_invalid"] += 1
+            return None, "schema invalid: " + "; ".join(errs)
+        except requests.exceptions.Timeout:
+            if attempt == 1: continue
+            HEALTH["qwen_fail"] += 1; return None, "timeout"
+        except Exception as e:
+            if attempt == 1: time.sleep(2); continue
+            HEALTH["qwen_fail"] += 1; return None, f"{type(e).__name__}: {str(e)[:120]}"
+    return None, "unknown"
+
+# ================= DISCORD DIGEST =================
+SENT_EMOJI = {"bullish": "🟢 Bullish", "bearish": "🔴 Bearish", "neutral": "⚪ Neutral", "na": "➖ N/A"}
+IMP_EMOJI = {"Critical": "🚨", "High": "🔥", "Medium": "📌", "Low": "ℹ️"}
+IMP_COLOR = {"Critical": 0xE74C3C, "High": 0xE67E22, "Medium": 0xF1C40F, "Low": 0x95A5A6}
+
+def _truncate(s, n):
+    s = (s or "").strip()
+    return s if len(s) <= n else s[:n-1] + "…"
+
+def build_event_embed(c, a, prior, status="NEW", timeline=None):
+    imp = a.get("importance", "Low")
+    sent = (a.get("sentiment") or "na").lower()
+    all_reddit = all(it["source_type"] == "reddit" for it in c["items"])
+    tag = "💬" if all_reddit else "📰"
+    desc = f"**{a.get('event','')}**\n{a.get('assessment','')}"
+    if a.get("what_changed"): desc += f"\n🔄 *What changed: {a['what_changed']}*"
+    status_emoji = {"NEW": "🆕", "DEVELOPING": "🔄", "CONFIRMED": "✅", "STABLE": "⚓", "RESOLVED": "🏁", "RETRACTED": "❌"}
+    fields = [
+        {"name": "Status", "value": f"{status_emoji.get(status, '🔹')} {status}", "inline": True},
+        {"name": "Sentiment", "value": SENT_EMOJI.get(sent, sent), "inline": True},
+        {"name": "Importance", "value": f"{IMP_EMOJI.get(imp, '')} {imp}", "inline": True},
+        {"name": "Confidence", "value": f"{a.get('confidence', '?')}%", "inline": True},
+        {"name": "Tickers", "value": _truncate(", ".join(a.get("tickers") or []) or "-", 200), "inline": True},
+    ]
+    if a.get("event_type"):
+        fields.append({"name": "Event Type", "value": _truncate(str(a["event_type"]), 150), "inline": True})
+    fields.append({"name": f"Sources ({c['independent_sources']} independent)",
+                   "value": _truncate(", ".join(c["source_names"]), 300), "inline": False})
+    fields.append({"name": "Triggered By",
+                   "value": _truncate(", ".join(c["items"][0].get("matched_categories", [])) or "-", 400), "inline": False})
+    if timeline and len(timeline) > 1:
+        tl_text = "\n".join(f"• {datetime.fromtimestamp(t['ts'], timezone.utc).strftime('%H:%M UTC')} {t['type']}" for t in timeline[-3:])
+        fields.append({"name": "🕒 Timeline", "value": tl_text, "inline": False})
+    footer = f"event {c['event_id']} · score {c['items'][0].get('score', 0)}"
+    if prior: footer += f" · updated (prev conf {prior.get('confidence', '?')}%)"
+    return {"title": _truncate(f"{tag} {a.get('event') or c['items'][0]['title']}", 250),
+            "url": c["items"][0]["url"], "description": _truncate(desc, 900),
+            "color": IMP_COLOR.get(imp, 0x95A5A6), "fields": fields,
+            "footer": {"text": footer}}
+
+def _post_discord(wh, payload):
+    r = requests.post(wh, json=payload, timeout=30)
+    if r.status_code >= 400:
+        raise RuntimeError(f"Discord HTTP {r.status_code}: {r.text[:120]}")
+
+def send_market_pulse():
+    wh = os.environ.get("DISCORD_WEBHOOK")
+    pulse = load_market_pulse()
+    if not wh or not pulse: return
+    marker = os.path.join(DATA, ".last_pulse")
+    last = 0.0
+    try:
+        with open(marker) as f: last = float(f.read().strip() or 0)
+    except Exception: pass
+    if pulse.get("updated", 0) <= last: return
+    try:
+        _post_discord(wh, {"embeds": [build_pulse_embed(pulse)]})
+        with open(marker, "w") as f: f.write(str(pulse["updated"]))
+        HEALTH["discord_ok"] += 1
+    except Exception as e:
+        HEALTH["discord_fail"] += 1; print("Discord pulse err:", type(e).__name__, str(e)[:200])
+
+def send_digest(digest_items, report):
+    wh = os.environ.get("DISCORD_WEBHOOK")
+    if not digest_items:
+        HEALTH["discord_skipped"] += 1; return
+    if not wh:
+        HEALTH["discord_fail"] += 1
+        print("DISCORD: webhook secret missing - digest NOT delivered"); return
+    rules = load_rules()
+    alert_lines = []; mention = False
+    for x in digest_items:
+        for r in match_rules(x["analysis"], x["cluster"], rules):
+            mention = mention or bool(r.get("mention"))
+            alert_lines.append(f"🚨 [{r.get('type')}:{r.get('value')}] {x['analysis'].get('event', '')[:100]}")
+    if alert_lines:
+        prefix = "@here " if (mention and rules.get("mention_role") == "here") else ""
+        try:
+            _post_discord(wh, {"content": (prefix + "\n".join(alert_lines))[:1900]})
+        except Exception as e:
+            HEALTH["discord_fail"] += 1; print("Alert err:", type(e).__name__, str(e)[:120])
+    news, social = [], []
+    for x in digest_items:
+        (social if all(it["source_type"] == "reddit" for it in x["cluster"]["items"]) else news).append(x)
+    rolls = {"bullish": 0, "bearish": 0, "neutral": 0, "na": 0}
+    for x in digest_items:
+        s = (x["analysis"].get("sentiment") or "na").lower()
+        rolls[s if s in rolls else "na"] += 1
+    es = report.get("events_summary", {})
+    header = {
+        "title": "🧠 AggregateIT Intelligence Digest",
+        "description": f"**{report['new']}** new items → **{report['matched']}** matched → **{len(digest_items)}** events on the Front Page",
+        "color": 0x5865F2,
+        "fields": [
+            {"name": "🆕 New events", "value": str(es.get("new", 0)), "inline": True},
+            {"name": "🔄 Updated", "value": str(es.get("updated", 0)), "inline": True},
+            {"name": "📊 Sentiment", "value": f"🟢 {rolls['bullish']} · 🔴 {rolls['bearish']} · ⚪ {rolls['neutral']}", "inline": True},
+        ],
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        news_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"], x.get("status", "NEW"), x.get("timeline")) for x in news]
+        social_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"], x.get("status", "NEW"), x.get("timeline")) for x in social]
+        _post_discord(wh, {"content": "**📰 NEWS SOURCES**", "embeds": [header] + news_embeds[:3]})
+        for k in range(3, len(news_embeds), 4): _post_discord(wh, {"embeds": news_embeds[k:k+4]})
+        if social_embeds:
+            _post_discord(wh, {"content": "**💬 SOCIAL NETWORKS**", "embeds": social_embeds[:4]})
+            for k in range(4, len(social_embeds), 4): _post_discord(wh, {"embeds": social_embeds[k:k+4]})
+        HEALTH["discord_ok"] += len(digest_items)
+    except Exception as e:
+        HEALTH["discord_fail"] += 1; print("Discord err:", type(e).__name__, str(e)[:200])
+
+def _ratio(ok, fail):
+    total = ok + fail
+    return 1.0 if total == 0 else ok / total
+
+def build_health(report, store_stats):
+    degraded = []; red = []
+    rss_r = _ratio(HEALTH["rss_ok"], HEALTH["rss_fail"])
+    reddit_r = _ratio(HEALTH["reddit_ok"], HEALTH["reddit_fail"])
+    gh_r = _ratio(HEALTH["github_ok"], HEALTH["github_fail"])
+    if (HEALTH["rss_ok"] + HEALTH["rss_fail"]) and rss_r < 0.95:
+        degraded.append(f"{HEALTH['rss_fail']} RSS feeds failed ({rss_r:.0%} ok)")
+    if (HEALTH["rss_ok"] + HEALTH["rss_fail"]) and rss_r < 0.5: red.append("RSS success below 50%")
+    if (HEALTH["reddit_ok"] + HEALTH["reddit_fail"]) and reddit_r < 0.8: degraded.append(f"Reddit degraded ({reddit_r:.0%} ok)")
+    if (HEALTH["github_ok"] + HEALTH["github_fail"]) and gh_r < 0.8: degraded.append(f"GitHub degraded ({gh_r:.0%} ok)")
+    if HEALTH["qwen_fail"]: degraded.append(f"{HEALTH['qwen_fail']} Qwen API failures")
+    if HEALTH["qwen_invalid"]: degraded.append(f"{HEALTH['qwen_invalid']} Qwen outputs rejected")
+    if HEALTH["discord_fail"]: degraded.append("Discord delivery failed")
+    if HEALTH["tv_movers_loaded"] == 0: degraded.append("TradingView movers missing (run TV refresh)")
+    if store_stats.get("fresh_init"): degraded.append("state DB freshly initialized")
+    qwen_total = HEALTH["qwen_ok"] + HEALTH["qwen_fail"]
+    if (not DRY_RUN) and qwen_total and HEALTH["qwen_fail"] > HEALTH["qwen_ok"]:
+        red.append("Qwen failing more than succeeding")
+    overall = "RED" if red else ("YELLOW" if degraded else "GREEN")
+    return {"run": report["run"], "overall": overall, "dry_run": DRY_RUN,
+            "degraded": degraded, "red": red, "counters": dict(HEALTH), "store": store_stats}
+
+# ================= MAIN =================
+async def main():
+    if not DRY_RUN and not os.environ.get("QWEN_API_KEY"):
+        raise SystemExit("FATAL: QWEN_API_KEY secret is not set.")
+
+    sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
+    since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
+    async with aiohttp.ClientSession(headers=UA) as s:
+        batches = await asyncio.gather(
+            *[fetch_rss(s, x, sem) for x in RSS],
+            *[fetch_reddit(s, x, sem_rd) for x in REDDIT],
+            *[fetch_github(s, x["_url"].split("github.com/")[1], sem, since.isoformat()) for x in GH])
+    items = [i for b in batches if b for i in b]
+
+    new = []
+    for i in items:
+        if i["ts"] < since.timestamp() or not i["url"]: continue
+        if not store.url_active(i["url"]): continue
+        if not store.title_active(title_hash(i.get("title", ""))): continue
+        new.append(i)
+
+    scored = []
+    for i in new:
+        sc, labels = score_item(i)
+        i["thash"] = title_hash(i.get("title", ""))
+        if sc > 0:
+            i["matched_categories"] = labels; i["score"] = sc; i["cats"] = ", ".join(labels)
+            scored.append(i)
+            if not DRY_RUN: store.register(i["url"], i["thash"], "discovered", sc)
+        else:
+            if not DRY_RUN: store.register(i["url"], i["thash"], "filtered", 0)
+
+    ticker_counts = {}
+    for i in scored:
+        for label in i.get("matched_categories", []):
+            t = label.split(" ")[0]
+            if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
+                ticker_counts[t.upper()] = ticker_counts.get(t.upper(), 0) + 1
+    for i in scored:
+        for label in i.get("matched_categories", []):
+            t = label.split(" ")[0].upper()
+            if ticker_counts.get(t, 0) >= 2:
+                i["score"] += 2
+                comp = i.setdefault("score_components", {})
+                comp["confluence"] = comp.get("confluence", 0) + 2
+                if "Confluence" not in i["matched_categories"]: i["matched_categories"].append("Confluence")
+                break
+
+    scored.sort(key=lambda x: -x["score"])
+    report = {"run": datetime.now(timezone.utc).isoformat(), "dry_run": DRY_RUN,
+              "fetched": len(items), "new": len(new), "matched": len(scored),
+              "events": [], "events_summary": {"clusters": 0, "new": 0, "updated": 0},
+              "wire": [], "quarantined": []}
+
+    front_page = []
+    for i in scored:
+        if i["score"] < FRONT_PAGE_FLOOR:
+            report["wire"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
+                                   "score": i["score"], "triggers": i["matched_categories"],
+                                   "components": i.get("score_components", {})})
+            if not DRY_RUN: store.register(i["url"], i["thash"], "deferred", i["score"])
+            continue
+        if len(front_page) >= MAX_ANALYZE:
+            if not DRY_RUN: store.register(i["url"], i["thash"], "deferred", i["score"])
+            continue
+        if i["source_type"] == "rss": i["text"] = full_text(i["url"], i["text"])
+        front_page.append(i)
+
+    clusters = cluster_events(front_page)
+    report["events_summary"]["clusters"] = len(clusters)
+
+    for c in clusters[MAX_EVENTS:]:
+        if not DRY_RUN:
+            for it in c["items"]: store.register(it["url"], it["thash"], "deferred", it["score"])
+
+    digest_items = []
+    for c in clusters[:MAX_EVENTS]:
+        prior = resolve_prior_event(c, store)
+        if DRY_RUN:
+            report["events"].append({"event_id": c["event_id"], "entity": c["entity"], "preview": True,
+                                     "new_event": prior is None,
+                                     "independent_sources": c["independent_sources"],
+                                     "triggers": c["items"][0].get("matched_categories", []),
+                                     "sources": [{"name": it["source_name"], "url": it["url"], "title": it["title"]} for it in c["items"]]})
+            continue
+        a, err = analyze_event(c, prior)
+        if a:
+            a = apply_corroboration_policy(a, c)
+            now = time.time()
+            if prior:
+                c["event_id"] = prior["event_id"]
+                try: old_tokens = set(json.loads(prior.get("tokens_json") or "[]"))
+                except Exception: old_tokens = set()
+                c["tokens"] = set(sorted(c["tokens"] | old_tokens)[:60])
+                report["events_summary"]["updated"] += 1
+                old_status = prior.get("status", "NEW")
+                old_sources = prior.get("source_count", 0)
+                if c["independent_sources"] > old_sources:
+                    store.add_event_update(c["event_id"], "corroborated", {"sources": c["independent_sources"]})
+                if a.get("corroboration") == "multi-source" and int(a.get("confidence", 0)) >= 85:
+                    status = "CONFIRMED"
+                elif a.get("corroboration") == "multi-source":
+                    status = "DEVELOPING"
+                else:
+                    status = old_status
+                if status != old_status:
+                    store.add_event_update(c["event_id"], "status_change", {"from": old_status, "to": status})
+            else:
+                report["events_summary"]["new"] += 1
+                status = "DEVELOPING" if c["independent_sources"] >= 2 and a.get("corroboration") == "multi-source" else "NEW"
+                store.add_event_update(c["event_id"], "detected", {"sources": c["independent_sources"]})
+            ev = {"event_id": c["event_id"], "entity": c["entity"],
+                  "tokens_json": json.dumps(sorted(c["tokens"])),
+                  "title": a["event"], "event_type": a["event_type"], "status": status,
+                  "severity": a["importance"], "confidence": int(a["confidence"]),
+                  "source_count": (prior["source_count"] if prior else 0) + c["independent_sources"],
+                  "assessment": a["assessment"], "what_changed": a["what_changed"],
+                  "sentiment": a.get("sentiment", "na"),
+                  "triggers_json": json.dumps(c["items"][0].get("matched_categories", [])),
+                  "sources_json": json.dumps([{"name": it["source_name"], "url": it["url"], "title": it["title"]} for it in c["items"]]),
+                  "score": c["items"][0].get("score", 0),
+                  "urls_json": json.dumps([it["url"] for it in c["items"]]),
+                  "first_seen": prior["first_seen"] if prior else now, "last_updated": now}
+            store.upsert_event(ev)
+            timeline = store.get_event_timeline(c["event_id"])
+            report["events"].append({"event_id": c["event_id"], "entity": c["entity"],
+                                     "new_event": prior is None, "title": a["event"],
+                                     "importance": a["importance"], "confidence": a["confidence"],
+                                     "what_changed": a["what_changed"], "status": status,
+                                     "independent_sources": c["independent_sources"],
+                                     "sources": [{"name": it["source_name"], "url": it["url"], "title": it["title"],
+                                                  "published": datetime.fromtimestamp(it["ts"], timezone.utc).isoformat(),
+                                                  "retrieved": report["run"]} for it in c["items"]],
+                                     "analysis": a})
+            digest_items.append({"cluster": c, "analysis": a, "prior": prior, "status": status, "timeline": timeline})
+            for it in c["items"]:
+                store.succeed(it["url"], it["thash"], "analyzed", json.dumps({"event_id": c["event_id"]}))
+        else:
+            report["quarantined"].append({"event_id": c["event_id"], "entity": c["entity"],
+                                          "title": c["items"][0]["title"], "error": err})
+            for it in c["items"]: store.fail(it["url"])
+            print("QUARANTINED EVENT:", c["event_id"], "|", err)
+        await asyncio.sleep(1)
+
+    send_digest(digest_items, report)
+    send_market_pulse()
+
+    store.record_run(report["fetched"], report["new"], report["matched"], len(report["events"]))
+    store_stats = store.stats()
+    health = build_health(report, store_stats)
+    with open(os.path.join(REPORTS, "run.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=2)
+    with open(os.path.join(REPORTS, "health.json"), "w", encoding="utf-8") as f: json.dump(health, f, indent=2)
+    with open(os.path.join(REPORTS, "errors.json"), "w", encoding="utf-8") as f: json.dump(ERRORS, f, indent=2)
+
+    es = report["events_summary"]
+    mode = " [DRY RUN]" if DRY_RUN else ""
+    print(f"FETCHED {report['fetched']} | NEW {report['new']} | MATCHED {report['matched']} | FP ARTICLES {len(front_page)} | EVENTS {es['clusters']} (new {es['new']} / upd {es['updated']}) | WIRE {len(report['wire'])} | QUARANTINED {len(report['quarantined'])}{mode}")
+    note = (" — " + "; ".join(health["degraded"])) if health["degraded"] else ""
+    print(f"HEALTH: {health['overall']}{note}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
