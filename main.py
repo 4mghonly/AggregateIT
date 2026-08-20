@@ -761,6 +761,7 @@ async def main():
     health = build_health(report, store_stats)
     with open(os.path.join(REPORTS, "run.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=2)
     with open(os.path.join(REPORTS, "health.json"), "w", encoding="utf-8") as f: json.dump(health, f, indent=2)
+    with open(os.path.join(REPORTS, "errors.json"), "w", encoding="utf-8") as f: json.dump(ERRORS, f, indent=2)
 
     es = report["events_summary"]
     mode = " [DRY RUN]" if DRY_RUN else ""
