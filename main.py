@@ -430,10 +430,11 @@ def get_macro_context():
         regime = compute_regime(macro)
         inst_map = {i["sym"]: i for i in macro.get("instruments", [])}
         lines = ["Current macro backdrop:"]
-        for sym in ["TVC:SPX", "CBOE:VIX", "TVC:US10Y", "TVC:DXY", "NYMEX:CL1!"]:
-            inst = inst_map.get(sym)
-            if inst and inst["pct"] is not None:
-                lines.append(f"- {inst['name']}: {inst['pct']:+.2f}%")
+        for want in ("S&P 500", "VIX", "US 10Y Yield", "US Dollar Index", "WTI Crude"):
+            for inst in macro.get("instruments", []):
+                if inst.get("name") == want and inst.get("pct") is not None:
+                    lines.append(f"- {want}: {inst['pct']:+.2f}%")
+                    break 
         if regime.get("curve_inverted"): lines.append("- ⚠️ Yield curve inverted")
         if regime.get("oil_spike"): lines.append(f"- Oil spike: {regime['oil_spike']}")
         return "\n".join(lines)
