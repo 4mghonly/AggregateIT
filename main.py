@@ -557,9 +557,9 @@ async def main():
     clusters = cluster_events(front_page)
     report["events_summary"]["clusters"] = len(clusters)
 
-    for c in clusters[MAX_EVENTS:]:
+        for c in clusters[MAX_EVENTS:]:
         if not DRY_RUN:
-            for it in c["items"]: store.succeed(it["url"], it["thash"], "capped")
+            for it in c["items"]: store.register(it["url"], it["thash"], "deferred", it["score"])
 
     digest_items = []
     for c in clusters[:MAX_EVENTS]:
