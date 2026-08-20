@@ -401,5 +401,30 @@ check("sub-cent +9900% excluded", all(m["t"] != "JUNK" for m in allm), [m["t"] f
 check("$0.40 mover excluded", all(m["t"] != "SUBX" for m in allm), [m["t"] for m in allm])
 check("$0.75 mover +115% kept", any(m["t"] == "MMA" for m in p10["gainers"]), [m["t"] for m in p10["gainers"]])
 
+print("[T44] Macro fetcher maps symbols correctly")
+def fake_post_macro(body):
+    syms = body.get("symbols", [])
+    data = []
+    for s in syms:
+        data.append({"s": s, "d": [None, "Test", "T", 1e9, None, 1.0, 100000, True, 1.5, 100.0, "index"]})
+    return {"data": data}
+m44 = tv.fetch_macro(post_fn=fake_post_macro)
+check("macro fetcher returns instruments", len(m44.get("instruments", [])) > 0, len(m44.get("instruments", [])))
+check("instruments have pct", all(i["pct"] is not None for i in m44["instruments"]), m44["instruments"][0])
+
+print("[T45] Regime signals computed deterministically")
+import market
+macro_test = {"updated": time.time(), "valid": True, "instruments": [
+    {"sym": "CBOE:VIX", "name": "VIX", "type": "index", "pct": 5.0, "price": 18.5},
+    {"sym": "TVC:US02Y", "name": "US 2Y Yield", "type": "bond", "pct": 0.1, "price": 4.5},
+    {"sym": "TVC:US10Y", "name": "US 10Y Yield", "type": "bond", "pct": -0.2, "price": 4.2},
+    {"sym": "TVC:DXY", "name": "US Dollar Index", "type": "index", "pct": 0.8, "price": 105.0},
+    {"sym": "NYMEX:CL1!", "name": "WTI Crude", "type": "future", "pct": 4.5, "price": 85.0}
+]}
+regime = market.compute_regime(macro_test)
+check("vix band detected", "vix" in regime and "normal" in regime["vix"], regime)
+check("curve inverted flagged", regime.get("curve_inverted") is True, regime)
+check("dxy strong bid", regime.get("dxy") == "strong bid", regime)
+check("oil spike flagged", "oil_spike" in regime and "4.5" in regime["oil_spike"], regime)
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
