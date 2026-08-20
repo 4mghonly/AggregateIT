@@ -1,0 +1,7 @@
+{
+  "mention_role": "here",
+  "rules": [
+    {"type": "importance", "value": "Critical", "mention": true},
+    {"type": "ticker", "value": "TSLA", "mention": false}
+  ]
+}
