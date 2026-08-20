@@ -237,5 +237,28 @@ check("nvda shows -0.99%", r1["pct"] is not None and abs(r1["pct"] + 0.992) < 0.
 check("violent move kept uncapped", r2["pct"] == 125.0, r2["pct"])
 check("missing change -> None", r3["pct"] is None, r3["pct"])
 
+print("[T27] Strict enum enforcement")
+valid_base = {"event": "Fed holds", "event_type": "macro", "facts": ["held"], "assessment": "pause",
+         "what_changed": "New event - no prior coverage",
+         "importance": "High", "confidence": 80, "sentiment": "neutral", "entities": ["Fed"],
+         "tickers": ["NVDA"], "evidence": ["held"], "corroboration": "multi-source",
+         "source_reliability": "High", "gaps": []}
+bad_evt = dict(valid_base); bad_evt["event_type"] = "merger"
+ok, _, _ = main.validate_analysis(bad_evt)
+check("event_type enum enforced", not ok)
+bad_cor = dict(valid_base); bad_cor["corroboration"] = "partial"
+ok, _, _ = main.validate_analysis(bad_cor)
+check("corroboration enum enforced", not ok)
+
+print("[T28] Ticker-in-evidence stripping")
+good_t = dict(valid_base); good_t["tickers"] = ["NVDA", "FAKE"]
+ok, obj, _ = main.validate_analysis(good_t, evidence_text="Nvidia ($NVDA) reported strong earnings.")
+check("fake ticker stripped", "FAKE" not in obj["tickers"], obj["tickers"])
+check("real ticker kept", "NVDA" in obj["tickers"], obj["tickers"])
+
+print("[T29] Prompt injection shielding structure")
+check("system role defined", "EVENT_SYSTEM_PROMPT" in dir(main))
+check("xml reports tag used", "<reports>" in main.EVENT_USER_PROMPT)
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
