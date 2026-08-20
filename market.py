@@ -17,9 +17,13 @@ def load_market_pulse():
         return None
 
 def _fmt_row(m):
-    arrow = "🟢" if m["pct"] > 0.005 else ("🔴" if m["pct"] < -0.005 else "⚪")
+    p = m.get("pct")
+    if p is None:
+        rv = f" · {m['relvol']:.1f}×" if m.get("relvol", 0) >= 1.5 else ""
+        return f"⚪ {m['t']} —{rv}"
+    arrow = "🟢" if p > 0.005 else ("🔴" if p < -0.005 else "⚪")
     rv = f" · {m['relvol']:.1f}×" if m.get("relvol", 0) >= 1.5 else ""
-    return f"{arrow} {m['t']} {m['pct']:+.2f}%{rv}"
+    return f"{arrow} {m['t']} {p:+.2f}%{rv}"
 
 def build_pulse_embed(pulse, color=None):
     ts = datetime.fromtimestamp(pulse["updated"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
