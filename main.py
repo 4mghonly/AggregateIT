@@ -29,6 +29,9 @@ CASHTAG_ONLY = {
 HEALTH = {"rss_ok":0,"rss_fail":0,"reddit_ok":0,"reddit_fail":0,"github_ok":0,"github_fail":0,
           "qwen_ok":0,"qwen_fail":0,"qwen_invalid":0,"discord_ok":0,"discord_fail":0,"discord_skipped":0,
           "tv_movers_loaded":0,"tv_universe_loaded":0}
+ERRORS = []
+def log_failure(service, url, err):
+    ERRORS.append({"ts": time.time(), "service": service, "url": url, "err": str(err)[:200]})
 
 def load(n):
     with open(os.path.join(BASE, "config", n), encoding="utf-8") as f: return json.load(f)
