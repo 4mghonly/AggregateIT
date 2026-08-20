@@ -228,14 +228,14 @@ p_closed = {"updated": time.time(), "valid": True, "session_open": False,
             "mega_caps": [{"t": "NVDA", "pct": 1.0, "relvol": 1.0}], "gainers": [], "losers": []}
 check("closed -> previous session label", "previous session" in market.build_pulse_embed(p_closed)["description"])
 
-print("[T26] Percent derived from change/close with proven semantics")
+print("[T26] Percent taken directly from scanner 'change' column")
 ROW_NVDA = {"s": "NVDA", "d": [None, "NVIDIA Corporation", "Electronic Technology", 5.26e12, None, 0.9, 96792772, True, -0.9920815509238221, 217.56, "stock"]}
-ROW_UP = {"s": "MRNA", "d": [None, "Moderna", "Health", 1e10, None, 2.0, 5000000, True, 0.29, 20.0, "stock"]}
+ROW_MOON = {"s": "MRNA", "d": [None, "Moderna", "Health", 1e10, None, 2.0, 5000000, True, 125.0, 45.0, "stock"]}
 ROW_MISSING = {"s": "MISS", "d": [None, "Miss", "Tech", 1e9, None, 1.0, 100000, True, None, None, "stock"]}
-r1 = tv._row(ROW_NVDA); r2 = tv._row(ROW_UP); r3 = tv._row(ROW_MISSING)
-check("nvda raw sample -> -0.45%", r1["pct"] is not None and abs(r1["pct"] + 0.454) < 0.01, r1["pct"])
-check("up day stays positive (no sign flip)", r2["pct"] is not None and r2["pct"] > 0, r2["pct"])
-check("missing change/close -> None", r3["pct"] is None, r3["pct"])
+r1 = tv._row(ROW_NVDA); r2 = tv._row(ROW_MOON); r3 = tv._row(ROW_MISSING)
+check("nvda shows -0.99%", r1["pct"] is not None and abs(r1["pct"] + 0.992) < 0.01, r1["pct"])
+check("violent move kept uncapped", r2["pct"] == 125.0, r2["pct"])
+check("missing change -> None", r3["pct"] is None, r3["pct"])
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
