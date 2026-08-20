@@ -45,15 +45,15 @@ check("Fed boosted", sc >= 5, f"score={sc}")
 print("[T7] TradingView 'Load More' pagination")
 def fake_post(body):
     start, end = body["range"]; total = 2500
-    return {"totalCount": total, "data": [{"s": f"T{i}", "d": [f"Co {i}", "Tech", 1e9, 1.0, 1.0, 1e6, 1]} for i in range(start, min(end, total))]}
+    return {"totalCount": total, "data": [{"s": f"T{i}", "d": [f"Co {i}", "Tech", 1e9, 0, 1.0, 1e6, 1]} for i in range(start, min(end, total))]}
 uni, total = tv.fetch_universe(post_fn=fake_post)
 check("paginates to end", len(uni) == 2500 and total == 2500)
 
 print("[T8] Movers scans merge by sort direction")
 def fake_post2(body):
     if body["sort"]["sortOrder"] == "asc":
-        return {"totalCount": 1, "data": [{"s": "BBB", "d": ["", "B", "T", 1, -9, 2, 100000, 1]}]}
-    return {"totalCount": 1, "data": [{"s": "AAA", "d": ["", "A", "T", 1, 8, 3, 100000, 1]}]}
+        return {"totalCount": 1, "data": [{"s": "BBB", "d": ["", "B", "T", 1, 0, 2, 100000, 1, -9, 91, "stock"]}]}
+    return {"totalCount": 1, "data": [{"s": "AAA", "d": ["", "A", "T", 1, 0, 3, 100000, 1, 8, 108, "stock"]}]}
 mv = tv.fetch_movers(post_fn=fake_post2)
 check("movers merged", set(mv) == {"AAA", "BBB"}, sorted(mv))
 
@@ -157,8 +157,8 @@ check("different topic not matched", main.resolve_prior_event(cl2, st2) is None)
 print("[T19] Primary-listing filter removes preferreds/duplicate classes")
 def fake_post3(body):
     return {"totalCount": 2, "data": [
-        {"s": "NYSE:JPM", "d": ["", "JPMorgan", "Finance", 6e11, 1.0, 1.0, 500000, 1]},
-        {"s": "NYSE:JPM.PM", "d": ["", "JPMorgan Pfd", "Finance", 1e9, 0.5, 0.5, 100, 0]}]}
+        {"s": "NYSE:JPM", "d": ["", "JPMorgan", "Finance", 6e11, 0, 1.0, 500000, 1, 6.0, 106.0, "stock"]},
+        {"s": "NYSE:JPM.PM", "d": ["", "JPMorgan Pfd", "Finance", 1e9, 0, 0.5, 100, 0, 0.5, 10.5, "fund"]}]}
 p3 = tv.fetch_pulse(post_fn=fake_post3, cap=20)
 check("non-primary excluded", all(m["t"] != "JPM.PM" for m in p3["mega_caps"]))
 check("primary kept", any(m["t"] == "JPM" for m in p3["mega_caps"]))
@@ -166,27 +166,27 @@ check("primary kept", any(m["t"] == "JPM" for m in p3["mega_caps"]))
 print("[T20] Zero-snapshot validity gate")
 def fake_post_zero(body):
     return {"totalCount": 2, "data": [
-        {"s": "X1", "d": ["", "A", "T", 1e12, 0, 1.0, 0, 1]},
-        {"s": "X2", "d": ["", "B", "T", 9e11, 0, 1.0, 0, 1]}]}
+        {"s": "X1", "d": ["", "A", "T", 1e12, 0, 1.0, 0, 1, 0, 100, "stock"]},
+        {"s": "X2", "d": ["", "B", "T", 9e11, 0, 1.0, 0, 1, 0, 100, "stock"]}]}
 check("all-zero snapshot invalid", tv.fetch_pulse(post_fn=fake_post_zero)["valid"] is False)
 def fake_post_live(body):
     return {"totalCount": 2, "data": [
-        {"s": "X1", "d": ["", "A", "T", 1e12, 2.5, 1.0, 50000, 1]},
-        {"s": "X2", "d": ["", "B", "T", 9e11, -1.0, 1.0, 50000, 1]}]}
+        {"s": "X1", "d": ["", "A", "T", 1e12, 0, 1.0, 50000, 1, 2.5, 102.5, "stock"]},
+        {"s": "X2", "d": ["", "B", "T", 9e11, 0, 1.0, 50000, 1, -1.0, 99.0, "stock"]}]}
 check("live snapshot valid", tv.fetch_pulse(post_fn=fake_post_live)["valid"] is True)
 
 print("[T21] Pulse mega-cap selection capped and sorted")
 def fake_post_big(body):
     if body["sort"]["sortBy"] == "market_cap_calc":
-        return {"totalCount": 30, "data": [{"s": f"S{i}", "d": ["", f"Co{i}", "T", 1e12 - i * 1e9, 1.0, 1.0, 10000, 1]} for i in range(30)]}
+        return {"totalCount": 30, "data": [{"s": f"S{i}", "d": ["", f"Co{i}", "T", 1e12 - i * 1e9, 0, 1.0, 10000, 1, 1.0, 101.0, "stock"]} for i in range(30)]}
     return {"totalCount": 0, "data": []}
 p4 = tv.fetch_pulse(post_fn=fake_post_big, cap=20)
 check("20 mega caps", len(p4["mega_caps"]) == 20, len(p4["mega_caps"]))
 check("sorted by mcap", p4["mega_caps"][0]["mcap"] > p4["mega_caps"][-1]["mcap"])
 
 print("[T22] Funds/ETFs excluded from stock lists")
-NVDA_ROW = {"s": "NVDA", "d": ["", "Nvidia", "Tech", 1e12, 1.0, 1.0, 100000, 1, 0, 0, "stock"]}
-XPP_ROW = {"s": "XPP", "d": ["", "ProShares", "Fund", 1e9, 2.0, 1.0, 100000, 1, 0, 0, "fund"]}
+NVDA_ROW = {"s": "NVDA", "d": ["", "Nvidia", "Tech", 1e12, 0, 1.0, 100000, 1, 1.0, 101.0, "stock"]}
+XPP_ROW = {"s": "XPP", "d": ["", "ProShares", "Fund", 1e9, 0, 1.0, 100000, 1, 2.0, 102.0, "fund"]}
 def fake_post6(body):
     return {"totalCount": 2, "data": [NVDA_ROW, XPP_ROW]}
 p6 = tv.fetch_pulse(post_fn=fake_post6, cap=20)
@@ -194,9 +194,9 @@ check("fund excluded", all(m["t"] != "XPP" for m in p6["mega_caps"]))
 check("stock kept", any(m["t"] == "NVDA" for m in p6["mega_caps"]))
 
 print("[T23] Movers sorted client-side by magnitude")
-ROW_A = {"s": "A", "d": ["", "A", "T", 1e11, 5.0, 1.0, 900000, 1, 0, 0, "stock"]}
-ROW_B = {"s": "B", "d": ["", "B", "T", 1e11, 9.0, 1.0, 800000, 1, 0, 0, "stock"]}
-ROW_C = {"s": "C", "d": ["", "C", "T", 1e11, 1.0, 1.0, 700000, 1, 0, 0, "stock"]}
+ROW_A = {"s": "A", "d": ["", "A", "T", 1e11, 0, 1.0, 900000, 1, 5.0, 105.0, "stock"]}
+ROW_B = {"s": "B", "d": ["", "B", "T", 1e11, 0, 1.0, 800000, 1, 9.0, 109.0, "stock"]}
+ROW_C = {"s": "C", "d": ["", "C", "T", 1e11, 0, 1.0, 700000, 1, 1.0, 101.0, "stock"]}
 def fake_post5(body):
     return {"totalCount": 3, "data": [ROW_A, ROW_B, ROW_C]}
 p5 = tv.fetch_pulse(post_fn=fake_post5, cap=20)
@@ -228,14 +228,14 @@ p_closed = {"updated": time.time(), "valid": True, "session_open": False,
             "mega_caps": [{"t": "NVDA", "pct": 1.0, "relvol": 1.0}], "gainers": [], "losers": []}
 check("closed -> previous session label", "previous session" in market.build_pulse_embed(p_closed)["description"])
 
-print("[T26] Percents taken directly; zeros kept; missing are None")
-ROW_OK = {"s": "NVDA", "d": ["", "Nvidia", "Tech", 1e12, -0.45, 1.0, 100000, 1, -0.64, 142.5, "stock"]}
-ROW_ZERO = {"s": "FLAT", "d": ["", "Flat", "Tech", 1e11, 0.0, 1.0, 100000, 1, 0, 100.0, "stock"]}
-ROW_MISSING = {"s": "MISS", "d": ["", "Miss", "Tech", 1e9, None, 1.0, 100000, 1, 0.5, 10.0, "stock"]}
-r_ok = tv._row(ROW_OK); r_zero = tv._row(ROW_ZERO); r_miss = tv._row(ROW_MISSING)
-check("direct pct kept", abs(r_ok["pct"] + 0.45) < 0.01, r_ok["pct"])
-check("zero pct kept", r_zero["pct"] == 0.0, r_zero["pct"])
-check("missing pct is None", r_miss["pct"] is None, r_miss["pct"])
+print("[T26] Percent derived from change/close with proven semantics")
+ROW_NVDA = {"s": "NVDA", "d": [None, "NVIDIA Corporation", "Electronic Technology", 5.26e12, None, 0.9, 96792772, True, -0.9920815509238221, 217.56, "stock"]}
+ROW_UP = {"s": "MRNA", "d": [None, "Moderna", "Health", 1e10, None, 2.0, 5000000, True, 0.29, 20.0, "stock"]}
+ROW_MISSING = {"s": "MISS", "d": [None, "Miss", "Tech", 1e9, None, 1.0, 100000, True, None, None, "stock"]}
+r1 = tv._row(ROW_NVDA); r2 = tv._row(ROW_UP); r3 = tv._row(ROW_MISSING)
+check("nvda raw sample -> -0.45%", r1["pct"] is not None and abs(r1["pct"] + 0.454) < 0.01, r1["pct"])
+check("up day stays positive (no sign flip)", r2["pct"] is not None and r2["pct"] > 0, r2["pct"])
+check("missing change/close -> None", r3["pct"] is None, r3["pct"])
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
