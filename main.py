@@ -468,7 +468,8 @@ def analyze_event(c, prior):
             content = chat([sys_msg, usr_msg])
             m = re.search(r"\{[\s\S]*\}", content)
             if not m: raise ValueError("no JSON object in response")
-            obj = json.loads(m.group(0))
+            raw_json = re.sub(r',\s*([\]}])', r'\1', m.group(0))
+            obj = json.loads(raw_json)
             ok, cleaned, errs = validate_analysis(obj, evidence_text=sources_block)
             if ok:
                 HEALTH["qwen_ok"] += 1
