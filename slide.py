@@ -494,6 +494,7 @@ def render_p2(d, a, llm_ok):
     A.text(x + 0.01, y - 0.004, "B%d N%d S%d" % (rolls["bullish"], rolls["neutral"], rolls["bearish"]), color=MUT2, fontsize=9)
     _kicker(A, 0.76, 0.150, 0.21, "KEY NUMBERS", GEO)
     y = 0.122
+    im = {i["name"]: i for i in macro.get("instruments", [])}
     g0 = pulse.get("gainers", [{}])[0]; l0 = pulse.get("losers", [{}])[0]
     for lab, val, col in [("GAINER", "%s %+.2f%%" % (g0.get("t", "-"), g0.get("pct", 0)) if g0.get("t") else "-", UP),
                           ("LOSER", "%s %+.2f%%" % (l0.get("t", "-"), l0.get("pct", 0)) if l0.get("t") else "-", DN),
