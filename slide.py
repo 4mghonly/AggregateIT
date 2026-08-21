@@ -347,6 +347,12 @@ def render_p1(d, a, llm_ok):
         A.text(0.70, y, nm, color=MUT2, fontsize=9)
         A.text(0.97, y, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=9, ha="right", weight="bold")
         y -= 0.017
+sp = d.get("social_pulse", {})
+    cnt = sp.get("counts", {})
+    if cnt:
+        A.text(0.36, y, "LANES: " + " · ".join("%s %d" % (k, v) for k, v in sorted(cnt.items())[:6]), color=MUT2, fontsize=8.5); y -= 0.017
+    for t in sp.get("top", [])[:2]:
+        A.text(0.36, y, "[%s] %s" % (t.get("src", ""), _clean(t.get("t", ""))[:40]), color=INK, fontsize=8.5); y -= 0.016
 
     # BOTTOM band
     by = 0.30
