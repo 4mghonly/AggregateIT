@@ -117,11 +117,11 @@ social_pulse = {}
         try:
             with open(YIELD_FILE, "w") as f: json.dump(hist, f)
         except Exception: pass
-    return {"store": store, "pulse": pulse, "macro": macro, "regime": regime, "events": events,
+return {"store": store, "pulse": pulse, "macro": macro, "regime": regime, "events": events,
             "geo_events": [e for e in events if e.get("geo")], "themes": themes,
             "st_radar": st_radar, "reddit": reddit, "sources_active": sources_active,
             "headlines": headlines, "sector_tape": sector_tape,
-            "curve_pts": curve_pts, "yield_hist": hist}
+            "curve_pts": curve_pts, "yield_hist": hist, "social_pulse": social_pulse}
 
 ANALYSIS_PROMPT = """You are the editor of a financial-and-geopolitical intelligence gazette.
 Write TENTATIVE, quantitative, complete-sentence analysis. Rules:
