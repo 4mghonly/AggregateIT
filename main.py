@@ -615,8 +615,18 @@ def build_health(report, store_stats):
     if (not DRY_RUN) and qwen_total and HEALTH["qwen_fail"] > HEALTH["qwen_ok"]:
         red.append("Qwen failing more than succeeding")
     overall = "RED" if red else ("YELLOW" if degraded else "GREEN")
+    import os
+    main_path = os.path.join(os.path.dirname(__file__), "main.py")
+    main_lines = 0; main_sections = 0
+    if os.path.exists(main_path):
+        with open(main_path) as f:
+            content = f.read()
+            main_lines = len(content.splitlines())
+            main_sections = content.count("# ================= ")
     return {"run": report["run"], "overall": overall, "dry_run": DRY_RUN,
-            "degraded": degraded, "red": red, "counters": dict(HEALTH), "store": store_stats}
+            "degraded": degraded, "red": red, "counters": dict(HEALTH), "store": store_stats,
+            "main_lines": main_lines, "main_sections": main_sections,
+            "decomposition_alert": main_lines > 850 or main_sections > 9}
 
 # ================= MAIN =================
 async def main():
