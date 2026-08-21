@@ -40,6 +40,9 @@ class SQLiteStore:
             first_seen REAL, last_updated REAL,
             sentiment TEXT, triggers_json TEXT, sources_json TEXT, score REAL DEFAULT 0,
             ddg_hits INTEGER DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS claims(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id TEXT, claim TEXT, support_indices TEXT, status TEXT DEFAULT 'unverified');
         CREATE TABLE IF NOT EXISTS event_updates(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id TEXT, ts REAL, type TEXT, details_json TEXT);
