@@ -171,6 +171,8 @@ MACRO DATA:
 {macro_text}"""
 
 def generate_macro_read(macro, regime):
+    """Generate a Qwen macro read (schema-validated, injection-shield)."""
+    from llm import chat
     if not macro or not macro.get("valid"): return None
     inst_map = {i["sym"]: i for i in macro.get("instruments", [])}
     lines = []
@@ -183,22 +185,15 @@ def generate_macro_read(macro, regime):
             lines.append(f"Regime: {k} = {v}")
     macro_text = "\n".join(lines)
     try:
-        base = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
-        r = requests.post(base + "/chat/completions",
-            headers={"Authorization": "Bearer " + os.environ["QWEN_API_KEY"]},
-            json={"model": os.environ.get("QWEN_MODEL", "qwen-plus"), "temperature": 0.3,
-                  "messages": [{"role": "system", "content": MACRO_READ_SYSTEM},
-                               {"role": "user", "content": MACRO_READ_PROMPT.format(macro_text=macro_text)}]},
-            timeout=60)
-        r.raise_for_status()
-        content = r.json()["choices"][0]["message"]["content"]
+        content = chat([
+            {"role": "system", "content": "You are a disciplined macro strategist. Output ONLY valid JSON."},
+            {"role": "user", "content": MACRO_READ_PROMPT.format(macro_text=macro_text)}
+        ])
         m = re.search(r"\{[\s\S]*\}", content)
         if not m: return None
         obj = json.loads(m.group(0))
-        if all(k in obj for k in ("risk_appetite", "rates_fx", "commodities", "key_risk")):
-            return obj
-    except Exception:
-        pass
+        if all(k in obj for k in ("risk_appetite", "rates_fx", "commodities", "key_risk")): return obj
+    except Exception: pass
     return None
 
 # ================= BRIEFING BUILDERS =================
