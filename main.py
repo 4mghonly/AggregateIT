@@ -663,6 +663,7 @@ async def main():
             *[fetch_reddit(s, x, sem_rd) for x in REDDIT],
             *[fetch_github(s, x["_url"].split("github.com/")[1], sem, since.isoformat()) for x in GH])
     items = [i for b in batches if b for i in b] + social_items
+
 try:
         sp = {"ts": time.time(), "counts": {}, "top": []}
         for i in social_items:
@@ -836,3 +837,4 @@ try:
 
 if __name__ == "__main__":
     asyncio.run(main())
+
