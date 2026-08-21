@@ -536,8 +536,8 @@ sp2 = d.get("social_pulse", {})
             colx = 0.03 + (i % 2) * 0.485
             yy = 0.178 - (i // 2) * 0.016
             A.text(colx, yy, "[%s] %s" % (t.get("src", ""), _clean(t.get("t", ""))[:58]), color=INK, fontsize=8.5)
-    _kicker(A, 0.03, 0.150, 0.40, "CROSS-ASSET ANALYSIS", MKT)
-    y = 0.122
+_kicker(A, 0.03, 0.140, 0.40, "CROSS-ASSET ANALYSIS", MKT)
+    y = 0.112
     for line in _fit(a["cross_asset"], 88, 3):
         A.text(0.03, y, line, color=INK, fontsize=10); y -= 0.018
     _kicker(A, 0.50, 0.150, 0.22, "THEMES & SENTIMENT", SOC)
