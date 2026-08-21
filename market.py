@@ -79,7 +79,8 @@ def build_macro_embed(macro, regime=None, color=None):
     groups = {}
     for i in macro.get("instruments", []): groups.setdefault(i.get("type", "other"), []).append(i)
     col1 = [_mline(i) for i in groups.get("index", [])[:6]]
-    col1 += ["— INDEX FUTURES —"] + [_mline(i) for i in groups.get("index_future", [])[:3]]
+    if groups.get("index_future"):
+        col1 += ["— INDEX FUTURES —"] + [_mline(i) for i in groups.get("index_future", [])[:3]]
     col1 += ["— COMMODITIES —"] + [_mline(i) for i in groups.get("commodity", [])[:5]]
     col2 = [_mline(i) for i in groups.get("forex", [])[:4]]
     col2 += ["— RATES —"] + [_mline(i) for i in groups.get("bond", [])[:3]]
