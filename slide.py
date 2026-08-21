@@ -413,6 +413,11 @@ def render_p2(d, a, llm_ok):
     y = 0.122
     for line in _wrap(a["cross_asset"], 70)[:3]:
         A.text(0.03, y, line, color=INK, fontsize=8.6); y -= 0.017
+    rolls = {"bullish": 0, "neutral": 0, "bearish": 0}
+    for e in d["events"]:
+        s = (e.get("sentiment") or "").lower()
+        if s in rolls: rolls[s] += 1
+    tot = max(sum(rolls.values()), 1)
     _kicker(A, 0.50, 0.145, 0.22, "THEMES & SENTIMENT", SOC)
     y = 0.122
     top_themes = sorted(d["themes"].items(), key=lambda x: -x[1])[:4]
