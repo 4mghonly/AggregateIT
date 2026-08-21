@@ -1,32 +1,7 @@
 [
- {"sub":"wallstreetbets","priority":"Very High"},{"sub":"smallstreetbets","priority":"High"},
- {"sub":"stocks","priority":"Very High"},{"sub":"stockmarket","priority":"Very High"},
- {"sub":"investing","priority":"High"},{"sub":"options","priority":"High"},
- {"sub":"pennystocks","priority":"High"},{"sub":"ValueInvesting","priority":"High"},
- {"sub":"SecurityAnalysis","priority":"High"},{"sub":"thetagang","priority":"High"},
- {"sub":"algotrading","priority":"High"},{"sub":"Daytrading","priority":"High"},
- {"sub":"SwingTrading","priority":"Medium"},{"sub":"Stock_Picks","priority":"Medium"},
- {"sub":"Dividend","priority":"Medium"},{"sub":"Bogleheads","priority":"Medium"},
- {"sub":"Superstonk","priority":"Medium"},{"sub":"AMCSTOCK","priority":"Medium"},
- {"sub":"CanadianInvestor","priority":"Medium"},{"sub":"UKInvesting","priority":"Medium"},
- {"sub":"AusFinance","priority":"Medium"},{"sub":"IndiaInvestments","priority":"Medium"},
- {"sub":"economy","priority":"High"},{"sub":"Economics","priority":"High"},
- {"sub":"geopolitics","priority":"Very High"},{"sub":"PoliticalDiscussion","priority":"High"},
- {"sub":"politics","priority":"High"},{"sub":"worldnews","priority":"Very High"},
- {"sub":"MiddleEast","priority":"Very High"},{"sub":"UAE","priority":"High"},
- {"sub":"AskMiddleEast","priority":"Medium"},{"sub":"InternationalNews","priority":"High"}
- ,{"sub": "geopolitics", "priority": "High"}
-,{"sub": "worldnews", "priority": "High"}
-,{"sub": "InternationalNews", "priority": "Medium"}
-,{"sub": "CredibleDefense", "priority": "High"}
-,{"sub": "WarCollege", "priority": "Medium"}
-,{"sub": "OSINT", "priority": "High"}
-,{"sub": "middleeast", "priority": "High"}
-,{"sub": "dubai", "priority": "Medium"}
-,{"sub": "abudhabi", "priority": "Medium"}
-,{"sub": "saudiarabia", "priority": "Medium"}
-,{"sub": "qatar", "priority": "Low"}
-,{"sub": "cybersecurity", "priority": "Medium"}
-,{"sub": "energy", "priority": "Medium"}
-,{"sub": "oil", "priority": "Low"}
+  {"sub": "stocks", "priority": "Low"},
+  {"sub": "wallstreetbets", "priority": "Low"},
+  {"sub": "investing", "priority": "Low"},
+  {"sub": "options", "priority": "Low"},
+  {"sub": "Economics", "priority": "Low"}
 ]
