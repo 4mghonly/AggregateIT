@@ -663,6 +663,16 @@ sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
             *[fetch_reddit(s, x, sem_rd) for x in REDDIT],
             *[fetch_github(s, x["_url"].split("github.com/")[1], sem, since.isoformat()) for x in GH])
     items = [i for b in batches if b for i in b] + social_items
+try:
+        sp = {"ts": time.time(), "counts": {}, "top": []}
+        for i in social_items:
+            k = i.get("source_type", "?") + ((":" + i["lane"]) if i.get("lane") else "")
+            sp["counts"][k] = sp["counts"].get(k, 0) + 1
+        for i in sorted(social_items, key=lambda x: -x.get("ts", 0))[:12]:
+            sp["top"].append({"t": (i.get("title") or "")[:90], "src": i.get("source_name", ""),
+                              "lane": i.get("lane", ""), "type": i.get("source_type", "")})
+        with open(os.path.join(DATA, "social_pulse.json"), "w", encoding="utf-8") as f: json.dump(sp, f)
+    except Exception: pass
 
     new = []
     for i in items:
