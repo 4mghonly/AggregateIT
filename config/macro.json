@@ -32,6 +32,7 @@
   ],
   "bonds": [
     {"sym": "TVC:US02Y", "name": "US 2Y Yield", "type": "bond"},
+    {"sym": "TVC:US05Y", "name": "US 5Y Yield", "type": "bond"},
     {"sym": "TVC:US10Y", "name": "US 10Y Yield", "type": "bond"},
     {"sym": "TVC:US30Y", "name": "US 30Y Yield", "type": "bond"}
   ]
