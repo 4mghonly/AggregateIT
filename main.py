@@ -795,6 +795,124 @@ try:
             if verify_event is not None and verified_count < 3:
                 try:
                     doms = verify_event(a["event"])
+new = []
+    for i in items:
+        if i["ts"] < since.timestamp() or not i["url"]: continue
+        if not store.url_active(i["url"]): continue
+        if not store.title_active(title_hash(i.get("title", ""))): continue
+        new.append(i)
+
+    scored = []
+    for i in new:
+        sc, labels = score_item(i)
+        i["thash"] = title_hash(i.get("title", ""))
+        if sc > 0:
+            i["matched_categories"] = labels; i["score"] = sc; i["cats"] = ", ".join(labels)
+            scored.append(i)
+            if not DRY_RUN: store.register(i["url"], i["thash"], "discovered", sc)
+        else:
+            if not DRY_RUN: store.register(i["url"], i["thash"], "filtered", 0)
+
+    ticker_counts = {}
+    for i in scored:
+        for label in i.get("matched_categories", []):
+            t = label.split(" ")[0]
+            if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
+                ticker_counts[t.upper()] = ticker_counts.get(t.upper(), 0) + 1
+    for i in scored:
+        for label in i.get("matched_categories", []):
+            t = label.split(" ")[0].upper()
+            if ticker_counts.get(t, 0) >= 2:
+                i["score"] += 2
+                comp = i.setdefault("score_components", {})
+                comp["confluence"] = comp.get("confluence", 0) + 2
+                if "Confluence" not in i["matched_categories"]: i["matched_categories"].append("Confluence")
+                break
+
+    scored.sort(key=lambda x: -x["score"])
+    report = {"run": datetime.now(timezone.utc).isoformat(), "dry_run": DRY_RUN,
+              "fetched": len(items), "new": len(new), "matched": len(scored),
+              "events": [], "events_summary": {"clusters": 0, "new": 0, "updated": 0},
+              "wire": [], "quarantined": []}
+
+    front_page = []
+    for i in scored:
+        if i["score"] < FRONT_PAGE_FLOOR:
+            report["wire"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
+                                   "score": i["score"], "triggers": i["matched_categories"],
+                                   "components": i.get("score_components", {})})
+            if not DRY_RUN: store.register(i["url"], i["thash"], "deferred", i["score"])
+            continue
+        if len(front_page) >= MAX_ANALYZE:
+            if not DRY_RUN: store.register(i["url"], i["thash"], "deferred", i["score"])
+            continue
+        if i["source_type"] == "rss": i["text"] = full_text(i["url"], i["text"])
+        front_page.append(i)
+
+    clusters = cluster_events(front_page)
+    report["events_summary"]["clusters"] = len(clusters)
+
+    for c in clusters[MAX_EVENTS:]:
+        if not DRY_RUN:
+            for it in c["items"]: store.register(it["url"], it["thash"], "deferred", it["score"])
+
+    digest_items = []
+    verified_count = 0
+    for c in clusters[:MAX_EVENTS]:
+        prior = resolve_prior_event(c, store)
+        if DRY_RUN:
+            report["events"].append({"event_id": c["event_id"], "entity": c["entity"], "preview": True,
+                                     "new_event": prior is None,
+                                     "independent_sources": c["independent_sources"],
+                                     "triggers": c["items"][0].get("matched_categories", []),
+                                     "sources": [{"name": it["source_name"], "url": it["url"], "title": it["title"]} for it in c["items"]]})
+            continue
+        a, err = analyze_event(c, prior)
+        if a:
+            a = apply_corroboration_policy(a, c)
+            now = time.time()
+            if prior:
+                c["event_id"] = prior["event_id"]
+                try: old_tokens = set(json.loads(prior.get("tokens_json") or "[]"))
+                except Exception: old_tokens = set()
+                c["tokens"] = set(sorted(c["tokens"] | old_tokens)[:60])
+                report["events_summary"]["updated"] += 1
+                old_status = prior.get("status", "NEW")
+                old_sources = prior.get("source_count", 0)
+                if c["independent_sources"] > old_sources:
+                    store.add_event_update(c["event_id"], "corroborated", {"sources": c["independent_sources"]})
+                if a.get("corroboration") == "multi-source" and int(a.get("confidence", 0)) >= 85:
+                    status = "CONFIRMED"
+                elif a.get("corroboration") == "multi-source":
+                    status = "DEVELOPING"
+                else:
+                    status = old_status
+                if status != old_status:
+                    store.add_event_update(c["event_id"], "status_change", {"from": old_status, "to": status})
+            else:
+                report["events_summary"]["new"] += 1
+                status = "DEVELOPING" if c["independent_sources"] >= 2 and a.get("corroboration") == "multi-source" else "NEW"
+                store.add_event_update(c["event_id"], "detected", {"sources": c["independent_sources"]})
+            ev = {"event_id": c["event_id"], "entity": c["entity"],
+                  "tokens_json": json.dumps(sorted(c["tokens"])),
+                  "title": a["event"], "event_type": a["event_type"], "status": status,
+                  "severity": a["importance"], "confidence": int(a["confidence"]),
+                  "source_count": (prior["source_count"] if prior else 0) + c["independent_sources"],
+                  "assessment": a["assessment"], "what_changed": a["what_changed"],
+                  "sentiment": a.get("sentiment", "na"),
+                  "triggers_json": json.dumps(c["items"][0].get("matched_categories", [])),
+                  "sources_json": json.dumps([{"name": it["source_name"], "url": it["url"], "title": it["title"]} for it in c["items"]]),
+                  "score": c["items"][0].get("score", 0),
+                  "urls_json": json.dumps([it["url"] for it in c["items"]]),
+                  "ddg_hits": 0,
+                  "first_seen": prior["first_seen"] if prior else now, "last_updated": now}
+            store.upsert_event(ev)
+            claims = a.get("claims", [])
+            if claims: store.save_claims(c["event_id"], claims)
+            a["claim_count"] = len(claims)
+            if verify_event is not None and verified_count < 3:
+                try:
+                    doms = verify_event(a["event"])
                     if doms: store.set_ddg_hits(c["event_id"], len(doms))
                 except Exception: pass
                 verified_count += 1
@@ -836,4 +954,3 @@ try:
 
 if __name__ == "__main__":
     asyncio.run(main())
-
