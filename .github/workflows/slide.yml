@@ -1,9 +1,9 @@
 name: Intelligence Slide Deck
 on:
   schedule:
-    - cron: "30 13-19 * * 1-5"      # Mon-Fri 17:30-23:30 GST (hourly during US session)
-    - cron: "0 20 * * 1-5"          # Mon-Fri 00:00 GST (closing print)
-    - cron: "0 13 * * 0"            # Sunday 17:00 GST (pre-futures open)
+    - cron: "30 13-19 * * 1-5"
+    - cron: "0 20 * * 1-5"
+    - cron: "0 13 * * 0"
   workflow_dispatch:
 jobs:
   slide:
@@ -11,7 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with:
+          python-version: "3.11"
       - run: pip install requests matplotlib
       - uses: actions/cache@v4
         with:
@@ -20,13 +21,15 @@ jobs:
           restore-keys: |
             seen-db-
       - name: Check slide quiet hours
+        id: check
         run: |
-          python -c "
-from policy import can_send
-import sys
-exit(0 if can_send('slide') else 1)" && echo "✅ Slide allowed" || (echo "🚫 Slide quiet hours - skipping" && exit 0)
-      - name: Render + send deck
-        if: success()
+          if python -c "from policy import can_send; import sys; sys.exit(0 if can_send('slide') else 1)"; then
+            echo "allowed=true" >> $GITHUB_OUTPUT
+          else
+            echo "allowed=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Render and send deck
+        if: steps.check.outputs.allowed == 'true'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
@@ -34,7 +37,7 @@ exit(0 if can_send('slide') else 1)" && echo "✅ Slide allowed" || (echo "🚫 
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
         run: python slide.py
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: steps.check.outputs.allowed == 'true'
         with:
           name: intel-deck
           path: |
