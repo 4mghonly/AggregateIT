@@ -15,4 +15,18 @@
  {"sub":"politics","priority":"High"},{"sub":"worldnews","priority":"Very High"},
  {"sub":"MiddleEast","priority":"Very High"},{"sub":"UAE","priority":"High"},
  {"sub":"AskMiddleEast","priority":"Medium"},{"sub":"InternationalNews","priority":"High"}
+ ,{"sub": "geopolitics", "priority": "High"}
+,{"sub": "worldnews", "priority": "High"}
+,{"sub": "InternationalNews", "priority": "Medium"}
+,{"sub": "CredibleDefense", "priority": "High"}
+,{"sub": "WarCollege", "priority": "Medium"}
+,{"sub": "OSINT", "priority": "High"}
+,{"sub": "middleeast", "priority": "High"}
+,{"sub": "dubai", "priority": "Medium"}
+,{"sub": "abudhabi", "priority": "Medium"}
+,{"sub": "saudiarabia", "priority": "Medium"}
+,{"sub": "qatar", "priority": "Low"}
+,{"sub": "cybersecurity", "priority": "Medium"}
+,{"sub": "energy", "priority": "Medium"}
+,{"sub": "oil", "priority": "Low"}
 ]
