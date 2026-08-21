@@ -1,16 +1,16 @@
 name: Intelligence Briefings
 on:
   schedule:
-    - cron: "0 4 * * *"
-    - cron: "0 14-20 * * 1-5"
-    - cron: "0 21 * * 1-5"
+    - cron: "0 4 * * *"         # MINI (08:00 GST)
+    - cron: "0 14 * * 1-5"      # MORNING (18:40 GST)
+    - cron: "0 21 * * 1-5"      # CLOSING (01:00 GST)
   workflow_dispatch:
     inputs:
       mode:
         description: "Briefing Type"
         type: choice
-        default: "LIVE"
-        options: ["MINI", "LIVE", "MORNING", "CLOSING"]
+        default: "MORNING"
+        options: ["MINI", "MORNING", "CLOSING"]
 jobs:
   briefing:
     runs-on: ubuntu-latest
@@ -25,11 +25,11 @@ jobs:
           key: seen-db-${{ github.run_id }}
           restore-keys: |
             seen-db-
-      - name: Fresh pulse immediately before briefing (safety net vs cron drift)
-        if: github.event.schedule != '0 4 * * *' && github.event.inputs.mode != 'MINI'
+      - name: Fresh pulse immediately before briefing
+        if: github.event.inputs.mode != 'MINI'
         run: python tv.py --pulse --macro
       - name: Send Discord Briefing
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          BRIEFING_MODE: ${{ github.event.inputs.mode || (github.event.schedule == '0 4 * * *' && 'MINI' || (github.event.schedule == '0 21 * * 1-5' && 'CLOSING' || 'LIVE')) }}
+          BRIEFING_MODE: ${{ github.event.inputs.mode || (github.event.schedule == '0 4 * * *' && 'MINI' || (github.event.schedule == '0 21 * * 1-5' && 'CLOSING' || 'MORNING')) }}
         run: python briefing.py
