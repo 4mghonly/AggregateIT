@@ -518,6 +518,7 @@ def build_event_embed(c, a, prior, status="NEW", timeline=None):
         {"name": "Tickers", "value": _truncate(", ".join(a.get("tickers") or []) or "-", 200), "inline": True},
     ]
     if a.get("event_type"):
+        {"name": "📑 Claims", "value": str(a.get("claim_count", 0)) + " verified facts", "inline": True},
         fields.append({"name": "Event Type", "value": _truncate(str(a["event_type"]), 150), "inline": True})
     fields.append({"name": f"Sources ({c['independent_sources']} independent)",
                    "value": _truncate(", ".join(c["source_names"]), 300), "inline": False})
