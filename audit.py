@@ -68,4 +68,32 @@ async def main():
     for r in bad: print(" -", r["kind"], "|", r["name"], "|", r.get("url", ""), "|", r.get("err", ""))
     with open("audit_report.json", "w") as f: json.dump(RESULTS, f, indent=2)
 
+# ---- Update C: per-source health + auto-mute ----
+import time as _time
+HEALTH_FILE = os.path.join(BASE, "data", "source_health.json")
+MUTED_FILE = os.path.join(BASE, "data", "muted.json")
+
+def _load_json(p):
+    try:
+        with open(p, encoding="utf-8") as f: return json.load(f)
+    except Exception: return {}
+
+def record(name, ok):
+    if not name: return
+    h = _load_json(HEALTH_FILE)
+    e = h.setdefault(name, {"ok": 0, "fail": 0})
+    e["ok" if ok else "fail"] += 1; e["ts"] = _time.time()
+    with open(HEALTH_FILE, "w", encoding="utf-8") as f: json.dump(h, f)
+
+def is_muted(name):
+    return name in _load_json(MUTED_FILE)
+
+def refresh_mutes():
+    h = _load_json(HEALTH_FILE); m = _load_json(MUTED_FILE)
+    for name, e in h.items():
+        tot = e.get("ok", 0) + e.get("fail", 0)
+        if tot >= 3 and e["ok"] / tot < 0.5: m[name] = _time.time()
+        elif tot >= 3 and e["ok"] / tot >= 0.7: m.pop(name, None)
+    with open(MUTED_FILE, "w", encoding="utf-8") as f: json.dump(m, f)
+
 asyncio.run(main())
