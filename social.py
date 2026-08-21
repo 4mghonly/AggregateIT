@@ -1,19 +1,29 @@
-"""social.py v2 — social signal layer (hardened for GitHub Actions egress).
-Reddit: Arctic Shift primary + PullPush mirror; 3 lanes (NEW/TOP/RISING) + dual-axis comments.
-Twitter/X: RSSHub rotation with a 4s pre-check (skip entirely if all instances blocked).
-StockTwits: trending + per-symbol streams.
+"""social.py v3 — social signal layer with Cloudflare Worker proxy support.
+If SOCIAL_PROXY_URL is set, all Reddit/Twitter/StockTwits traffic routes through it
+(bypasses datacenter IP blocks); otherwise falls back to direct calls.
+Reddit: Arctic Shift + PullPush mirror, 3 lanes (NEW/TOP/RISING) + dual-axis comments.
+Twitter/X: RSSHub rotation with 4s pre-check. StockTwits: trending + streams.
 Writes data/social_pulse.json for the Gazette. Items match main.py schema."""
 import os, json, time, re, calendar, requests, feedparser
 from datetime import datetime, timezone, timedelta
+from urllib.parse import quote, urlencode
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
+PROXY = os.environ.get("SOCIAL_PROXY_URL", "").rstrip("/")
 SHIFT_MIRRORS = [
     ("https://arctic-shift.philo.berkeley.edu/api/reddit", "arctic"),
     ("https://api.pullpush.io/reddit", "pullpush"),
 ]
 RSSHUB = ["https://rsshub.app", "https://rsshub.rssforever.com", "https://hub.slarker.me", "https://rsshub.pseudoyu.com"]
 UA = {"User-Agent": "Mozilla/5.0 (compatible; NewsIntelEngine/0.5)"}
+
+def _route(url, params=None):
+    if params:
+        url = url + ("&" if "?" in url else "?") + urlencode(params)
+    if PROXY:
+        return PROXY + "/?target=" + quote(url, safe="")
+    return url
 
 def _load_chatter():
     try:
@@ -28,7 +38,7 @@ def _shift_get(path, params):
             url = url.replace("/submissions/search", "/search/submission").replace("/comments/search", "/search/comment")
             p["size"] = p.pop("limit", 5)
         try:
-            r = requests.get(url, params=p, timeout=8, headers=UA)
+            r = requests.get(_route(url, p), timeout=8, headers=UA)
             if r.status_code == 200: return r.json().get("data", [])
         except Exception: continue
     return []
@@ -80,7 +90,7 @@ def _reddit_items(since_ts):
 def _get_working_rsshub():
     for inst in RSSHUB:
         try:
-            r = requests.get(inst, timeout=4, headers=UA)
+            r = requests.get(_route(inst), timeout=4, headers=UA)
             if r.status_code < 500: return inst
         except Exception: continue
     return None
@@ -96,7 +106,7 @@ def _twitter_items(since_ts):
     for cat, hs in chat.get("twitter_handles", {}).items():
         for h in hs:
             try:
-                r = requests.get(f"{inst}/twitter/user/{h}", timeout=6, headers=UA)
+                r = requests.get(_route(f"{inst}/twitter/user/{h}"), timeout=6, headers=UA)
                 if r.status_code == 200:
                     for e in feedparser.parse(r.text).entries[:per]:
                         out.append({"source_type": "twitter", "source_name": "X:@" + h, "category": "Twitter/" + cat,
@@ -110,13 +120,13 @@ def _twitter_items(since_ts):
 def _stocktwits_items():
     out = []
     try:
-        r = requests.get("https://api.stocktwits.com/api/2/trending/symbols.json", timeout=5)
+        r = requests.get(_route("https://api.stocktwits.com/api/2/trending/symbols.json"), timeout=5)
         syms = [s.get("symbol") for s in r.json().get("symbols", [])[:10]]
     except Exception:
         syms = []
     for t in syms:
         try:
-            r = requests.get(f"https://api.stocktwits.com/api/2/streams/symbol/{t}.json", timeout=5)
+            r = requests.get(_route(f"https://api.stocktwits.com/api/2/streams/symbol/{t}.json"), timeout=5)
             for m in r.json().get("messages", [])[:3]:
                 out.append({"source_type": "stocktwits", "source_name": "ST:$" + str(t), "category": "StockTwits",
                             "url": f"https://stocktwits.com/symbol/{t}", "title": f"${t}: " + (m.get("body") or "")[:70],
