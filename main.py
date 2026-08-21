@@ -1,13 +1,20 @@
+"""main.py v10 — AggregateIT engine orchestrator.
+Integrates: explainable scoring, clustering v2 + metrics, provenance,
+claims-level evidence, ddg verification, macro context, policy gating,
+routed alerts, proportional health, decomposition counters."""
 import os, re, json, time, sqlite3, asyncio, calendar, hashlib, sys
 import feedparser, aiohttp, requests, trafilatura
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlparse
 from storage import SQLiteStore, DATA
 from market import load_market_pulse, build_pulse_embed, load_macro_pulse, compute_regime
-from alerts import route_alerts, load_rules
+from alerts import load_rules, route_alerts
 from policy import can_send, can_send_digest, can_send_alert
-from verify import verify_event
 from llm import chat
+try:
+    from verify import verify_event
+except Exception:
+    verify_event = None
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 REPORTS = os.path.join(BASE, "reports")
@@ -22,6 +29,7 @@ FRONT_PAGE_FLOOR = 5
 ALWAYS_ANALYZE = ["federal reserve", "european central bank", "cisa"]
 PRIO_LIMIT = {"Very High": 10, "High": 5, "Medium": 3}
 UA = {"User-Agent": "NewsIntelEngine/0.4 (personal research)"}
+CLUSTER_METRICS_FILE = os.path.join(REPORTS, "cluster_metrics.json")
 
 CASHTAG_ONLY = {
     "ALL","ARE","CAT","KEY","LOW","FIX","TAP","MAS","LIN","GEN","HAL","DOW","MET",
@@ -227,8 +235,7 @@ def primary_entity(i):
 
 def cluster_similarity(new_item, cluster):
     score = 0.0; reasons = []
-    new_entity = primary_entity(new_item)
-    if new_entity != cluster["entity"]:
+    if primary_entity(new_item) != cluster["entity"]:
         return 0.0, ["entity mismatch"], False
     score += 0.2; reasons.append("entity")
 
@@ -260,9 +267,7 @@ def cluster_similarity(new_item, cluster):
     score += 0.2 * jacc
     if jacc > 0.1: reasons.append(f"title({jacc:.2f})")
 
-    new_ts = new_item.get("ts", 0)
-    cluster_ts = max(item.get("ts", 0) for item in cluster["items"])
-    hours_apart = abs(new_ts - cluster_ts) / 3600.0
+    hours_apart = abs(new_item.get("ts", 0) - max(item.get("ts", 0) for item in cluster["items"])) / 3600.0
     if hours_apart < 1: score += 0.05; reasons.append("time(<1h)")
     elif hours_apart < 6: score += 0.02; reasons.append("time(<6h)")
 
@@ -278,11 +283,13 @@ def cluster_events(items):
             seed = c["items"][0]
             seed_cluster = {"entity": c["entity"], "tokens": title_tokens(seed.get("title", "")), "items": [seed]}
             seed_sim, _, _ = cluster_similarity(i, seed_cluster)
-            metrics.append({"sim": round(sim, 3), "seed_sim": round(seed_sim, 3), "merged": content and sim >= 0.4 and seed_sim >= 0.3})
-            if content and sim >= 0.4 and seed_sim >= 0.3:
+            merged = content and sim >= 0.4 and seed_sim >= 0.3
+            metrics.append({"sim": round(sim, 3), "seed_sim": round(seed_sim, 3), "merged": merged})
+            if merged:
                 c["items"].append(i); c["tokens"] |= title_tokens(i.get("title", "")); placed = True; break
         if not placed:
-            clusters.append({"entity": primary_entity(i), "tokens": title_tokens(i.get("title", "")), "items": [i], "event_id": None})
+            clusters.append({"entity": primary_entity(i), "tokens": title_tokens(i.get("title", "")),
+                             "items": [i], "event_id": None})
     for c in clusters:
         seed = c["entity"] + "|" + " ".join(sorted(title_tokens(c["items"][0]["title"])))
         c["event_id"] = hashlib.md5(seed.encode()).hexdigest()[:12]
@@ -291,7 +298,7 @@ def cluster_events(items):
         c["families"] = sorted({source_family(d) for d in c["domains"]})
         c["independent_sources"] = len(c["families"])
     try:
-        with open(CLUSTER_METRICS_FILE, "w") as f: json.dump(metrics, f)
+        with open(CLUSTER_METRICS_FILE, "w", encoding="utf-8") as f: json.dump(metrics, f)
     except Exception: pass
     return clusters
 
@@ -365,22 +372,6 @@ Output ONLY one valid JSON object with exactly these keys:
   "gaps": ["what is missing or unconfirmed"],
   "claims": [{"claim": "specific verifiable fact", "indices": [1]}]
 }"""
-{
-  "event": "one-sentence description of the underlying event",
-  "event_type": "earnings|regulation|geopolitical|market_move|security|macro|other",
-  "facts": ["statements directly supported by the reports [idx]"],
-  "assessment": "analytical interpretation, clearly opinion not fact",
-  "what_changed": "what is NEW compared to prior coverage (or 'New event - no prior coverage')",
-  "importance": "Low|Medium|High|Critical",
-  "confidence": 0,
-  "sentiment": "bullish|bearish|neutral|na",
-  "entities": ["companies, people, organizations, countries"],
-  "tickers": ["VALID symbols only"],
-  "evidence": ["short verbatim quotes supporting key claims [idx]"],
-  "corroboration": "none|single-source|multi-source",
-  "source_reliability": "High|Medium|Low",
-  "gaps": ["what is missing or unconfirmed"]
-}"""
 
 EVENT_USER_PROMPT = """TRIGGER CONTEXT: flagged because it relates to: {cats}
 PRIOR EVENT STATE:
@@ -398,7 +389,6 @@ ENUM_SENT = {"bullish","bearish","neutral","na"}
 ENUM_REL = {"High","Medium","Low"}
 ENUM_EVT = {"earnings","regulation","geopolitical","market_move","security","macro","other"}
 ENUM_COR = {"none","single-source","multi-source"}
-CLUSTER_METRICS_FILE = os.path.join(REPORTS, "cluster_metrics.json")
 TICK_RE = re.compile(r"^[A-Z.\-]{1,6}$")
 
 def validate_analysis(obj, evidence_text=""):
@@ -410,6 +400,10 @@ def validate_analysis(obj, evidence_text=""):
         v = obj.get(k)
         if not isinstance(v, list): errs.append(f"'{k}' must be a list")
         elif not all(isinstance(x, str) for x in v): errs.append(f"'{k}' items must be strings")
+    cl = obj.get("claims", [])
+    if not isinstance(cl, list): errs.append("'claims' must be a list")
+    elif not all(isinstance(x, dict) and isinstance(x.get("claim"), str) for x in cl): errs.append("claims items invalid")
+    obj["claims"] = cl if isinstance(cl, list) else []
     if obj.get("event_type") not in ENUM_EVT: errs.append("event_type not in enum")
     if obj.get("corroboration") not in ENUM_COR: errs.append("corroboration not in enum")
     if obj.get("importance") not in ENUM_IMP: errs.append("importance not in Low|Medium|High|Critical")
@@ -442,14 +436,13 @@ def get_macro_context():
         macro = load_macro_pulse()
         if not macro or not macro.get("valid"): return ""
         regime = compute_regime(macro)
-        inst_map = {i["sym"]: i for i in macro.get("instruments", [])}
         lines = ["Current macro backdrop:"]
         for want in ("S&P 500", "VIX", "US 10Y Yield", "US Dollar Index", "WTI Crude"):
             for inst in macro.get("instruments", []):
                 if inst.get("name") == want and inst.get("pct") is not None:
                     lines.append(f"- {want}: {inst['pct']:+.2f}%")
-                    break 
-        if regime.get("curve_inverted"): lines.append("- ⚠️ Yield curve inverted")
+                    break
+        if regime.get("curve_inverted"): lines.append("- Yield curve inverted")
         if regime.get("oil_spike"): lines.append(f"- Oil spike: {regime['oil_spike']}")
         return "\n".join(lines)
     except Exception:
@@ -462,7 +455,7 @@ def analyze_event(c, prior):
                        f"previous title: \"{prior['title']}\" | previous assessment: {(prior['assessment'] or '')[:300]} | "
                        f"previous confidence: {prior['confidence']} | sources so far: {prior['source_count']}")
     else:
-        prior_state = "NEW EVENT — no prior coverage."
+        prior_state = "NEW EVENT - no prior coverage."
     sources_block = build_sources_block(c)
     macro_context = get_macro_context()
     sys_msg = {"role": "system", "content": EVENT_SYSTEM_PROMPT}
@@ -514,11 +507,11 @@ def build_event_embed(c, a, prior, status="NEW", timeline=None):
         {"name": "Status", "value": f"{status_emoji.get(status, '🔹')} {status}", "inline": True},
         {"name": "Sentiment", "value": SENT_EMOJI.get(sent, sent), "inline": True},
         {"name": "Importance", "value": f"{IMP_EMOJI.get(imp, '')} {imp}", "inline": True},
+        {"name": "📑 Claims", "value": str(a.get("claim_count", 0)) + " verified facts", "inline": True},
         {"name": "Confidence", "value": f"{a.get('confidence', '?')}%", "inline": True},
         {"name": "Tickers", "value": _truncate(", ".join(a.get("tickers") or []) or "-", 200), "inline": True},
     ]
     if a.get("event_type"):
-        {"name": "📑 Claims", "value": str(a.get("claim_count", 0)) + " verified facts", "inline": True},
         fields.append({"name": "Event Type", "value": _truncate(str(a["event_type"]), 150), "inline": True})
     fields.append({"name": f"Sources ({c['independent_sources']} independent)",
                    "value": _truncate(", ".join(c["source_names"]), 300), "inline": False})
@@ -543,6 +536,7 @@ def send_market_pulse():
     wh = os.environ.get("DISCORD_WEBHOOK")
     pulse = load_market_pulse()
     if not wh or not pulse: return
+    if not can_send("pulse"): return
     marker = os.path.join(DATA, ".last_pulse")
     last = 0.0
     try:
@@ -560,20 +554,19 @@ def send_digest(digest_items, report):
     wh = os.environ.get("DISCORD_WEBHOOK")
     if not digest_items:
         HEALTH["discord_skipped"] += 1; return
-        digest_items = [x for x in digest_items if can_send_digest(x)]
+    digest_items = [x for x in digest_items if can_send_digest(x)]
     if not digest_items:
         HEALTH["discord_skipped"] += 1; return
     if not wh:
         HEALTH["discord_fail"] += 1
         print("DISCORD: webhook secret missing - digest NOT delivered"); return
-    for env, b in route_alerts([x for x in digest_items if can_send_alert(x)]).items():
+    alert_items = [x for x in digest_items if can_send_alert(x) and can_send("alert", x["analysis"].get("importance"))]
+    for env, b in route_alerts(alert_items).items():
         target = os.environ.get(env) or wh
         if not b["lines"] or not target: continue
         prefix = "@here " if (b["mention"] and load_rules().get("mention_role") == "here") else ""
-        try:
-            _post_discord(target, {"content": (prefix + "\n".join(b["lines"]))[:1900]})
-        except Exception as e:
-            HEALTH["discord_fail"] += 1; print("Alert err:", type(e).__name__, str(e)[:120])   
+        try: _post_discord(target, {"content": (prefix + "\n".join(b["lines"]))[:1900]})
+        except Exception as e: HEALTH["discord_fail"] += 1; print("Alert err:", type(e).__name__, str(e)[:120])
     news, social = [], []
     for x in digest_items:
         (social if all(it["source_type"] == "reddit" for it in x["cluster"]["items"]) else news).append(x)
@@ -628,14 +621,12 @@ def build_health(report, store_stats):
     if (not DRY_RUN) and qwen_total and HEALTH["qwen_fail"] > HEALTH["qwen_ok"]:
         red.append("Qwen failing more than succeeding")
     overall = "RED" if red else ("YELLOW" if degraded else "GREEN")
-    import os
-    main_path = os.path.join(os.path.dirname(__file__), "main.py")
+    main_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")
     main_lines = 0; main_sections = 0
-    if os.path.exists(main_path):
-        with open(main_path) as f:
-            content = f.read()
-            main_lines = len(content.splitlines())
-            main_sections = content.count("# ================= ")
+    try:
+        with open(main_path, encoding="utf-8") as f: content = f.read()
+        main_lines = len(content.splitlines()); main_sections = content.count("# ================= ")
+    except Exception: pass
     return {"run": report["run"], "overall": overall, "dry_run": DRY_RUN,
             "degraded": degraded, "red": red, "counters": dict(HEALTH), "store": store_stats,
             "main_lines": main_lines, "main_sections": main_sections,
@@ -717,8 +708,8 @@ async def main():
             for it in c["items"]: store.register(it["url"], it["thash"], "deferred", it["score"])
 
     digest_items = []
+    verified_count = 0
     for c in clusters[:MAX_EVENTS]:
-        verified_count = 0
         prior = resolve_prior_event(c, store)
         if DRY_RUN:
             report["events"].append({"event_id": c["event_id"], "entity": c["entity"], "preview": True,
@@ -764,16 +755,17 @@ async def main():
                   "sources_json": json.dumps([{"name": it["source_name"], "url": it["url"], "title": it["title"]} for it in c["items"]]),
                   "score": c["items"][0].get("score", 0),
                   "urls_json": json.dumps([it["url"] for it in c["items"]]),
+                  "ddg_hits": 0,
                   "first_seen": prior["first_seen"] if prior else now, "last_updated": now}
             store.upsert_event(ev)
             claims = a.get("claims", [])
             if claims: store.save_claims(c["event_id"], claims)
             a["claim_count"] = len(claims)
-            if verified_count < 3:
-                doms = verify_event(a["event"])
-                if doms:
-                    store.set_ddg_hits(c["event_id"], len(doms))
-                    a["ddg_domains"] = doms
+            if verify_event is not None and verified_count < 3:
+                try:
+                    doms = verify_event(a["event"])
+                    if doms: store.set_ddg_hits(c["event_id"], len(doms))
+                except Exception: pass
                 verified_count += 1
             timeline = store.get_event_timeline(c["event_id"])
             report["events"].append({"event_id": c["event_id"], "entity": c["entity"],
