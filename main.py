@@ -163,6 +163,8 @@ async def fetch_text(session, url, sem, headers=None):
     return None
 
 async def fetch_rss(session, src, sem):
+    name = src.get("Source_name", "")
+    if audit.is_muted(name): return []
     txt = await fetch_text(session, src["_url"], sem); out = []
     if txt:
         for e in feedparser.parse(txt).entries[:MAX_PER_SOURCE]:
@@ -171,6 +173,7 @@ async def fetch_rss(session, src, sem):
                 "title": e.get("title", ""), "text": re.sub("<[^>]+>", "", e.get("summary", "")),
                 "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
     HEALTH["rss_ok" if out else "rss_fail"] += 1
+    audit.record(name, bool(out))
     return out
 
 async def fetch_reddit(session, r, sem):
