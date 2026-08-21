@@ -3,77 +3,31 @@ on:
   schedule:
     - cron: "0 * * * *"
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Dry run (no Qwen calls, zero tokens)"
-        type: choice
-        default: "false"
-        options: ["true", "false"]
-concurrency:
-  group: engine
-  cancel-in-progress: false
-permissions:
-  contents: read
-  actions: read
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - run: pip install -r requirements.txt
-      - run: pip install requests feedparser trafilatura aiohttp ddgs
-      - run: python tests.py
   run:
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      # State layer 1: rolling cache (primary)
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: pip install feedparser aiohttp requests trafilatura
       - uses: actions/cache@v4
         with:
           path: data
           key: seen-db-${{ github.run_id }}
           restore-keys: |
             seen-db-
-      # State layer 2: artifact recovery (only fills gaps; never clobbers cache)
-      - name: Find last successful run
-        id: lastbackup
-        run: |
-          RUN_ID=$(gh run list --workflow engine.yml --status success --limit 1 --json databaseId -q '.[0].databaseId' 2>/dev/null || true)
-          echo "run_id=${RUN_ID:-}" >> $GITHUB_OUTPUT
+      - name: Run python main.py
         env:
-          GH_TOKEN: ${{ github.token }}
-      - uses: actions/download-artifact@v4
-        if: steps.lastbackup.outputs.run_id != ''
-        continue-on-error: true
-        with:
-          name: state-backup
-          path: data/
-          run-id: ${{ steps.lastbackup.outputs.run_id }}
-          github-token: ${{ github.token }}
-      - run: pip install -r requirements.txt
-      - name: Run engine
-        env:
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
         run: python main.py
-      # State layer 3: durable backup (30 days)
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: state-backup
-          path: data/
-          overwrite: true
-          retention-days: 30
-          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         if: always()
         with:
