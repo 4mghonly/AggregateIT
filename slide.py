@@ -387,27 +387,29 @@ def render_p2(d, a, llm_ok):
     tot = max(sum(rolls.values()), 1)
     im = {i["name"]: i for i in macro.get("instruments", [])}
 
-    # LEFT column: mega-caps, sector tape, movers scatter
-    ax = fig.add_axes([0.05, 0.62, 0.27, 0.28]); _lax(ax); _title(ax, "MEGA-CAP LEADERS (%CHG)")
+    # LEFT column: INCREASED SPACING to prevent overlap
+    ax = fig.add_axes([0.05, 0.68, 0.27, 0.22]); _lax(ax); _title(ax, "MEGA-CAP LEADERS (%CHG)")
     mega = [m for m in pulse.get("mega_caps", []) if m.get("pct") is not None][:12]
     if mega:
         names = [m["t"] for m in mega][::-1]; vals = [m["pct"] for m in mega][::-1]
         ax.barh(names, vals, color=[UP if v > 0 else DN for v in vals], height=0.72)
         ax.axvline(0, color=MUT2, lw=0.6)
         mm = max([abs(v) for v in vals] + [0.1]); ax.set_xlim(-mm * 1.3, mm * 1.3)
-    ax = fig.add_axes([0.05, 0.44, 0.27, 0.16]); _lax(ax); _title(ax, "SECTOR TAPE (avg %chg)")
+    
+    ax = fig.add_axes([0.05, 0.51, 0.27, 0.14]); _lax(ax); _title(ax, "SECTOR TAPE (avg %chg)")
     if d["sector_tape"]:
         ks = [k[:14] for k, _ in d["sector_tape"][:8]][::-1]; vs = [v for _, v in d["sector_tape"][:8]][::-1]
         ax.barh(ks, vs, color=[UP if v > 0 else DN for v in vs], height=0.7)
         ax.axvline(0, color=MUT2, lw=0.6)
-    ax = fig.add_axes([0.05, 0.30, 0.27, 0.12]); _lax(ax); _title(ax, "MOVERS: %CHG vs REL-VOLUME")
+    
+    ax = fig.add_axes([0.05, 0.36, 0.27, 0.12]); _lax(ax); _title(ax, "MOVERS: %CHG vs REL-VOLUME")
     sig = [{"t": k, **v} for k, v in pulse.get("sig", {}).items() if v.get("pct") is not None and v.get("relvol")][:50]
     if sig:
         ax.scatter([v["pct"] for v in sig], [v["relvol"] for v in sig], c=[UP if v["pct"] > 0 else DN for v in sig], s=12, alpha=0.7)
         for v in sorted(sig, key=lambda x: -x["relvol"])[:4]:
             ax.annotate(_clean(v["t"]), (v["pct"], v["relvol"]), color=INK, fontsize=7.5, xytext=(3, 3), textcoords="offset points")
 
-    # MIDDLE: macro table + yield
+    # MIDDLE: Macro table with MISSING DATA HANDLING
     _kicker(A, 0.36, 0.90, 0.32, "MACRO & RATES - FULL BOARD", MKT)
     groups = {}
     for i in macro.get("instruments", []): groups.setdefault(i.get("type", "other"), []).append(i)
@@ -416,29 +418,46 @@ def render_p2(d, a, llm_ok):
     y = 0.868
     for gname, key, n in blocks:
         A.text(0.36, y, gname, color=MUT2, fontsize=9.5, weight="bold"); y -= 0.017
-        for i in groups.get(key, [])[:n]:
-            p = i.get("pct")
-            A.text(0.36, y, _clean(i["name"])[:16], color=INK, fontsize=9.5)
-            A.text(0.475, y, _fmt_price(i.get("price"), i.get("type")), color=MUT2, fontsize=9, ha="right")
-            A.text(0.53, y, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=9.5, ha="right", weight="bold")
-            y -= 0.017
+        rows = groups.get(key, [])[:n]
+        if not rows:
+            A.text(0.36, y, "No data available", color=MUT2, fontsize=9); y -= 0.017
+        else:
+            for i in rows:
+                p = i.get("pct")
+                A.text(0.36, y, _clean(i["name"])[:16], color=INK, fontsize=9.5)
+                A.text(0.475, y, _fmt_price(i.get("price"), i.get("type")), color=MUT2, fontsize=9, ha="right")
+                A.text(0.53, y, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=9.5, ha="right", weight="bold")
+                y -= 0.017
         y -= 0.006
+
     y = 0.868
     for gname, key, n in [("FOREX", "forex", 4), ("RATES", "bond", 4)]:
         A.text(0.56, y, gname, color=MUT2, fontsize=9.5, weight="bold"); y -= 0.017
-        for i in groups.get(key, [])[:n]:
-            p = i.get("pct")
-            A.text(0.56, y, _clean(i["name"])[:14], color=INK, fontsize=9.5)
-            A.text(0.685, y, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=9.5, ha="right", weight="bold")
-            y -= 0.017
+        rows = groups.get(key, [])[:n]
+        if not rows:
+            A.text(0.56, y, "No data available", color=MUT2, fontsize=9); y -= 0.017
+        else:
+            for i in rows:
+                p = i.get("pct")
+                A.text(0.56, y, _clean(i["name"])[:14], color=INK, fontsize=9.5)
+                A.text(0.685, y, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=9.5, ha="right", weight="bold")
+                y -= 0.017
         y -= 0.006
-    A.text(0.56, y, "REGIME", color=MUT2, fontsize=9.5, weight="bold"); y -= 0.017
-    for line in filter(None, [
-        "VIX: %s" % regime.get("vix"), "2s10s: %s%s" % (regime.get("curve_2s10s", ""), " INVERTED" if regime.get("curve_inverted") else ""),
-        "DXY: %s" % regime.get("dxy"), "Oil: %s" % regime.get("oil_spike")]):
-        A.text(0.56, y, _clean(line), color=GEO, fontsize=9.5); y -= 0.017
 
-    ax = fig.add_axes([0.36, 0.30, 0.30, 0.26]); _lax(ax)
+    A.text(0.56, y, "REGIME", color=MUT2, fontsize=9.5, weight="bold"); y -= 0.017
+    regime_lines = list(filter(None, [
+        "VIX: %s" % regime.get("vix") if regime.get("vix") else None,
+        "2s10s: %s%s" % (regime.get("curve_2s10s", ""), " INVERTED" if regime.get("curve_inverted") else "") if regime.get("curve_2s10s") else None,
+        "DXY: %s" % regime.get("dxy") if regime.get("dxy") else None,
+        "Oil: %s" % regime.get("oil_spike") if regime.get("oil_spike") else None]))
+    if not regime_lines:
+        A.text(0.56, y, "No regime data", color=MUT2, fontsize=9); y -= 0.017
+    else:
+        for line in regime_lines:
+            A.text(0.56, y, _clean(line), color=GEO, fontsize=9.5); y -= 0.017
+
+    # Yield curve
+    ax = fig.add_axes([0.36, 0.36, 0.30, 0.22]); _lax(ax)
     hist = [h for h in d["yield_hist"] if h.get("spread2s10s") is not None]
     if len(hist) >= 3:
         ax.plot(range(len(hist)), [h["spread2s10s"] for h in hist], marker="o", color=GEO, lw=2.5, markersize=6)
@@ -454,31 +473,32 @@ def render_p2(d, a, llm_ok):
         else:
             ax.text(0.5, 0.5, "no data", color=MUT2, ha="center")
 
-    # RIGHT column: commodities, risers/fallers pie, 1-hour movers
-    ax = fig.add_axes([0.72, 0.74, 0.25, 0.16]); _lax(ax); _title(ax, "COMMODITIES COMPLEX")
+    # RIGHT column: Commodities + Risers/Fallers + 1h movers
+    ax = fig.add_axes([0.72, 0.76, 0.25, 0.12]); _lax(ax); _title(ax, "COMMODITIES COMPLEX")
     coms = [i for i in groups.get("commodity", []) if i.get("pct") is not None]
-    if coms:
+    if not coms:
+        ax.text(0.5, 0.5, "No data", color=MUT2, ha="center", transform=ax.transAxes)
+    else:
         ax.bar([_clean(i["name"])[:8] for i in coms], [i["pct"] for i in coms], color=[UP if i["pct"] > 0 else DN for i in coms])
         ax.axhline(0, color=MUT2, lw=0.6)
 
-    _kicker(A, 0.71, 0.70, 0.26, "RISERS & FALLERS (SINCE LAST UPDATE)", HI)
+    _kicker(A, 0.71, 0.72, 0.26, "RISERS & FALLERS (SINCE LAST UPDATE)", HI)
     deltas = pulse.get("deltas", {})
     if deltas:
         up = sum(1 for v in deltas.values() if v > 0.05)
         dn = sum(1 for v in deltas.values() if v < -0.05)
         fl = len(deltas) - up - dn
-        axp = fig.add_axes([0.72, 0.50, 0.115, 0.185]); axp.set_facecolor(PAPER); axp.set_axis_off()
-        axp.pie([up, dn, fl], colors=[UP, DN, "#B9B0A0"], startangle=90,
-                wedgeprops={"linewidth": 0.8, "edgecolor": PAPER})
-        A.text(0.85, 0.63, "Rising %d" % up, color=UP, fontsize=10.5, weight="bold")
-        A.text(0.85, 0.59, "Falling %d" % dn, color=DN, fontsize=10.5, weight="bold")
-        A.text(0.85, 0.55, "Unchanged %d" % fl, color=MUT2, fontsize=10.5, weight="bold")
+        axp = fig.add_axes([0.72, 0.52, 0.115, 0.185]); axp.set_facecolor(PAPER); axp.set_axis_off()
+        axp.pie([up, dn, fl], colors=[UP, DN, "#B9B0A0"], startangle=90, wedgeprops={"linewidth": 0.8, "edgecolor": PAPER})
+        A.text(0.85, 0.65, "Rising %d" % up, color=UP, fontsize=10.5, weight="bold")
+        A.text(0.85, 0.61, "Falling %d" % dn, color=DN, fontsize=10.5, weight="bold")
+        A.text(0.85, 0.57, "Unchanged %d" % fl, color=MUT2, fontsize=10.5, weight="bold")
     else:
-        A.text(0.72, 0.60, "No previous snapshot yet -", color=MUT2, fontsize=9.5)
-        A.text(0.72, 0.575, "baseline building.", color=MUT2, fontsize=9.5)
+        A.text(0.72, 0.62, "No previous snapshot yet -", color=MUT2, fontsize=9.5)
+        A.text(0.72, 0.59, "baseline building.", color=MUT2, fontsize=9.5)
 
-    _kicker(A, 0.71, 0.47, 0.26, "1-HOUR MOVERS (LARGE CAPS)", HI)
-    y = 0.44
+    _kicker(A, 0.71, 0.49, 0.26, "1-HOUR MOVERS (LARGE CAPS)", HI)
+    y = 0.46
     hm = pulse.get("hour_movers", [])
     if not hm:
         A.text(0.71, y, "No large-cap stock moved >1% in the past hour.", color=MUT2, fontsize=9.5); y -= 0.023
@@ -488,12 +508,12 @@ def render_p2(d, a, llm_ok):
         A.text(0.97, y, "sess %+.2f%% · $%.0fB" % (m["pct"], m["mcap"] / 1e9), color=MUT2, fontsize=9, ha="right")
         y -= 0.023
 
-    # HEADLINES: one full line each, clear of the rule
-    A.add_patch(plt.Rectangle((0.03, 0.285), 0.94, 0.0015, color=INK))
-    _kicker(A, 0.03, 0.268, 0.94, "NEWS HEADLINES - PAST 24 HOURS", GEO)
+    # HEADLINES: LOWERED to create buffer from charts
+    A.add_patch(plt.Rectangle((0.03, 0.305), 0.94, 0.0015, color=INK))
+    _kicker(A, 0.03, 0.288, 0.94, "NEWS HEADLINES - PAST 24 HOURS", GEO)
     for i, e in enumerate(d["headlines"][:8]):
         colx = 0.03 + (i % 2) * 0.485
-        yy = 0.238 - (i // 2) * 0.017
+        yy = 0.263 - (i // 2) * 0.017
         ts = datetime.fromtimestamp(e.get("ts") or 0, timezone.utc).strftime("%H:%M")
         t = _clean(e.get("title"))
         if len(t) > 120: t = t[:117] + "..."
