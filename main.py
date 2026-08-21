@@ -654,14 +654,15 @@ async def main():
     if not DRY_RUN and not os.environ.get("QWEN_API_KEY"):
         raise SystemExit("FATAL: QWEN_API_KEY secret is not set.")
 
-    sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
+sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
     since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
+    social_items = social.fetch_all(since.timestamp())
     async with aiohttp.ClientSession(headers=UA) as s:
         batches = await asyncio.gather(
             *[fetch_rss(s, x, sem) for x in RSS],
             *[fetch_reddit(s, x, sem_rd) for x in REDDIT],
             *[fetch_github(s, x["_url"].split("github.com/")[1], sem, since.isoformat()) for x in GH])
-    items = [i for b in batches if b for i in b]
+    items = [i for b in batches if b for i in b] + social_items
 
     new = []
     for i in items:
