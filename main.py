@@ -553,7 +553,7 @@ def send_digest(digest_items, report):
     if not wh:
         HEALTH["discord_fail"] += 1
         print("DISCORD: webhook secret missing - digest NOT delivered"); return
-    for env, b in route_alerts(digest_items).items():
+    for env, b in route_alerts([x for x in digest_items if can_send_alert(x)]).items():
         target = os.environ.get(env) or wh
         if not b["lines"] or not target: continue
         prefix = "@here " if (b["mention"] and load_rules().get("mention_role") == "here") else ""
