@@ -126,6 +126,16 @@ class SQLiteStore:
             "INSERT INTO event_updates(event_id, ts, type, details_json) VALUES (?,?,?,?)",
             (event_id, time.time(), update_type, json.dumps(details or {})))
         self.con.commit()
+    def save_claims(self, event_id, claims_list):
+        """claims_list: [{"claim": "...", "indices": [1, 2]}]"""
+        self.con.execute("DELETE FROM claims WHERE event_id=?", (event_id,))
+        for c in claims_list:
+            self.con.execute("INSERT INTO claims(event_id, claim, support_indices) VALUES (?,?,?)",
+                             (event_id, c.get("claim", ""), json.dumps(c.get("indices", []))))
+        self.con.commit()
+
+    def get_claim_count(self, event_id):
+        return self.con.execute("SELECT COUNT(*) FROM claims WHERE event_id=?", (event_id,)).fetchone()[0]
 
     def get_event_timeline(self, event_id):
         rows = self.con.execute(
