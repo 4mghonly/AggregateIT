@@ -1,0 +1,20 @@
+{
+  "extra_clusters": [
+    {"id": "UAE-01", "sub": "UAE & Emirates", "prio": "High", "tags": ["ME", "EC", "MK"], "phrases": ["uae", "united arab emirates", "dubai", "abu dhabi", "adnoc", "dp world", "emirates airline", "etihad", "dfm", "adx exchange", "uae central bank"]},
+    {"id": "GCC-01", "sub": "GCC & Gulf", "prio": "High", "tags": ["ME", "EC", "EN"], "phrases": ["saudi", "riyadh", "mbs", "qatar", "kuwait", "bahrain", "oman", "gcc", "gulf cooperation", "opec", "aramco", "pif"]},
+    {"id": "GEO-10", "sub": "Red Sea & Maritime", "prio": "Critical", "tags": ["GG", "TR", "ME"], "phrases": ["red sea", "houthi", "bab el-mandeb", "suez canal", "tanker", "maritime security", "ship seizure", "naval escort"]},
+    {"id": "GEO-11", "sub": "Iran & Proxies", "prio": "Critical", "tags": ["GG", "ME"], "phrases": ["iran", "irgc", "hezbollah", "enrichment", "iaea", "proxy forces", "israel strike"]},
+    {"id": "GEO-12", "sub": "Great Power & Trade", "prio": "High", "tags": ["GG", "US", "EC"], "phrases": ["nato", "taiwan", "south china sea", "sanctions package", "export controls", "tariff", "chip ban"]},
+    {"id": "CY-10", "sub": "Cyber Escalation", "prio": "High", "tags": ["CY"], "phrases": ["ransomware", "zero-day", "apt group", "cyberattack", "data breach", "critical infrastructure hack"]}
+  ],
+  "queries": ["strait of hormuz", "red sea", "houthi", "sanctions", "opec", "adnoc", "dubai", "saudi", "iran", "hezbollah", "ransomware", "nvda", "tsla", "aapl", "fed rate", "cpi"],
+  "reddit_subs": ["geopolitics", "worldnews", "news", "InternationalNews", "CredibleDefense", "WarCollege", "OSINT", "middleeast", "dubai", "abudhabi", "saudiarabia", "qatar", "economics", "finance", "investing", "stocks", "wallstreetbets", "StockMarket", "options", "technology", "ArtificialIntelligence", "cybersecurity", "energy", "oil"],
+  "twitter_handles": {
+    "osint": ["OSINTtechnical", "ELINTNews", "OSINTdefender", "sentdefender", "clashreport", "FaytuksNews", "OSINTAggregator"],
+    "defense": ["WarOnTheRocks", "BreakingDefense", "DefenseNews"],
+    "wires": ["AP", "Reuters", "BBCBreaking", "AJEnglish", "France24", "dwnews", "AFP"],
+    "macro": ["WalterBloomberg", "DeItaone", "FirstSquawk"],
+    "gcc": ["AlArabiya_Eng", "KhaleejTimes", "GulfNews", "TheNationalNews", "SaudiGazette"]
+  },
+  "caps": {"reddit_per_lane": 5, "comments_per_query": 5, "tweets_per_handle": 5, "total": 60}
+}
