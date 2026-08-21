@@ -4,7 +4,8 @@ from datetime import datetime, timezone, timedelta
 from urllib.parse import urlparse
 from storage import SQLiteStore, DATA
 from market import load_market_pulse, build_pulse_embed, load_macro_pulse, compute_regime
-from alerts import load_rules, match_rules
+from alerts import route_alerts, load_rules
+from verify import verify_event
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 REPORTS = os.path.join(BASE, "reports")
@@ -548,18 +549,14 @@ def send_digest(digest_items, report):
     if not wh:
         HEALTH["discord_fail"] += 1
         print("DISCORD: webhook secret missing - digest NOT delivered"); return
-    rules = load_rules()
-    alert_lines = []; mention = False
-    for x in digest_items:
-        for r in match_rules(x["analysis"], x["cluster"], rules):
-            mention = mention or bool(r.get("mention"))
-            alert_lines.append(f"🚨 [{r.get('type')}:{r.get('value')}] {x['analysis'].get('event', '')[:100]}")
-    if alert_lines:
-        prefix = "@here " if (mention and rules.get("mention_role") == "here") else ""
+    for env, b in route_alerts(digest_items).items():
+        target = os.environ.get(env) or wh
+        if not b["lines"] or not target: continue
+        prefix = "@here " if (b["mention"] and load_rules().get("mention_role") == "here") else ""
         try:
-            _post_discord(wh, {"content": (prefix + "\n".join(alert_lines))[:1900]})
+            _post_discord(target, {"content": (prefix + "\n".join(b["lines"]))[:1900]})
         except Exception as e:
-            HEALTH["discord_fail"] += 1; print("Alert err:", type(e).__name__, str(e)[:120])
+            HEALTH["discord_fail"] += 1; print("Alert err:", type(e).__name__, str(e)[:120])   
     news, social = [], []
     for x in digest_items:
         (social if all(it["source_type"] == "reddit" for it in x["cluster"]["items"]) else news).append(x)
@@ -694,6 +691,7 @@ async def main():
 
     digest_items = []
     for c in clusters[:MAX_EVENTS]:
+        verified_count = 0
         prior = resolve_prior_event(c, store)
         if DRY_RUN:
             report["events"].append({"event_id": c["event_id"], "entity": c["entity"], "preview": True,
@@ -741,6 +739,12 @@ async def main():
                   "urls_json": json.dumps([it["url"] for it in c["items"]]),
                   "first_seen": prior["first_seen"] if prior else now, "last_updated": now}
             store.upsert_event(ev)
+            if verified_count < 3:
+                doms = verify_event(a["event"])
+                if doms:
+                    store.set_ddg_hits(c["event_id"], len(doms))
+                    a["ddg_domains"] = doms
+                verified_count += 1
             timeline = store.get_event_timeline(c["event_id"])
             report["events"].append({"event_id": c["event_id"], "entity": c["entity"],
                                      "new_event": prior is None, "title": a["event"],
