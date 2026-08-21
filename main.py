@@ -7,6 +7,7 @@ from market import load_market_pulse, build_pulse_embed, load_macro_pulse, compu
 from alerts import route_alerts, load_rules
 from policy import can_send, can_send_digest, can_send_alert
 from verify import verify_event
+from llm import chat
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 REPORTS = os.path.join(BASE, "reports")
