@@ -270,7 +270,7 @@ def cluster_similarity(new_item, cluster):
     return score, reasons, content_gate
 
 def cluster_events(items):
-    clusters = []
+    clusters = []; metrics = []
     for i in sorted(items, key=lambda x: -x.get("score", 0)):
         placed = False
         for c in clusters:
@@ -278,14 +278,11 @@ def cluster_events(items):
             seed = c["items"][0]
             seed_cluster = {"entity": c["entity"], "tokens": title_tokens(seed.get("title", "")), "items": [seed]}
             seed_sim, _, _ = cluster_similarity(i, seed_cluster)
+            metrics.append({"sim": round(sim, 3), "seed_sim": round(seed_sim, 3), "merged": content and sim >= 0.4 and seed_sim >= 0.3})
             if content and sim >= 0.4 and seed_sim >= 0.3:
-                c["items"].append(i)
-                c["tokens"] |= title_tokens(i.get("title", ""))
-                placed = True
-                break
+                c["items"].append(i); c["tokens"] |= title_tokens(i.get("title", "")); placed = True; break
         if not placed:
-            clusters.append({"entity": primary_entity(i), "tokens": title_tokens(i.get("title", "")),
-                             "items": [i], "event_id": None})
+            clusters.append({"entity": primary_entity(i), "tokens": title_tokens(i.get("title", "")), "items": [i], "event_id": None})
     for c in clusters:
         seed = c["entity"] + "|" + " ".join(sorted(title_tokens(c["items"][0]["title"])))
         c["event_id"] = hashlib.md5(seed.encode()).hexdigest()[:12]
@@ -293,6 +290,9 @@ def cluster_events(items):
         c["domains"] = sorted({canonical_domain(it["url"]) for it in c["items"]})
         c["families"] = sorted({source_family(d) for d in c["domains"]})
         c["independent_sources"] = len(c["families"])
+    try:
+        with open(CLUSTER_METRICS_FILE, "w") as f: json.dump(metrics, f)
+    except Exception: pass
     return clusters
 
 def resolve_prior_event(c, store, hours=72):
@@ -765,6 +765,9 @@ async def main():
                   "urls_json": json.dumps([it["url"] for it in c["items"]]),
                   "first_seen": prior["first_seen"] if prior else now, "last_updated": now}
             store.upsert_event(ev)
+            claims = a.get("claims", [])
+            if claims: store.save_claims(c["event_id"], claims)
+            a["claim_count"] = len(claims)
             if verified_count < 3:
                 doms = verify_event(a["event"])
                 if doms:
