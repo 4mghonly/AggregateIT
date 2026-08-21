@@ -1,9 +1,9 @@
 name: Intelligence Slide Deck
 on:
   schedule:
-    - cron: "30 13-19 * * 1-5"      # Hourly during US session (17:30-23:30 GST)
-    - cron: "0 20 * * 1-5"          # Closing print (00:00 GST)
-    - cron: "0 4,8 * * 6,0"         # Weekend editions (08:00 & 12:00 GST)
+    - cron: "30 13-19 * * 1-5"      # Mon-Fri 17:30-23:30 GST (hourly during US session)
+    - cron: "0 20 * * 1-5"          # Mon-Fri 00:00 GST (closing print)
+    - cron: "0 13 * * 0"            # Sunday 17:00 GST (pre-futures open)
   workflow_dispatch:
 jobs:
   slide:
@@ -19,14 +19,20 @@ jobs:
           key: seen-db-${{ github.run_id }}
           restore-keys: |
             seen-db-
+      - name: Check slide quiet hours
+        run: |
+          python -c "
+from policy import can_send
+import sys
+exit(0 if can_send('slide') else 1)" && echo "✅ Slide allowed" || (echo "🚫 Slide quiet hours - skipping" && exit 0)
       - name: Render + send deck
+        if: success()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
-        run: |
-          python -c "from policy import can_send; exit(0 if can_send('slide') else 1)" && python slide.py || echo "Quiet hours - skipping deck"
+        run: python slide.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
