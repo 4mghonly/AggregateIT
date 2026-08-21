@@ -95,4 +95,41 @@
   {"Id":139,"Source_name":"koala73/worldmonitor","Category":"GitHub Repository","Url":"https://github.com/koala73/worldmonitor","Verification_status":"Active"},
   {"Id":140,"Source_name":"Mendoraa/deevo-monitor","Category":"GitHub Repository","Url":"https://github.com/Mendoraa/deevo-monitor","Verification_status":"Active"},
   {"Id":141,"Source_name":"frangelbarrera/OSINT-BIBLE","Category":"GitHub Repository","Url":"https://github.com/frangelbarrera/OSINT-BIBLE","Verification_status":"Active"}
+  ,{"Url": "https://www.warontherocks.com/feed/", "Source_name": "War on the Rocks", "Category": "Geopolitics", "tier": 2}
+,{"Url": "https://breakingdefense.com/feed/", "Source_name": "Breaking Defense", "Category": "Defense", "tier": 2}
+,{"Url": "https://thediplomat.com/feed/", "Source_name": "The Diplomat", "Category": "Geopolitics", "tier": 2}
+,{"Url": "https://www.aljazeera.com/xml/rss/all.xml", "Source_name": "Al Jazeera", "Category": "World", "tier": 1}
+,{"Url": "https://middleeasteye.net/rss", "Source_name": "Middle East Eye", "Category": "MiddleEast", "tier": 2}
+,{"Url": "https://www.thenationalnews.com/rss", "Source_name": "The National", "Category": "MiddleEast", "tier": 2}
+,{"Url": "https://www.france24.com/en/rss", "Source_name": "France24", "Category": "World", "tier": 1}
+,{"Url": "https://www.dw.com/en/top-stories/rss", "Source_name": "DW", "Category": "World", "tier": 1}
+,{"Url": "https://www.federalreserve.gov/feeds/press_all.xml", "Source_name": "Federal Reserve", "Category": "CentralBanks", "tier": 1}
+,{"Url": "https://www.ecb.europa.eu/rss/press.html", "Source_name": "ECB", "Category": "CentralBanks", "tier": 1}
+,{"Url": "https://feeds.cnbc.com/id/100003114/device/rss/rss.html", "Source_name": "CNBC", "Category": "Markets", "tier": 1}
+,{"Url": "https://feeds.content.dowjones.io/marketwatch", "Source_name": "MarketWatch", "Category": "Markets", "tier": 1}
+,{"Url": "https://seekingalpha.com/feed.xml", "Source_name": "Seeking Alpha", "Category": "Markets", "tier": 2}
+,{"Url": "https://www.benzinga.com/feed", "Source_name": "Benzinga", "Category": "Markets", "tier": 2}
+,{"Url": "https://finance.yahoo.com/news/rssindex", "Source_name": "Yahoo Finance", "Category": "Markets", "tier": 2}
+,{"Url": "https://oilprice.com/rss/main", "Source_name": "OilPrice", "Category": "Energy", "tier": 2}
+,{"Url": "https://www.energyvoice.com/feed/", "Source_name": "Energy Voice", "Category": "Energy", "tier": 2}
+,{"Url": "https://www.rigzone.com/rss/", "Source_name": "Rigzone", "Category": "Energy", "tier": 3}
+,{"Url": "https://www.freightwaves.com/feed", "Source_name": "FreightWaves", "Category": "Trade", "tier": 2}
+,{"Url": "https://theloadstar.com/feed/", "Source_name": "The Loadstar", "Category": "Trade", "tier": 2}
+,{"Url": "https://techcrunch.com/feed/", "Source_name": "TechCrunch", "Category": "Tech", "tier": 1}
+,{"Url": "https://www.theverge.com/rss/index.xml", "Source_name": "The Verge", "Category": "Tech", "tier": 1}
+,{"Url": "https://arstechnica.com/feed/", "Source_name": "Ars Technica", "Category": "Tech", "tier": 1}
+,{"Url": "https://www.wired.com/feed/rss", "Source_name": "Wired", "Category": "Tech", "tier": 1}
+,{"Url": "https://venturebeat.com/feed/", "Source_name": "VentureBeat", "Category": "Tech", "tier": 2}
+,{"Url": "https://www.eetimes.com/feed/", "Source_name": "EE Times", "Category": "Semis", "tier": 2}
+,{"Url": "https://therecord.media/feed", "Source_name": "The Record", "Category": "Cyber", "tier": 2}
+,{"Url": "https://krebsonsecurity.com/feed/", "Source_name": "Krebs", "Category": "Cyber", "tier": 2}
+,{"Url": "https://www.bleepingcomputer.com/feed/", "Source_name": "BleepingComputer", "Category": "Cyber", "tier": 2}
+,{"Url": "https://www.darkreading.com/rss.xml", "Source_name": "Dark Reading", "Category": "Cyber", "tier": 3}
+,{"Url": "https://www.cyberscoop.com/feed/", "Source_name": "CyberScoop", "Category": "Cyber", "tier": 3}
+,{"Url": "https://www.coindesk.com/arc/outboundfeeds/rss/", "Source_name": "CoinDesk", "Category": "Crypto", "tier": 1}
+,{"Url": "https://www.theblock.co/rss.xml", "Source_name": "The Block", "Category": "Crypto", "tier": 2}
+,{"Url": "https://decrypt.co/feed", "Source_name": "Decrypt", "Category": "Crypto", "tier": 2}
+,{"Url": "https://cointelegraph.com/rss", "Source_name": "Cointelegraph", "Category": "Crypto", "tier": 3}
+,{"Url": "https://www.scmp.com/rss/2/feed", "Source_name": "SCMP", "Category": "Asia", "tier": 1}
+,{"Url": "https://asia.nikkei.com/rss", "Source_name": "Nikkei Asia", "Category": "Asia", "tier": 1}
 ]
