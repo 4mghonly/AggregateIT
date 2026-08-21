@@ -1,7 +1,7 @@
 name: Daily Digest
 on:
   schedule:
-    - cron: "30 21 * * 1-5"
+    - cron: "30 4 * * 1-5"         # 08:30 GST (moved out of quiet hours)
   workflow_dispatch:
 jobs:
   daily:
