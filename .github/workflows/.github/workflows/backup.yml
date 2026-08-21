@@ -1,0 +1,22 @@
+name: State Backup
+on:
+  schedule:
+    - cron: "0 6 * * 0"            # Sunday 10:00 GST
+  workflow_dispatch:
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: seen-db-${{ github.run_id }}
+          restore-keys: |
+            seen-db-
+      - name: Upload state.db
+        uses: actions/upload-artifact@v4
+        with:
+          name: state-db-backup
+          path: data/state.db
+          retention-days: 90
