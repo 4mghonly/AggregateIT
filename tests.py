@@ -427,5 +427,34 @@ check("vix band detected", "vix" in regime and "normal" in regime["vix"], regime
 check("curve inverted flagged", regime.get("curve_inverted") is True, regime)
 check("dxy strong bid", regime.get("dxy") == "strong bid", regime)
 check("oil spike flagged", "oil_spike" in regime and "4.5" in regime["oil_spike"], regime)
+
+print("[T46] 1-hour movers computed vs previous snapshot")
+prev_path = os.path.join(tv.DATA, "prev_pct.json")
+with open(prev_path, "w") as f: json.dump({"AAA": 2.0, "BBB": 0.5}, f)
+ROW_H1 = {"s": "AAA", "d": [None, "A", "T", 3e11, None, 2.0, 900000, True, 5.0, 105.0, "stock"]}
+ROW_H2 = {"s": "BBB", "d": [None, "B", "T", 2e11, None, 1.0, 800000, True, 0.8, 55.0, "stock"]}
+def fake_post_h(body): return {"totalCount": 2, "data": [ROW_H1, ROW_H2]}
+p_h = tv.fetch_pulse(post_fn=fake_post_h, cap=20)
+hm = {m["t"]: m for m in p_h.get("hour_movers", [])}
+check("AAA +3% 1h move detected", "AAA" in hm and abs(hm["AAA"]["hour_chg"] - 3.0) < 1e-6, p_h.get("hour_movers"))
+check("BBB sub-1% excluded", "BBB" not in hm, sorted(hm))
+os.remove(prev_path)
+
+print("[T47] Alert routing buckets by webhook_env")
+rules_t = {"mention_role": "here", "rules": [
+    {"type": "importance", "value": "Critical", "mention": True, "webhook_env": "DISCORD_WEBHOOK_CRIT"},
+    {"type": "ticker", "value": "TSLA", "mention": False}]}
+items_t = [{"analysis": {"importance": "Critical", "tickers": ["TSLA"], "event": "X"}, "cluster": {}}]
+bk = alerts.route_alerts(items_t, rules_t)
+check("critical routed to CRIT env", "DISCORD_WEBHOOK_CRIT" in bk, sorted(bk))
+check("ticker rule to default env", "DISCORD_WEBHOOK" in bk, sorted(bk))
+
+print("[T48] Macro config: futures+commodities capped, index futures separate")
+mc = json.load(open(os.path.join(os.path.dirname(os.path.abspath(main.__file__)), "config", "macro.json")))
+n_fc = len(mc.get("index_futures", [])) + len(mc.get("commodities", []))
+check("futures+commodities <= 8", n_fc <= 8, n_fc)
+check("index futures separate from cash indices", "index_futures" in mc and all(not s["sym"].endswith("1!") for s in mc.get("indices", [])), sorted(mc))
+
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
