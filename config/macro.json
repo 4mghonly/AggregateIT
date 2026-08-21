@@ -7,18 +7,22 @@
     {"sym": "TVC:DJI", "name": "Dow Jones", "type": "index"},
     {"sym": "TVC:RUT", "name": "Russell 2000", "type": "index"},
     {"sym": "CBOE:VIX", "name": "VIX", "type": "index"},
-    {"sym": "TVC:DXY", "name": "US Dollar Index", "type": "index"}
+    {"sym": "TVC:DXY", "name": "US Dollar Index", "type": "index"},
+    {"sym": "TVC:STOXX50E", "name": "EURO STOXX 50", "type": "index"},
+    {"sym": "TVC:DAX", "name": "DAX", "type": "index"},
+    {"sym": "TVC:NI225", "name": "Nikkei 225", "type": "index"}
   ],
-  "futures": [
-    {"sym": "CME:ES1!", "name": "S&P 500 E-mini", "type": "future"},
-    {"sym": "CME:NQ1!", "name": "Nasdaq 100 E-mini", "type": "future"},
-    {"sym": "CBOT:YM1!", "name": "Dow E-mini", "type": "future"},
-    {"sym": "COMEX:GC1!", "name": "Gold", "type": "future"},
-    {"sym": "NYMEX:CL1!", "name": "WTI Crude", "type": "future"},
-    {"sym": "NYMEX:NG1!", "name": "Natural Gas", "type": "future"},
-    {"sym": "OANDA:SPX500USD", "name": "S&P 500 (CFD)", "type": "future"},
-    {"sym": "OANDA:NAS100USD", "name": "Nasdaq 100 (CFD)", "type": "future"},
-    {"sym": "OANDA:US30USD", "name": "Dow (CFD)", "type": "future"}
+  "index_futures": [
+    {"sym": "CME:ES1!", "name": "S&P Fut (ES)", "type": "index_future"},
+    {"sym": "CME:NQ1!", "name": "Nasdaq Fut (NQ)", "type": "index_future"},
+    {"sym": "CBOT:YM1!", "name": "Dow Fut (YM)", "type": "index_future"}
+  ],
+  "commodities": [
+    {"sym": "COMEX:GC1!", "name": "Gold", "type": "commodity"},
+    {"sym": "COMEX:SI1!", "name": "Silver", "type": "commodity"},
+    {"sym": "NYMEX:CL1!", "name": "WTI Crude", "type": "commodity"},
+    {"sym": "TVC:UKOIL", "name": "Brent", "type": "commodity"},
+    {"sym": "COMEX:HG1!", "name": "Copper", "type": "commodity"}
   ],
   "forex": [
     {"sym": "OANDA:EURUSD", "name": "EUR/USD", "type": "forex"},
