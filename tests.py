@@ -455,6 +455,14 @@ n_fc = len(mc.get("index_futures", [])) + len(mc.get("commodities", []))
 check("futures+commodities <= 8", n_fc <= 8, n_fc)
 check("index futures separate from cash indices", "index_futures" in mc and all(not s["sym"].endswith("1!") for s in mc.get("indices", [])), sorted(mc))
 
+print("[T49] main.py decomposition alert thresholds")
+import os
+mp = os.path.join(os.path.dirname(os.path.abspath(main.__file__)), "main.py")
+with open(mp) as f: content = f.read()
+lines = len(content.splitlines())
+secs = content.count("# ================= ")
+check("main.py under 850 lines", lines <= 850, lines)
+check("main.py under 9 sections", secs <= 9, secs)
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
