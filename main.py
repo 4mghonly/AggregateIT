@@ -654,7 +654,7 @@ async def main():
     if not DRY_RUN and not os.environ.get("QWEN_API_KEY"):
         raise SystemExit("FATAL: QWEN_API_KEY secret is not set.")
 
-sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
+    sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
     since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
     social_items = social.fetch_all(since.timestamp())
     async with aiohttp.ClientSession(headers=UA) as s:
