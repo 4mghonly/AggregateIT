@@ -464,5 +464,43 @@ secs = content.count("# ================= ")
 check("main.py under 850 lines", lines <= 850, lines)
 check("main.py under 9 sections", secs <= 9, secs)
 
+print("[T50] Reddit 3-lane fetch maps items")
+def fake_shift(path, params):
+    if params.get("sort") == "created_utc:desc":
+        return [{"id": "a", "permalink": "/r/x/comments/a", "title": "New post", "selftext": "t", "subreddit": "x", "created_utc": 1e9, "score": 1}]
+    if params.get("sort") == "score:desc" and "q" not in params:
+        return [{"id": "b", "permalink": "/r/x/comments/b", "title": "Top post", "selftext": "t", "subreddit": "x", "created_utc": 1e9, "score": 9}]
+    return []
+o1, o2 = social._shift_get, social._load_chatter
+social._shift_get = fake_shift
+social._load_chatter = lambda: {"reddit_subs": ["x"], "queries": []}
+it50 = social._reddit_items(time.time() - 3600)
+social._shift_get, social._load_chatter = o1, o2
+check("new+top lanes present", {"new", "top"} <= {i["lane"] for i in it50}, [i["lane"] for i in it50])
+check("reddit schema ok", all(i["source_type"] in ("reddit", "reddit_comment") and i["url"] for i in it50), it50[:1])
+
+print("[T51] RSSHub instance failover")
+class R51: status_code = 200; text = "<rss></rss>"
+calls51 = []
+def fake_get51(url, **kw):
+    calls51.append(url)
+    if "rsshub.app" in url: raise Exception("down")
+    return R51
+o3, o4 = social.requests.get, social._load_chatter
+social.requests.get = fake_get51
+social._load_chatter = lambda: {"twitter_handles": {"osint": ["h"]}, "caps": {}}
+social._twitter_items(time.time() - 3600)
+social.requests.get, social._load_chatter = o3, o4
+check("failover to 2nd instance", len(calls51) >= 2 and "rsshub.app" not in calls51[-1], calls51)
+
+print("[T52] muted sources skipped")
+with open(audit.MUTED_FILE, "w") as f: json.dump({"BadSource": 1}, f)
+check("is_muted true", audit.is_muted("BadSource"), None)
+os.remove(audit.MUTED_FILE)
+
+print("[T53] context brief builds")
+b53 = context.build_context_brief()
+check("context returns str", isinstance(b53, str), type(b53))
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
