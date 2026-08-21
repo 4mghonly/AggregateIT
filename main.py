@@ -11,6 +11,7 @@ from market import load_market_pulse, build_pulse_embed, load_macro_pulse, compu
 from alerts import load_rules, route_alerts
 from policy import can_send, can_send_digest, can_send_alert
 from llm import chat
+import social, audit
 try:
     from verify import verify_event
 except Exception:
