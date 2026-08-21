@@ -206,7 +206,7 @@ async def fetch_github(session, repo, sem, since_iso):
 
 def full_text(url, fallback):
     try:
-        raw = trafilatura.fetch_url(url)
+        raw = trafilatura.fetch_url(url, timeout=8)
         txt = trafilatura.extract(raw, include_comments=False)
         if txt and len(txt) > 400: return txt[:4000]
     except Exception: pass
