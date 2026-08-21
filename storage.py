@@ -1,6 +1,5 @@
 """storage.py — AggregateIT persistence layer.
-v4 FINAL: canonical schema = items / seen_titles / runs / meta / events
-(+sentiment/triggers/sources/score) / event_updates.
+v5: v4 + ddg_hits column (independent-domain corroboration count).
 state.db is the single source of truth. Only filtered/analyzed/alerted are terminal;
 deferred and failed stay retriable."""
 import os, json, sqlite3, time
@@ -13,7 +12,8 @@ TERMINAL = {"filtered", "analyzed", "alerted"}
 
 EVENT_COLS = ["event_id", "entity", "tokens_json", "title", "event_type", "status", "severity",
               "confidence", "source_count", "assessment", "what_changed", "urls_json",
-              "first_seen", "last_updated", "sentiment", "triggers_json", "sources_json", "score"]
+              "first_seen", "last_updated", "sentiment", "triggers_json", "sources_json", "score",
+              "ddg_hits"]
 
 class SQLiteStore:
     def __init__(self, path=DB_PATH):
@@ -38,7 +38,8 @@ class SQLiteStore:
             confidence INTEGER, source_count INTEGER,
             assessment TEXT, what_changed TEXT, urls_json TEXT,
             first_seen REAL, last_updated REAL,
-            sentiment TEXT, triggers_json TEXT, sources_json TEXT, score REAL DEFAULT 0);
+            sentiment TEXT, triggers_json TEXT, sources_json TEXT, score REAL DEFAULT 0,
+            ddg_hits INTEGER DEFAULT 0);
         CREATE TABLE IF NOT EXISTS event_updates(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id TEXT, ts REAL, type TEXT, details_json TEXT);
@@ -46,7 +47,8 @@ class SQLiteStore:
         """)
         # migration for DBs created before the extended event columns
         for col, ddl in (("sentiment", "TEXT"), ("triggers_json", "TEXT"),
-                         ("sources_json", "TEXT"), ("score", "REAL DEFAULT 0")):
+                         ("sources_json", "TEXT"), ("score", "REAL DEFAULT 0"),
+                         ("ddg_hits", "INTEGER DEFAULT 0")):
             try:
                 self.con.execute(f"ALTER TABLE events ADD COLUMN {col} {ddl}")
             except Exception:
@@ -108,6 +110,11 @@ class SQLiteStore:
         self.con.execute(
             f"INSERT OR REPLACE INTO events({', '.join(EVENT_COLS)}) VALUES ({','.join('?' * len(EVENT_COLS))})",
             tuple(e.get(k) for k in EVENT_COLS))
+        self.con.commit()
+
+    def set_ddg_hits(self, event_id, n):
+        """Store the number of independent domains corroborating this event."""
+        self.con.execute("UPDATE events SET ddg_hits=? WHERE event_id=?", (n, event_id))
         self.con.commit()
 
     # --- event timeline ---
