@@ -125,10 +125,14 @@ def fetch_pulse(post_fn=_post, cap=20):
             json.dump({m["t"]: m["pct"] for m in pool if m["pct"] is not None}, f)
     except Exception: pass
 
+    deltas = {}
+    for m in pool:
+        if m["pct"] is not None and m["t"] in prev_map:
+            deltas[m["t"]] = m["pct"] - prev_map[m["t"]]
     valid = any(m["pct"] is not None and abs(m["pct"]) > 0.005 for m in mega)
     return {"updated": time.time(), "valid": valid, "session_open": us_session_open(),
             "mega_caps": mega, "gainers": gainers, "losers": losers, "sig": sig,
-            "sample": sample, "hour_movers": hour_movers}
+            "sample": sample, "hour_movers": hour_movers, "deltas": deltas}
 
 def fetch_macro(post_fn=None):
     try:
