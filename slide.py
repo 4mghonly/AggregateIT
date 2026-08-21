@@ -8,6 +8,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from datetime import datetime, timezone
 from storage import SQLiteStore
+from llm import chat
 import market
 from briefing import fetch_stocktwits, load_events, theme_counts, DOMAIN_NAMES
 
@@ -195,15 +196,12 @@ def analyze(d):
     prev = _load_prev()
     out = None
     try:
-        base = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
         prompt = ANALYSIS_PROMPT.replace("__DATA__", _data_text(d)).replace("__PREV__", _prev_text(prev))
-        r = requests.post(base + "/chat/completions",
-            headers={"Authorization": "Bearer " + os.environ["QWEN_API_KEY"]},
-            json={"model": os.environ.get("QWEN_MODEL", "qwen-plus"), "temperature": 0.3,
-                  "messages": [{"role": "system", "content": "Gazette editor. Output ONLY valid JSON. NO EMOJIS. NO DOLLAR FIGURES."},
-                               {"role": "user", "content": prompt}]}, timeout=90)
-        r.raise_for_status()
-        m = re.search(r"\{[\s\S]*\}", r.json()["choices"][0]["message"]["content"])
+        content = chat([
+            {"role": "system", "content": "Gazette editor. Output ONLY valid JSON. NO EMOJIS. NO DOLLAR FIGURES."},
+            {"role": "user", "content": prompt}
+        ])
+        m = re.search(r"\{[\s\S]*\}", content)
         if m:
             obj = json.loads(m.group(0))
             if all(isinstance(obj.get(k), str) and len(obj.get(k)) >= 10 for k in REQUIRED_KEYS):
@@ -369,6 +367,8 @@ def render_p1(d, a, llm_ok):
     A.text(0.708, y - 0.020, rk[1] if len(rk) > 1 else "", color=DN, fontsize=9.5)
 
     mode = "Qwen (validated)" if llm_ok else "deterministic fallback"
+    total_claims = sum(store.get_claim_count(e.get("event_id", "")) for e in d["events"][:5])
+    A.text(0.03, 0.04, "Corroboration: %d claims verified across top events | Narr: %s" % (total_claims, "Qwen" if llm_ok else "Det"), color=MUT2, fontsize=8.5)
     A.text(0.03, 0.02, "Narrative: %s | Charts from snapshots | Tentative - machine-compiled, not investment advice" % mode, color=MUT2, fontsize=8.5)
     A.text(0.97, 0.02, "Page 1 of 2", color=MUT2, fontsize=8.5, ha="right")
     fig.savefig(P1, facecolor=PAPER); plt.close(fig)
