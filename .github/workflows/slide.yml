@@ -28,6 +28,9 @@ jobs:
           else
             echo "allowed=false" >> $GITHUB_OUTPUT
           fi
+      - name: Fetch fresh market and macro data
+        if: steps.check.outputs.allowed == 'true'
+        run: python tv.py --pulse --macro
       - name: Render and send deck
         if: steps.check.outputs.allowed == 'true'
         env:
