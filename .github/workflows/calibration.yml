@@ -1,0 +1,26 @@
+name: Calibration Loop
+on:
+  schedule:
+    - cron: "0 6 * * 1"         # Monday 10:00 GST
+  workflow_dispatch:
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install requests
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: seen-db-${{ github.run_id }}
+          restore-keys: |
+            seen-db-
+      - name: Run calibration
+        run: python calibrate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: calibration-report
+          path: reports/calibration_report.json
