@@ -398,6 +398,7 @@ ENUM_SENT = {"bullish","bearish","neutral","na"}
 ENUM_REL = {"High","Medium","Low"}
 ENUM_EVT = {"earnings","regulation","geopolitical","market_move","security","macro","other"}
 ENUM_COR = {"none","single-source","multi-source"}
+CLUSTER_METRICS_FILE = os.path.join(REPORTS, "cluster_metrics.json")
 TICK_RE = re.compile(r"^[A-Z.\-]{1,6}$")
 
 def validate_analysis(obj, evidence_text=""):
