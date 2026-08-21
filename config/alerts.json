@@ -1,7 +1,7 @@
 {
   "mention_role": "here",
   "rules": [
-    {"type": "importance", "value": "Critical", "mention": true},
+    {"type": "importance", "value": "Critical", "mention": true, "webhook_env": "DISCORD_WEBHOOK_CRIT"},
     {"type": "ticker", "value": "TSLA", "mention": false}
   ]
 }
