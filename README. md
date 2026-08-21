@@ -5,8 +5,7 @@ corporate, technology, security, and market developments, consolidates reporting
 events, assessing significance and confidence, and surfacing material changes relevant to
 financial markets.»
 
-Out of scope (by design): automated trading, trade recommendations, price prediction, generic
-news aggregation, full social-media firehose ingestion, multi-user SaaS.
+Out of scope (by design, deferred to final advisory layer): automated trading, trade recommendations, price prediction, generic news aggregation, full social-media firehose ingestion, multi-user SaaS. These will only be added as a separate advisory layer on top of the proven terminal.
 
 ## Architecture
 
