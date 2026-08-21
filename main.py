@@ -1,7 +1,4 @@
-"""main.py v10 — AggregateIT engine orchestrator.
-Integrates: explainable scoring, clustering v2 + metrics, provenance,
-claims-level evidence, ddg verification, macro context, policy gating,
-routed alerts, proportional health, decomposition counters."""
+"""main.py v11 — AggregateIT engine orchestrator."""
 import os, re, json, time, sqlite3, asyncio, calendar, hashlib, sys
 import feedparser, aiohttp, requests, trafilatura
 from datetime import datetime, timezone, timedelta
@@ -54,19 +51,12 @@ RAW = load("sources.json"); REDDIT = load("reddit.json"); WATCH = load("watchlis
 _kw = load("keywords.json")
 KEYWORDS_DATA = _kw["clusters"] if isinstance(_kw, dict) else _kw
 PRIO_SCORE = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
-async def fetch_rss(session, src, sem):
-    name = src.get("Source_name", "")
-    if audit.is_muted(name): return []
-    txt = await fetch_text(session, src["_url"], sem); out = []
-    if txt:
-        for e in feedparser.parse(txt).entries[:MAX_PER_SOURCE]:
-            out.append({"source_type": "rss", "source_name": src.get("Source_name", ""),
-                "category": src.get("Category", ""), "url": e.get("link", ""),
-                "title": e.get("title", ""), "text": re.sub("<[^>]+>", "", e.get("summary", "")),
-                "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
-    HEALTH["rss_ok" if out else "rss_fail"] += 1
-    audit.record(name, bool(out))
-    return out
+try:
+    _chat = load("chatter.json")
+    _extra = _chat.get("extra_clusters", [])
+    for e in _extra: e["phrases"] = [p.lower() for p in e.get("phrases", [])]
+    KEYWORDS_DATA += _extra
+except Exception: pass
 for e in KEYWORDS_DATA:
     e["phrases"] = [p.lower() for p in e.get("phrases", [])]
 
@@ -255,7 +245,6 @@ def cluster_similarity(new_item, cluster):
     if primary_entity(new_item) != cluster["entity"]:
         return 0.0, ["entity mismatch"], False
     score += 0.2; reasons.append("entity")
-
     def tickers_of(it):
         out = set()
         for label in it.get("matched_categories", []):
@@ -263,14 +252,12 @@ def cluster_similarity(new_item, cluster):
             if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
                 out.add(t.upper())
         return out
-
     new_tickers = tickers_of(new_item)
     cluster_tickers = set()
     for item in cluster["items"]: cluster_tickers |= tickers_of(item)
     if new_tickers & cluster_tickers:
         ov = len(new_tickers & cluster_tickers) / max(len(new_tickers | cluster_tickers), 1)
         score += 0.3 * ov; reasons.append(f"ticker({ov:.2f})")
-
     new_kws = set(new_item.get("keyword_ids", []))
     cluster_kws = set()
     for item in cluster["items"]: cluster_kws.update(item.get("keyword_ids", []))
@@ -278,16 +265,13 @@ def cluster_similarity(new_item, cluster):
     if new_kws & cluster_kws:
         kw_ov = len(new_kws & cluster_kws) / max(len(new_kws | cluster_kws), 1)
         score += 0.25 * kw_ov; reasons.append(f"keyword({kw_ov:.2f})")
-
     new_toks = title_tokens(new_item.get("title", ""))
     jacc = jaccard(new_toks, cluster["tokens"])
     score += 0.2 * jacc
     if jacc > 0.1: reasons.append(f"title({jacc:.2f})")
-
     hours_apart = abs(new_item.get("ts", 0) - max(item.get("ts", 0) for item in cluster["items"])) / 3600.0
     if hours_apart < 1: score += 0.05; reasons.append("time(<1h)")
     elif hours_apart < 6: score += 0.02; reasons.append("time(<6h)")
-
     content_gate = (jacc >= 0.3) or (kw_ov > 0)
     return score, reasons, content_gate
 
@@ -502,8 +486,7 @@ def analyze_event(c, prior):
             if attempt == 1: time.sleep(2); continue
             HEALTH["qwen_fail"] += 1; return None, f"{type(e).__name__}: {str(e)[:120]}"
     return None, "unknown"
-
-# ================= DISCORD DIGEST =================
+    # ================= DISCORD DIGEST =================
 SENT_EMOJI = {"bullish": "🟢 Bullish", "bearish": "🔴 Bearish", "neutral": "⚪ Neutral", "na": "➖ N/A"}
 IMP_EMOJI = {"Critical": "🚨", "High": "🔥", "Medium": "📌", "Low": "ℹ️"}
 IMP_COLOR = {"Critical": 0xE74C3C, "High": 0xE67E22, "Medium": 0xF1C40F, "Low": 0x95A5A6}
@@ -584,9 +567,9 @@ def send_digest(digest_items, report):
         prefix = "@here " if (b["mention"] and load_rules().get("mention_role") == "here") else ""
         try: _post_discord(target, {"content": (prefix + "\n".join(b["lines"]))[:1900]})
         except Exception as e: HEALTH["discord_fail"] += 1; print("Alert err:", type(e).__name__, str(e)[:120])
-    news, social = [], []
+    news, soc_items = [], []
     for x in digest_items:
-        (social if all(it["source_type"] == "reddit" for it in x["cluster"]["items"]) else news).append(x)
+        (soc_items if all(it["source_type"] == "reddit" for it in x["cluster"]["items"]) else news).append(x)
     rolls = {"bullish": 0, "bearish": 0, "neutral": 0, "na": 0}
     for x in digest_items:
         s = (x["analysis"].get("sentiment") or "na").lower()
@@ -605,12 +588,12 @@ def send_digest(digest_items, report):
     }
     try:
         news_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"], x.get("status", "NEW"), x.get("timeline")) for x in news]
-        social_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"], x.get("status", "NEW"), x.get("timeline")) for x in social]
+        soc_embeds = [build_event_embed(x["cluster"], x["analysis"], x["prior"], x.get("status", "NEW"), x.get("timeline")) for x in soc_items]
         _post_discord(wh, {"content": "**📰 NEWS SOURCES**", "embeds": [header] + news_embeds[:3]})
         for k in range(3, len(news_embeds), 4): _post_discord(wh, {"embeds": news_embeds[k:k+4]})
-        if social_embeds:
-            _post_discord(wh, {"content": "**💬 SOCIAL NETWORKS**", "embeds": social_embeds[:4]})
-            for k in range(4, len(social_embeds), 4): _post_discord(wh, {"embeds": social_embeds[k:k+4]})
+        if soc_embeds:
+            _post_discord(wh, {"content": "**💬 SOCIAL NETWORKS**", "embeds": soc_embeds[:4]})
+            for k in range(4, len(soc_embeds), 4): _post_discord(wh, {"embeds": soc_embeds[k:k+4]})
         HEALTH["discord_ok"] += len(digest_items)
     except Exception as e:
         HEALTH["discord_fail"] += 1; print("Discord err:", type(e).__name__, str(e)[:200])
@@ -663,139 +646,8 @@ async def main():
             *[fetch_reddit(s, x, sem_rd) for x in REDDIT],
             *[fetch_github(s, x["_url"].split("github.com/")[1], sem, since.isoformat()) for x in GH])
     items = [i for b in batches if b for i in b] + social_items
-try:
-        sp = {"ts": time.time(), "counts": {}, "top": []}
-        for i in social_items:
-            lane = (":" + i["lane"]) if i.get("lane") else ""
-            k = i.get("source_type", "?") + lane
-            sp["counts"][k] = sp["counts"].get(k, 0) + 1
-        top12 = sorted(social_items, key=lambda x: -x.get("ts", 0))[:12]
-        for i in top12:
-            sp["top"].append({"t": (i.get("title") or "")[:90], "src": i.get("source_name", ""), "lane": i.get("lane", ""), "type": i.get("source_type", "")})
-        with open(os.path.join(DATA, "social_pulse.json"), "w", encoding="utf-8") as f:
-            json.dump(sp, f)
-    except Exception:
-        pass
 
     new = []
-    for i in items:
-        if i["ts"] < since.timestamp() or not i["url"]: continue
-        if not store.url_active(i["url"]): continue
-        if not store.title_active(title_hash(i.get("title", ""))): continue
-        new.append(i)
-
-    scored = []
-    for i in new:
-        sc, labels = score_item(i)
-        i["thash"] = title_hash(i.get("title", ""))
-        if sc > 0:
-            i["matched_categories"] = labels; i["score"] = sc; i["cats"] = ", ".join(labels)
-            scored.append(i)
-            if not DRY_RUN: store.register(i["url"], i["thash"], "discovered", sc)
-        else:
-            if not DRY_RUN: store.register(i["url"], i["thash"], "filtered", 0)
-
-    ticker_counts = {}
-    for i in scored:
-        for label in i.get("matched_categories", []):
-            t = label.split(" ")[0]
-            if 2 <= len(t) <= 6 and t.replace(".", "").replace("-", "").isalpha():
-                ticker_counts[t.upper()] = ticker_counts.get(t.upper(), 0) + 1
-    for i in scored:
-        for label in i.get("matched_categories", []):
-            t = label.split(" ")[0].upper()
-            if ticker_counts.get(t, 0) >= 2:
-                i["score"] += 2
-                comp = i.setdefault("score_components", {})
-                comp["confluence"] = comp.get("confluence", 0) + 2
-                if "Confluence" not in i["matched_categories"]: i["matched_categories"].append("Confluence")
-                break
-
-    scored.sort(key=lambda x: -x["score"])
-    report = {"run": datetime.now(timezone.utc).isoformat(), "dry_run": DRY_RUN,
-              "fetched": len(items), "new": len(new), "matched": len(scored),
-              "events": [], "events_summary": {"clusters": 0, "new": 0, "updated": 0},
-              "wire": [], "quarantined": []}
-
-    front_page = []
-    for i in scored:
-        if i["score"] < FRONT_PAGE_FLOOR:
-            report["wire"].append({"url": i["url"], "title": i["title"], "source": i["source_name"],
-                                   "score": i["score"], "triggers": i["matched_categories"],
-                                   "components": i.get("score_components", {})})
-            if not DRY_RUN: store.register(i["url"], i["thash"], "deferred", i["score"])
-            continue
-        if len(front_page) >= MAX_ANALYZE:
-            if not DRY_RUN: store.register(i["url"], i["thash"], "deferred", i["score"])
-            continue
-        if i["source_type"] == "rss": i["text"] = full_text(i["url"], i["text"])
-        front_page.append(i)
-
-    clusters = cluster_events(front_page)
-    report["events_summary"]["clusters"] = len(clusters)
-
-    for c in clusters[MAX_EVENTS:]:
-        if not DRY_RUN:
-            for it in c["items"]: store.register(it["url"], it["thash"], "deferred", it["score"])
-
-    digest_items = []
-    verified_count = 0
-    for c in clusters[:MAX_EVENTS]:
-        prior = resolve_prior_event(c, store)
-        if DRY_RUN:
-            report["events"].append({"event_id": c["event_id"], "entity": c["entity"], "preview": True,
-                                     "new_event": prior is None,
-                                     "independent_sources": c["independent_sources"],
-                                     "triggers": c["items"][0].get("matched_categories", []),
-                                     "sources": [{"name": it["source_name"], "url": it["url"], "title": it["title"]} for it in c["items"]]})
-            continue
-        a, err = analyze_event(c, prior)
-        if a:
-            a = apply_corroboration_policy(a, c)
-            now = time.time()
-            if prior:
-                c["event_id"] = prior["event_id"]
-                try: old_tokens = set(json.loads(prior.get("tokens_json") or "[]"))
-                except Exception: old_tokens = set()
-                c["tokens"] = set(sorted(c["tokens"] | old_tokens)[:60])
-                report["events_summary"]["updated"] += 1
-                old_status = prior.get("status", "NEW")
-                old_sources = prior.get("source_count", 0)
-                if c["independent_sources"] > old_sources:
-                    store.add_event_update(c["event_id"], "corroborated", {"sources": c["independent_sources"]})
-                if a.get("corroboration") == "multi-source" and int(a.get("confidence", 0)) >= 85:
-                    status = "CONFIRMED"
-                elif a.get("corroboration") == "multi-source":
-                    status = "DEVELOPING"
-                else:
-                    status = old_status
-                if status != old_status:
-                    store.add_event_update(c["event_id"], "status_change", {"from": old_status, "to": status})
-            else:
-                report["events_summary"]["new"] += 1
-                status = "DEVELOPING" if c["independent_sources"] >= 2 and a.get("corroboration") == "multi-source" else "NEW"
-                store.add_event_update(c["event_id"], "detected", {"sources": c["independent_sources"]})
-            ev = {"event_id": c["event_id"], "entity": c["entity"],
-                  "tokens_json": json.dumps(sorted(c["tokens"])),
-                  "title": a["event"], "event_type": a["event_type"], "status": status,
-                  "severity": a["importance"], "confidence": int(a["confidence"]),
-                  "source_count": (prior["source_count"] if prior else 0) + c["independent_sources"],
-                  "assessment": a["assessment"], "what_changed": a["what_changed"],
-                  "sentiment": a.get("sentiment", "na"),
-                  "triggers_json": json.dumps(c["items"][0].get("matched_categories", [])),
-                  "sources_json": json.dumps([{"name": it["source_name"], "url": it["url"], "title": it["title"]} for it in c["items"]]),
-                  "score": c["items"][0].get("score", 0),
-                  "urls_json": json.dumps([it["url"] for it in c["items"]]),
-                  "ddg_hits": 0,
-                  "first_seen": prior["first_seen"] if prior else now, "last_updated": now}
-            store.upsert_event(ev)
-            claims = a.get("claims", [])
-            if claims: store.save_claims(c["event_id"], claims)
-            a["claim_count"] = len(claims)
-            if verify_event is not None and verified_count < 3:
-                try:
-                    doms = verify_event(a["event"])
-new = []
     for i in items:
         if i["ts"] < since.timestamp() or not i["url"]: continue
         if not store.url_active(i["url"]): continue
