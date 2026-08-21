@@ -87,6 +87,10 @@ def collect():
             n = s.get("name", "")
             if n.startswith("r/"): reddit[n] = reddit.get(n, 0) + 1
     sources_active = sorted({(e.get("source") or "").split(" +")[0] for e in events if e.get("source")})
+social_pulse = {}
+    try:
+        with open(os.path.join(market.DATA, "social_pulse.json")) as f: social_pulse = json.load(f)
+    except Exception: pass
     headlines = sorted(events, key=lambda x: -(x.get("ts") or 0))[:8]
     sectors = {}
     for m in pulse.get("mega_caps", []):
