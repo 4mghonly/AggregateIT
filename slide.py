@@ -1,14 +1,14 @@
-"""slide.py v8 — THE AGGREGATE GAZETTE. 4K two-page editorial deck.
-v8: larger type, kicker spacing fixed, sentence-safe wrapping, dollar-claim
-scrubber (no invented prices), index futures hidden until resolvable,
-yield history chart (trailing sessions), compact headlines, whitespace filled."""
+"""slide.py v9 — THE AGGREGATE GAZETTE. 4K two-page editorial deck.
+Consolidated: larger type, fixed kicker spacing, sentence-safe wrapping,
+dollar-claim scrubber, chart spacing + missing-data fallbacks, llm.chat
+token tracking, claims corroboration, social/OSINT lanes on both pages."""
 import os, json, re, time, textwrap, requests
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from datetime import datetime, timezone
-from storage import SQLiteStore
 from llm import chat
+from storage import SQLiteStore
 import market
 from briefing import fetch_stocktwits, load_events, theme_counts, DOMAIN_NAMES
 
@@ -25,11 +25,9 @@ SEV_COLOR = {"Critical": DN, "High": "#B4622D", "Medium": HI, "Low": MUT2}
 GEO_TAGS = {"GG", "ME", "TR", "CY", "US"}
 
 def _clean(s): return re.sub(r'[^\x20-\x7E]', '', s or '').strip()
-
 def _wrap(s, n): return textwrap.wrap(_clean(s), n) or [""]
 
 def _fit(text, width, max_lines):
-    """Wrap to max_lines keeping complete sentences; ellipsize if truncated."""
     lines = textwrap.wrap(_clean(text), width)
     if len(lines) <= max_lines: return lines
     s = " ".join(lines[:max_lines])
@@ -40,7 +38,6 @@ def _fit(text, width, max_lines):
 
 _DOLLAR_RE = re.compile(r"\$\s?[\d,]+")
 def _scrub(text):
-    """Drop sentences containing dollar/price claims (anti-hallucination)."""
     sents = re.split(r"(?<=[.!?])\s+", _clean(text))
     keep = [s for s in sents if not _DOLLAR_RE.search(s)]
     return " ".join(keep)
@@ -87,7 +84,7 @@ def collect():
             n = s.get("name", "")
             if n.startswith("r/"): reddit[n] = reddit.get(n, 0) + 1
     sources_active = sorted({(e.get("source") or "").split(" +")[0] for e in events if e.get("source")})
-social_pulse = {}
+    social_pulse = {}
     try:
         with open(os.path.join(market.DATA, "social_pulse.json")) as f: social_pulse = json.load(f)
     except Exception: pass
@@ -97,7 +94,6 @@ social_pulse = {}
         if m.get("pct") is not None:
             sectors.setdefault(m.get("s", "Other"), []).append(m["pct"])
     sector_tape = sorted(((k, sum(v) / len(v)) for k, v in sectors.items()), key=lambda x: -x[1])
-    # yield curve points + trailing history
     im_all = {x["sym"]: x for x in macro.get("instruments", [])}
     curve_pts = {}
     for s, n in (("TVC:US02Y", "2Y"), ("TVC:US05Y", "5Y"), ("TVC:US10Y", "10Y"), ("TVC:US30Y", "30Y")):
@@ -117,7 +113,7 @@ social_pulse = {}
         try:
             with open(YIELD_FILE, "w") as f: json.dump(hist, f)
         except Exception: pass
-return {"store": store, "pulse": pulse, "macro": macro, "regime": regime, "events": events,
+    return {"store": store, "pulse": pulse, "macro": macro, "regime": regime, "events": events,
             "geo_events": [e for e in events if e.get("geo")], "themes": themes,
             "st_radar": st_radar, "reddit": reddit, "sources_active": sources_active,
             "headlines": headlines, "sector_tape": sector_tape,
@@ -168,6 +164,11 @@ def _data_text(d):
     if d["st_radar"]: L.append("STOCKTWITS " + " | ".join([_clean(r) for r in d["st_radar"][:6]]))
     if d["reddit"]:
         L.append("REDDIT " + ", ".join("%s x%d" % (k, v) for k, v in sorted(d["reddit"].items(), key=lambda x: -x[1])[:5]))
+    sp = d.get("social_pulse", {})
+    if sp.get("counts"):
+        L.append("SOCIAL LANES " + ", ".join("%s=%d" % (k, v) for k, v in sorted(sp["counts"].items())[:8]))
+    for t in sp.get("top", [])[:6]:
+        L.append("CHATTER [%s] %s" % (t.get("src"), t.get("t")))
     if d["sources_active"]: L.append("SOURCES: " + ", ".join(d["sources_active"][:15]))
     return "\n".join(L)
 
@@ -229,10 +230,9 @@ def _lax(ax):
     ax.tick_params(colors=MUT2, labelsize=9)
     for s in ax.spines.values(): s.set_color("#C9C0AE")
     ax.title.set_color(INK); ax.title.set_fontsize(11); ax.title.set_weight("bold")
-    
-def _title(ax, t):
-    ax.set_title(_clean(t))
-    ax.title.set_color(INK); ax.title.set_fontsize(12); ax.title.set_weight("bold")
+
+def _title(ax, text):
+    ax.set_title(_clean(text))
 
 def _masthead(A, title, right1, right2):
     A.text(0.5, 0.965, _clean(title), color=INK, fontsize=30, weight="bold", fontfamily="serif", ha="center")
@@ -250,7 +250,7 @@ def render_p1(d, a, llm_ok):
     vol = (datetime.now(timezone.utc) - datetime(2026, 1, 1, tzinfo=timezone.utc)).days
     _masthead(A, "THE AGGREGATE GAZETTE", "Vol. %d · Market & Geopolitical Intelligence" % vol, "%s · %s" % (now, session))
 
-    pulse, macro, regime = d["pulse"], d["macro"], d["regime"]
+    pulse, macro, regime, store = d["pulse"], d["macro"], d["regime"], d["store"]
     rolls = {"bullish": 0, "neutral": 0, "bearish": 0}
     for e in d["events"]:
         s = (e.get("sentiment") or "").lower()
@@ -276,7 +276,6 @@ def render_p1(d, a, llm_ok):
         A.text(cx + w / 2, 0.886, _clean(sub), color=MUT2, fontsize=8.5, ha="center")
     A.add_patch(plt.Rectangle((0.03, 0.878), 0.94, 0.0015, color=INK))
 
-    # LEAD
     A.text(0.335, 0.845, _clean(a["headline"]), color=INK, fontsize=20, weight="bold", fontfamily="serif")
     A.add_patch(plt.Rectangle((0.335, 0.831), 0.35, 0.0015, color=HI))
     body = _fit(a["lead"], 76, 8)
@@ -296,7 +295,6 @@ def render_p1(d, a, llm_ok):
         A.text(0.335 + i * cw + cw / 2, hy - 0.014, m["t"], color="#fff", fontsize=7.5, ha="center", weight="bold")
         A.text(0.335 + i * cw + cw / 2, hy - 0.029, "%+.1f" % m["pct"], color="#fff", fontsize=7, ha="center")
 
-    # LEFT rail
     _kicker(A, 0.03, 0.845, 0.27, "WORLD & GEOPOLITICS", GEO)
     y = 0.816
     for line in _fit(a["geopol_read"], 60, 5):
@@ -321,7 +319,6 @@ def render_p1(d, a, llm_ok):
     for line in _wrap(", ".join(d.get("sources_active", [])[:14]) or "No sources in window.", 58)[:4]:
         A.text(0.03, y, line, color=MUT2, fontsize=9); y -= 0.017
 
-    # RIGHT rail
     _kicker(A, 0.70, 0.845, 0.27, "MARKETS & ECONOMY", MKT)
     y = 0.816
     for line in _fit(a["market_read"], 60, 5):
@@ -347,14 +344,7 @@ def render_p1(d, a, llm_ok):
         A.text(0.70, y, nm, color=MUT2, fontsize=9)
         A.text(0.97, y, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=9, ha="right", weight="bold")
         y -= 0.017
-sp = d.get("social_pulse", {})
-    cnt = sp.get("counts", {})
-    if cnt:
-        A.text(0.36, y, "LANES: " + " · ".join("%s %d" % (k, v) for k, v in sorted(cnt.items())[:6]), color=MUT2, fontsize=8.5); y -= 0.017
-    for t in sp.get("top", [])[:2]:
-        A.text(0.36, y, "[%s] %s" % (t.get("src", ""), _clean(t.get("t", ""))[:40]), color=INK, fontsize=8.5); y -= 0.016
 
-    # BOTTOM band
     by = 0.30
     A.add_patch(plt.Rectangle((0.03, 0.315), 0.94, 0.0015, color=INK))
     _kicker(A, 0.03, by, 0.29, "WHAT CHANGED", HI)
@@ -367,6 +357,12 @@ sp = d.get("social_pulse", {})
         A.text(0.36, y, line, color=INK, fontsize=10); y -= 0.019
     for line in ([_clean(r)[:44] for r in d["st_radar"][:3]] or ["No retail consensus."]):
         A.text(0.36, y, line, color=MUT2, fontsize=9); y -= 0.017
+    sp = d.get("social_pulse", {})
+    cnt = sp.get("counts", {})
+    if cnt:
+        A.text(0.36, y, "LANES: " + " · ".join("%s %d" % (k, v) for k, v in sorted(cnt.items())[:6]), color=MUT2, fontsize=8.5); y -= 0.017
+    for t in sp.get("top", [])[:2]:
+        A.text(0.36, y, "[%s] %s" % (t.get("src", ""), _clean(t.get("t", ""))[:40]), color=INK, fontsize=8.5); y -= 0.016
     _kicker(A, 0.70, by, 0.27, "OUTLOOK & KEY RISK", DN)
     y = by - 0.030
     for line in _fit(a["outlook"], 58, 3):
@@ -376,9 +372,9 @@ sp = d.get("social_pulse", {})
     A.text(0.708, y - 0.006, rk[0] if rk else "", color=DN, fontsize=9.5, weight="bold")
     A.text(0.708, y - 0.020, rk[1] if len(rk) > 1 else "", color=DN, fontsize=9.5)
 
-    mode = "Qwen (validated)" if llm_ok else "deterministic fallback"
     total_claims = sum(store.get_claim_count(e.get("event_id", "")) for e in d["events"][:5])
-    A.text(0.03, 0.04, "Corroboration: %d claims verified across top events | Narr: %s" % (total_claims, "Qwen" if llm_ok else "Det"), color=MUT2, fontsize=8.5)
+    A.text(0.03, 0.04, "Corroboration: %d claims verified across top events | Narrative: %s" % (total_claims, "Qwen" if llm_ok else "Det"), color=MUT2, fontsize=8.5)
+    mode = "Qwen (validated)" if llm_ok else "deterministic fallback"
     A.text(0.03, 0.02, "Narrative: %s | Charts from snapshots | Tentative - machine-compiled, not investment advice" % mode, color=MUT2, fontsize=8.5)
     A.text(0.97, 0.02, "Page 1 of 2", color=MUT2, fontsize=8.5, ha="right")
     fig.savefig(P1, facecolor=PAPER); plt.close(fig)
@@ -397,7 +393,6 @@ def render_p2(d, a, llm_ok):
     tot = max(sum(rolls.values()), 1)
     im = {i["name"]: i for i in macro.get("instruments", [])}
 
-    # LEFT column: INCREASED SPACING to prevent overlap
     ax = fig.add_axes([0.05, 0.68, 0.27, 0.22]); _lax(ax); _title(ax, "MEGA-CAP LEADERS (%CHG)")
     mega = [m for m in pulse.get("mega_caps", []) if m.get("pct") is not None][:12]
     if mega:
@@ -405,13 +400,11 @@ def render_p2(d, a, llm_ok):
         ax.barh(names, vals, color=[UP if v > 0 else DN for v in vals], height=0.72)
         ax.axvline(0, color=MUT2, lw=0.6)
         mm = max([abs(v) for v in vals] + [0.1]); ax.set_xlim(-mm * 1.3, mm * 1.3)
-    
     ax = fig.add_axes([0.05, 0.51, 0.27, 0.14]); _lax(ax); _title(ax, "SECTOR TAPE (avg %chg)")
     if d["sector_tape"]:
         ks = [k[:14] for k, _ in d["sector_tape"][:8]][::-1]; vs = [v for _, v in d["sector_tape"][:8]][::-1]
         ax.barh(ks, vs, color=[UP if v > 0 else DN for v in vs], height=0.7)
         ax.axvline(0, color=MUT2, lw=0.6)
-    
     ax = fig.add_axes([0.05, 0.36, 0.27, 0.12]); _lax(ax); _title(ax, "MOVERS: %CHG vs REL-VOLUME")
     sig = [{"t": k, **v} for k, v in pulse.get("sig", {}).items() if v.get("pct") is not None and v.get("relvol")][:50]
     if sig:
@@ -419,7 +412,6 @@ def render_p2(d, a, llm_ok):
         for v in sorted(sig, key=lambda x: -x["relvol"])[:4]:
             ax.annotate(_clean(v["t"]), (v["pct"], v["relvol"]), color=INK, fontsize=7.5, xytext=(3, 3), textcoords="offset points")
 
-    # MIDDLE: Macro table with MISSING DATA HANDLING
     _kicker(A, 0.36, 0.90, 0.32, "MACRO & RATES - FULL BOARD", MKT)
     groups = {}
     for i in macro.get("instruments", []): groups.setdefault(i.get("type", "other"), []).append(i)
@@ -439,7 +431,6 @@ def render_p2(d, a, llm_ok):
                 A.text(0.53, y, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=9.5, ha="right", weight="bold")
                 y -= 0.017
         y -= 0.006
-
     y = 0.868
     for gname, key, n in [("FOREX", "forex", 4), ("RATES", "bond", 4)]:
         A.text(0.56, y, gname, color=MUT2, fontsize=9.5, weight="bold"); y -= 0.017
@@ -453,7 +444,6 @@ def render_p2(d, a, llm_ok):
                 A.text(0.685, y, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=9.5, ha="right", weight="bold")
                 y -= 0.017
         y -= 0.006
-
     A.text(0.56, y, "REGIME", color=MUT2, fontsize=9.5, weight="bold"); y -= 0.017
     regime_lines = list(filter(None, [
         "VIX: %s" % regime.get("vix") if regime.get("vix") else None,
@@ -466,7 +456,6 @@ def render_p2(d, a, llm_ok):
         for line in regime_lines:
             A.text(0.56, y, _clean(line), color=GEO, fontsize=9.5); y -= 0.017
 
-    # Yield curve
     ax = fig.add_axes([0.36, 0.36, 0.30, 0.22]); _lax(ax)
     hist = [h for h in d["yield_hist"] if h.get("spread2s10s") is not None]
     if len(hist) >= 3:
@@ -483,7 +472,6 @@ def render_p2(d, a, llm_ok):
         else:
             ax.text(0.5, 0.5, "no data", color=MUT2, ha="center")
 
-    # RIGHT column: Commodities + Risers/Fallers + 1h movers
     ax = fig.add_axes([0.72, 0.76, 0.25, 0.12]); _lax(ax); _title(ax, "COMMODITIES COMPLEX")
     coms = [i for i in groups.get("commodity", []) if i.get("pct") is not None]
     if not coms:
@@ -518,7 +506,6 @@ def render_p2(d, a, llm_ok):
         A.text(0.97, y, "sess %+.2f%% · $%.0fB" % (m["pct"], m["mcap"] / 1e9), color=MUT2, fontsize=9, ha="right")
         y -= 0.023
 
-    # HEADLINES: LOWERED to create buffer from charts
     A.add_patch(plt.Rectangle((0.03, 0.305), 0.94, 0.0015, color=INK))
     _kicker(A, 0.03, 0.288, 0.94, "NEWS HEADLINES - PAST 24 HOURS", GEO)
     for i, e in enumerate(d["headlines"][:8]):
@@ -528,7 +515,8 @@ def render_p2(d, a, llm_ok):
         t = _clean(e.get("title"))
         if len(t) > 120: t = t[:117] + "..."
         A.text(colx, yy, "[%s] %s" % (ts, t), color=INK, fontsize=9)
-sp2 = d.get("social_pulse", {})
+
+    sp2 = d.get("social_pulse", {})
     tops = sp2.get("top", [])[:4]
     if tops:
         _kicker(A, 0.03, 0.20, 0.30, "SOCIAL & OSINT WIRES", SOC)
@@ -536,12 +524,13 @@ sp2 = d.get("social_pulse", {})
             colx = 0.03 + (i % 2) * 0.485
             yy = 0.178 - (i // 2) * 0.016
             A.text(colx, yy, "[%s] %s" % (t.get("src", ""), _clean(t.get("t", ""))[:58]), color=INK, fontsize=8.5)
-_kicker(A, 0.03, 0.140, 0.40, "CROSS-ASSET ANALYSIS", MKT)
+
+    _kicker(A, 0.03, 0.140, 0.40, "CROSS-ASSET ANALYSIS", MKT)
     y = 0.112
     for line in _fit(a["cross_asset"], 88, 3):
         A.text(0.03, y, line, color=INK, fontsize=10); y -= 0.018
-    _kicker(A, 0.50, 0.150, 0.22, "THEMES & SENTIMENT", SOC)
-    y = 0.122
+    _kicker(A, 0.50, 0.140, 0.22, "THEMES & SENTIMENT", SOC)
+    y = 0.112
     top_themes = sorted(d["themes"].items(), key=lambda x: -x[1])[:4]
     mx = top_themes[0][1] if top_themes else 1
     for k, v in top_themes:
@@ -553,8 +542,8 @@ _kicker(A, 0.03, 0.140, 0.40, "CROSS-ASSET ANALYSIS", MKT)
         w = 0.15 * rolls[key] / tot
         A.add_patch(plt.Rectangle((x, y - 0.004), max(w, 0.004), 0.010, color=col)); x += w + 0.004
     A.text(x + 0.01, y - 0.004, "B%d N%d S%d" % (rolls["bullish"], rolls["neutral"], rolls["bearish"]), color=MUT2, fontsize=9)
-    _kicker(A, 0.76, 0.150, 0.21, "KEY NUMBERS", GEO)
-    y = 0.122
+    _kicker(A, 0.76, 0.140, 0.21, "KEY NUMBERS", GEO)
+    y = 0.112
     g0 = pulse.get("gainers", [{}])[0]; l0 = pulse.get("losers", [{}])[0]
     for lab, val, col in [("GAINER", "%s %+.2f%%" % (g0.get("t", "-"), g0.get("pct", 0)) if g0.get("t") else "-", UP),
                           ("LOSER", "%s %+.2f%%" % (l0.get("t", "-"), l0.get("pct", 0)) if l0.get("t") else "-", DN),
