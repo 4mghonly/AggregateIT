@@ -54,6 +54,19 @@ RAW = load("sources.json"); REDDIT = load("reddit.json"); WATCH = load("watchlis
 _kw = load("keywords.json")
 KEYWORDS_DATA = _kw["clusters"] if isinstance(_kw, dict) else _kw
 PRIO_SCORE = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
+async def fetch_rss(session, src, sem):
+    name = src.get("Source_name", "")
+    if audit.is_muted(name): return []
+    txt = await fetch_text(session, src["_url"], sem); out = []
+    if txt:
+        for e in feedparser.parse(txt).entries[:MAX_PER_SOURCE]:
+            out.append({"source_type": "rss", "source_name": src.get("Source_name", ""),
+                "category": src.get("Category", ""), "url": e.get("link", ""),
+                "title": e.get("title", ""), "text": re.sub("<[^>]+>", "", e.get("summary", "")),
+                "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
+    HEALTH["rss_ok" if out else "rss_fail"] += 1
+    audit.record(name, bool(out))
+    return out
 for e in KEYWORDS_DATA:
     e["phrases"] = [p.lower() for p in e.get("phrases", [])]
 
