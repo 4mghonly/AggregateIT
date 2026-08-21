@@ -547,6 +547,9 @@ def send_digest(digest_items, report):
     wh = os.environ.get("DISCORD_WEBHOOK")
     if not digest_items:
         HEALTH["discord_skipped"] += 1; return
+        digest_items = [x for x in digest_items if can_send_digest(x)]
+    if not digest_items:
+        HEALTH["discord_skipped"] += 1; return
     if not wh:
         HEALTH["discord_fail"] += 1
         print("DISCORD: webhook secret missing - digest NOT delivered"); return
