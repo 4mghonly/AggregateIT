@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from storage import SQLiteStore, DATA
 from market import load_market_pulse, build_pulse_embed, load_macro_pulse, compute_regime
 from alerts import route_alerts, load_rules
+from policy import can_send, can_send_digest, can_send_alert
 from verify import verify_event
 
 BASE = os.path.dirname(os.path.abspath(__file__))
