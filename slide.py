@@ -528,7 +528,14 @@ def render_p2(d, a, llm_ok):
         t = _clean(e.get("title"))
         if len(t) > 120: t = t[:117] + "..."
         A.text(colx, yy, "[%s] %s" % (ts, t), color=INK, fontsize=9)
-
+sp2 = d.get("social_pulse", {})
+    tops = sp2.get("top", [])[:4]
+    if tops:
+        _kicker(A, 0.03, 0.20, 0.30, "SOCIAL & OSINT WIRES", SOC)
+        for i, t in enumerate(tops):
+            colx = 0.03 + (i % 2) * 0.485
+            yy = 0.178 - (i // 2) * 0.016
+            A.text(colx, yy, "[%s] %s" % (t.get("src", ""), _clean(t.get("t", ""))[:58]), color=INK, fontsize=8.5)
     _kicker(A, 0.03, 0.150, 0.40, "CROSS-ASSET ANALYSIS", MKT)
     y = 0.122
     for line in _fit(a["cross_asset"], 88, 3):
