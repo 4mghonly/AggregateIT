@@ -23,10 +23,17 @@ def _log_usage(model, in_tokens, out_tokens):
 def chat(messages, model=None, temperature=0.3, timeout=90):
     """Drop-in replacement for direct requests.post to Qwen."""
     base = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
-    model = model or os.environ.get("QWEN_MODEL", "Qwen3.8-Max")
+    model = model or os.environ.get("QWEN_MODEL", "qwen3.8-2.4t-a95b")
     r = requests.post(base + "/chat/completions",
         headers={"Authorization": "Bearer " + os.environ["QWEN_API_KEY"]},
-        json={"model": model, "temperature": temperature, "messages": messages}, timeout=timeout)
+        json={
+            "model": model, 
+            "temperature": temperature, 
+            "max_tokens": 4000, 
+            "messages": messages, 
+            "enable_thinking": False
+        }, 
+        timeout=timeout)
     r.raise_for_status()
     res = r.json()
     usage = res.get("usage", {})
