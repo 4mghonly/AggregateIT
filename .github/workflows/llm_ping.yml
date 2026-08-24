@@ -1,0 +1,18 @@
+name: LLM Ping
+on: workflow_dispatch
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install requests
+      - name: Ping endpoints
+        env:
+          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+          QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
+          QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
+        run: python llm_ping.py
