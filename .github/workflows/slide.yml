@@ -75,4 +75,5 @@ jobs:
           path: |
             reports/intel_slide_p1.png
             reports/intel_slide_p2.png
+          overwrite: true
           if-no-files-found: warn
