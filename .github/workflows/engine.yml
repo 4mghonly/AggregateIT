@@ -1,16 +1,16 @@
-name: Intelligence Slide Deck
+name: Daily Intelligence Briefing
 
 on:
+  schedule:
+    - cron: "30 7 * * *"   # daily 07:30 UTC — adjust to taste
   workflow_dispatch:
-  # schedule:
-  #   - cron: "0 8,20 * * *"   # uncomment to auto-render 08:00 & 20:00 UTC
 
 concurrency:
   group: aggregateit-writers
   cancel-in-progress: false
 
 jobs:
-  slide:
+  briefing:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/
-          key: data-${{ github.run_id }}-slide
+          key: data-${{ github.run_id }}-briefing
           restore-keys: |
             data-
 
@@ -39,11 +39,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: reports/
-          key: reports-${{ github.run_id }}-slide
+          key: reports-${{ github.run_id }}-briefing
           restore-keys: |
             reports-
 
-      - name: Render Gazette
+      - name: Run briefing
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
@@ -51,14 +51,12 @@ jobs:
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
           QWEN_MAX_CALLS: "10"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python slide.py
+        run: python briefing.py
 
-      - name: Upload Gazette pages
+      - name: Upload run artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: aggregate-gazette
-          path: |
-            reports/intel_slide_p1.png
-            reports/intel_slide_p2.png
-          if-no-files-found: warn
+          name: briefing-report
+          path: reports/
+          if-no-files-found: war
