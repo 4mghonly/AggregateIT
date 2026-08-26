@@ -3,6 +3,21 @@ on:
   schedule:
     - cron: "0 * * * *"
   workflow_dispatch:
+name: News Intelligence Engine
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: aggregateit-writers
+  cancel-in-progress: false
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    ...
 jobs:
   run:
     runs-on: ubuntu-latest
