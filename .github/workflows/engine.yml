@@ -1,18 +1,18 @@
-name: News Intelligence Engine
+name: Intelligence Slide Deck
 
 on:
-  schedule:
-    - cron: "0 * * * *"
   workflow_dispatch:
+  # schedule:
+  #   - cron: "0 8,20 * * *"   # uncomment to auto-render 08:00 & 20:00 UTC
 
 concurrency:
   group: aggregateit-writers
   cancel-in-progress: false
 
 jobs:
-  engine:
+  slide:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/
-          key: data-${{ github.run_id }}-engine
+          key: data-${{ github.run_id }}-slide
           restore-keys: |
             data-
 
@@ -39,24 +39,26 @@ jobs:
         uses: actions/cache@v4
         with:
           path: reports/
-          key: reports-${{ github.run_id }}-engine
+          key: reports-${{ github.run_id }}-slide
           restore-keys: |
             reports-
 
-      - name: Run engine
+      - name: Render Gazette
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
-          QWEN_MAX_CALLS: "40"
+          QWEN_MAX_CALLS: "10"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python main.py
+        run: python slide.py
 
-      - name: Upload run artifact
+      - name: Upload Gazette pages
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: intel-report
-          path: reports/
+          name: aggregate-gazette
+          path: |
+            reports/intel_slide_p1.png
+            reports/intel_slide_p2.png
           if-no-files-found: warn
