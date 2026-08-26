@@ -1,63 +1,64 @@
 name: Intelligence Slide Deck
-on:
-  schedule:
-    - cron: "30 13-19 * * 1-5"
-    - cron: "0 20 * * 1-5"
-    - cron: "0 13 * * 0"
-  workflow_dispatch:
-name: News Intelligence Engine
 
 on:
-  schedule:
-    - cron: "0 * * * *"
   workflow_dispatch:
+  # schedule:
+  #   - cron: "0 8,20 * * *"   # uncomment to auto-render 08:00 & 20:00 UTC
 
 concurrency:
   group: aggregateit-writers
   cancel-in-progress: false
 
 jobs:
-  engine:
-    runs-on: ubuntu-latest
-    ...
-jobs:
   slide:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install requests matplotlib
-      - uses: actions/cache@v4
-        with:
-          path: data
-          key: seen-db-${{ github.run_id }}
-          restore-keys: |
-            seen-db-
-      - name: Check slide quiet hours
-        id: check
+
+      - name: Install dependencies
         run: |
-          if python -c "from policy import can_send; import sys; sys.exit(0 if can_send('slide') else 1)"; then
-            echo "allowed=true" >> $GITHUB_OUTPUT
-          else
-            echo "allowed=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Fetch fresh market and macro data
-        if: steps.check.outputs.allowed == 'true'
-        run: python tv.py --pulse --macro
-      - name: Render and send deck
-        if: steps.check.outputs.allowed == 'true'
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || pip install requests feedparser trafilatura matplotlib
+
+      - name: Restore data cache
+        uses: actions/cache@v4
+        with:
+          path: data/
+          key: data-${{ github.run_id }}-slide
+          restore-keys: |
+            data-
+
+      - name: Restore reports cache
+        uses: actions/cache@v4
+        with:
+          path: reports/
+          key: reports-${{ github.run_id }}-slide
+          restore-keys: |
+            reports-
+
+      - name: Render Gazette
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
+          QWEN_MAX_CALLS: "10"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python slide.py
-      - uses: actions/upload-artifact@v4
-        if: steps.check.outputs.allowed == 'true'
+
+      - name: Upload Gazette pages
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: intel-deck
+          name: aggregate-gazette
           path: |
             reports/intel_slide_p1.png
             reports/intel_slide_p2.png
+          if-no-files-found: warn
