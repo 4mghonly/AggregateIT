@@ -41,7 +41,7 @@ jobs:
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
+          QWEN_MAX_CALLS: "40"
         run: python main.py
       - uses: actions/upload-artifact@v4
         if: always()
