@@ -1,21 +1,8 @@
-name: Intelligence Briefings
-on:
-  schedule:
-    - cron: "0 4 * * *"         # MINI (08:00 GST)
-    - cron: "0 14 * * 1-5"      # MORNING (18:40 GST)
-    - cron: "0 21 * * 1-5"      # CLOSING (01:00 GST)
-  workflow_dispatch:
-    inputs:
-      mode:
-        description: "Briefing Type"
-        type: choice
-        default: "MORNING"
-        options: ["MINI", "MORNING", "CLOSING"]
-name: News Intelligence Engine
+name: Daily Intelligence Briefing
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "30 7 * * *"   # daily 07:30 UTC — adjust to taste
   workflow_dispatch:
 
 concurrency:
@@ -23,28 +10,53 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  engine:
-    runs-on: ubuntu-latest
-    ...
-jobs:
   briefing:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - run: pip install requests
-      - uses: actions/cache@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          path: data
-          key: seen-db-${{ github.run_id }}
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || pip install requests feedparser trafilatura matplotlib
+
+      - name: Restore data cache
+        uses: actions/cache@v4
+        with:
+          path: data/
+          key: data-${{ github.run_id }}-briefing
           restore-keys: |
-            seen-db-
-      - name: Fresh pulse immediately before briefing
-        if: github.event.inputs.mode != 'MINI'
-        run: python tv.py --pulse --macro
-      - name: Send Discord Briefing
+            data-
+
+      - name: Restore reports cache
+        uses: actions/cache@v4
+        with:
+          path: reports/
+          key: reports-${{ github.run_id }}-briefing
+          restore-keys: |
+            reports-
+
+      - name: Run briefing
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          BRIEFING_MODE: ${{ github.event.inputs.mode || (github.event.schedule == '0 4 * * *' && 'MINI' || (github.event.schedule == '0 21 * * 1-5' && 'CLOSING' || 'MORNING')) }}
+          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+          QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
+          QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
+          QWEN_MAX_CALLS: "10"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python briefing.py
+
+      - name: Upload run artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: briefing-report
+          path: reports/
+          if-no-files-found: warn
