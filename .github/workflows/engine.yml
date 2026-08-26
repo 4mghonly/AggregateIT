@@ -1,8 +1,8 @@
-name: Daily Intelligence Briefing
+name: News Intelligence Engine
 
 on:
   schedule:
-    - cron: "30 7 * * *"   # daily 07:30 UTC — adjust to taste
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 concurrency:
@@ -10,9 +10,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  briefing:
+  engine:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/
-          key: data-${{ github.run_id }}-briefing
+          key: data-${{ github.run_id }}-engine
           restore-keys: |
             data-
 
@@ -39,24 +39,24 @@ jobs:
         uses: actions/cache@v4
         with:
           path: reports/
-          key: reports-${{ github.run_id }}-briefing
+          key: reports-${{ github.run_id }}-engine
           restore-keys: |
             reports-
 
-      - name: Run briefing
+      - name: Run engine
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
-          QWEN_MAX_CALLS: "10"
+          QWEN_MAX_CALLS: "40"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python briefing.py
+        run: python main.py
 
       - name: Upload run artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: briefing-report
+          name: intel-report
           path: reports/
-          if-no-files-found: war
+          if-no-files-found: warn
