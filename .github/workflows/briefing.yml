@@ -74,4 +74,5 @@ jobs:
         with:
           name: briefing-report
           path: reports/
+          overwrite: true
           if-no-files-found: warn
