@@ -7,7 +7,10 @@ from storage import SQLiteStore, DATA
 from market import load_market_pulse, build_pulse_embed, load_macro_pulse, compute_regime
 from alerts import load_rules, route_alerts
 from policy import can_send, can_send_digest, can_send_alert
+import llm
 from llm import chat
+_ok, _det = llm.preflight()
+print("QWEN PREFLIGHT:", "OK" if _ok else "FAIL " + _det)
 import social, audit
 try:
     from verify import verify_event
