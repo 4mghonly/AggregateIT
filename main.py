@@ -27,7 +27,13 @@ MAX_PER_SOURCE = 5
 MAX_ANALYZE = 25
 MAX_EVENTS = 10
 FRONT_PAGE_FLOOR = 5
+MAX_KEYWORD_POINTS = 6
+FIN_RESERVED_SLOTS = 3
+FIN_PRIORITY_SOURCES = ("bloomberg", "wsj", "financial times", "marketwatch", "cnbc",
+                        "nasdaq", "yahoo finance", "seeking alpha", "benzinga",
+                        "investing.com")
 ALWAYS_ANALYZE = ["federal reserve", "european central bank", "cisa"]
+FIN_KEYWORD_PREFIXES = ("CB", "MK", "XA", "RN", "EN", "AI")
 PRIO_LIMIT = {"Very High": 10, "High": 5, "Medium": 3}
 UA = {"User-Agent": "NewsIntelEngine/0.4 (personal research)"}
 CLUSTER_METRICS_FILE = os.path.join(REPORTS, "cluster_metrics.json")
@@ -116,6 +122,8 @@ def score_item(i):
     comp = {"priority_source": 0, "ticker": 0, "mover": 0, "tv": 0, "keyword": 0, "confluence": 0}
     if any(a in i["source_name"].lower() for a in ALWAYS_ANALYZE):
         score += 5; hits.append("Priority Source"); comp["priority_source"] += 5
+    if any(f in i["source_name"].lower() for f in FIN_PRIORITY_SOURCES):
+        score += 3; hits.append("Financial Wire"); comp["priority_source"] += 3
     for sym in set(c.upper() for c in CASHTAG.findall(text)):
         if sym in T_BY_SYM:
             score += 3; hits.append(sym); comp["ticker"] += 3
@@ -133,7 +141,7 @@ def score_item(i):
             score += 2; hits.append(f"{t} (TV)"); comp["tv"] += 2
             if t in MOVERS: score += 4; hits.append(f"{t} (Mover)"); comp["mover"] += 4
     kws = find_matches(text)
-    kw = sum(PRIO_SCORE.get(e.get("prio", "Medium"), 2) for e in kws)
+    kw = min(sum(PRIO_SCORE.get(e.get("prio", "Medium"), 2) for e in kws), MAX_KEYWORD_POINTS)
     score += kw; comp["keyword"] += kw
     i["keyword_ids"] = [e["id"] for e in kws]
     i["keyword_tags"] = sorted({t for e in kws for t in e.get("tags", [])})
@@ -640,6 +648,10 @@ def build_health(report, store_stats):
 async def main():
     if not DRY_RUN and not os.environ.get("QWEN_API_KEY"):
         raise SystemExit("FATAL: QWEN_API_KEY secret is not set.")
+    if not DRY_RUN and not _ok:
+        # Without a working LLM endpoint no event can ever be validated or stored,
+        # so downstream briefings would silently post empty. Fail loudly instead.
+        raise SystemExit(f"FATAL: Qwen preflight failed: {_det}")
 
     sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
     since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
@@ -708,13 +720,26 @@ async def main():
     clusters = cluster_events(front_page)
     report["events_summary"]["clusters"] = len(clusters)
 
-    for c in clusters[MAX_EVENTS:]:
-        if not DRY_RUN:
-            for it in c["items"]: store.register(it["url"], it["thash"], "deferred", it["score"])
+    # Balance guard: reserve slots for financial clusters so geopolitical
+    # multi-keyword stories cannot fill every analysis slot.
+    def cluster_domain(c):
+        ids = set()
+        for it in c["items"]: ids |= set(it.get("keyword_ids", []))
+        return "fin" if any(i.split("-")[0] in FIN_KEYWORD_PREFIXES for i in ids) else "gen"
+
+    fin_clusters = [c for c in clusters if cluster_domain(c) == "fin"][:FIN_RESERVED_SLOTS]
+    reserved_ids = {c["event_id"] for c in fin_clusters}
+    rest = [c for c in clusters if c["event_id"] not in reserved_ids][:MAX_EVENTS - len(fin_clusters)]
+    selected_clusters = fin_clusters + rest
+
+    for c in clusters:
+        if c["event_id"] not in {x["event_id"] for x in selected_clusters}:
+            if not DRY_RUN:
+                for it in c["items"]: store.register(it["url"], it["thash"], "deferred", it["score"])
 
     digest_items = []
     verified_count = 0
-    for c in clusters[:MAX_EVENTS]:
+    for c in selected_clusters:
         prior = resolve_prior_event(c, store)
         if DRY_RUN:
             report["events"].append({"event_id": c["event_id"], "entity": c["entity"], "preview": True,

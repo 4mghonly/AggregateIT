@@ -50,29 +50,3 @@ jobs:
           path: reports/
           overwrite: true
           if-no-files-found: warn
-      - name: Restore reports cache
-        uses: actions/cache@v4
-        with:
-          path: reports/
-          key: reports-${{ github.run_id }}-engine
-          restore-keys: |
-            reports-
-
-      - name: Run engine
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
-          QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
-          QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
-          QWEN_MAX_CALLS: "40"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python main.py
-
-      - name: Upload run artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: intel-report
-          path: reports/
-          overwrite: true
-          if-no-files-found: warn

@@ -62,6 +62,18 @@ def load_events(store, hours):
                       "summary": ev.get("assessment") or ""})
     return items
 
+def load_window(store, hours=24):
+    """Load events for the primary window; fall back to a wider window if empty.
+    Returns (items, hours_used, note)."""
+    items = load_events(store, hours)
+    if items:
+        return items, hours, ""
+    items = load_events(store, 72)
+    if items:
+        return items, 72, f"⚠️ No events in the last {hours}h — showing the last 72h instead."
+    return [], 72, ("⚠️ No events stored at all. The engine has not produced any events "
+                    "(check QWEN_* secrets, engine runs, and the data/ cache).")
+
 def theme_counts(items):
     counts = {}
     for i in items:
@@ -200,7 +212,7 @@ def generate_macro_read(macro, regime):
 def build_exec(mode):
     pulse = market.load_market_pulse()
     hours = 24
-    items = load_events(SQLiteStore(), hours)
+    items, hours, window_note = load_window(SQLiteStore(), hours)
     gainers = (pulse or {}).get("gainers", [])[:4]
     losers = (pulse or {}).get("losers", [])[:4]
     hits = watch_hits(items, (pulse or {}).get("sig", {}))
@@ -209,8 +221,10 @@ def build_exec(mode):
              "LIVE": "LIVE DESK · US SESSION"}.get(mode, "LIVE DESK · US SESSION")
     color = {"MORNING": 0xF1C40F, "CLOSING": 0x3498DB, "LIVE": 0x2ECC71}.get(mode, 0x2ECC71)
     now = datetime.now(timezone.utc).strftime("%a %Y-%m-%d %H:%M UTC")
+    desc = f"{now} • Window: last {hours}h • **{len(items)}** tracked events"
+    if window_note: desc += f"\n{window_note}"
     e1 = {"title": f"📋 EXECUTIVE BRIEFING · {label}",
-          "description": f"{now} • Window: last {hours}h • **{len(items)}** tracked events",
+          "description": desc,
           "color": color,
           "fields": [
               {"name": "🎯 Mission", "value": "Surface market-moving geopolitical & corporate signals before consensus.", "inline": True},
@@ -254,9 +268,10 @@ def build_exec(mode):
     return embeds_list
 
 def build_mini():
-    items = load_events(SQLiteStore(), 24)
+    items, hours, window_note = load_window(SQLiteStore(), 24)
+    desc = window_note if window_note else findings(items, hours)
     return [{"title": "🌅 AGGREGATEIT · OVERNIGHT WIRE (08:00 UAE)",
-             "description": findings(items, 24), "color": 0xE67E22,
+             "description": desc, "color": 0xE67E22,
              "fields": [
                  {"name": "📰 Major Headlines", "value": headlines(items, 6), "inline": False},
                  {"name": "🧭 Theme Activity", "value": theme_chart(items), "inline": True},

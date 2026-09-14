@@ -502,5 +502,34 @@ print("[T53] context brief builds")
 b53 = context.build_context_brief()
 check("context returns str", isinstance(b53, str), type(b53))
 
+print("[T54] Keyword score cap keeps multi-cluster stories bounded")
+many_hits = item("Iran Israel Hormuz tariff sanctions NATO Taiwan escalation",
+                 "iran israel strait of hormuz tariff export controls nato taiwan sanctions")
+sc, labels = main.score_item(many_hits)
+kw_comp = many_hits["score_components"]["keyword"]
+check("keyword component <= cap", kw_comp <= main.MAX_KEYWORD_POINTS, f"kw={kw_comp}")
+
+print("[T55] Financial wires get priority boost")
+sc_fin = main.score_item(item("Tech earnings recap", "Markets close mixed", source="Bloomberg - Markets"))[0]
+sc_pln = main.score_item(item("Tech earnings recap", "Markets close mixed", source="Plain Blog"))[0]
+check("fin wire boosted", sc_fin >= sc_pln + 3, f"{sc_fin} vs {sc_pln}")
+
+print("[T56] Cluster domain classification for balance guard")
+c_fin = {"items": [{"keyword_ids": ["CB-01", "MK-01"]}], "event_id": "fin1"}
+c_geo = {"items": [{"keyword_ids": ["GEO-11", "ME-01"]}], "event_id": "geo1"}
+def cluster_domain(c):
+    ids = set()
+    for it in c["items"]: ids |= set(it.get("keyword_ids", []))
+    return "fin" if any(i.split("-")[0] in ("CB", "MK", "XA", "RN", "EN", "AI") for i in ids) else "gen"
+check("financial cluster classified", cluster_domain(c_fin) == "fin", cluster_domain(c_fin))
+check("geopolitical cluster classified", cluster_domain(c_geo) == "gen", cluster_domain(c_geo))
+
+print("[T57] Briefing empty-window fallback reports diagnosis")
+class FakeStore:
+    def recent_all_events(self, hours=24, limit=100): return []
+items57, hours57, note57 = briefing.load_window(FakeStore(), 24)
+check("falls back to 72h", hours57 == 72, f"hours={hours57}")
+check("empty store yields diagnostic note", "No events stored" in note57, note57)
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
