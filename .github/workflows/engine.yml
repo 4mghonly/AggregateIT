@@ -33,7 +33,7 @@ jobs:
           key: reports-${{ github.run_id }}-engine
           restore-keys: |
             reports-
-      - name: Run engine
+      - name: Run engine (pass 1)
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
@@ -42,7 +42,26 @@ jobs:
           QWEN_MAX_CALLS: "40"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python main.py
-      - name: Upload run artifact
+      - name: Upload run artifact (pass 1)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: intel-report
+          path: reports/
+          overwrite: true
+          if-no-files-found: warn
+      # Pass 2 is a deliberate catch-up: items deferred/failed in pass 1 stay
+      # retriable, so a second run picks them up (plus any new social items).
+      - name: Run engine (pass 2 — catch-up)
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+          QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
+          QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
+          QWEN_MAX_CALLS: "40"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python main.py
+      - name: Upload run artifact (pass 2)
         if: always()
         uses: actions/upload-artifact@v4
         with:

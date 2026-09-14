@@ -33,7 +33,7 @@ jobs:
           key: reports-${{ github.run_id }}-briefing
           restore-keys: |
             reports-
-      - name: Run briefing
+      - name: Run briefing (pass 1)
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
@@ -42,7 +42,28 @@ jobs:
           QWEN_MAX_CALLS: "10"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python briefing.py
-      - name: Upload run artifact
+      - name: Upload run artifact (pass 1)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: briefing-report
+          path: reports/
+          overwrite: true
+          if-no-files-found: warn
+      # Pass 2 gives the briefing a second shot if pass 1 hit a transient
+      # failure (webhook timeout, macro-read blip); same artifact, overwrite
+      # keeps only the latest copy.
+      - name: Run briefing (pass 2 — retry)
+        if: always() && !cancelled()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+          QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
+          QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
+          QWEN_MAX_CALLS: "10"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python briefing.py
+      - name: Upload run artifact (pass 2)
         if: always()
         uses: actions/upload-artifact@v4
         with:
