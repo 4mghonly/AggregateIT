@@ -531,5 +531,34 @@ items57, hours57, note57 = briefing.load_window(FakeStore(), 24)
 check("falls back to 72h", hours57 == 72, f"hours={hours57}")
 check("empty store yields diagnostic note", "No events stored" in note57, note57)
 
+print("[T58] LLM provider flexibility (enable_thinking gating)")
+import llm
+llm.API_KEY = "k"
+llm.BASE_URL = "https://openrouter.ai/api/v1"
+check("openrouter not dashscope", not llm._is_dashscope(), llm.BASE_URL)
+llm.BASE_URL = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+check("dashscope detected", llm._is_dashscope(), llm.BASE_URL)
+# simulate preflight payload for a non-dashscope provider
+sent = {}
+class FakeResp:
+    status_code = 200; text = "ok"
+    def json(self): return {"choices": [{"message": {"content": "ok"}}]}
+def fake_post(url, headers=None, json=None, timeout=None):
+    sent.update(json or {}); return FakeResp()
+_orig = llm.requests.post
+llm.requests.post = fake_post
+llm.BASE_URL = "https://openrouter.ai/api/v1"
+llm.preflight()
+llm.requests.post = _orig
+check("preflight omits enable_thinking off-dashscope",
+      "enable_thinking" not in sent, sent.get("enable_thinking", "ABSENT"))
+sent.clear()
+llm.requests.post = fake_post
+llm.BASE_URL = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+llm.preflight()
+llm.requests.post = _orig
+check("preflight sends enable_thinking on dashscope",
+      sent.get("enable_thinking") is False, sent.get("enable_thinking"))
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

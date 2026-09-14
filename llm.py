@@ -14,12 +14,18 @@ from datetime import datetime, timezone
 BASE = os.path.dirname(os.path.abspath(__file__))
 API_KEY = os.environ.get("QWEN_API_KEY", "")
 BASE_URL = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
-DEFAULT_MODEL = "qwen3.8-2.4t-a95b"
+DEFAULT_MODEL = "qwen-plus"
 MODEL = os.environ.get("QWEN_MODEL") or DEFAULT_MODEL
 MAX_CALLS = int(os.environ.get("QWEN_MAX_CALLS") or 40)
 PROMPT_VERSION = 1
 USAGE_FILE = os.path.join(BASE, "reports", "token_usage.json")
 LEDGER_FILE = os.path.join(BASE, "data", "qwen_ledger.json")
+
+def _is_dashscope():
+    # enable_thinking is a DashScope-only extension; other OpenAI-compatible
+    # providers (OpenRouter, Together, etc.) reject it as an unknown/restricted
+    # parameter, so it must not be sent to them.
+    return "dashscope" in BASE_URL or "aliyuncs" in BASE_URL
 
 class BudgetExceeded(RuntimeError): pass
 class LLMPermanent(RuntimeError): pass
@@ -65,20 +71,30 @@ def _log_usage(model, inp, outp, cached=False):
 def preflight():
     if not API_KEY: return False, "QWEN_API_KEY missing"
     try:
+        payload = {"model": MODEL, "messages": [{"role": "user", "content": "ping"}],
+                   "max_tokens": 1}
+        if _is_dashscope(): payload["enable_thinking"] = False
         r = requests.post(BASE_URL + "/chat/completions",
             headers={"Authorization": "Bearer " + API_KEY, "Content-Type": "application/json"},
-            json={"model": MODEL, "messages": [{"role": "user", "content": "ping"}],
-                  "max_tokens": 1, "enable_thinking": False}, timeout=20)
+            json=payload, timeout=20)
         return (True, "ok") if r.status_code == 200 else (False, "HTTP %d %s" % (r.status_code, r.text[:120]))
     except Exception as e:
         return False, str(e)[:120]
 
 def _post(messages, model, temperature, max_tokens, timeout):
+    payload = {"model": model, "temperature": temperature, "max_tokens": max_tokens,
+               "messages": messages}
+    if _is_dashscope(): payload["enable_thinking"] = False
     r = requests.post(BASE_URL + "/chat/completions",
         headers={"Authorization": "Bearer " + API_KEY, "Content-Type": "application/json"},
-        json={"model": model, "temperature": temperature, "max_tokens": max_tokens,
-              "messages": messages, "enable_thinking": False},
-        timeout=timeout)
+        json=payload, timeout=timeout)
+    if r.status_code == 400 and "enable_thinking" in r.text and "enable_thinking" in payload:
+        # Model rejects the parameter even on DashScope (thinking-only models);
+        # retry once without it so one strict model doesn't break the pipeline.
+        payload.pop("enable_thinking")
+        r = requests.post(BASE_URL + "/chat/completions",
+            headers={"Authorization": "Bearer " + API_KEY, "Content-Type": "application/json"},
+            json=payload, timeout=timeout)
     if r.status_code in (429, 500, 502, 503, 504):
         raise LLMTransient("HTTP %d" % r.status_code)
     if 400 <= r.status_code < 500:
