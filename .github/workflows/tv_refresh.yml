@@ -17,9 +17,9 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: data
-          key: seen-db-${{ github.run_id }}
+          key: data-${{ github.run_id }}-tv_refresh
           restore-keys: |
-            seen-db-
+            data-
       - name: Universe (weekly Monday + manual)
         if: github.event.schedule == '30 12 * * 1' || github.event_name == 'workflow_dispatch'
         run: python tv.py --universe

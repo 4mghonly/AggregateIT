@@ -17,8 +17,8 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: data
-          key: seen-db-${{ github.run_id }}
+          key: data-${{ github.run_id }}-search
           restore-keys: |
-            seen-db-
+            data-
       - name: Search
         run: python tv.py --search "${{ github.event.inputs.query }}"
