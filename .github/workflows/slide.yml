@@ -1,5 +1,7 @@
 name: Intelligence Slide Deck
 on:
+  schedule:
+    - cron: "30 5 * * *"         # 09:30 GST — mid-morning Gazette, clear of hourly engine and 07:30 briefing
   workflow_dispatch:
 concurrency:
   group: aggregateit-writers
