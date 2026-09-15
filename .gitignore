@@ -1,0 +1,6 @@
+__pycache__/
+.agents_tmp/
+data/
+reports/
+audit_report.json
+*.log

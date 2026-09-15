@@ -15,7 +15,7 @@ SHIFT_MIRRORS = [
     ("https://arctic-shift.philo.berkeley.edu/api/reddit", "arctic"),
     ("https://api.pullpush.io/reddit", "pullpush"),
 ]
-RSSHUB = ["https://rsshub.app", "https://rsshub.rssforever.com", "https://hub.slarker.me", "https://rsshub.pseudoyu.com"]
+RSSHUB = ["https://rsshub.rssforever.com", "https://hub.slarker.me", "https://rsshub.ktachibana.party", "https://rsshub.app", "https://rsshub.pseudoyu.com"]
 UA = {"User-Agent": "Mozilla/5.0 (compatible; NewsIntelEngine/0.5)"}
 
 def _route(url, params=None):
@@ -47,7 +47,7 @@ def _parse_ts(s):
     try: return datetime.fromisoformat((s or "").replace("Z", "+00:00")).timestamp()
     except Exception: return time.time()
 
-def _reddit_items(since_ts):
+def _reddit_items(since_ts, expired=None):
     chat = _load_chatter()
     caps = chat.get("caps", {})
     per_lane = caps.get("reddit_per_lane", 5)
@@ -71,6 +71,7 @@ def _reddit_items(since_ts):
                     "ts": row.get("created_utc") or since_ts, "lane": lane})
 
     for sub in subs:
+        if expired and expired(): break
         for lane, sort, aft in (("new", "created_utc:desc", after), ("top", "score:desc", after), ("rising", "score:desc", rising_after)):
             rows = _shift_get("/submissions/search", {"subreddit": sub, "after": aft, "sort": sort, "limit": per_lane})
             for row in rows:
@@ -79,6 +80,7 @@ def _reddit_items(since_ts):
         time.sleep(0.2)
 
     for q in chat.get("queries", [])[:12]:
+        if expired and expired(): break
         rows = _shift_get("/comments/search", {"q": q, "after": after, "sort": "score:desc", "limit": caps.get("comments_per_query", 5)})
         for row in rows:
             if (row.get("score") or 0) < 3: continue
@@ -95,8 +97,8 @@ def _get_working_rsshub():
         except Exception: continue
     return None
 
-def _twitter_items(since_ts):
-    inst = _get_working_rsshub()
+def _twitter_items(since_ts, inst=None, expired=None):
+    if inst is None: inst = _get_working_rsshub()
     if not inst:
         print("SOCIAL: all RSSHub instances unreachable - skipping Twitter this run")
         return []
@@ -104,12 +106,47 @@ def _twitter_items(since_ts):
     per = chat.get("caps", {}).get("tweets_per_handle", 5)
     out = []
     for cat, hs in chat.get("twitter_handles", {}).items():
+        if expired and expired(): break
         for h in hs:
+            if expired and expired(): break
             try:
                 r = requests.get(_route(f"{inst}/twitter/user/{h}"), timeout=6, headers=UA)
                 if r.status_code == 200:
                     for e in feedparser.parse(r.text).entries[:per]:
                         out.append({"source_type": "twitter", "source_name": "X:@" + h, "category": "Twitter/" + cat,
+                                    "url": e.get("link", ""), "title": (e.get("title") or "")[:200],
+                                    "text": re.sub("<[^>]+>", "", e.get("summary", ""))[:4000],
+                                    "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
+            except Exception: pass
+            time.sleep(0.2)
+    return out
+
+RSSHUB_ROUTES = {
+    "bluesky":  lambda h: f"/bluesky/user/{h}",
+    "mastodon": lambda h: f"/mastodon/account/{h}",
+    "telegram": lambda h: f"/telegram/channel/{h}",
+    "youtube":  lambda h: f"/youtube/channel/{h}",
+}
+RSSHUB_PREFIX = {"bluesky": "BSKY:", "mastodon": "MASTO:", "telegram": "TG:", "youtube": "YT:"}
+
+def _rsshub_items(since_ts, inst=None, expired=None):
+    if inst is None: inst = _get_working_rsshub()
+    if not inst: return []
+    chat = _load_chatter()
+    per = chat.get("caps", {}).get("rsshub_per_source", 3)
+    out = []
+    for platform, handles in chat.get("rsshub_sources", {}).items():
+        if expired and expired(): break
+        route = RSSHUB_ROUTES.get(platform)
+        if not route: continue
+        for h in handles:
+            if expired and expired(): break
+            try:
+                r = requests.get(_route(inst + route(h)), timeout=6, headers=UA)
+                if r.status_code == 200:
+                    for e in feedparser.parse(r.text).entries[:per]:
+                        out.append({"source_type": platform, "source_name": RSSHUB_PREFIX[platform] + h,
+                                    "category": platform.capitalize(),
                                     "url": e.get("link", ""), "title": (e.get("title") or "")[:200],
                                     "text": re.sub("<[^>]+>", "", e.get("summary", ""))[:4000],
                                     "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
@@ -136,11 +173,17 @@ def _stocktwits_items():
     return out
 
 def fetch_all(since_ts):
-    rd = _reddit_items(since_ts)
-    tw = _twitter_items(since_ts)
+    # Wall-clock budget: expanded source surface means a degraded-mirror day
+    # could otherwise starve the hourly engine job (25-min timeout, 2 passes).
+    deadline = time.time() + float(os.environ.get("SOCIAL_BUDGET_S", "600"))
+    def expired(): return time.time() > deadline
+    rd = _reddit_items(since_ts, expired)
+    inst = _get_working_rsshub()
+    tw = [] if expired() else _twitter_items(since_ts, inst, expired)
+    rs = [] if expired() else _rsshub_items(since_ts, inst, expired)
     st = _stocktwits_items()
-    print("SOCIAL FETCH: reddit=%d twitter=%d stocktwits=%d" % (len(rd), len(tw), len(st)))
-    out = (rd + tw + st)[: _load_chatter().get("caps", {}).get("total", 60)]
+    print("SOCIAL FETCH: reddit=%d twitter=%d rsshub=%d stocktwits=%d" % (len(rd), len(tw), len(rs), len(st)))
+    out = (rd + tw + rs + st)[: _load_chatter().get("caps", {}).get("total", 60)]
     try:
         os.makedirs(DATA, exist_ok=True)
         sp = {"ts": time.time(), "counts": {}, "top": []}
