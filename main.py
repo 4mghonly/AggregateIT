@@ -1,5 +1,5 @@
 """main.py v11 — AggregateIT engine orchestrator."""
-import os, re, json, time, sqlite3, asyncio, calendar, hashlib, sys
+import os, re, json, time, sqlite3, asyncio, calendar, hashlib, sys, subprocess
 import feedparser, aiohttp, requests, trafilatura
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlparse
@@ -73,6 +73,24 @@ TICK_RAW = load("tickers.json") + [{"t": x, "c": x, "s": "Watchlist"} for x in W
 T_BY_SYM = {d["t"].upper(): d for d in TICK_RAW}
 SYMS = [t for t in T_BY_SYM if len(t) >= 3 and t not in CASHTAG_ONLY]
 NAMES = [(d["c"].lower(), d) for d in TICK_RAW if len(d["c"]) >= 6]
+
+def _market_data_stale():
+    p = os.path.join(DATA, "movers.json")
+    try: return not os.path.exists(p) or time.time() - json.load(open(p)).get("updated", 0) > 6 * 3600
+    except Exception: return True
+
+def ensure_market_data():
+    # Cache-restore races (hourly engine always produces the newest data- cache)
+    # can strand tv_refresh's output in its own cache entry; refresh inline when
+    # the pulse snapshot is missing or >6h old so briefings never go dark.
+    if not _market_data_stale(): return
+    try:
+        r = subprocess.run([sys.executable, "tv.py", "--pulse"], timeout=240,
+                           capture_output=True, text=True)
+        print("TV SELF-HEAL:", (r.stdout or r.stderr).strip()[:200] or f"exit {r.returncode}")
+    except Exception as e:
+        print("TV SELF-HEAL FAIL:", type(e).__name__, str(e)[:120])
+ensure_market_data()
 
 def load_market_context():
     movers, uni_tickers, uni_names = {}, set(), {}
@@ -202,23 +220,22 @@ async def fetch_github(session, repo, sem, since_iso):
     out = []
     for ep, kind in (("releases?per_page=5", "release"), (f"commits?per_page=5&since={since_iso}", "commit")):
         txt = await fetch_text(session, f"https://api.github.com/repos/{repo}/{ep}", sem, hdrs)
-        if txt:
-            try:
-                data = json.loads(txt)
-                if isinstance(data, list):
-                    for it in data:
-                        ts = parse_iso_ts(it.get("published_at") or it.get("created_at") or it.get("commit", {}).get("committer", {}).get("date")) or time.time()
-                        out.append({"source_type": "github", "source_name": repo, "category": "GitHub",
-                            "url": it.get("html_url", ""), "title": (it.get("name") or it.get("commit", {}).get("message") or "")[:200],
-                            "text": (it.get("body") or it.get("commit", {}).get("message") or "")[:4000], "ts": ts})
-            except Exception: pass
+        if not txt: continue
+        try:
+            data = json.loads(txt)
+            if isinstance(data, list):
+                for it in data:
+                    ts = parse_iso_ts(it.get("published_at") or it.get("created_at") or it.get("commit", {}).get("committer", {}).get("date")) or time.time()
+                    out.append({"source_type": "github", "source_name": repo, "category": "GitHub",
+                        "url": it.get("html_url", ""), "title": (it.get("name") or it.get("commit", {}).get("message") or "")[:200],
+                        "text": (it.get("body") or it.get("commit", {}).get("message") or "")[:4000], "ts": ts})
+        except Exception: pass
     HEALTH["github_ok" if out else "github_fail"] += 1
     return out
 
 def full_text(url, fallback):
     try:
-        raw = trafilatura.fetch_url(url, timeout=8)
-        txt = trafilatura.extract(raw, include_comments=False)
+        txt = trafilatura.extract(trafilatura.fetch_url(url, timeout=8), include_comments=False)
         if txt and len(txt) > 400: return txt[:4000]
     except Exception: pass
     return fallback[:4000]
@@ -235,12 +252,10 @@ def title_tokens(title):
     return {t for t in re.findall(r"[a-z0-9]{2,}", normalize_title(title)) if t not in STOPWORDS}
 
 def jaccard(a, b):
-    if not a or not b: return 0.0
-    return len(a & b) / len(a | b)
+    return len(a & b) / len(a | b) if a and b else 0.0
 
 def containment(new_tokens, stored_tokens):
-    if not new_tokens: return 0.0
-    return len(new_tokens & stored_tokens) / len(new_tokens)
+    return len(new_tokens & stored_tokens) / len(new_tokens) if new_tokens else 0.0
 
 def primary_entity(i):
     for label in i.get("matched_categories", []):
@@ -276,15 +291,13 @@ def cluster_similarity(new_item, cluster):
     if new_kws & cluster_kws:
         kw_ov = len(new_kws & cluster_kws) / max(len(new_kws | cluster_kws), 1)
         score += 0.25 * kw_ov; reasons.append(f"keyword({kw_ov:.2f})")
-    new_toks = title_tokens(new_item.get("title", ""))
-    jacc = jaccard(new_toks, cluster["tokens"])
+    new_toks = title_tokens(new_item.get("title", "")); jacc = jaccard(new_toks, cluster["tokens"])
     score += 0.2 * jacc
     if jacc > 0.1: reasons.append(f"title({jacc:.2f})")
     hours_apart = abs(new_item.get("ts", 0) - max(item.get("ts", 0) for item in cluster["items"])) / 3600.0
     if hours_apart < 1: score += 0.05; reasons.append("time(<1h)")
     elif hours_apart < 6: score += 0.02; reasons.append("time(<6h)")
-    content_gate = (jacc >= 0.3) or (kw_ov > 0)
-    return score, reasons, content_gate
+    return score, reasons, (jacc >= 0.3) or (kw_ov > 0)
 
 def cluster_events(items):
     clusters = []; metrics = []
