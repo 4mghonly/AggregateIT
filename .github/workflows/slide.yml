@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: "30 5 * * *"         # 09:30 GST — mid-morning Gazette, clear of hourly engine and 07:30 briefing
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/slide-trigger
 concurrency:
   group: aggregateit-writers
   cancel-in-progress: false
