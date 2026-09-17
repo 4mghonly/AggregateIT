@@ -9,6 +9,12 @@ jobs:
         with: { python-version: "3.11" }
       - run: pip install aiohttp feedparser
       - run: python audit.py
+        env:
+          SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
+          RSSHUB_BASE_URL: ${{ secrets.RSSHUB_BASE_URL || vars.RSSHUB_BASE_URL }}
+          RSS_BRIDGE_URL: ${{ secrets.RSS_BRIDGE_URL || vars.RSS_BRIDGE_URL }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: audit-report, path: audit_report.json }

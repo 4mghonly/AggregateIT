@@ -1,5 +1,5 @@
 """Correctness baseline for AggregateIT POC. Run: python tests.py"""
-import sys, os, json, time, tempfile
+import sys, os, json, time, tempfile, subprocess
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import main, tv, briefing, market, social, context, audit
 from storage import SQLiteStore
@@ -466,10 +466,11 @@ check("main.py under 9 sections", secs <= 9, secs)
 
 print("[T50] Reddit 3-lane fetch maps items")
 def fake_shift(path, params):
+    fresh = time.time() - 60
     if params.get("sort") == "created_utc:desc":
-        return [{"id": "a", "permalink": "/r/x/comments/a", "title": "New post", "selftext": "t", "subreddit": "x", "created_utc": 1e9, "score": 1}]
+        return [{"id": "a", "permalink": "/r/x/comments/a", "title": "New post", "selftext": "t", "subreddit": "x", "created_utc": fresh, "score": 1}]
     if params.get("sort") == "score:desc" and "q" not in params:
-        return [{"id": "b", "permalink": "/r/x/comments/b", "title": "Top post", "selftext": "t", "subreddit": "x", "created_utc": 1e9, "score": 9}]
+        return [{"id": "b", "permalink": "/r/x/comments/b", "title": "Top post", "selftext": "t", "subreddit": "x", "created_utc": fresh, "score": 9}]
     return []
 o1, o2 = social._shift_get, social._load_chatter
 social._shift_get = fake_shift
@@ -602,6 +603,62 @@ for n, typ, url in [("X:A", "twitter", "https://x.com/a/1"),
 c63 = main.cluster_events(social63)[0]
 check("social independent source count is zero", c63["independent_sources"] == 0, c63)
 check("social families retained separately", len(c63["social_families"]) >= 1, c63)
+
+print("[T64] Recommended social providers use current routes and fallbacks")
+check("current Bluesky RSSHub route", social.RSSHUB_ROUTES["bluesky"]("openai.com") == "/bsky/profile/openai.com")
+old_bridge64, old_load64, old_feed64 = social.RSS_BRIDGE_URL, social._load_chatter, social._feed_entries
+social.RSS_BRIDGE_URL = "https://bridge.example"
+social._load_chatter = lambda: {"twitter_handles": {"markets": ["example"]},
+                                "caps": {"tweets_per_handle": 2, "handles_per_category": 1}}
+social._feed_entries = lambda url, timeout=8: ([{"title": "Market update", "link": "https://x.com/example/status/1",
+                                                "summary": "Update", "published_parsed": time.gmtime()}]
+                                               if "bridge.example" in url else [])
+tw64 = social._twitter_items(time.time() - 3600, inst="")
+social.RSS_BRIDGE_URL, social._load_chatter, social._feed_entries = old_bridge64, old_load64, old_feed64
+check("RSS-Bridge used when RSSHub is absent", len(tw64) == 1 and tw64[0]["source_type"] == "twitter", tw64)
+
+print("[T65] Bluesky and Mastodon use native public interfaces")
+class Resp65:
+    status_code = 200
+    def json(self):
+        return {"feed": [{"post": {"uri": "at://did:plc:test/app.bsky.feed.post/abc",
+                          "record": {"text": "Public update", "createdAt": "2026-09-17T00:00:00Z"}}}]}
+old_get65, old_load65, old_feed65 = social.requests.get, social._load_chatter, social._feed_entries
+social.requests.get = lambda *a, **k: Resp65()
+social._load_chatter = lambda: {"rsshub_sources": {"bluesky": ["example.bsky.social"],
+                                                    "mastodon": ["mastodon.social/@example"]},
+                                "caps": {"rsshub_per_source": 2, "rsshub_sources_per_platform": 2}}
+social._feed_entries = lambda url, timeout=8: ([{"title": "Mastodon update", "summary": "Mastodon update",
+                                                "link": "https://mastodon.social/@example/1",
+                                                "published_parsed": time.gmtime()}]
+                                               if url.endswith("/@example.rss") else [])
+fed65 = social._native_federated_items(0)
+social.requests.get, social._load_chatter, social._feed_entries = old_get65, old_load65, old_feed65
+check("AT Protocol feed parsed", any(x["source_type"] == "bluesky" for x in fed65), fed65)
+check("native Mastodon RSS parsed", any(x["source_type"] == "mastodon" for x in fed65), fed65)
+
+print("[T66] LLM outage fallback is valid and cannot alert")
+c66 = {"items": [{**item("$NVDA earnings update", "Nvidia earnings update"), "score": 9}],
+       "entity": "NVDA", "independent_sources": 1}
+a66 = main.fallback_event_analysis(c66, None, "quota exhausted")
+ok66, _, errs66 = main.validate_analysis(a66, "$NVDA earnings update")
+check("fallback satisfies analysis schema", ok66, errs66)
+check("fallback severity capped", a66["importance"] in ("Low", "Medium"), a66)
+check("fallback is excluded from digest alerts", not main.can_send_digest({"analysis": a66, "status": "NEW"}), a66)
+
+print("[T67] Audit import has no network or file side effect")
+with tempfile.TemporaryDirectory() as td67:
+    env67 = dict(os.environ); env67["PYTHONPATH"] = os.path.dirname(os.path.abspath(main.__file__))
+    p67 = subprocess.run([sys.executable, "-c", "import audit"], cwd=td67, env=env67,
+                         capture_output=True, text=True, timeout=10)
+    check("audit import succeeds", p67.returncode == 0, p67.stderr)
+    check("audit report not created on import", not os.path.exists(os.path.join(td67, "audit_report.json")))
+
+print("[T68] Engine workflow runs once with bounded token budget")
+wf68 = open(os.path.join(os.path.dirname(os.path.abspath(main.__file__)), ".github", "workflows", "engine.yml")).read()
+check("one engine execution", wf68.count("python main.py") == 1, wf68.count("python main.py"))
+check("ten-call hard cap", 'QWEN_MAX_CALLS: "10"' in wf68)
+check("manual run defaults dry", "default: true" in wf68 and "DRY_RUN:" in wf68)
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

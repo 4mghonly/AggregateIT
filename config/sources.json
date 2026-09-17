@@ -448,13 +448,6 @@
   "Verification_status": "Active"
  },
  {
-  "Id": 65,
-  "Source_name": "WSJ - Markets",
-  "Category": "US Markets",
-  "Url": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
-  "Verification_status": "Active"
- },
- {
   "Id": 66,
   "Source_name": "Bloomberg - Markets",
   "Category": "US Markets",
@@ -649,13 +642,6 @@
   "Category": "Markets",
   "tier": 2,
   "Id": 93
- },
- {
-  "Url": "https://oilprice.com/rss/main",
-  "Source_name": "OilPrice.com Headlines",
-  "Category": "Energy",
-  "tier": 3,
-  "Id": 94
  },
  {
   "Url": "https://www.freightwaves.com/feed",

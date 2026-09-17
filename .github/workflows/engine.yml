@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "0 * * * *"
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Collect and score without storing or sending
+        type: boolean
+        default: true
 concurrency:
   group: aggregateit-writers
   cancel-in-progress: false
@@ -33,37 +38,23 @@ jobs:
           key: reports-${{ github.run_id }}-engine
           restore-keys: |
             reports-
-      - name: Run engine (pass 1)
+      - name: Run engine
         env:
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
-          QWEN_MAX_CALLS: "40"
+          QWEN_MAX_CALLS: "10"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
+          SOCIAL_BUDGET_S: "180"
+          RSSHUB_BASE_URL: ${{ secrets.RSSHUB_BASE_URL || vars.RSSHUB_BASE_URL }}
+          RSS_BRIDGE_URL: ${{ secrets.RSS_BRIDGE_URL || vars.RSS_BRIDGE_URL }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
         run: python main.py
-      - name: Upload run artifact (pass 1)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: intel-report
-          path: reports/
-          overwrite: true
-          if-no-files-found: warn
-      # Pass 2 is a deliberate catch-up: items deferred/failed in pass 1 stay
-      # retriable, so a second run picks them up (plus any new social items).
-      - name: Run engine (pass 2 — catch-up)
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
-          QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
-          QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
-          QWEN_MAX_CALLS: "40"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
-        run: python main.py
-      - name: Upload run artifact (pass 2)
+      - name: Upload run artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:

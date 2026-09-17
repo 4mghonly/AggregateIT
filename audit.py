@@ -52,6 +52,7 @@ async def check_gh(session, repo, sem):
         RESULTS.append({"kind": "GITHUB", "name": repo, "http": "ERR", "items": 0, "ok": False, "err": str(e)[:80]})
 
 async def main():
+    RESULTS.clear()
     sem, sem_rd = asyncio.Semaphore(10), asyncio.Semaphore(3)
     async with aiohttp.ClientSession(headers=UA) as s:
         await asyncio.gather(
@@ -96,4 +97,5 @@ def refresh_mutes():
         elif tot >= 3 and e["ok"] / tot >= 0.7: m.pop(name, None)
     with open(MUTED_FILE, "w", encoding="utf-8") as f: json.dump(m, f)
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

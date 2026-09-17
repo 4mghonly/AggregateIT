@@ -130,8 +130,18 @@ per-platform quotas, merge remaining capacity by recency, and publish per-platfo
 secret. Scheduled jobs therefore always attempted direct data-center access, where Reddit,
 X/RSSHub, and StockTwits are frequently blocked.
 
-**Fix:** pass the optional secret to both engine passes and the Gazette refresh. Direct mode
+**Fix:** pass the optional secret to the engine and Gazette refresh. Direct mode
 remains the fallback when no proxy is configured.
+
+### 4.8 Audit execution and model retries consumed the hourly budget
+
+Importing `audit.py` executed a complete live audit, so every engine and test run made more
+than 100 unrelated network requests before collection began. The workflow then ran the engine
+twice, allowing up to 80 model calls per hour. A depleted model quota stopped the complete run.
+
+**Fix:** make the audit CLI-only, run one bounded engine pass, cap it at ten model calls, trim
+evidence payloads, and persist conservative Low/Medium fallback assessments when the model is
+unavailable. Fallback assessments cannot trigger digests or alerts.
 
 ### 4.7 Invalid YouTube identifiers created permanent empty lanes
 
@@ -166,9 +176,11 @@ factual corroboration unless an item links to an independently attributable prim
 
 ### Current collection lanes
 
-- Reddit submissions and comments across new, top, and rising lanes.
-- X accounts through RSSHub when a working authorized route is available.
-- Bluesky, Mastodon, and Telegram through bounded RSSHub adapters.
+- Reddit submissions and comments through the official OAuth API when configured, with public
+  archives and optional RSS-Bridge as bounded fallbacks.
+- X accounts through a configured RSSHub instance, with optional RSS-Bridge fallback.
+- Bluesky through the public AT Protocol API and Mastodon through native RSS.
+- Telegram through RSSHub, with optional RSS-Bridge fallback.
 - StockTwits trending symbols and symbol streams.
 - Verified specialist/institutional feeds: Oryx, Atlantic Council, CSIS, CISA, BIS,
   Financial Stability Board, CEPR/VoxEU, and RAND commentary.
@@ -235,6 +247,8 @@ Each new source must have:
 - Send only normalized evidence and changed fields to the model.
 - Enforce per-run call, token, time, and spend ceilings.
 - Record input/output tokens, model, latency, fallback, and estimated cost per product.
+- Current hourly ceiling: one engine pass, at most eight analyzed events and ten model calls;
+  prompts contain at most four sources with 800 characters of evidence each.
 
 ## 9. Security and Compliance
 

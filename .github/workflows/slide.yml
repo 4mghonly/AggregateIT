@@ -38,6 +38,10 @@ jobs:
         env:
           SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
           SOCIAL_BUDGET_S: "180"
+          RSSHUB_BASE_URL: ${{ secrets.RSSHUB_BASE_URL || vars.RSSHUB_BASE_URL }}
+          RSS_BRIDGE_URL: ${{ secrets.RSS_BRIDGE_URL || vars.RSS_BRIDGE_URL }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
         run: |
           python tv.py --pulse
           python tv.py --macro
@@ -48,7 +52,7 @@ jobs:
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
-          QWEN_MAX_CALLS: "10"
+          QWEN_MAX_CALLS: "3"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python slide.py
       - name: Upload Gazette pages

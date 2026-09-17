@@ -68,7 +68,13 @@ Multi-source claims without ≥2 independent families are downgraded and capped.
 
 ## Secrets
 
-`QWEN_API_KEY`, `QWEN_BASE_URL`, `QWEN_MODEL`, `DISCORD_WEBHOOK`, `GITHUB_TOKEN` (auto).
+Required secrets: `QWEN_API_KEY`, `QWEN_BASE_URL`, `QWEN_MODEL`, `DISCORD_WEBHOOK`,
+`GITHUB_TOKEN` (automatic in Actions).
+
+Optional source adapters: `SOCIAL_PROXY_URL`, `RSSHUB_BASE_URL`, `RSS_BRIDGE_URL`,
+`REDDIT_CLIENT_ID`, and `REDDIT_CLIENT_SECRET`. Without those values the collector uses
+native public Bluesky/Mastodon feeds and bounded public fallbacks; unavailable lanes are
+reported as empty rather than aborting the engine.
 
 ## Persistence
 

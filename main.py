@@ -7,9 +7,11 @@ from storage import SQLiteStore, DATA
 from market import load_market_pulse, build_pulse_embed, load_macro_pulse, compute_regime
 from alerts import load_rules, route_alerts
 from policy import can_send, can_send_digest, can_send_alert
+from analysis_fallback import build as build_fallback_analysis
 import llm
 from llm import chat
 _ok, _det = llm.preflight()
+LLM_AVAILABLE = _ok
 print("QWEN PREFLIGHT:", "OK" if _ok else "FAIL " + _det)
 import social, audit
 try:
@@ -24,8 +26,9 @@ os.makedirs(DATA, exist_ok=True); os.makedirs(REPORTS, exist_ok=True)
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
 LOOKBACK_H = int(os.environ.get("LOOKBACK_HOURS", "6"))
 MAX_PER_SOURCE = 5
-MAX_ANALYZE = 25
-MAX_EVENTS = 10
+MAX_ANALYZE = 16
+MAX_EVENTS = 8
+MAX_SOCIAL_EVENTS = 2
 FRONT_PAGE_FLOOR = 5
 MAX_KEYWORD_POINTS = 6
 FIN_RESERVED_SLOTS = 3
@@ -44,15 +47,12 @@ CASHTAG_ONLY = {
     "SNOW","JOBS","CARS","BEER","DECK",
     "HAS","APP","TECH","NOW","COST","BALL","WELL","POOL","ICE","AMP","DOC","FOX","PARA"
 }
-
 HEALTH = {"rss_ok":0,"rss_fail":0,"reddit_ok":0,"reddit_fail":0,"github_ok":0,"github_fail":0,
           "qwen_ok":0,"qwen_fail":0,"qwen_invalid":0,"discord_ok":0,"discord_fail":0,"discord_skipped":0,
           "tv_movers_loaded":0,"tv_universe_loaded":0}
-
 ERRORS = []
 def log_failure(service, url, err):
     ERRORS.append({"ts": time.time(), "service": service, "url": url, "err": str(err)[:200]})
-
 def load(n):
     with open(os.path.join(BASE, "config", n), encoding="utf-8") as f: return json.load(f)
 
@@ -416,7 +416,6 @@ ENUM_REL = {"High","Medium","Low"}
 ENUM_EVT = {"earnings","regulation","geopolitical","market_move","security","macro","other"}
 ENUM_COR = {"none","single-source","multi-source"}
 TICK_RE = re.compile(r"^[A-Z.\-]{1,6}$")
-
 def validate_analysis(obj, evidence_text=""):
     errs = []
     if not isinstance(obj, dict): return False, None, ["response is not a JSON object"]
@@ -448,14 +447,12 @@ def validate_analysis(obj, evidence_text=""):
     obj["tickers"] = valid_tickers[:10]
     if obj.get("corroboration") == "none" and obj["confidence"] > 60: obj["confidence"] = 60
     return True, obj, []
-
 def build_sources_block(c):
     lines = []
-    for idx, it in enumerate(c["items"][:5], 1):
+    for idx, it in enumerate(c["items"][:4], 1):
         ts = datetime.fromtimestamp(it["ts"], timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-        lines.append(f"<report index=\"{idx}\">\nSOURCE: {it['source_name']} | PUBLISHED: {ts}\nTITLE: {it['title']}\nTEXT: {it['text'][:1200]}\n</report>")
+        lines.append(f"<report index=\"{idx}\">\nSOURCE: {it['source_name']} | PUBLISHED: {ts}\nTITLE: {it['title']}\nTEXT: {it['text'][:800]}\n</report>")
     return "\n\n".join(lines)
-
 def get_macro_context():
     """Build a macro context string for event analysis."""
     try:
@@ -473,8 +470,12 @@ def get_macro_context():
         return "\n".join(lines)
     except Exception:
         return ""
-
+def fallback_event_analysis(c, prior, reason):
+    return build_fallback_analysis(c, prior, reason, T_BY_SYM, SOCIAL_SOURCE_TYPES)
 def analyze_event(c, prior):
+    if not LLM_AVAILABLE:
+        HEALTH["qwen_fail"] += 1
+        return fallback_event_analysis(c, prior, _det), None
     if prior:
         prior_state = (f"Event {prior['event_id']} tracked since "
                        f"{datetime.fromtimestamp(prior['first_seen'], timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} | "
@@ -490,7 +491,7 @@ def analyze_event(c, prior):
         macro_context=macro_context, n_sources=c["independent_sources"], sources_block=sources_block)}
     for attempt in (1, 2):
         try:
-            content = chat([sys_msg, usr_msg])
+            content = chat([sys_msg, usr_msg], temperature=0.1, max_tokens=1100)
             m = re.search(r"\{[\s\S]*\}", content)
             if not m: raise ValueError("no JSON object in response")
             raw_json = re.sub(r',\s*([\]}])', r'\1', m.group(0))
@@ -506,11 +507,11 @@ def analyze_event(c, prior):
             HEALTH["qwen_invalid"] += 1
             return None, "schema invalid: " + "; ".join(errs)
         except requests.exceptions.Timeout:
-            if attempt == 1: continue
-            HEALTH["qwen_fail"] += 1; return None, "timeout"
+            HEALTH["qwen_fail"] += 1
+            return fallback_event_analysis(c, prior, "timeout"), None
         except Exception as e:
-            if attempt == 1: time.sleep(2); continue
-            HEALTH["qwen_fail"] += 1; return None, f"{type(e).__name__}: {str(e)[:120]}"
+            HEALTH["qwen_fail"] += 1
+            return fallback_event_analysis(c, prior, f"{type(e).__name__}: {str(e)[:120]}"), None
     return None, "unknown"
     # ================= DISCORD DIGEST =================
 SENT_EMOJI = {"bullish": "🟢 Bullish", "bearish": "🔴 Bearish", "neutral": "⚪ Neutral", "na": "➖ N/A"}
@@ -659,12 +660,8 @@ def build_health(report, store_stats):
 
 # ================= MAIN =================
 async def main():
-    if not DRY_RUN and not os.environ.get("QWEN_API_KEY"):
-        raise SystemExit("FATAL: QWEN_API_KEY secret is not set.")
-    if not DRY_RUN and not _ok:
-        # Without a working LLM endpoint no event can ever be validated or stored,
-        # so downstream briefings would silently post empty. Fail loudly instead.
-        raise SystemExit(f"FATAL: Qwen preflight failed: {_det}")
+    if not LLM_AVAILABLE:
+        print("DEGRADED: Qwen unavailable; using conservative non-alerting fallback analysis:", _det)
 
     sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
     since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
@@ -742,7 +739,10 @@ async def main():
 
     fin_clusters = [c for c in clusters if cluster_domain(c) == "fin"][:FIN_RESERVED_SLOTS]
     reserved_ids = {c["event_id"] for c in fin_clusters}
-    rest = [c for c in clusters if c["event_id"] not in reserved_ids][:MAX_EVENTS - len(fin_clusters)]
+    rest_pool = [c for c in clusters if c["event_id"] not in reserved_ids]
+    non_social = [c for c in rest_pool if not all(it["source_type"] in SOCIAL_SOURCE_TYPES for it in c["items"])]
+    social_only = [c for c in rest_pool if all(it["source_type"] in SOCIAL_SOURCE_TYPES for it in c["items"])][:MAX_SOCIAL_EVENTS]
+    rest = (non_social + social_only)[:MAX_EVENTS - len(fin_clusters)]
     selected_clusters = fin_clusters + rest
 
     for c in clusters:

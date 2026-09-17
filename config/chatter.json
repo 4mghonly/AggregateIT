@@ -880,14 +880,16 @@
     {"name": "RAND Commentary", "category": "Policy", "url": "https://www.rand.org/blog.xml"}
   ],
   "caps": {
-    "reddit_per_lane": 5,
+    "reddit_per_lane": 3,
+    "reddit_subs_per_run": 18,
+    "reddit_queries_per_run": 8,
     "comments_per_query": 5,
-    "tweets_per_handle": 5,
-    "handles_per_category": 4,
+    "tweets_per_handle": 3,
+    "handles_per_category": 2,
     "rsshub_per_source": 3,
     "rsshub_sources_per_platform": 6,
     "blog_items_per_feed": 3,
-    "platform_quotas": {"reddit": 30, "twitter": 25, "rsshub": 20, "stocktwits": 10, "blogs": 15},
-    "total": 100
+    "platform_quotas": {"reddit": 18, "twitter": 15, "rsshub": 12, "stocktwits": 5, "blogs": 10},
+    "total": 60
   }
 }
