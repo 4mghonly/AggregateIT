@@ -1,11 +1,13 @@
 """Original Gazette layout; offline rendering with honest metrics."""
 import math, re, textwrap, time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 from briefing import DOMAIN_NAMES
+
+UAE_TZ = timezone(timedelta(hours=4), name="UAE")
 
 PAPER, INK, MUT2, CARDL = "#F6F1E7", "#1C1B18", "#514B43", "#C8BDAA"
 GEO, MKT, SOC, UP, DN, HI = "#7D2A2A", "#1F3864", "#705514", "#285C38", "#9D3029", "#896000"
@@ -168,7 +170,7 @@ def render_p1(d, a, llm_ok, path):
     d = prepare(d)
     fig = plt.figure(figsize=(19.2, 10.8), dpi=200); fig.patch.set_facecolor(PAPER)
     A = fig.add_axes([0, 0, 1, 1]); A.set_axis_off(); A.set_xlim(0, 1); A.set_ylim(0, 1)
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now = datetime.now(UAE_TZ).strftime("%Y-%m-%d %H:%M UAE")
     if d.get("sample"): now = "SYNTHETIC SAMPLE - NOT LIVE DATA | " + now
     session = ("US SESSION SNAPSHOT" if d["pulse"].get("session_open") else "PREVIOUS SESSION SNAPSHOT")
     vol = (datetime.now(timezone.utc) - datetime(2026, 1, 1, tzinfo=timezone.utc)).days
@@ -326,7 +328,7 @@ def render_p2(d, a, llm_ok, path):
     d = prepare(d)
     fig = plt.figure(figsize=(19.2, 10.8), dpi=200); fig.patch.set_facecolor(PAPER)
     A = fig.add_axes([0, 0, 1, 1]); A.set_axis_off(); A.set_xlim(0, 1); A.set_ylim(0, 1)
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    now = datetime.now(UAE_TZ).strftime("%Y-%m-%d %H:%M UAE")
     if d.get("sample"): now = "SYNTHETIC SAMPLE - NOT LIVE DATA | " + now
     _masthead(A, "MARKETS & DATA", "The Aggregate Gazette · Section B", now)
     pulse, macro, regime = d["pulse"], d["macro"], d["regime"]
@@ -457,12 +459,12 @@ def render_p2(d, a, llm_ok, path):
         y -= 0.016
 
     A.add_patch(plt.Rectangle((0.03, 0.305), 0.94, 0.0015, color=INK))
-    A.text(0.03, 0.288, "NEWS UPDATES - PAST %d HOURS (UTC)" % d["event_window_h"], color=GEO, fontsize=12, weight="bold")
+    A.text(0.03, 0.288, "NEWS UPDATES - PAST %d HOURS (UAE)" % d["event_window_h"], color=GEO, fontsize=12, weight="bold")
     A.add_patch(plt.Rectangle((0.03, 0.280), 0.94, 0.0015, color=GEO))
     for i, e in enumerate(d["headlines"][:8]):
         colx = 0.03 + (i % 2) * 0.485
         yy = 0.263 - (i // 2) * 0.017
-        ts = datetime.fromtimestamp(e.get("ts") or 0, timezone.utc).strftime("%H:%M")
+        ts = datetime.fromtimestamp(e.get("ts") or 0, UAE_TZ).strftime("%H:%M")
         t = _clean(e.get("title"))
         t = one_line(A, t, .42, 9)
         A.text(colx, yy, "[%s] %s" % (ts, t), color=INK, fontsize=9)
