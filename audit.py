@@ -1,5 +1,6 @@
 import asyncio, json, os
 import aiohttp, feedparser
+from urllib.parse import urlencode
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 UA = {"User-Agent": "NewsIntelEngine-Audit/0.1 (personal research)"}
@@ -7,7 +8,7 @@ UA = {"User-Agent": "NewsIntelEngine-Audit/0.1 (personal research)"}
 def load(n):
     with open(os.path.join(BASE, "config", n), encoding="utf-8") as f: return json.load(f)
 
-RAW = load("sources.json"); REDDIT = load("reddit.json")
+RAW = load("sources.json"); REDDIT = load("reddit.json"); CHATTER = load("chatter.json")
 seen = set(); RSS = []; GH = []
 for s in RAW:
     u = s.get("Url", "").replace("http://", "https://").rstrip("/")
@@ -51,6 +52,30 @@ async def check_gh(session, repo, sem):
     except Exception as e:
         RESULTS.append({"kind": "GITHUB", "name": repo, "http": "ERR", "items": 0, "ok": False, "err": str(e)[:80]})
 
+async def check_bluesky(session, handle, sem):
+    url = "https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?" + urlencode(
+        {"actor": handle, "limit": 1, "filter": "posts_no_replies"})
+    try:
+        status, txt = await get(session, url, sem)
+        n = len(json.loads(txt).get("feed", [])) if txt else 0
+        RESULTS.append({"kind": "BSKY", "name": handle, "url": url,
+                        "http": status, "items": n, "ok": status == 200 and n > 0})
+    except Exception as e:
+        RESULTS.append({"kind": "BSKY", "name": handle, "url": url,
+                        "http": "ERR", "items": 0, "ok": False, "err": str(e)[:80]})
+
+async def check_mastodon(session, account, sem):
+    try:
+        host, user = account.split("/@", 1)
+        url = f"https://{host}/@{user}.rss"
+        status, txt = await get(session, url, sem)
+        n = len(feedparser.parse(txt).entries) if txt else 0
+        RESULTS.append({"kind": "MASTO", "name": account, "url": url,
+                        "http": status, "items": n, "ok": status == 200 and n > 0})
+    except Exception as e:
+        RESULTS.append({"kind": "MASTO", "name": account, "http": "ERR",
+                        "items": 0, "ok": False, "err": str(e)[:80]})
+
 async def main():
     RESULTS.clear()
     sem, sem_rd = asyncio.Semaphore(10), asyncio.Semaphore(3)
@@ -58,7 +83,9 @@ async def main():
         await asyncio.gather(
             *[check_rss(s, x, sem) for x in RSS],
             *[check_reddit(s, x["sub"], sem_rd) for x in REDDIT],
-            *[check_gh(s, x["_url"].split("github.com/")[1], sem) for x in GH])
+            *[check_gh(s, x["_url"].split("github.com/")[1], sem) for x in GH],
+            *[check_bluesky(s, x, sem) for x in CHATTER.get("rsshub_sources", {}).get("bluesky", [])],
+            *[check_mastodon(s, x, sem) for x in CHATTER.get("rsshub_sources", {}).get("mastodon", [])])
     for r in sorted(RESULTS, key=lambda r: (r["kind"], r["name"])):
         tag = "OK  " if r["ok"] else "FAIL"
         extra = f"items={r.get('items')}" + (f" comments={r.get('comments')}" if r["kind"] == "REDDIT" else "")

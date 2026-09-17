@@ -660,5 +660,10 @@ check("one engine execution", wf68.count("python main.py") == 1, wf68.count("pyt
 check("ten-call hard cap", 'QWEN_MAX_CALLS: "10"' in wf68)
 check("manual run defaults dry", "default: true" in wf68 and "DRY_RUN:" in wf68)
 
+print("[T69] Source audit covers native social adapters")
+audit_src69 = open(audit.__file__).read()
+check("Bluesky identities audited", "check_bluesky" in audit_src69 and '"BSKY"' in audit_src69)
+check("Mastodon identities audited", "check_mastodon" in audit_src69 and '"MASTO"' in audit_src69)
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
