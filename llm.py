@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 BASE = os.path.dirname(os.path.abspath(__file__))
 API_KEY = os.environ.get("QWEN_API_KEY", "")
 BASE_URL = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
-DEFAULT_MODEL = "qwen-plus"
+DEFAULT_MODEL = "qwen3.8-flash"
 MODEL = os.environ.get("QWEN_MODEL") or DEFAULT_MODEL
 MAX_CALLS = int(os.environ.get("QWEN_MAX_CALLS") or 40)
 PROMPT_VERSION = 1
