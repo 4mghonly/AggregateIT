@@ -33,6 +33,15 @@ jobs:
           key: reports-${{ github.run_id }}-slide
           restore-keys: |
             reports-
+      - name: Refresh Gazette inputs
+        continue-on-error: true
+        env:
+          SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
+          SOCIAL_BUDGET_S: "180"
+        run: |
+          python tv.py --pulse
+          python tv.py --macro
+          python -c "import social, time; social.fetch_all(time.time() - 86400)"
       - name: Render Gazette
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -50,32 +59,4 @@ jobs:
           path: |
             reports/intel_slide_p1.png
             reports/intel_slide_p2.png
-          if-no-files-found: warn
-      - name: Restore reports cache
-        uses: actions/cache@v4
-        with:
-          path: reports/
-          key: reports-${{ github.run_id }}-slide
-          restore-keys: |
-            reports-
-
-      - name: Render Gazette
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
-          QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
-          QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
-          QWEN_MAX_CALLS: "10"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python slide.py
-
-      - name: Upload Gazette pages
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: aggregate-gazette
-          path: |
-            reports/intel_slide_p1.png
-            reports/intel_slide_p2.png
-          overwrite: true
           if-no-files-found: warn

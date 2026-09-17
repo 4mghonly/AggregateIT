@@ -560,5 +560,48 @@ llm.requests.post = _orig
 check("preflight sends enable_thinking on dashscope",
       sent.get("enable_thinking") is False, sent.get("enable_thinking"))
 
+print("[T59] Gazette event loader preserves canonical fields")
+class EventStore59:
+    def recent_all_events(self, hours=24, limit=100):
+        return [{"event_id": "evt-1", "urls_json": '["https://example.com/a"]',
+                 "sources_json": '[{"name":"Wire A"}]', "last_updated": time.time(),
+                 "title": "Test event", "score": 8, "triggers_json": '["GG-01"]',
+                 "severity": "High", "status": "CONFIRMED", "confidence": 91,
+                 "source_count": 2, "sentiment": "neutral", "assessment": "Test"}]
+ev59 = briefing.load_events(EventStore59(), 24)[0]
+check("event id preserved", ev59["event_id"] == "evt-1", ev59)
+check("severity/status/confidence preserved",
+      (ev59["severity"], ev59["status"], ev59["confidence"]) == ("High", "CONFIRMED", 91), ev59)
+
+print("[T60] Social platform cap is balanced")
+streams60 = {
+    "reddit": [{"source_type": "reddit", "ts": i} for i in range(20)],
+    "blogs": [{"source_type": "blog", "ts": 100 + i} for i in range(5)],
+}
+merged60 = social._balanced_merge(streams60, 10, {"reddit": 6, "blogs": 4})
+check("global social cap", len(merged60) == 10, len(merged60))
+check("blog lane retained", sum(i["source_type"] == "blog" for i in merged60) >= 4, merged60)
+
+print("[T61] Gazette workflow renders once")
+wf61 = open(os.path.join(os.path.dirname(os.path.abspath(main.__file__)), ".github", "workflows", "slide.yml")).read()
+check("one slide render", wf61.count("python slide.py") == 1, wf61.count("python slide.py"))
+
+print("[T62] Social configuration is structured")
+chat62 = json.load(open(os.path.join(os.path.dirname(os.path.abspath(main.__file__)), "config", "chatter.json")))
+check("specialist blog feeds configured", len(chat62.get("blog_feeds", [])) >= 10, len(chat62.get("blog_feeds", [])))
+check("platform quotas configured", set(chat62.get("caps", {}).get("platform_quotas", {})) >= {"reddit", "twitter", "rsshub", "stocktwits", "blogs"}, chat62.get("caps", {}))
+
+print("[T63] Social chatter cannot create factual corroboration")
+social63 = []
+for n, typ, url in [("X:A", "twitter", "https://x.com/a/1"),
+                    ("TG:B", "telegram", "https://t.me/b/1")]:
+    it63 = item("Nvidia chip report", "Nvidia chip supply discussion", source=n)
+    it63.update({"source_name": n, "source_type": typ, "url": url,
+                 "matched_categories": ["NVDA ticker", "AI-01"], "keyword_ids": ["AI-01"]})
+    social63.append(it63)
+c63 = main.cluster_events(social63)[0]
+check("social independent source count is zero", c63["independent_sources"] == 0, c63)
+check("social families retained separately", len(c63["social_families"]) >= 1, c63)
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)

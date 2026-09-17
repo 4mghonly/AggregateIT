@@ -53,11 +53,20 @@ def load_events(store, hours):
         except Exception: srcs = []
         src = srcs[0].get("name", "Unknown") if srcs else "Unknown"
         if len(srcs) > 1: src += f" +{len(srcs) - 1} more"
-        items.append({"url": urls[0] if urls else "", "ts": ev.get("last_updated") or 0,
+        items.append({"event_id": ev.get("event_id", ""),
+                      "url": urls[0] if urls else "", "ts": ev.get("last_updated") or 0,
                       "title": ev.get("title") or "Untitled event", "source": src,
                       "score": ev.get("score") or 0,
                       "triggers": json.loads(ev.get("triggers_json") or "[]"),
                       "importance": ev.get("severity") or "Low",
+                      # Keep the briefing-facing `importance` alias while exposing
+                      # canonical event fields needed by the Gazette.  Previously
+                      # the slide renderer silently defaulted every event to Low
+                      # severity and displayed blank status/confidence values.
+                      "severity": ev.get("severity") or "Low",
+                      "status": ev.get("status") or "NEW",
+                      "confidence": ev.get("confidence"),
+                      "source_count": ev.get("source_count") or len(srcs),
                       "sentiment": ev.get("sentiment") or "na",
                       "summary": ev.get("assessment") or ""})
     return items

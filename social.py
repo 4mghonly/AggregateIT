@@ -1,4 +1,4 @@
-"""social.py v3 — social signal layer with Cloudflare Worker proxy support.
+"""social.py v4 — bounded, balanced social and specialist-blog signal layer.
 If SOCIAL_PROXY_URL is set, all Reddit/Twitter/StockTwits traffic routes through it
 (bypasses datacenter IP blocks); otherwise falls back to direct calls.
 Reddit: Arctic Shift + PullPush mirror, 3 lanes (NEW/TOP/RISING) + dual-axis comments.
@@ -46,6 +46,20 @@ def _shift_get(path, params):
 def _parse_ts(s):
     try: return datetime.fromisoformat((s or "").replace("Z", "+00:00")).timestamp()
     except Exception: return time.time()
+
+def _entry_ts(entry):
+    """Return a feed entry timestamp without turning undated items into fresh news."""
+    parsed = entry.get("published_parsed") or entry.get("updated_parsed")
+    return calendar.timegm(parsed) if parsed else 0
+
+def _rotating_sample(values, limit, salt=""):
+    """Bound large watchlists while rotating coverage every hour."""
+    values = list(values or [])
+    limit = max(0, int(limit or 0))
+    if not limit or len(values) <= limit: return values
+    slot = int(time.time() // 3600) + sum(ord(c) for c in salt)
+    start = slot % len(values)
+    return (values[start:] + values[:start])[:limit]
 
 def _reddit_items(since_ts, expired=None):
     chat = _load_chatter()
@@ -103,20 +117,24 @@ def _twitter_items(since_ts, inst=None, expired=None):
         print("SOCIAL: all RSSHub instances unreachable - skipping Twitter this run")
         return []
     chat = _load_chatter()
-    per = chat.get("caps", {}).get("tweets_per_handle", 5)
+    caps = chat.get("caps", {})
+    per = caps.get("tweets_per_handle", 5)
+    per_category = caps.get("handles_per_category", 4)
     out = []
     for cat, hs in chat.get("twitter_handles", {}).items():
         if expired and expired(): break
-        for h in hs:
+        for h in _rotating_sample(hs, per_category, "twitter:" + cat):
             if expired and expired(): break
             try:
                 r = requests.get(_route(f"{inst}/twitter/user/{h}"), timeout=6, headers=UA)
                 if r.status_code == 200:
                     for e in feedparser.parse(r.text).entries[:per]:
+                        ts = _entry_ts(e)
+                        if not ts or ts < since_ts: continue
                         out.append({"source_type": "twitter", "source_name": "X:@" + h, "category": "Twitter/" + cat,
                                     "url": e.get("link", ""), "title": (e.get("title") or "")[:200],
                                     "text": re.sub("<[^>]+>", "", e.get("summary", ""))[:4000],
-                                    "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
+                                    "ts": ts})
             except Exception: pass
             time.sleep(0.2)
     return out
@@ -133,23 +151,27 @@ def _rsshub_items(since_ts, inst=None, expired=None):
     if inst is None: inst = _get_working_rsshub()
     if not inst: return []
     chat = _load_chatter()
-    per = chat.get("caps", {}).get("rsshub_per_source", 3)
+    caps = chat.get("caps", {})
+    per = caps.get("rsshub_per_source", 3)
+    per_platform = caps.get("rsshub_sources_per_platform", 6)
     out = []
     for platform, handles in chat.get("rsshub_sources", {}).items():
         if expired and expired(): break
         route = RSSHUB_ROUTES.get(platform)
         if not route: continue
-        for h in handles:
+        for h in _rotating_sample(handles, per_platform, "rsshub:" + platform):
             if expired and expired(): break
             try:
                 r = requests.get(_route(inst + route(h)), timeout=6, headers=UA)
                 if r.status_code == 200:
                     for e in feedparser.parse(r.text).entries[:per]:
+                        ts = _entry_ts(e)
+                        if not ts or ts < since_ts: continue
                         out.append({"source_type": platform, "source_name": RSSHUB_PREFIX[platform] + h,
                                     "category": platform.capitalize(),
                                     "url": e.get("link", ""), "title": (e.get("title") or "")[:200],
                                     "text": re.sub("<[^>]+>", "", e.get("summary", ""))[:4000],
-                                    "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
+                                    "ts": ts})
             except Exception: pass
             time.sleep(0.2)
     return out
@@ -172,6 +194,35 @@ def _stocktwits_items():
         time.sleep(0.2)
     return out
 
+def _blog_items(since_ts, expired=None):
+    """Fetch verified public specialist and institutional feeds from chatter.json."""
+    chat = _load_chatter(); out = []
+    per = chat.get("caps", {}).get("blog_items_per_feed", 3)
+    for src in chat.get("blog_feeds", []):
+        if expired and expired(): break
+        try:
+            r = requests.get(_route(src["url"]), timeout=8, headers=UA)
+            if r.status_code != 200: continue
+            for e in feedparser.parse(r.content).entries[:per]:
+                ts = _entry_ts(e)
+                if not ts or ts < since_ts: continue
+                out.append({"source_type": "blog", "source_name": "BLOG:" + src["name"],
+                            "category": "Blog/" + src.get("category", "Analysis"),
+                            "url": e.get("link", ""), "title": (e.get("title") or "")[:200],
+                            "text": re.sub("<[^>]+>", "", e.get("summary", ""))[:4000], "ts": ts})
+        except Exception: pass
+    return out
+
+def _balanced_merge(streams, total, quotas):
+    """Prevent the first (normally Reddit) stream from consuming the global cap."""
+    picked, leftovers = [], []
+    for name, items in streams.items():
+        cap = max(0, int(quotas.get(name, total)))
+        picked.extend(items[:cap]); leftovers.extend(items[cap:])
+    if len(picked) < total:
+        picked.extend(sorted(leftovers, key=lambda x: -x.get("ts", 0))[:total - len(picked)])
+    return sorted(picked, key=lambda x: -x.get("ts", 0))[:total]
+
 def fetch_all(since_ts):
     # Wall-clock budget: expanded source surface means a degraded-mirror day
     # could otherwise starve the hourly engine job (25-min timeout, 2 passes).
@@ -182,11 +233,16 @@ def fetch_all(since_ts):
     tw = [] if expired() else _twitter_items(since_ts, inst, expired)
     rs = [] if expired() else _rsshub_items(since_ts, inst, expired)
     st = _stocktwits_items()
-    print("SOCIAL FETCH: reddit=%d twitter=%d rsshub=%d stocktwits=%d" % (len(rd), len(tw), len(rs), len(st)))
-    out = (rd + tw + rs + st)[: _load_chatter().get("caps", {}).get("total", 60)]
+    bg = [] if expired() else _blog_items(since_ts, expired)
+    chat = _load_chatter(); caps = chat.get("caps", {})
+    total = caps.get("total", 100)
+    quotas = caps.get("platform_quotas", {"reddit": 30, "twitter": 25, "rsshub": 20, "stocktwits": 10, "blogs": 15})
+    streams = {"reddit": rd, "twitter": tw, "rsshub": rs, "stocktwits": st, "blogs": bg}
+    print("SOCIAL FETCH: reddit=%d twitter=%d rsshub=%d stocktwits=%d blogs=%d" % (len(rd), len(tw), len(rs), len(st), len(bg)))
+    out = _balanced_merge(streams, total, quotas)
     try:
         os.makedirs(DATA, exist_ok=True)
-        sp = {"ts": time.time(), "counts": {}, "top": []}
+        sp = {"ts": time.time(), "counts": {}, "coverage": {k: len(v) for k, v in streams.items()}, "top": []}
         for i in out:
             lane = (":" + i["lane"]) if i.get("lane") else ""
             k = i.get("source_type", "?") + lane

@@ -41,6 +41,7 @@ jobs:
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
           QWEN_MAX_CALLS: "40"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
         run: python main.py
       - name: Upload run artifact (pass 1)
         if: always()
@@ -60,6 +61,7 @@ jobs:
           QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
           QWEN_MAX_CALLS: "40"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
         run: python main.py
       - name: Upload run artifact (pass 2)
         if: always()

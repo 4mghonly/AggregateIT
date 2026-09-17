@@ -320,7 +320,8 @@ def cluster_events(items):
         c["event_id"] = hashlib.md5(seed.encode()).hexdigest()[:12]
         c["source_names"] = sorted({it["source_name"] for it in c["items"]})
         c["domains"] = sorted({canonical_domain(it["url"]) for it in c["items"]})
-        c["families"] = sorted({source_family(d) for d in c["domains"]})
+        c["families"] = sorted({source_family(canonical_domain(it["url"])) for it in c["items"] if it.get("source_type") not in SOCIAL_SOURCE_TYPES})
+        c["social_families"] = sorted({source_family(canonical_domain(it["url"])) for it in c["items"] if it.get("source_type") in SOCIAL_SOURCE_TYPES})
         c["independent_sources"] = len(c["families"])
     try:
         with open(CLUSTER_METRICS_FILE, "w", encoding="utf-8") as f: json.dump(metrics, f)
@@ -342,7 +343,7 @@ WIRE_FAMILIES = {
     "ftalphaville.ft.com": "ft", "seekingalpha.com": "seekingalpha",
     "nasdaq.com": "nasdaq", "yahoo.com": "yahoo",
 }
-
+SOCIAL_SOURCE_TYPES = {"reddit", "reddit_comment", "twitter", "bluesky", "mastodon", "telegram", "stocktwits", "youtube"}
 def canonical_domain(url):
     try:
         netloc = urlparse(url).netloc.lower()
@@ -523,8 +524,7 @@ def _truncate(s, n):
 def build_event_embed(c, a, prior, status="NEW", timeline=None):
     imp = a.get("importance", "Low")
     sent = (a.get("sentiment") or "na").lower()
-    all_reddit = all(it["source_type"] == "reddit" for it in c["items"])
-    tag = "💬" if all_reddit else "📰"
+    tag = "💬" if all(it["source_type"] in SOCIAL_SOURCE_TYPES for it in c["items"]) else "📰"
     desc = f"**{a.get('event','')}**\n{a.get('assessment','')}"
     if a.get("what_changed"): desc += f"\n🔄 *What changed: {a['what_changed']}*"
     status_emoji = {"NEW": "🆕", "DEVELOPING": "🔄", "CONFIRMED": "✅", "STABLE": "⚓", "RESOLVED": "🏁", "RETRACTED": "❌"}
@@ -594,7 +594,7 @@ def send_digest(digest_items, report):
         except Exception as e: HEALTH["discord_fail"] += 1; print("Alert err:", type(e).__name__, str(e)[:120])
     news, soc_items = [], []
     for x in digest_items:
-        (soc_items if all(it["source_type"] == "reddit" for it in x["cluster"]["items"]) else news).append(x)
+        (soc_items if all(it["source_type"] in SOCIAL_SOURCE_TYPES for it in x["cluster"]["items"]) else news).append(x)
     rolls = {"bullish": 0, "bearish": 0, "neutral": 0, "na": 0}
     for x in digest_items:
         s = (x["analysis"].get("sentiment") or "na").lower()

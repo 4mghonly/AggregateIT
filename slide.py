@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from llm import chat
 from storage import SQLiteStore
 import market
-from briefing import fetch_stocktwits, load_events, theme_counts, DOMAIN_NAMES
+from briefing import fetch_stocktwits, load_window, theme_counts, DOMAIN_NAMES
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 REPORTS = os.path.join(BASE, "reports")
@@ -68,7 +68,7 @@ def collect():
     pulse = market.load_market_pulse() or {}
     macro = market.load_macro_pulse() or {}
     regime = market.compute_regime(macro) if macro else {}
-    events = load_events(store, 24)
+    events, event_window_h, event_note = load_window(store, 24)
     for e in events:
         e["geo"] = any((t or "").split("-")[0] in GEO_TAGS for t in e.get("triggers", []))
     themes = theme_counts(events)
@@ -115,7 +115,8 @@ def collect():
             "geo_events": [e for e in events if e.get("geo")], "themes": themes,
             "st_radar": st_radar, "reddit": reddit, "sources_active": sources_active,
             "headlines": headlines, "sector_tape": sector_tape,
-            "curve_pts": curve_pts, "yield_hist": hist, "social_pulse": social_pulse}
+            "curve_pts": curve_pts, "yield_hist": hist, "social_pulse": social_pulse,
+            "event_window_h": event_window_h, "event_note": event_note}
 
 ANALYSIS_PROMPT = """You are the editor of a financial-and-geopolitical intelligence gazette.
 Write TENTATIVE, quantitative, complete-sentence analysis. Rules:
@@ -412,6 +413,14 @@ def render_p2(d, a, llm_ok):
         if s in rolls: rolls[s] += 1
     tot = max(sum(rolls.values()), 1)
     im = {i["name"]: i for i in macro.get("instruments", [])}
+    def age_label(ts):
+        if not ts: return "missing"
+        age = max(0, time.time() - ts) / 3600.0
+        return "%.1fh" % age
+    status_line = "DATA STATUS  events %d/%dh · market %s · macro %s · social %s" % (
+        len(d.get("events", [])), d.get("event_window_h", 24), age_label(pulse.get("updated")),
+        age_label(macro.get("updated")), age_label(d.get("social_pulse", {}).get("ts")))
+    A.text(0.5, 0.932, status_line, color=MUT2, fontsize=8.5, ha="center")
 
     ax = fig.add_axes([0.05, 0.74, 0.27, 0.18]); _lax(ax); ax.set_title("MEGA-CAP LEADERS (%CHG)", pad=6)
     mega = [m for m in pulse.get("mega_caps", []) if m.get("pct") is not None][:12]
@@ -437,7 +446,7 @@ def render_p2(d, a, llm_ok):
     groups = {}
     for i in macro.get("instruments", []): groups.setdefault(i.get("type", "other"), []).append(i)
     yL, yR = py, py
-    for gname, key, n in [("CASH INDICES", "index", 6), ("COMMODITIES", "commodity", 5)]:
+    for gname, key, n in [("CASH INDICES", "index", 5), ("INDEX FUTURES", "index_future", 3), ("COMMODITIES", "commodity", 4)]:
         A.text(px, yL, gname, color=MUT2, fontsize=9.5, weight="bold"); yL -= 0.016
         rows = groups.get(key, [])[:n]
         if not rows:
@@ -536,16 +545,25 @@ def render_p2(d, a, llm_ok):
         t = _clean(e.get("title"))
         if len(t) > 118: t = t[:115] + "..."
         A.text(colx, yy, "[%s] %s" % (ts, t), color=INK, fontsize=9)
+    if not d["headlines"]:
+        note = _clean(d.get("event_note") or "No fresh event headlines in the selected window.")
+        A.text(0.03, 0.260, note[:150], color=MUT2, fontsize=9.5)
 
     sp2 = d.get("social_pulse", {})
     tops = sp2.get("top", [])[:4]
+    A.text(0.03, 0.196, "SOCIAL & OSINT WIRES", color=SOC, fontsize=11, weight="bold")
+    A.add_patch(plt.Rectangle((0.03, 0.188), 0.30, 0.0015, color=SOC))
     if tops:
-        A.text(0.03, 0.196, "SOCIAL & OSINT WIRES", color=SOC, fontsize=11, weight="bold")
-        A.add_patch(plt.Rectangle((0.03, 0.188), 0.30, 0.0015, color=SOC))
         for i, t in enumerate(tops):
             colx = 0.03 + (i % 2) * 0.485
             yy = 0.176 - (i // 2) * 0.016
             A.text(colx, yy, "[%s] %s" % (t.get("src", ""), _clean(t.get("t", ""))[:58]), color=INK, fontsize=8.5)
+    else:
+        A.text(0.03, 0.174, "No fresh social items. Check proxy access and source coverage.", color=MUT2, fontsize=9)
+    coverage = sp2.get("coverage", {})
+    if coverage:
+        A.text(0.97, 0.196, "coverage: " + " · ".join("%s %d" % (k, v) for k, v in coverage.items()),
+               color=MUT2, fontsize=8.5, ha="right")
 
     for (bx, bw, btitle, bcol) in ((0.03, 0.40, "CROSS-ASSET ANALYSIS", MKT), (0.47, 0.25, "THEMES & SENTIMENT", SOC), (0.76, 0.21, "KEY NUMBERS", GEO)):
         px, py, pw = _panel(A, bx, 0.140, bw, 0.085, btitle, bcol)

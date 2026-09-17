@@ -865,16 +865,29 @@
       "SantimentFeed",
       "WhaleAlert"
     ],
-    "youtube": [
-      "UCZB8e3k9J5bkGzYHdNJ5G8Q",
-      "UCw1Y2vG2k7Fk7K7Y7Y7Y7Y7Q",
-      "UC4JX40jDee_tINbkjycV4Sg"
-    ]
+    "youtube": []
   },
+  "blog_feeds": [
+    {"name": "Oryx", "category": "Defense OSINT", "url": "https://www.oryxspioenkop.com/feeds/posts/default"},
+    {"name": "Atlantic Council", "category": "Geopolitics", "url": "https://www.atlanticcouncil.org/feed/"},
+    {"name": "CSIS", "category": "Geopolitics", "url": "https://www.csis.org/rss.xml"},
+    {"name": "CISA Advisories", "category": "Cyber", "url": "https://www.cisa.gov/cybersecurity-advisories/all.xml"},
+    {"name": "CISA News", "category": "Cyber", "url": "https://www.cisa.gov/news.xml"},
+    {"name": "BIS Press", "category": "Central Banks", "url": "https://www.bis.org/doclist/all_pressrels.rss"},
+    {"name": "BIS Speeches", "category": "Central Banks", "url": "https://www.bis.org/doclist/cbspeeches.rss"},
+    {"name": "Financial Stability Board", "category": "Financial Stability", "url": "https://www.fsb.org/feed/"},
+    {"name": "CEPR VoxEU", "category": "Economics", "url": "https://cepr.org/rss/vox-content"},
+    {"name": "RAND Commentary", "category": "Policy", "url": "https://www.rand.org/blog.xml"}
+  ],
   "caps": {
     "reddit_per_lane": 5,
     "comments_per_query": 5,
     "tweets_per_handle": 5,
+    "handles_per_category": 4,
+    "rsshub_per_source": 3,
+    "rsshub_sources_per_platform": 6,
+    "blog_items_per_feed": 3,
+    "platform_quotas": {"reddit": 30, "twitter": 25, "rsshub": 20, "stocktwits": 10, "blogs": 15},
     "total": 100
   }
 }
