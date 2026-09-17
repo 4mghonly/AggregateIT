@@ -1,7 +1,7 @@
 name: Intelligence Slide Deck
 on:
   schedule:
-    - cron: "30 5 * * *"         # 09:30 GST — mid-morning Gazette, clear of hourly engine and 07:30 briefing
+    - cron: "30 11 * * *"        # 15:30 UAE time (GitHub cron uses UTC)
   workflow_dispatch:
   push:
     branches: [main]
