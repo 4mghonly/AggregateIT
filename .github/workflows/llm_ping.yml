@@ -14,5 +14,5 @@ jobs:
         env:
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
-          QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
+          QWEN_MODEL: qwen3.8-flash
         run: python llm_ping.py
