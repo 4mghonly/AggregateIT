@@ -1,5 +1,12 @@
 name: LLM Ping
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - llm.py
+      - llm_ping.py
+      - .github/workflows/llm_ping.yml
 jobs:
   ping:
     runs-on: ubuntu-latest
