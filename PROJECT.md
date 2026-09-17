@@ -312,6 +312,6 @@ A release is acceptable when:
 - Cash indices, index futures, commodities, FX, and rates are represented explicitly.
 - Scheduled Gazette generation runs once and refreshes market/social inputs first.
 - Social collection cannot be monopolized by a single platform.
-- Invalid YouTube sources are removed and ten live specialist feeds are configured.
+- Invalid social identities and YouTube sources are removed, and ten live specialist feeds are configured.
 - The remaining cache-race limitation is documented as a production blocker rather than
   hidden behind a successful workflow status.

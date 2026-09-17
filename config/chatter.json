@@ -823,30 +823,11 @@
     "bluesky": [
       "bellingcat.com",
       "osinttechnical.bsky.social",
-      "war_noir.bsky.social",
-      "arcticseaice.bsky.social",
-      "navalnews.bsky.social",
       "defenseone.bsky.social",
-      "economist.bsky.social",
-      "ft.bsky.social",
-      "reuters.bsky.social",
       "wsj.bsky.social",
-      "bloomberg.bsky.social",
-      "apnews.bsky.social"
+      "bloomberg.bsky.social"
     ],
     "mastodon": [
-      "fosstodon.org/@nixcraft",
-      "mastodon.social/@krebs",
-      "infosec.exchange/@malwarebytes",
-      "mastodon.social/@TheHackersNews",
-      "mastodon.social/@DarkReading",
-      "mastodon.social/@nvidia",
-      "mastodon.social/@amd",
-      "mastodon.social/@intel",
-      "mastodon.social/@ASML",
-      "mastodon.social/@TSMC",
-      "mastodon.social/@DeepMind",
-      "mastodon.social/@OpenAI",
       "mastodon.social/@AnthropicAI"
     ],
     "telegram": [

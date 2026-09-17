@@ -651,13 +651,6 @@
   "Id": 95
  },
  {
-  "Url": "https://theloadstar.com/feed/",
-  "Source_name": "The Loadstar",
-  "Category": "Trade",
-  "tier": 2,
-  "Id": 96
- },
- {
   "Url": "https://techcrunch.com/feed/",
   "Source_name": "TechCrunch",
   "Category": "Tech",
