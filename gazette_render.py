@@ -140,9 +140,9 @@ def _panel(A, x, ytop, w, h, title=None, color=INK):
     A.add_patch(plt.Rectangle((x, ytop - h), w, h, fill=False, color=CARDL, lw=1.0))
     yy = ytop - 0.012
     if title:
-        A.text(x + 0.008, ytop - 0.020, _clean(title), color=color, fontsize=11, weight="bold")
-        A.add_patch(plt.Rectangle((x + 0.008, ytop - 0.028), w - 0.016, 0.0015, color=color))
-        yy = ytop - 0.040
+        A.text(x + 0.008, ytop - 0.021, _clean(title), color=color, fontsize=11.5, weight="bold")
+        A.add_patch(plt.Rectangle((x + 0.008, ytop - 0.030), w - 0.016, 0.0015, color=color))
+        yy = ytop - 0.046
     return x + 0.008, yy, w - 0.016
 
 def _block(A, x, y, w, text, size=10, color=INK, lh=0.019, maxl=6):
@@ -152,9 +152,12 @@ def _block(A, x, y, w, text, size=10, color=INK, lh=0.019, maxl=6):
 
 def _lax(ax):
     ax.set_facecolor(PAPER)
-    ax.tick_params(colors=MUT2, labelsize=9)
+    ax.tick_params(colors=MUT2, labelsize=9.5, pad=4)
+    for label in list(ax.get_xticklabels()) + list(ax.get_yticklabels()):
+        label.set_fontweight("bold")
     for s in ax.spines.values(): s.set_color(CARDL)
-    ax.title.set_color(INK); ax.title.set_fontsize(10); ax.title.set_weight("bold")
+    ax.title.set_color(INK); ax.title.set_fontsize(10.5); ax.title.set_weight("bold")
+    ax.xaxis.label.set_fontweight("bold"); ax.yaxis.label.set_fontweight("bold")
 
 def _masthead(A, title, r1, r2):
     A.text(.03, .978, r1, color=MUT2, fontsize=10)
@@ -194,7 +197,7 @@ def render_p1(d, a, llm_ok, path):
         if i: A.add_patch(plt.Rectangle((cx, 0.883), 0.0012, 0.048, color=INK))
         A.text(cx + w / 2, 0.925, _clean(lab), color=MUT2, fontsize=9, ha="center", weight="bold")
         A.text(cx + w / 2, 0.902, _clean(val), color=INK, fontsize=15, ha="center", weight="bold")
-        A.text(cx + w / 2, 0.886, _clean(sub), color=MUT2, fontsize=8.5, ha="center")
+        A.text(cx + w / 2, 0.886, _clean(sub), color=MUT2, fontsize=9, ha="center")
     A.add_patch(plt.Rectangle((0.03, 0.878), 0.94, 0.0015, color=INK))
 
     headline = measured_lines(A, a["headline"], .35, 16, "bold", "serif")[:2]
@@ -205,10 +208,10 @@ def render_p1(d, a, llm_ok, path):
     y = .781
     if body and body[0]:
         A.text(0.335, y - 0.006, body[0][0], color=INK, fontsize=24, weight="bold", fontfamily="serif")
-        A.text(0.350, y, body[0][1:], color=INK, fontsize=10.5)
+        A.text(0.350, y, body[0][1:], color=INK, fontsize=11)
         y -= 0.022
         for line in body[1:]:
-            A.text(0.335, y, line, color=INK, fontsize=10.5); y -= 0.020
+            A.text(0.335, y, line, color=INK, fontsize=11); y -= 0.020
     hy = .681
     cells = mega[:12]; cw = 0.35 / max(len(cells), 1)
     for i, m in enumerate(cells):
@@ -223,9 +226,9 @@ def render_p1(d, a, llm_ok, path):
     for e in d["events"][:7]:
         sev = e.get("severity") or "Low"
         A.add_patch(plt.Rectangle((px, y - 0.004), 0.005, 0.014, color=SEV_COLOR.get(sev, MUT2)))
-        A.text(px + 0.010, y, one_line(A, e.get("title"), pw-.012, 9.5, "bold"), color=INK, fontsize=9.5, weight="bold")
+        A.text(px + 0.010, y, one_line(A, e.get("title"), pw-.012, 9.5, "bold"), color=INK, fontsize=10, weight="bold")
         conf = e.get("confidence")
-        A.text(px + 0.010, y - 0.015, "%s | score %s/100 | %s" % (sev, conf if conf is not None else "-", freshness(e.get("ts"))), color=MUT2, fontsize=8.5)
+        A.text(px + 0.010, y - 0.015, "%s | score %s/100 | %s" % (sev, conf if conf is not None else "-", freshness(e.get("ts"))), color=MUT2, fontsize=9)
         y -= 0.034
 
     px, py, pw = _panel(A, 0.03, 0.845, 0.27, 0.51, "WORLD & GEOPOLITICS", GEO)
@@ -235,16 +238,16 @@ def render_p1(d, a, llm_ok, path):
     for e in d["geo_events"][:4]:
         sev = e.get("severity") or "Low"
         A.add_patch(plt.Rectangle((px, y - 0.003), 0.005, 0.014, color=SEV_COLOR.get(sev, MUT2)))
-        A.text(px + 0.010, y, one_line(A, e.get("title"), pw-.012, 9.5, "bold"), color=INK, fontsize=9.5, weight="bold")
+        A.text(px + 0.010, y, one_line(A, e.get("title"), pw-.012, 9.5, "bold"), color=INK, fontsize=10, weight="bold")
         conf = e.get("confidence")
-        A.text(px + 0.010, y - 0.014, "%s | %s | %s" % (sev, (str(conf) + "/100") if conf is not None else "-", (e.get("source") or "")[:22]), color=MUT2, fontsize=8.5)
+        A.text(px + 0.010, y - 0.014, "%s | %s | %s" % (sev, (str(conf) + "/100") if conf is not None else "-", (e.get("source") or "")[:22]), color=MUT2, fontsize=9)
         y -= 0.033
     y -= 0.004
     A.text(px, y, "HIGH / CRITICAL EVENT SHARE", color=GEO, fontsize=10, weight="bold"); y -= 0.018
     score = 100 * hi_crit / max(len(d["events"]), 1)
     A.add_patch(plt.Rectangle((px, y - 0.006), pw * .86, 0.011, color=CARDL))
     A.add_patch(plt.Rectangle((px, y - 0.006), pw * .86 * score / 100.0, 0.011, color=GEO))
-    A.text(px + pw, y - 0.006, "%d%%" % score if d["events"] else "-", color=GEO, fontsize=9.5, weight="bold", ha="right")
+    A.text(px + pw, y - 0.006, "%d%%" % score if d["events"] else "-", color=GEO, fontsize=10, weight="bold", ha="right")
     y -= 0.026
     A.text(px, y, "ACTIVE NEWS SOURCES", color=GEO, fontsize=10, weight="bold"); y -= 0.016
     for line in _wrap(", ".join(d.get("sources_active", [])[:14]) or "No sources in window.", _chars(pw, 9))[:5]:
@@ -253,7 +256,7 @@ def render_p1(d, a, llm_ok, path):
     A.text(px, y, "SOCIAL CHATTER", color=SOC, fontsize=10, weight="bold"); y -= 0.016
     sp = d.get("social_pulse", {})
     for t in sp.get("top", [])[:3]:
-        A.text(px, y, one_line(A, "[%s] %s" % (t.get("src", ""), t.get("t", "")), pw, 8.5), color=INK, fontsize=8.5); y -= 0.015
+        A.text(px, y, one_line(A, "[%s] %s" % (t.get("src", ""), t.get("t", "")), pw, 8.5), color=INK, fontsize=9); y -= 0.015
 
     px, py, pw = _panel(A, 0.70, 0.845, 0.27, 0.51, "MARKETS & ECONOMY", MKT)
     y = _block(A, px, py, pw, a["market_read"], 10, INK, 0.020, 4)
@@ -267,8 +270,8 @@ def render_p1(d, a, llm_ok, path):
     y -= 0.004
     A.text(px, y, "TOP MOVERS", color=MKT, fontsize=10, weight="bold"); y -= 0.016
     for m in (pulse.get("gainers", [])[:2] + pulse.get("losers", [])[:2]):
-        A.text(px, y, m["t"], color=INK, fontsize=9.5, weight="bold")
-        A.text(px + pw, y, "%+.2f%%" % m["pct"], color=UP if m["pct"] > 0 else DN, fontsize=9.5, ha="right", weight="bold")
+        A.text(px, y, m["t"], color=INK, fontsize=10, weight="bold")
+        A.text(px + pw, y, "%+.2f%%" % m["pct"], color=UP if m["pct"] > 0 else DN, fontsize=10, ha="right", weight="bold")
         y -= 0.016
     y -= 0.004
     A.text(px, y, "MACRO SNAPSHOT", color=MKT, fontsize=10, weight="bold"); y -= 0.016
@@ -300,22 +303,22 @@ def render_p1(d, a, llm_ok, path):
                 A.text(px, y, line, color=MUT2, fontsize=9); y -= 0.016
             cnt = sp.get("coverage") or sp.get("counts", {})
             if cnt:
-                A.text(px, y, "LANES: " + " · ".join("%s %d" % (k, v) for k, v in sorted(cnt.items())[:5]), color=MUT2, fontsize=8.5); y -= 0.016
+                A.text(px, y, "LANES: " + " · ".join("%s %d" % (k, v) for k, v in sorted(cnt.items())[:5]), color=MUT2, fontsize=9); y -= 0.016
             _block(A, px, .09, pw, "News ticker mentions: " + ticker_mentions(d["events"]), 9, MUT2, .018, 2)
             for t in sp.get("top", [])[:2]:
-                A.text(px, y, one_line(A, "[%s] %s" % (t.get("src", ""), t.get("t", "")), pw, 8.5), color=INK, fontsize=8.5); y -= 0.015
+                A.text(px, y, one_line(A, "[%s] %s" % (t.get("src", ""), t.get("t", "")), pw, 8.5), color=INK, fontsize=9); y -= 0.015
         else:
             y = _block(A, px, y, pw, a["outlook"], 10, INK, 0.019, 3)
             _block(A, px, y-.014, pw, "Current: VIX %s | curve %s | WTI %s" % (regime.get("vix", "unavailable"), regime.get("curve_2s10s", "-"), pct(im.get("WTI Crude", {}).get("pct"))), 9, MUT2, .018, 3)
             yb = 0.300 - 0.245 + 0.010
             A.add_patch(plt.Rectangle((px, yb), pw, 0.042, color="#EAD9D2"))
             rk = _fit(a["key_risk"], _chars(pw, 9.5), 2)
-            A.text(px + 0.006, yb + 0.028, rk[0] if rk else "", color=DN, fontsize=9.5, weight="bold")
-            A.text(px + 0.006, yb + 0.012, rk[1] if len(rk) > 1 else "", color=DN, fontsize=9.5)
+            A.text(px + 0.006, yb + 0.028, rk[0] if rk else "", color=DN, fontsize=10, weight="bold")
+            A.text(px + 0.006, yb + 0.012, rk[1] if len(rk) > 1 else "", color=DN, fontsize=10)
 
     A.text(.03, .038, quality(d), color=MUT2, fontsize=9)
-    A.text(0.03, 0.020, "Narrative: %s | Charts from snapshots | Tentative - machine-compiled, not investment advice" % ("AI-generated; not independently verified" if llm_ok else "deterministic fallback"), color=MUT2, fontsize=8.5)
-    A.text(0.97, 0.020, "Page 1 of 2", color=MUT2, fontsize=8.5, ha="right")
+    A.text(0.03, 0.020, "Narrative: %s | Charts from snapshots | Tentative - machine-compiled, not investment advice" % ("AI-generated; not independently verified" if llm_ok else "deterministic fallback"), color=MUT2, fontsize=9)
+    A.text(0.97, 0.020, "Page 1 of 2", color=MUT2, fontsize=9, ha="right")
     fig.savefig(path, facecolor=PAPER); plt.close(fig)
 
 # ================= PAGE 2 =================
@@ -336,63 +339,63 @@ def render_p2(d, a, llm_ok, path):
     status_line = "DATA STATUS  events %d/%dh · market %s · macro %s · social %s" % (
         len(d.get("events", [])), d.get("event_window_h", 24), freshness(pulse.get("updated")),
         freshness(macro.get("updated")), freshness(d.get("social_pulse", {}).get("ts")))
-    A.text(0.5, 0.955, status_line, color=MUT2, fontsize=8.5, ha="center")
+    A.text(0.5, 0.955, status_line, color=MUT2, fontsize=9, ha="center")
 
     A.text(.5, .937, quality(d), color=MUT2, fontsize=9, ha="center")
-    ax = fig.add_axes([0.06, 0.74, 0.26, 0.16]); _lax(ax); ax.set_title("MEGA-CAP LEADERS (%CHG)", pad=6)
+    ax = fig.add_axes([0.06, 0.755, 0.26, 0.145]); _lax(ax); ax.set_title("MEGA-CAP LEADERS (%CHG)", pad=6)
     mega = [m for m in pulse.get("mega_caps", []) if m.get("pct") is not None][:12]
     if mega:
         names = [m["t"] for m in mega][::-1]; vals = [m["pct"] for m in mega][::-1]
         ax.barh(names, vals, color=[UP if v > 0 else DN for v in vals], height=0.72)
         ax.axvline(0, color=MUT2, lw=0.6)
         mm = max([abs(v) for v in vals] + [0.1]); ax.set_xlim(-mm * 1.3, mm * 1.3)
-    ax = fig.add_axes([0.06, 0.52, 0.26, 0.16]); _lax(ax); ax.set_title("SECTOR SAMPLE (avg %chg)", pad=6)
+    ax = fig.add_axes([0.06, 0.535, 0.26, 0.145]); _lax(ax); ax.set_title("SECTOR SAMPLE (avg %chg)", pad=6)
     if d["sector_tape"]:
         ks = [k[:14] for k, _ in d["sector_tape"][:8]][::-1]; vs = [v for _, v in d["sector_tape"][:8]][::-1]
         ax.barh(ks, vs, color=[UP if v > 0 else DN for v in vs], height=0.7)
         ax.axvline(0, color=MUT2, lw=0.6)
-    ax = fig.add_axes([0.05, 0.325, 0.27, 0.145]); _lax(ax); ax.set_title("MOVERS: %CHG vs REL-VOLUME", pad=6)
+    ax = fig.add_axes([0.05, 0.335, 0.27, 0.13]); _lax(ax); ax.set_title("MOVERS: %CHG vs REL-VOLUME", pad=6)
     sig = [{"t": k, **v} for k, v in pulse.get("sig", {}).items() if v.get("pct") is not None and v.get("relvol")][:50]
     if sig:
         ax.scatter([v["pct"] for v in sig], [v["relvol"] for v in sig], c=[UP if v["pct"] > 0 else DN for v in sig], s=12, alpha=0.7)
         for v in sorted(sig, key=lambda x: -x["relvol"])[:4]:
-            ax.annotate(_clean(v["t"]), (v["pct"], v["relvol"]), color=INK, fontsize=7.5, xytext=(3, 3), textcoords="offset points")
-    ax.set_xlabel("Session change (%)", color=MUT2, fontsize=9, labelpad=1)
+            ax.annotate(_clean(v["t"]), (v["pct"], v["relvol"]), color=INK, fontsize=8.5, weight="bold", xytext=(4, 5), textcoords="offset points")
+    ax.set_xlabel("Session change (%)", color=MUT2, fontsize=9.5, weight="bold", labelpad=3)
 
     px, py, pw = _panel(A, 0.34, 0.91, 0.36, 0.29, "MACRO & RATES - FULL BOARD", MKT)
     groups = {}
     for i in macro.get("instruments", []): groups.setdefault(i.get("type", "other"), []).append(i)
     yL, yR = py, py
     for gname, key, n in [("CASH INDICES", "index", 5), ("INDEX FUTURES", "index_future", 3), ("COMMODITIES", "commodity", 4)]:
-        A.text(px, yL, gname, color=MUT2, fontsize=9.5, weight="bold"); yL -= 0.016
+        A.text(px, yL, gname, color=MUT2, fontsize=10, weight="bold"); yL -= 0.016
         rows = groups.get(key, [])[:n]
         if not rows:
             A.text(px, yL, "No data available", color=MUT2, fontsize=9); yL -= 0.016
         for i in rows:
             p = i.get("pct")
-            A.text(px, yL, _clean(i["name"])[:16], color=INK, fontsize=9.5)
+            A.text(px, yL, _clean(i["name"])[:16], color=INK, fontsize=10)
             A.text(px + pw * 0.30, yL, _fmt_price(i.get("price"), i.get("type")), color=MUT2, fontsize=9, ha="right")
-            A.text(px + pw * 0.46, yL, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=9.5, ha="right", weight="bold")
+            A.text(px + pw * 0.46, yL, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=10, ha="right", weight="bold")
             yL -= 0.016
         yL -= 0.005
     for gname, key, n in [("FOREX", "forex", 5), ("YIELDS (% RELATIVE CHANGE)", "bond", 4)]:
-        A.text(px + pw * 0.52, yR, gname, color=MUT2, fontsize=9.5, weight="bold"); yR -= 0.016
+        A.text(px + pw * 0.52, yR, gname, color=MUT2, fontsize=10, weight="bold"); yR -= 0.016
         rows = groups.get(key, [])[:n]
         if not rows:
             A.text(px + pw * 0.52, yR, "No data available", color=MUT2, fontsize=9); yR -= 0.016
         for i in rows:
             p = i.get("pct")
-            A.text(px + pw * 0.52, yR, _clean(i["name"])[:14], color=INK, fontsize=9.5)
-            A.text(px + pw, yR, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=9.5, ha="right", weight="bold")
+            A.text(px + pw * 0.52, yR, _clean(i["name"])[:14], color=INK, fontsize=10)
+            A.text(px + pw, yR, "%+.2f%%" % p if p is not None else "-", color=UP if (p or 0) > 0 else (DN if (p or 0) < 0 else MUT2), fontsize=10, ha="right", weight="bold")
             yR -= 0.016
         yR -= 0.005
-    A.text(px + pw * 0.52, yR, "REGIME", color=MUT2, fontsize=9.5, weight="bold"); yR -= 0.016
+    A.text(px + pw * 0.52, yR, "REGIME", color=MUT2, fontsize=10, weight="bold"); yR -= 0.016
     for line in list(filter(None, [
         "VIX: %s" % regime.get("vix") if regime.get("vix") else None,
         "2s10s: %s%s" % (regime.get("curve_2s10s", ""), " INVERTED" if regime.get("curve_inverted") else "") if regime.get("curve_2s10s") else None,
         "DXY: %s" % regime.get("dxy") if regime.get("dxy") else None,
         "Oil: %s" % regime.get("oil_spike") if regime.get("oil_spike") else None])):
-        A.text(px + pw * 0.52, yR, _clean(line), color=GEO, fontsize=9.5); yR -= 0.016
+        A.text(px + pw * 0.52, yR, _clean(line), color=GEO, fontsize=10); yR -= 0.016
 
     ax = fig.add_axes([0.36, 0.34, 0.30, 0.24]); _lax(ax)
     hist = [h for h in d["yield_hist"] if h.get("spread2s10s") is not None]
@@ -400,12 +403,12 @@ def render_p2(d, a, llm_ok, path):
         ax.plot(range(len(hist)), [h["spread2s10s"] for h in hist], marker="o", color=GEO, lw=2.5, markersize=6)
         ax.axhline(0, color=MUT2, lw=0.6, ls="--")
         ax.set_title("2s10s SPREAD (bp) - TRAILING %d DAYS" % len(hist), pad=6)
-        ax.set_xlabel("%s → %s" % (hist[0]["day"], hist[-1]["day"]), color=MUT2, fontsize=8.5)
+        ax.set_xlabel("%s → %s" % (hist[0]["day"], hist[-1]["day"]), color=MUT2, fontsize=9.5, weight="bold", labelpad=3)
     else:
         pts = [(n, d["curve_pts"].get(n)) for n in ("2Y", "5Y", "10Y", "30Y") if d["curve_pts"].get(n) is not None]
         if pts:
             ax.plot([n for n, _ in pts], [p for _, p in pts], marker="o", color=GEO, lw=2.5, markersize=8)
-            for n, p in pts: ax.annotate("%.2f%%" % p, (n, p), textcoords="offset points", xytext=(0, 10), color=INK, fontsize=9.5, ha="center")
+            for n, p in pts: ax.annotate("%.2f%%" % p, (n, p), textcoords="offset points", xytext=(0, 12), color=INK, fontsize=10, weight="bold", ha="center")
             ax.margins(y=.25)
             ax.set_title("US YIELD CURVE (%) - CURRENT SNAPSHOT", pad=10)
         else:
@@ -432,18 +435,18 @@ def render_p2(d, a, llm_ok, path):
         A.text(0.85, 0.66, "Falling %d" % dn, color=DN, fontsize=10.5, weight="bold")
         A.text(0.85, 0.62, "Unchanged %d" % fl, color=MUT2, fontsize=10.5, weight="bold")
     else:
-        A.text(0.72, 0.66, "No previous snapshot yet -", color=MUT2, fontsize=9.5)
-        A.text(0.72, 0.63, "baseline building.", color=MUT2, fontsize=9.5)
+        A.text(0.72, 0.66, "No previous snapshot yet -", color=MUT2, fontsize=10)
+        A.text(0.72, 0.63, "baseline building.", color=MUT2, fontsize=10)
 
     A.text(0.71, 0.52, "1-HOUR MOVERS (LARGE CAPS)", color=HI, fontsize=11, weight="bold")
     A.add_patch(plt.Rectangle((0.71, 0.512), 0.26, 0.0015, color=HI))
     y = 0.49
     hm = pulse.get("hour_movers", [])
     if not hm:
-        A.text(0.71, y, "No qualifying 1h observations; coverage may be incomplete.", color=MUT2, fontsize=9.5); y -= 0.020
+        A.text(0.71, y, "No qualifying 1h observations; coverage may be incomplete.", color=MUT2, fontsize=10); y -= 0.020
     for m in hm[:5]:
         A.text(0.71, y, m["t"], color=INK, fontsize=10, weight="bold")
-        A.text(0.80, y, "%+.2f%% (1h)" % m["hour_chg"], color=UP if m["hour_chg"] > 0 else DN, fontsize=9.5, weight="bold")
+        A.text(0.80, y, "%+.2f%% (1h)" % m["hour_chg"], color=UP if m["hour_chg"] > 0 else DN, fontsize=10, weight="bold")
         A.text(0.97, y, "session %s | %s" % (pct(m.get("pct")), market_cap(m.get("mcap"))), color=MUT2, fontsize=9, ha="right")
         y -= 0.020
     y -= 0.006
@@ -465,7 +468,7 @@ def render_p2(d, a, llm_ok, path):
         A.text(colx, yy, "[%s] %s" % (ts, t), color=INK, fontsize=9)
     if not d["headlines"]:
         note = _clean(d.get("event_note") or "No fresh event headlines in the selected window.")
-        A.text(0.03, 0.260, note[:150], color=MUT2, fontsize=9.5)
+        A.text(0.03, 0.260, note[:150], color=MUT2, fontsize=10)
 
     sp2 = d.get("social_pulse", {})
     tops = sp2.get("top", [])[:4]
@@ -475,13 +478,13 @@ def render_p2(d, a, llm_ok, path):
         for i, t in enumerate(tops):
             colx = 0.03 + (i % 2) * 0.485
             yy = 0.176 - (i // 2) * 0.016
-            A.text(colx, yy, "[%s] %s" % (t.get("src", ""), _clean(t.get("t", ""))[:58]), color=INK, fontsize=8.5)
+            A.text(colx, yy, "[%s] %s" % (t.get("src", ""), _clean(t.get("t", ""))[:58]), color=INK, fontsize=9)
     else:
         A.text(0.03, 0.174, "No fresh social items. Check proxy access and source coverage.", color=MUT2, fontsize=9)
     coverage = sp2.get("coverage", {})
     if coverage:
         A.text(0.97, 0.196, "coverage: " + " · ".join("%s %d" % (k, v) for k, v in coverage.items()),
-               color=MUT2, fontsize=8.5, ha="right")
+               color=MUT2, fontsize=9, ha="right")
 
     for (bx, bw, btitle, bcol) in ((0.03, 0.40, "CROSS-ASSET ANALYSIS", MKT), (0.47, 0.25, "THEMES & SENTIMENT", SOC), (0.76, 0.21, "KEY NUMBERS", GEO)):
         px, py, pw = _panel(A, bx, 0.140, bw, 0.105, btitle, bcol)
@@ -492,24 +495,24 @@ def render_p2(d, a, llm_ok, path):
             top_themes = sorted(d["themes"].items(), key=lambda x: -x[1])[:3]
             mx = top_themes[0][1] if top_themes else 1
             for k, v in top_themes:
-                A.text(px, y, _clean(DOMAIN_NAMES.get(k, k))[:12], color=MUT2, fontsize=8.5)
+                A.text(px, y, _clean(DOMAIN_NAMES.get(k, k))[:12], color=MUT2, fontsize=9)
                 A.add_patch(plt.Rectangle((px + pw * 0.45, y + 0.002), (pw * 0.4) * v / mx, 0.008, color=MKT))
-                A.text(px + pw, y, str(v), color=INK, fontsize=8.5, ha="right"); y -= 0.015
+                A.text(px + pw, y, str(v), color=INK, fontsize=9, ha="right"); y -= 0.015
             x = px
             for key, col in [("bullish", UP), ("neutral", MUT2), ("bearish", DN)]:
                 w = (pw * 0.6) * rolls[key] / tot
                 A.add_patch(plt.Rectangle((x, y - 0.002), w, 0.009, color=col)); x += w + 0.004
-            A.text(px, y - .017, "News: bull %d / neutral %d / bear %d" % (rolls["bullish"], rolls["neutral"], rolls["bearish"]) if sum(rolls.values()) else "News sentiment unavailable", color=MUT2, fontsize=8.5)
+            A.text(px, y - .017, "News: bull %d / neutral %d / bear %d" % (rolls["bullish"], rolls["neutral"], rolls["bearish"]) if sum(rolls.values()) else "News sentiment unavailable", color=MUT2, fontsize=9)
         else:
             g0 = (pulse.get("gainers") or [{}])[0]; l0 = (pulse.get("losers") or [{}])[0]
             for lab, val, col in [("GAINER", "%s %+.2f%%" % (g0.get("t", "-"), g0.get("pct", 0)) if g0.get("t") else "-", UP),
                                   ("LOSER", "%s %+.2f%%" % (l0.get("t", "-"), l0.get("pct", 0)) if l0.get("t") else "-", DN),
                                   ("GOLD", pct(im.get("Gold", {}).get("pct")), UP if (im.get("Gold", {}).get("pct") or 0) > 0 else DN),
                                   ("10Y", _fmt_price(im.get("US 10Y Yield", {}).get("price"), "bond"), GEO)]:
-                A.text(px, y, lab, color=MUT2, fontsize=8.5, weight="bold")
+                A.text(px, y, lab, color=MUT2, fontsize=9, weight="bold")
                 A.text(px + pw, y, _clean(val), color=col, fontsize=9, ha="right", weight="bold"); y -= 0.014
 
-    A.text(0.03, 0.020, "All charts computed from source snapshots | Tentative - machine-compiled, not investment advice", color=MUT2, fontsize=8.5)
-    A.text(0.97, 0.020, "Page 2 of 2", color=MUT2, fontsize=8.5, ha="right")
+    A.text(0.03, 0.020, "All charts computed from source snapshots | Tentative - machine-compiled, not investment advice", color=MUT2, fontsize=9)
+    A.text(0.97, 0.020, "Page 2 of 2", color=MUT2, fontsize=9, ha="right")
     fig.savefig(path, facecolor=PAPER); plt.close(fig)
 
