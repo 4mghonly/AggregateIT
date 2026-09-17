@@ -195,7 +195,7 @@ def _fallback_analysis(d, prev):
     geo = ("Geopolitical desk: %s." % (d["geo_events"][0].get("title") or "")) if d["geo_events"] else "Geopolitical desk: no major developments in window."
     news = ("Dominant cluster: %s." % _clean(DOMAIN_NAMES.get(sorted(d["themes"].items(), key=lambda x: -x[1])[0][0], "Mixed"))) if d["themes"] else "No dominant cluster."
     if ev: news += " Top event: %s." % (ev[0].get("title") or "")
-    soc = " | ".join([_clean(r) for r in d["st_radar"][:4]]) if d["st_radar"] else "No strong retail consensus."
+    soc = " | ".join([_clean(r) for r in d["st_radar"][:4]]) if d["st_radar"] else "Retail sentiment coverage is insufficient for an assessment."
     if d["reddit"]: soc += " Reddit: " + ", ".join("%s x%d" % (k, v) for k, v in sorted(d["reddit"].items(), key=lambda x: -x[1])[:3])
     headline = (ev[0].get("title") or "Quiet session across markets") if ev else "Quiet session across markets"
     return {"headline": headline, "lead": (geo + " " + mkt)[:600], "geopol_read": geo[:600],
@@ -206,6 +206,7 @@ def _fallback_analysis(d, prev):
 
 def analyze(d):
     prev = _load_prev()
+    d["previous_edition"] = prev
     out = None
     try:
         prompt = ANALYSIS_PROMPT.replace("__DATA__", _data_text(d)).replace("__PREV__", _prev_text(prev))
