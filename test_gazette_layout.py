@@ -94,10 +94,18 @@ class LayoutTests(unittest.TestCase):
         plt.close(fig)
     def test_render_full_empty_and_long(self):
         d,a=fixture()
-        long_a={k:"A long observation needs careful interpretation and independent verification. "*20 for k in a}
+        long_a={k:"A long observation needs careful interpretation, source attribution, cautious wording and independent verification. "*20 for k in a}
+        long_d=copy.deepcopy(d)
+        for i,event in enumerate(long_d["events"]):
+            event["title"] = event["title"] + " — extended synthetic context describing the reported development, affected region, timing and stated market relevance without inferring causation"
+            event["source"] = "Example International News and Independent Verification Wire"
+        long_d["geo_events"] = long_d["events"][:4]
+        long_d["headlines"] = long_d["events"]
+        long_d["sources_active"] = ["Example International News and Independent Verification Wire", "Example Regional Economics and Markets Reporting Service"]
+        long_d["social_pulse"]["top"] = [{"src":"SYNTHETIC WIRE","t":"Extended synthetic social observation used only to test wrapping, spacing and clipping under unusually long input data."}]
         out=Path(os.environ.get("GAZETTE_QA_OUT","qa-samples")); out.mkdir(exist_ok=True)
         with patch("socket.socket",side_effect=AssertionError("Network prohibited during rendering")):
-            for name,data,analysis in [("sample",d,a),("empty",{"sample":True},a),("long",d,long_a)]:
+            for name,data,analysis in [("sample",d,a),("empty",{"sample":True},a),("long-data",long_d,long_a)]:
                 for i,render in enumerate((g.render_p1,g.render_p2),1):
                     path=out/f"{name}-p{i}.png"
                     render(data,analysis,False,path)
