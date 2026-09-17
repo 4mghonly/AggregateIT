@@ -44,7 +44,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
-          QWEN_MODEL: ${{ secrets.QWEN_MODEL }}
+          QWEN_MODEL: qwen3.8-flash
           QWEN_MAX_CALLS: "10"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
