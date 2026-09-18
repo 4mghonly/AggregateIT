@@ -49,9 +49,9 @@ class CoreTests(unittest.TestCase):
 
 class EditorialTests(unittest.TestCase):
     def setUp(self):
-        self.article=dict(id='a',region='iraq',country='IQ',language='en',title='Officials report a border attack',text='Officials report a border attack with 12 injuries.',
+        self.article=dict(id='a',region='iraq',country='IQ',language='en',title='Officials report a border attack in Iraq',text='Officials report a border attack with 12 injuries.',
           source='Example',url='https://example.com/a',published=1,affiliation='publisher',kind='news')
-        self.event=dict(region='iraq',topic='security',title_ar='تقرير عن هجوم قرب الحدود',summary_ar='أفاد المصدر بوقوع هجوم قرب الحدود وإصابة 12 شخصاً.',
+        self.event=dict(region='iraq',topic='security',title_ar='تقرير عن هجوم قرب الحدود في العراق',summary_ar='أفاد المصدر بوقوع هجوم قرب الحدود وإصابة 12 شخصاً.',
           assessment_ar='لا تكفي المعلومات لتحديد تداعيات الهجوم.',watch_ar='متابعة تحديثات المصدر.',severity='high',source_ids=['a'],
           evidence=[{'id':'a','quote':'Officials report a border attack with 12 injuries.'}])
     def validate(self,event=None): return validate_events({'events':[event or self.event]},[self.article])
@@ -80,6 +80,14 @@ class EditorialTests(unittest.TestCase):
         self.assertTrue(quote_supported('Officials said: “12 injured”.','Officials said: "12 injured".'))
         self.assertFalse(quote_supported('Officials said 120 injured','Officials said 12 injured'))
         self.assertFalse(quote_supported('Officials said not injured','Officials said injured'))
+
+    def test_publisher_country_does_not_define_event_region(self):
+        self.event.update(region='turkey',title_ar='هجوم في جنوب لبنان',summary_ar='أفاد المصدر بهجوم في لبنان.')
+        self.assertEqual(self.validate()[1][0]['reason'],'event_geography')
+        self.event['region']='levant'; self.assertTrue(self.validate()[0])
+    def test_outside_region_incident_is_rejected(self):
+        self.event.update(region='north_africa',title_ar='هجوم على محطة روسية',summary_ar='أفاد المصدر بهجوم على محطة في روسيا.')
+        self.assertEqual(self.validate()[1][0]['reason'],'event_geography')
 
     def test_hallucinated_citation_rejected(self):
         self.event['source_ids']=['invented']; self.assertFalse(self.validate()[0])
