@@ -9,9 +9,9 @@ import unittest
 from unittest.mock import patch, Mock
 import requests
 from PIL import Image
-from .core import State, canonical, edition_window, preliminary_relevant
+from .core import State, canonical, edition_window, live_window, preliminary_relevant
 from .collect import entry_time, social_links
-from .editor import validate_events, EditorialError
+from .editor import validate_events, quote_supported, EditorialError
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
 from .sample import fixture
@@ -24,6 +24,12 @@ class CoreTests(unittest.TestCase):
         self.assertEqual((end-start).total_seconds(),21600)
         _,before=edition_window(datetime.fromisoformat('2026-09-18T11:29:59+00:00'))
         self.assertEqual(before.hour,9)
+    def test_early_scheduler_waits_for_intended_edition(self):
+        with patch('arabic_newsletter.core.time.sleep') as sleep:
+            _,end=live_window(datetime.fromisoformat('2026-09-18T11:29:00+00:00'))
+            self.assertEqual(end.isoformat(),'2026-09-18T15:30:00+04:00')
+            self.assertEqual(sum(c.args[0] for c in sleep.call_args_list),60)
+
     def test_midnight_rollover(self):
         _,end=edition_window(datetime.fromisoformat('2026-09-18T01:00:00+04:00'))
         self.assertEqual(end.isoformat(),'2026-09-17T21:30:00+04:00')
@@ -52,6 +58,11 @@ class EditorialTests(unittest.TestCase):
     def test_attributed_not_verified(self):
         events,rejected=self.validate(); self.assertEqual(len(events),1); self.assertFalse(rejected)
         self.assertEqual(events[0]['status_ar'],'تقرير منسوب')
+    def test_evidence_typography_only_normalization(self):
+        self.assertTrue(quote_supported('Officials said: “12 injured”.','Officials said: "12 injured".'))
+        self.assertFalse(quote_supported('Officials said 120 injured','Officials said 12 injured'))
+        self.assertFalse(quote_supported('Officials said not injured','Officials said injured'))
+
     def test_hallucinated_citation_rejected(self):
         self.event['source_ids']=['invented']; self.assertFalse(self.validate()[0])
     def test_hallucinated_evidence_rejected(self):

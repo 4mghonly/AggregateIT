@@ -12,8 +12,8 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:14.418399+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:16.780933+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s002",
@@ -28,8 +28,8 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:14.418910+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:16.781500+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s003",
@@ -74,12 +74,12 @@
         "verified_via": "https://www.aljazeera.net",
         "status": "publisher_linked",
         "collection": "supported",
-        "collection_status": "http_502",
-        "approved": true
+        "approved": true,
+        "collection_status": "active"
       }
     ],
-    "verified_at": "2026-09-18T08:36:14.420475+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:16.784082+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s004",
@@ -94,8 +94,8 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:14.421320+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:16.784920+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s005",
@@ -110,8 +110,8 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:14.423409+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:16.785819+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s006",
@@ -128,7 +128,7 @@
     "social": [
       {
         "platform": "bluesky",
-        "url": "https://bsky.app/profile/theguardian.com",
+        "url": "https://bsky.app/profile/us.theguardian.com",
         "verified_via": "https://www.theguardian.com/world",
         "status": "publisher_linked",
         "collection": "discovery_only",
@@ -151,8 +151,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:36:14.424727+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:16.786650+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s007",
@@ -172,8 +172,9 @@
         "url": "https://www.youtube.com/channel/UCR0fZh5SBxxMNYdg0VzRFkg",
         "verified_via": "https://www.middleeasteye.net",
         "status": "publisher_linked",
-        "collection": "supported",
-        "approved": true
+        "collection": "discovery_only",
+        "approved": true,
+        "collection_status": "active"
       },
       {
         "platform": "x",
@@ -200,8 +201,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:36:14.425691+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:16.787587+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s008",
@@ -233,8 +234,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:36:14.427196+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:16.788647+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s009",
@@ -274,8 +275,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:36:36.042601+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:17.568668+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s010",
@@ -295,8 +296,9 @@
         "url": "https://www.youtube.com/channel/UCFl-GzKYeCW3iWjnQDuxzAA",
         "verified_via": "https://www.bellingcat.com",
         "status": "publisher_linked",
-        "collection": "supported",
-        "approved": true
+        "collection": "discovery_only",
+        "approved": true,
+        "collection_status": "active"
       },
       {
         "platform": "bluesky",
@@ -320,8 +322,8 @@
         "verified_via": "https://www.bellingcat.com",
         "status": "publisher_linked",
         "collection": "supported",
-        "collection_status": "http_502",
-        "approved": true
+        "approved": true,
+        "collection_status": "active"
       },
       {
         "platform": "youtube",
@@ -332,8 +334,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:36:36.082652+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:17.611205+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s011",
@@ -348,8 +350,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:37.200940+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:17.765581+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s012",
@@ -364,8 +366,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:38.299310+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:17.780582+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s013",
@@ -377,7 +379,7 @@
     "feed": "",
     "affiliation": "official",
     "enabled": true,
-    "verification_status": "pending_recheck",
+    "verification_status": "social_only",
     "social_policy": "discover_from_publisher_website",
     "social": [
       {
@@ -385,12 +387,37 @@
         "url": "https://t.me/QatarNewsAgency",
         "verified_via": "https://www.qna.org.qa",
         "status": "publisher_linked",
+        "collection": "supported",
         "approved": true,
-        "collection": "supported"
+        "collection_status": "active"
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/QatarNewsAgency",
+        "verified_via": "https://www.qna.org.qa",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/QatarNewsAgency",
+        "verified_via": "https://www.qna.org.qa",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@qatarnewsagency3270",
+        "verified_via": "https://www.qna.org.qa",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:36:39.435329+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:17.864434+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s014",
@@ -405,8 +432,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:48.439679+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:17.924936+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s015",
@@ -421,8 +448,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:49.195256+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:17.966873+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s016",
@@ -437,8 +464,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:49.205349+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:18.039086+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s017",
@@ -486,8 +513,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:36:50.035097+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:18.441141+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s018",
@@ -502,8 +529,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:50.581572+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:18.799553+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s019",
@@ -518,8 +545,8 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:36:51.055674+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:19.151661+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s020",
@@ -534,8 +561,8 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:37:01.547558+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:19.281643+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s021",
@@ -555,8 +582,7 @@
         "url": "https://t.me/mehrnews",
         "verified_via": "https://www.mehrnews.com",
         "status": "publisher_linked",
-        "collection": "discovery_only",
-        "collection_status": "http_502",
+        "collection": "supported",
         "approved": false
       },
       {
@@ -568,8 +594,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:01.549118+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:19.375318+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s022",
@@ -581,7 +607,7 @@
     "feed": "",
     "affiliation": "diaspora",
     "enabled": true,
-    "verification_status": "failed",
+    "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [
       {
@@ -609,8 +635,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:03.724328+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:19.384440+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s023",
@@ -624,9 +650,34 @@
     "enabled": true,
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
-    "social": [],
-    "verified_at": "2026-09-18T08:37:04.842052+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "social": [
+      {
+        "platform": "x",
+        "url": "https://twitter.com/anadoluajansi",
+        "verified_via": "https://www.aa.com.tr/tr",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/anadoluajansi",
+        "verified_via": "https://www.aa.com.tr/tr",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/anadoluajansi",
+        "verified_via": "https://www.aa.com.tr/tr",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:19.473002+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s024",
@@ -666,8 +717,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:10.281708+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:20.038538+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s025",
@@ -715,8 +766,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:10.426096+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:20.428696+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s026",
@@ -728,7 +779,7 @@
     "feed": "https://shafaq.com/ar?rss=1",
     "affiliation": "publisher",
     "enabled": true,
-    "verification_status": "pending_recheck",
+    "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [
       {
@@ -756,8 +807,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:19.283924+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:20.656938+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s027",
@@ -772,8 +823,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:37:19.644311+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:20.996232+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s028",
@@ -817,13 +868,12 @@
         "url": "https://t.me/rudawdigital",
         "verified_via": "https://www.rudaw.net/english",
         "status": "publisher_linked",
-        "collection": "discovery_only",
-        "collection_status": "http_502",
+        "collection": "supported",
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:19.693494+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:21.010101+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s029",
@@ -835,7 +885,7 @@
     "feed": "",
     "affiliation": "broadcaster",
     "enabled": true,
-    "verification_status": "failed",
+    "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [
       {
@@ -863,8 +913,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:30.294971+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:21.123433+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s030",
@@ -879,8 +929,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:37:30.632545+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:21.162031+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s031",
@@ -920,8 +970,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:30.959976+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:21.265062+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s032",
@@ -969,8 +1019,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:31.934379+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:21.336373+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s033",
@@ -1010,8 +1060,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:36.430145+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:21.697380+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s034",
@@ -1026,8 +1076,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:37:39.779580+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:22.831166+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s035",
@@ -1042,8 +1092,8 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:37:40.140119+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:22.882528+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s036",
@@ -1083,8 +1133,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:40.469540+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:23.140761+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s037",
@@ -1140,8 +1190,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:45.454760+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:23.484148+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s038",
@@ -1173,8 +1223,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:49.475974+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:23.553689+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s039",
@@ -1206,8 +1256,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:37:49.550691+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:23.694635+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s040",
@@ -1222,8 +1272,8 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:37:52.046073+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:23.725070+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s041",
@@ -1238,8 +1288,8 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:02.111863+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:24.042505+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s042",
@@ -1253,9 +1303,34 @@
     "enabled": true,
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": [],
-    "verified_at": "2026-09-18T08:38:07.128447+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "social": [
+      {
+        "platform": "x",
+        "url": "https://x.com/APS_Algerie",
+        "verified_via": "https://www.aps.dz",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/algeriepresseservice.ar",
+        "verified_via": "https://www.aps.dz",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@APSDZALGERIEPRESSESERVICE",
+        "verified_via": "https://www.aps.dz",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:24.259097+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s043",
@@ -1270,8 +1345,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:08.722483+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:24.353772+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s044",
@@ -1286,8 +1361,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:09.441501+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:24.605908+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s045",
@@ -1311,8 +1386,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:10.534576+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:24.980873+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s046",
@@ -1324,11 +1399,11 @@
     "feed": "https://www.madamasr.com/ar/feed/",
     "affiliation": "publisher",
     "enabled": true,
-    "verification_status": "failed",
+    "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:12.855656+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:25.019502+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s047",
@@ -1360,8 +1435,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:17.686780+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:25.034976+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s048",
@@ -1401,8 +1476,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:17.772191+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:25.313033+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s049",
@@ -1414,11 +1489,36 @@
     "feed": "",
     "affiliation": "publisher",
     "enabled": true,
-    "verification_status": "failed",
+    "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
-    "social": [],
-    "verified_at": "2026-09-18T08:38:18.080838+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "social": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@WasatTV",
+        "verified_via": "https://alwasat.ly",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/alwasatnewsly",
+        "verified_via": "https://alwasat.ly",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/alwasatnewsly",
+        "verified_via": "https://alwasat.ly",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:25.462887+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s050",
@@ -1432,9 +1532,50 @@
     "enabled": true,
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
-    "social": [],
-    "verified_at": "2026-09-18T08:38:18.098174+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "social": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/c/DawnNewsEnglish",
+        "verified_via": "https://www.dawn.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UC_xWTNsx7zA2uI0ydQikViA?sub_confirmation=1",
+        "verified_via": "https://www.dawn.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/dawn_com",
+        "verified_via": "https://www.dawn.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/dawndotcom",
+        "verified_via": "https://www.dawn.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCkMdI0K-74jAjOmh5J5H97Q",
+        "verified_via": "https://www.dawn.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:25.542940+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s051",
@@ -1449,8 +1590,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:27.078017+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:25.565755+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s052",
@@ -1465,8 +1606,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:27.170544+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:25.920352+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s053",
@@ -1481,8 +1622,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:27.242581+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:26.040365+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s054",
@@ -1522,8 +1663,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:29.760289+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:26.206009+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s055",
@@ -1571,8 +1712,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:29.781601+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:26.327235+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s056",
@@ -1612,8 +1753,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:36.587859+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:26.424899+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s057",
@@ -1628,8 +1769,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:36.963558+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:26.520239+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s058",
@@ -1669,8 +1810,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:36.990600+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:26.742036+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s059",
@@ -1685,8 +1826,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:37.245916+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:27.265037+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s060",
@@ -1698,7 +1839,7 @@
     "feed": "",
     "affiliation": "official",
     "enabled": true,
-    "verification_status": "failed",
+    "verification_status": "social_only",
     "social_policy": "discover_from_publisher_website",
     "social": [
       {
@@ -1715,8 +1856,8 @@
         "verified_via": "https://www.ena.et/web/eng",
         "status": "publisher_linked",
         "collection": "supported",
-        "collection_status": "network_error",
-        "approved": true
+        "approved": true,
+        "collection_status": "active"
       },
       {
         "platform": "youtube",
@@ -1739,7 +1880,7 @@
         "url": "https://t.me/poaenglish",
         "verified_via": "https://www.ena.et/web/eng",
         "status": "publisher_linked",
-        "collection": "discovery_only",
+        "collection": "supported",
         "approved": false
       },
       {
@@ -1763,7 +1904,7 @@
         "url": "https://t.me/poaarabic",
         "verified_via": "https://www.ena.et/web/eng",
         "status": "publisher_linked",
-        "collection": "discovery_only",
+        "collection": "supported",
         "approved": false
       },
       {
@@ -1775,8 +1916,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:48.612209+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:27.456992+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s061",
@@ -1791,8 +1932,8 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:49.030212+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:27.545357+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s062",
@@ -1832,8 +1973,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:54.406993+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:27.714486+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s063",
@@ -1873,8 +2014,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:55.748608+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:28.121498+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s064",
@@ -1886,7 +2027,7 @@
     "feed": "",
     "affiliation": "publisher",
     "enabled": true,
-    "verification_status": "failed",
+    "verification_status": "social_only",
     "social_policy": "discover_from_publisher_website",
     "social": [
       {
@@ -1919,7 +2060,7 @@
         "verified_via": "https://www.maannews.net",
         "status": "publisher_linked",
         "collection": "supported",
-        "collection_status": "network_error",
+        "collection_status": "active",
         "approved": true
       },
       {
@@ -1939,8 +2080,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:56.514706+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:28.957287+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s065",
@@ -1952,11 +2093,11 @@
     "feed": "https://www.timesofisrael.com/feed/",
     "affiliation": "publisher",
     "enabled": true,
-    "verification_status": "active",
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:58.044999+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:29.566995+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s066",
@@ -1968,7 +2109,7 @@
     "feed": "https://today.lorientlejour.com/rss",
     "affiliation": "publisher",
     "enabled": true,
-    "verification_status": "failed",
+    "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [
       {
@@ -1996,8 +2137,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:38:58.703713+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:29.688803+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s067",
@@ -2012,8 +2153,8 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-18T08:38:58.961741+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:30.150593+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s068",
@@ -2053,8 +2194,8 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-18T08:39:10.044168+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:30.313290+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s069",
@@ -2099,12 +2240,12 @@
         "verified_via": "https://sana.sy",
         "status": "publisher_linked",
         "collection": "supported",
-        "collection_status": "network_error",
-        "approved": true
+        "approved": true,
+        "collection_status": "active"
       }
     ],
-    "verified_at": "2026-09-18T08:39:13.197314+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:30.624754+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s070",
@@ -2118,9 +2259,66 @@
     "enabled": true,
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": [],
-    "verified_at": "2026-09-18T08:39:14.607476+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "social": [
+      {
+        "platform": "x",
+        "url": "https://x.com/Petranews/status/2100284064544534673",
+        "verified_via": "https://petra.gov.jo",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/1072636875728760",
+        "verified_via": "https://petra.gov.jo",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/embed/sY-hW699tPI",
+        "verified_via": "https://petra.gov.jo",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "http://x.com/Petranews",
+        "verified_via": "https://petra.gov.jo",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/Petranews",
+        "verified_via": "https://petra.gov.jo",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "http://youtube.com/Petranews",
+        "verified_via": "https://petra.gov.jo",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "telegram",
+        "url": "http://t.me/Petranews",
+        "verified_via": "https://petra.gov.jo",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:30.686511+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   },
   {
     "id": "s071",
@@ -2132,7 +2330,7 @@
     "feed": "",
     "affiliation": "broadcaster",
     "enabled": true,
-    "verification_status": "failed",
+    "verification_status": "social_only",
     "social_policy": "discover_from_publisher_website",
     "social": [
       {
@@ -2157,10 +2355,11 @@
         "verified_via": "https://www.almamlakatv.com",
         "status": "publisher_linked",
         "collection": "supported",
-        "approved": true
+        "approved": true,
+        "collection_status": "active"
       }
     ],
-    "verified_at": "2026-09-18T08:39:18.603653+00:00",
-    "verification_environment": "development runner; not a guarantee of production reachability"
+    "verified_at": "2026-09-18T08:46:30.708442+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
   }
 ]

@@ -3,6 +3,7 @@ import hashlib
 import json
 import re
 import sqlite3
+import time
 import unicodedata
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -53,6 +54,18 @@ def edition_window(now=None):
     anchor = now.replace(hour=3, minute=30, second=0, microsecond=0)
     end = anchor + timedelta(hours=6 * int((now-anchor).total_seconds() // 21600))
     return end-timedelta(hours=6), end
+
+def live_window(now=None):
+    # Scheduled app wakeups can arrive slightly early. Wait for the imminent
+    # boundary instead of accidentally publishing the preceding edition.
+    now=now or datetime.now(timezone.utc)
+    start,end=edition_window(now+timedelta(minutes=2))
+    remaining=(end-now).total_seconds()
+    while remaining>0:
+        pause=min(remaining,30)
+        time.sleep(pause)
+        remaining-=pause
+    return start,end
 
 def write_json(path, value):
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)

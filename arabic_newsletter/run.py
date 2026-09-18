@@ -5,7 +5,7 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from .core import ROOT, State, edition_window, write_json
+from .core import ROOT, State, edition_window, live_window, write_json
 from .collect import audit, collect
 from .editor import Client, synthesize
 from .delivery import webhook_url, send
@@ -35,13 +35,13 @@ def main():
                     client.chat('Return JSON only.',{'request':'Return {"ok":true}'},30)
                     print('Arabic model API probe passed')
                 if args.send: webhook_url()
-                print('Arabic configuration preflight passed (credentials present; not an API authentication test)'); return
+                print('Arabic configuration preflight passed' if args.probe_model else 'Arabic configuration present; API authentication not tested'); return
             if args.audit: audit(args.output); return
             if args.sample: brief=fixture(args.long)
             else:
                 now=datetime.fromisoformat(args.end) if args.end else None
                 if now and now.tzinfo is None: parser.error('--end must include a timezone')
-                start,end=edition_window(now); edition=end.isoformat()
+                start,end=edition_window(now) if now else live_window(); edition=end.isoformat()
                 if args.send:
                     webhook_url(); Client(state)
                     prior=state.delivery(edition)
@@ -55,6 +55,7 @@ def main():
                 write_json(args.output/'source_evidence.json',articles)
                 if not any(r['status'] in ('active','social_only') for r in health): raise RuntimeError('All source collection failed; publication blocked')
                 events,rejected=synthesize(articles,state)
+                write_json(args.output/'editorial_draft.json',state.get('last_editorial_draft') or {})
                 brief=dict(sample=False,window_start=start.isoformat(),window_end=end.isoformat(),events=events,
                   input_count=len(articles),health=health,rejected=rejected)
                 if args.send and not events: raise RuntimeError('No qualified events; empty publication blocked, see health artifact')
