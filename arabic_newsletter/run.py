@@ -54,8 +54,11 @@ def main():
                 write_json(args.output/'collection_health.json',health)
                 write_json(args.output/'source_evidence.json',articles)
                 if not any(r['status'] in ('active','social_only') for r in health): raise RuntimeError('All source collection failed; publication blocked')
-                events,rejected=synthesize(articles,state)
-                write_json(args.output/'editorial_draft.json',state.get('last_editorial_draft') or {})
+                try:
+                    events,rejected=synthesize(articles,state)
+                finally:
+                    write_json(args.output/'editorial_draft.json',state.get('last_editorial_draft') or {})
+                    write_json(args.output/'editorial_review.json',state.get('last_editorial_review') or [])
                 brief=dict(sample=False,window_start=start.isoformat(),window_end=end.isoformat(),events=events,
                   input_count=len(articles),health=health,rejected=rejected)
                 if args.send and not events: raise RuntimeError('No qualified events; empty publication blocked, see health artifact')

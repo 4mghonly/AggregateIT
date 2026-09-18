@@ -11,7 +11,7 @@ import requests
 from PIL import Image
 from .core import State, canonical, edition_window, live_window, preliminary_relevant
 from .collect import entry_time, social_links
-from .editor import validate_events, quote_supported, EditorialError
+from .editor import validate_events, quote_supported, synthesize, EditorialError
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
 from .sample import fixture
@@ -49,12 +49,30 @@ class CoreTests(unittest.TestCase):
 
 class EditorialTests(unittest.TestCase):
     def setUp(self):
-        self.article=dict(id='a',title='Officials report a border attack',text='Officials report a border attack with 12 injuries.',
+        self.article=dict(id='a',region='iraq',country='IQ',language='en',title='Officials report a border attack',text='Officials report a border attack with 12 injuries.',
           source='Example',url='https://example.com/a',published=1,affiliation='publisher',kind='news')
         self.event=dict(region='iraq',topic='security',title_ar='تقرير عن هجوم قرب الحدود',summary_ar='أفاد المصدر بوقوع هجوم قرب الحدود وإصابة 12 شخصاً.',
           assessment_ar='لا تكفي المعلومات لتحديد تداعيات الهجوم.',watch_ar='متابعة تحديثات المصدر.',severity='high',source_ids=['a'],
           evidence=[{'id':'a','quote':'Officials report a border attack with 12 injuries.'}])
     def validate(self,event=None): return validate_events({'events':[event or self.event]},[self.article])
+    def test_one_correction_then_same_review_gate(self):
+        with tempfile.TemporaryDirectory() as d:
+            state=State(d)
+            with patch('arabic_newsletter.editor.Client') as client:
+                client.return_value.chat.side_effect=[{'events':[copy.deepcopy(self.event)]},{'approved':[],'reasons':{'0':'Clarify attribution'}},{'events':[copy.deepcopy(self.event)]},{'approved':[0]}]
+                events,_=synthesize([self.article],state)
+                self.assertEqual(len(events),1); self.assertEqual(client.return_value.chat.call_count,4)
+            state.close()
+    def test_repair_cannot_bypass_rejection_or_loop(self):
+        with tempfile.TemporaryDirectory() as d:
+            state=State(d)
+            with patch('arabic_newsletter.editor.Client') as client:
+                client.return_value.chat.side_effect=[{'events':[copy.deepcopy(self.event)]},{'approved':[]},{'events':[copy.deepcopy(self.event)]},{'approved':[]}]
+                with self.assertRaises(EditorialError): synthesize([self.article],state)
+                self.assertEqual(client.return_value.chat.call_count,4)
+                self.assertEqual(len(state.get('last_editorial_review')),2)
+            state.close()
+
     def test_attributed_not_verified(self):
         events,rejected=self.validate(); self.assertEqual(len(events),1); self.assertFalse(rejected)
         self.assertEqual(events[0]['status_ar'],'تقرير منسوب')

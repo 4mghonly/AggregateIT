@@ -73,8 +73,10 @@ and unreviewed social links remain discovery-only; availability is never fabrica
 Items without a publication timestamp cannot become fresh news merely because
 retrieved now. Same-URL and same-title duplicates are removed before the model;
 multilingual/syndicated event copies are grouped during synthesis and review.
-Model inputs and outputs are bounded and cached. At most four editorial model HTTP requests
-(two stages, each with at most one retry) per run. The cached preflight probe
+Model inputs and outputs are bounded and cached. At most six editorial model HTTP requests per run, including retries.
+If every event is rejected, one correction pass uses the reviewers’ reasons and
+then repeats the same deterministic checks and editorial review. A second failed
+review blocks publication; there is no unbounded correction loop. The cached preflight probe
 can use up to two additional requests on its first run. Early scheduler wakeups
 within two minutes of an edition boundary wait for that boundary.
 Each event needs literal supporting evidence, known article IDs, Arabic prose,
