@@ -11,7 +11,7 @@ import requests
 from PIL import Image
 from .core import State, canonical, edition_window, live_window, preliminary_relevant
 from .collect import entry_time, social_links
-from .editor import validate_events, quote_supported, synthesize, EditorialError
+from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
 from .sample import fixture
@@ -89,6 +89,20 @@ class EditorialTests(unittest.TestCase):
         self.event['summary_ar']='أفاد المصدر بإصابة 120 شخصاً.'; self.assertFalse(self.validate()[0])
     def test_arabic_indic_number_supported(self):
         self.event['summary_ar']='أفاد المصدر بإصابة ١٢ شخصاً.'; self.assertTrue(self.validate()[0])
+    def test_scaled_quantities_preserve_exact_total(self):
+        self.assertEqual(numbers('۵۲۲ هزار و ۲۰۰'),numbers('522 ألف و200'))
+        self.assertNotEqual(numbers('۵۲۲ هزار و ۲۰۰'),numbers('522 ألف'))
+        self.assertEqual(numbers('۴۳۹ هزار'),numbers('439000'))
+        self.assertNotEqual(numbers('12 مليون'),numbers('12'))
+    def test_ellipsis_requires_ordered_real_fragments(self):
+        self.assertTrue(quote_supported('Officials reported a border attack...Police confirmed 12 injuries','Officials reported a border attack on Friday. Police confirmed 12 injuries.'))
+        self.assertFalse(quote_supported('Officials reported a border attack...Police confirmed 120 injuries','Officials reported a border attack. Police confirmed 12 injuries.'))
+        self.assertFalse(quote_supported('Officials stated...there was an attack','Officials stated no evidence that there was an attack'))
+    def test_currency_amount_is_not_security_output(self):
+        self.article['text']+=' The project costs 12 million dollars.'
+        self.event['summary_ar']='أفاد المصدر بتمويل بقيمة 12 مليون دولار.'
+        self.assertFalse(self.validate()[0])
+
     def test_non_arabic_rejected(self):
         self.event['summary_ar']='The officials reported a border attack.'; self.assertFalse(self.validate()[0])
     def test_financial_and_out_of_scope_rejected(self):
