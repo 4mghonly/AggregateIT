@@ -17,7 +17,7 @@ def main():
     modes=parser.add_mutually_exclusive_group()
     modes.add_argument('--sample',action='store_true'); modes.add_argument('--audit',action='store_true')
     modes.add_argument('--preflight',action='store_true')
-    parser.add_argument('--long',action='store_true'); parser.add_argument('--send',action='store_true')
+    parser.add_argument('--probe-model',action='store_true'); parser.add_argument('--long',action='store_true'); parser.add_argument('--send',action='store_true')
     parser.add_argument('--end',help='ISO timestamp for a replay; requires timezone')
     parser.add_argument('--output',type=Path,default=ROOT/'runtime'/'output')
     args=parser.parse_args()
@@ -30,7 +30,10 @@ def main():
         state=State(state_dir)
         try:
             if args.preflight:
-                Client(state)
+                client=Client(state)
+                if args.probe_model:
+                    client.chat('Return JSON only.',{'request':'Return {"ok":true}'},30)
+                    print('Arabic model API probe passed')
                 if args.send: webhook_url()
                 print('Arabic configuration preflight passed (credentials present; not an API authentication test)'); return
             if args.audit: audit(args.output); return

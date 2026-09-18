@@ -40,7 +40,17 @@ class Client:
                 if attempt==0: time.sleep(2); continue
                 raise EditorialError('Model network failure') from None
             if r.status_code in (429,500,502,503,504) and attempt==0: time.sleep(2); continue
-            if r.status_code!=200: raise EditorialError(f'Model HTTP {r.status_code}')
+            if r.status_code!=200:
+                try:
+                    err=r.json().get('error',{})
+                    detail=str(err.get('message') or err.get('code') or 'request rejected') if isinstance(err,dict) else str(err)
+                except ValueError: detail='non-JSON error response'
+                detail=detail.replace(self.key,'[redacted]').replace(self.base,'[endpoint]')
+                detail=re.sub(r'https?://\S+','[url]',detail)[:350]
+                # Providers differ on optional JSON/thinking request extensions.
+                if r.status_code==400 and attempt==0 and any(k in detail.lower() for k in ('response_format','enable_thinking')):
+                    payload.pop('response_format',None); payload.pop('enable_thinking',None); continue
+                raise EditorialError(f'Model HTTP {r.status_code}: {detail}')
             try:
                 response=r.json()
                 if response['choices'][0].get('finish_reason')=='length': raise ValueError('truncated')

@@ -51,11 +51,11 @@ jobs:
       - name: Render long Arabic sample
         if: "!startsWith(github.event.head_commit.message, 'Arabic newsletter: scheduled')"
         run: python -m arabic_newsletter.run --sample --long --output arabic_newsletter/runtime/sample
+      - name: Validate Arabic model configuration
+        run: python -m arabic_newsletter.run --preflight --probe-model
       - name: Audit sources from runner
         if: "!startsWith(github.event.head_commit.message, 'Arabic newsletter: scheduled')"
         run: python -m arabic_newsletter.run --audit --output arabic_newsletter/runtime/audit
-      - name: Validate Arabic model configuration
-        run: python -m arabic_newsletter.run --preflight
       - name: Collect, translate, verify and render live slides
         run: |
           if [ -n "$DISCORD_WEBHOOK_ARABIC" ]; then

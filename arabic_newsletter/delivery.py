@@ -1,5 +1,6 @@
 """Dedicated Discord delivery. No fallback channel; uncertain sends require reconciliation."""
 import os
+import json
 import re
 import time
 from contextlib import ExitStack
@@ -28,8 +29,8 @@ def send(state,edition,paths):
         try:
             with ExitStack() as stack:
                 files={f'files[{i}]':(p.name,stack.enter_context(p.open('rb')),'image/png' if p.suffix=='.png' else 'text/plain; charset=utf-8') for i,p in enumerate(paths)}
-                r=requests.post(url,data={'content':'النشرة الجيوسياسية والعسكرية والأمنية | '+edition+' | بتوقيت الإمارات',
-                  'allowed_mentions':'{"parse":[]}'},files=files,timeout=(10,60))
+                r=requests.post(url,data={'payload_json':json.dumps({'content':'النشرة الجيوسياسية والعسكرية والأمنية | '+edition+' | بتوقيت الإمارات',
+                  'allowed_mentions':{'parse':[]}},ensure_ascii=False)},files=files,timeout=(10,60))
         except requests.RequestException:
             state.mark(edition,'uncertain')
             raise DeliveryError('Discord response uncertain; automatic duplicate retry blocked') from None
