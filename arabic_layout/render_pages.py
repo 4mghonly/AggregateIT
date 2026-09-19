@@ -13,8 +13,8 @@ def page1(brief,path):
     bx,by,bw,bh=panel(c,(1065,1745,805,265),'التغيرات منذ الإحاطة السابقة',GOLD); numbered_list(c,changes(brief,4),(bx,by,bw,bh),GOLD,4)
     bx,by,bw,bh=panel(c,(1895,1745,830,265),'انعكاسات محتملة على المصالح الإقليمية',TEAL); numbered_list(c,implications(events,4),(bx,by,bw,bh),TEAL,4)
     alert_panel(c,(2750,440,1035,750),events); assessments_panel(c,(2750,1215,1035,480),events); indicator_table(c,(2750,1720,1035,290),events)
-    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1000,2115,1900,28),17,False,MUTED,'center')
-    c.text('الصفحة 1 من 3',(55,2110,260,28),17,True,MUTED,'left')
+    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1000,2115,1900,28),19,True,MUTED,'center')
+    c.text('الصفحة 1 من 3',(55,2110,260,28),19,True,MUTED,'left')
     c.save(path); return c.clipped
 
 def region_summary(e):
@@ -25,28 +25,20 @@ def region_card(c,region,e,n,box):
     x,y,w,h=map(int,box)
     sev_label,col,pale=severity(e or {}) if e else ('مراقبة',NAVY,PALE_BLUE)
     status={'high':'متوتر','medium':'حذر ومراقبة','low':'مستقر'}.get((e or {}).get('severity'),'مراقبة')
-    header_colors={
-        'gcc':NAVY,'oman':TEAL,'iran':GREEN,'turkey':PURPLE,'iraq':GOLD,'yemen':SKY,
-        'egypt':GREEN,'sudan':RED,'north_africa':PURPLE,'sahel':GOLD,'horn':TEAL,'somalia':SKY,
-        'pakistan':GREEN,'afghanistan':RED,'levant':PURPLE,'palestine_israel':NAVY,'jordan':GOLD}
-    head=header_colors.get(region,SKY)
-    c.rounded(box,PAPER,'#D5E2E9',13,2)
-    c.d.rounded_rectangle((x,y,x+w,y+56),radius=13,fill=head)
-    c.d.rectangle((x,y+42,x+w,y+56),fill=head)
-    number_badge(c,x+12,y+8,n,'#EEF5FB',NAVY_DARK,40)
-    c.text(REGIONS[region],(x+68,y+5,w-86,42),29,True,'white','center')
-    c.asset(REGION_ASSET[region],(x+14,y+72,305,h-136),10)
+    head=REGION_COLORS.get(region,SKY)
+    c.rounded(box,PAPER,'#CAD7DF',13,2)
+    c.d.rounded_rectangle((x,y,x+w,y+62),radius=13,fill=head)
+    c.d.rectangle((x,y+46,x+w,y+62),fill=head)
+    number_badge(c,x+12,y+10,n,'#F5F8FA',NAVY_DARK,42)
+    c.text(REGIONS[region],(x+70,y+5,w-88,48),33,True,'white','center')
+    c.flag_group(REGION_FLAGS.get(region,['AE']),(x+18,y+82,320,h-150))
     if e:
-        c.text(compact(e.get('title_ar',''),105),(x+340,y+68,w-525,72),29,True,NAVY_DARK)
-        c.text(compact(e.get('summary_ar',''),100),(x+340,y+142,w-525,h-206),21,False,INK)
+        c.text(compact(e.get('title_ar',''),92),(x+365,y+74,w-405,72),32,True,NAVY_DARK)
+        c.text(compact(e.get('summary_ar',''),90),(x+365,y+150,w-405,h-214),24,True,INK)
     else:
-        c.text('لا يوجد تحديث مؤهل خلال نافذة التغطية الحالية.',(x+340,y+90,w-525,90),24,True,MUTED)
-    # restrained region marker, visually equivalent to the reference's map silhouette
-    c.d.ellipse((x+w-155,y+94,x+w-91,y+158),fill='#E1E9EE')
-    c.d.polygon([(x+w-144,y+127),(x+w-125,y+102),(x+w-105,y+122),(x+w-116,y+148)],fill='#C4D2DA')
-    c.rounded((x+14,y+h-51,w-28,37),pale,None,9,0)
-    c.text('الوضع العام: '+status,(x+24,y+h-46,w-48,27),19,True,col,'center')
-
+        c.text('لا يوجد تحديث مؤهل خلال نافذة التغطية الحالية.',(x+365,y+100,w-405,96),27,True,MUTED)
+    c.rounded((x+18,y+h-52,w-36,38),pale,None,9,0)
+    c.text('الوضع العام: '+status,(x+28,y+h-47,w-56,29),21,True,col,'center')
 def page2(brief,path):
     c=Canvas(); masthead(c,brief,2); stats(c,brief); events=brief.get('events',[]); first={}
     for e in events: first.setdefault(e.get('region'),e)
@@ -55,8 +47,8 @@ def page2(brief,path):
     for i,r in enumerate(regions):
         col=i%3; row=i//3
         region_card(c,r,first.get(r),i+1,(left+col*(cw+gx),top+row*(ch+gy),cw,ch))
-    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1000,2115,1900,28),17,False,MUTED,'center')
-    c.text('الصفحة 2 من 3',(55,2110,260,28),17,True,MUTED,'left')
+    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1000,2115,1900,28),19,True,MUTED,'center')
+    c.text('الصفحة 2 من 3',(55,2110,260,28),19,True,MUTED,'left')
     c.save(path); return c.clipped
 
 def maritime_event(events):
@@ -74,7 +66,7 @@ def analytics_social(c,box,events):
     for i,(name,count,pct) in enumerate(topics):
         cy=yy+i*70
         number_badge(c,x+w-48,cy,i+1,PALE_BLUE,NAVY_DARK,42)
-        c.text(name,(x+4,cy,w-220,39),23,True,INK)
+        c.text(name,(x+4,cy,w-220,42),26,True,INK)
         base=w-270
         c.d.rounded_rectangle((x+4,cy+47,x+4+base,cy+61),radius=7,fill='#E7ECEF')
         c.d.rounded_rectangle((x+4,cy+47,x+4+max(14,int(base*pct/100)),cy+61),radius=7,fill=colors[i%5])
@@ -94,7 +86,7 @@ def analytics_social(c,box,events):
     narratives=[compact(e.get('title_ar',''),82) for e in featured_events(events,6)]
     for i,t in enumerate(narratives):
         number_badge(c,x+w-42,ny+48+i*66,i+1,'#EAF2FB',NAVY_DARK,36)
-        c.text(t,(x+5,ny+45+i*66,w-60,52),22,False,INK)
+        c.text(t,(x+5,ny+44+i*66,w-60,54),24,True,INK)
     cy=y+h-150
     c.rounded((x,cy,w,135),PALE_RED,'#F0C9CE',11,1)
     c.text('معلومة متداولة تتطلب الحذر',(x+16,cy+12,w-32,37),25,True,RED)
@@ -104,13 +96,12 @@ def maritime_panel(c,box,events):
     x,y,w,h=panel(c,box,'تحديثات الملاحة في الشرق الأوسط',TEAL)
     e=maritime_event(events)
     if not e:
-        c.text('لا يوجد تحديث بحري مؤهل في هذه النافذة؛ يستمر رصد البحر الأحمر وخليج عدن وبحر العرب ومضيق هرمز.',(x,y,w,h),24,True,MUTED)
+        c.text('لا يوجد تحديث بحري مؤهل في هذه النافذة؛ يستمر رصد البحر الأحمر وخليج عدن وبحر العرب ومضيق هرمز.',(x,y,w,h),26,True,MUTED)
         return
-    c.asset('red_sea',(x,y+2,270,h-18),12)
-    c.text(compact(e.get('title_ar',''),88),(x+295,y,w-295,56),27,True,NAVY_DARK)
-    c.text(compact(e.get('summary_ar',''),125),(x+295,y+62,w-295,h-126),21,False,INK)
-    c.text('للمتابعة: '+compact(e.get('watch_ar') or '',85),(x+295,y+h-58,w-295,48),18,True,TEAL)
-
+    c.flag_group(event_country_codes(e),(x,y+8,240,h-30))
+    c.text(compact(e.get('title_ar',''),80),(x+270,y,w-270,62),30,True,NAVY_DARK)
+    c.text(compact(e.get('summary_ar',''),105),(x+270,y+68,w-270,h-126),23,True,INK)
+    c.text('للمتابعة: '+compact(e.get('watch_ar') or '',72),(x+270,y+h-55,w-270,46),20,True,TEAL)
 def page3(brief,path):
     c=Canvas(); masthead(c,brief,3); stats(c,brief); events=brief.get('events',[])
     analytics_social(c,(55,440,980,1570),events)
@@ -123,8 +114,8 @@ def page3(brief,path):
     alert_panel(c,(2750,440,1035,700),events)
     assessments_panel(c,(2750,1165,1035,520),events)
     indicator_table(c,(2750,1710,1035,300),events)
-    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1000,2115,1900,28),17,False,MUTED,'center')
-    c.text('الصفحة 3 من 3',(55,2110,260,28),17,True,MUTED,'left')
+    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1000,2115,1900,28),19,True,MUTED,'center')
+    c.text('الصفحة 3 من 3',(55,2110,260,28),19,True,MUTED,'left')
     c.save(path); return c.clipped
 
 def render(brief,output):
