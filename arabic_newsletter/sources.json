@@ -2284,13 +2284,13 @@
     "language": "en",
     "website": "https://www.petra.gov.jo/en/",
     "affiliation": "official",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "verified_at": "2026-09-18T08:46:30.686511+00:00",
     "verification_environment": "GitHub Actions run 35326029801",
-    "retired_reason": "repaired_endpoint_pending_reaudit_2026-09-19"
+    "retired_reason": "failed_source_audit_2026-09-19_final_preview"
   },
   {
     "id": "s071",
@@ -2602,10 +2602,11 @@
     "language": "en",
     "website": "https://www.khaama.com",
     "affiliation": "independent",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_final_preview"
   },
   {
     "id": "s092",
@@ -2615,11 +2616,12 @@
     "language": "en",
     "website": "https://www.thereporterethiopia.com",
     "affiliation": "independent",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "feed": "https://www.thereporterethiopia.com/feed/"
+    "feed": "https://www.thereporterethiopia.com/feed/",
+    "retired_reason": "failed_source_audit_2026-09-19_final_preview"
   },
   {
     "id": "s093",
@@ -2732,5 +2734,19 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s101",
+    "name": "Ammon News Jordan",
+    "region": "jordan",
+    "country": "JO",
+    "language": "en",
+    "website": "https://en.ammonnews.net",
+    "feed": "https://en.ammonnews.net/rss.php?id=2&type=news",
+    "affiliation": "independent",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
   }
 ]
