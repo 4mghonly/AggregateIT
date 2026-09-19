@@ -165,15 +165,15 @@ def page1(brief,path):
 def region_card(c,region,event,index,box):
     x,y,w,h=box; c.d.rectangle((x,y,x+w,y+h),outline=BORDER,width=2)
     color=SEVERITY[event['severity']][1] if event else MUTED
-    c.text(REGIONS[region],(x+20,y+12,w-40,38),25,True,color); c.rule(x+20,y+54,w-40,color)
+    c.text(REGIONS[region],(x+20,y+12,w-40,38),24,True,color); c.rule(x+20,y+54,w-40,color)
     if not event:
-        c.text('لا يوجد تحديث مؤهل خلال نافذة التغطية الحالية.',(x+20,y+72,w-40,h-90),25,False,MUTED); return
+        c.text('لا يوجد تحديث مؤهل خلال نافذة التغطية الحالية.',(x+20,y+72,w-40,h-90),23,False,MUTED); return
     title_y=y+68; title_h=58; ref_h=27; ref_y=y+h-ref_h-8
-    c.text(event['title_ar'],(x+20,title_y,w-40,title_h),26,True)
+    c.text(event['title_ar'],(x+20,title_y,w-40,title_h),24,True)
     summary_y=title_y+title_h+4
     summary_h=max(38,ref_y-summary_y-5)
-    c.text(event['summary_ar'],(x+20,summary_y,w-40,summary_h),20)
-    c.text(f'[{index}] {SEVERITY[event["severity"]][0]} | {event["status_ar"]}',(x+20,ref_y,w-40,ref_h),18,True,color)
+    c.text(event['summary_ar'],(x+20,summary_y,w-40,summary_h),18)
+    c.text(f'[{index}] {SEVERITY[event["severity"]][0]} | {event["status_ar"]}',(x+20,ref_y,w-40,ref_h),17,True,color)
 
 def page2(brief,path):
     c=Canvas(); masthead(c,brief,2,'الموقف الإقليمي — تغطية جميع مناطق المسؤولية'); events=brief['events']
