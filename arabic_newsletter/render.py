@@ -77,14 +77,40 @@ def is_uae(event):
 def event_card(c,event,index,box,analysis=False,compact=False):
     x,y,w,h=box; severity,color=SEVERITY[event['severity']]
     c.d.rectangle((x+w-8,y,x+w,y+h-8),fill=color); w-=24
-    c.text(REGIONS[event['region']]+' | '+severity+' | '+event['status_ar'],(x,y,w,44),25 if compact else 28,True,color)
-    yy=c.text(event['title_ar'],(x,y+47,w,86 if compact else 112),31 if compact else 37,True)
-    yy=c.text(event['summary_ar'],(x,yy+6,w,112 if compact else 170),26 if compact else 31)
-    if analysis and event.get('assessment_ar'):
-        yy=c.text('التقدير: '+event['assessment_ar'],(x,yy+6,w,84),25 if compact else 29,False,BLUE)
-    if analysis and event.get('watch_ar'):
-        yy=c.text('للمتابعة: '+event['watch_ar'],(x,yy+4,w,80),24 if compact else 28,False,GREEN)
-    c.text(refs(event,index),(x,y+h-48,w,42),22 if compact else 25,False,MUTED)
+    header_h=40 if compact else 46
+    title_h=68 if compact else 104
+    ref_h=31 if compact else 42
+    gap=6
+    c.text(REGIONS[event['region']]+' | '+severity+' | '+event['status_ar'],(x,y,w,header_h),24 if compact else 28,True,color)
+    title_y=y+header_h+gap
+    c.text(event['title_ar'],(x,title_y,w,title_h),28 if compact else 37,True)
+    body_y=title_y+title_h+gap
+    ref_y=y+h-ref_h
+    available=max(30,ref_y-body_y-gap)
+    if compact:
+        body_size=23 if h<240 else 25
+        if analysis:
+            summary_h=max(42,int(available*0.42))
+            assess_h=max(35,int(available*0.29))
+            watch_h=max(35,available-summary_h-assess_h-2*gap)
+            c.text(event['summary_ar'],(x,body_y,w,summary_h),body_size)
+            ay=body_y+summary_h+gap
+            c.text('التقدير: '+(event.get('assessment_ar') or 'لا يتوفر تقدير مدعوم.'),(x,ay,w,assess_h),22,False,BLUE)
+            wy=ay+assess_h+gap
+            c.text('للمتابعة: '+(event.get('watch_ar') or 'انتظار تحديث موثق.'),(x,wy,w,watch_h),21,False,GREEN)
+        else:
+            c.text(event['summary_ar'],(x,body_y,w,available),body_size)
+    else:
+        summary_h=min(170,max(70,int(available*0.48 if analysis else available)))
+        c.text(event['summary_ar'],(x,body_y,w,summary_h),31)
+        if analysis:
+            ay=body_y+summary_h+gap
+            remain=max(60,ref_y-ay-gap)
+            assess_h=max(30,(remain-gap)//2)
+            watch_h=max(30,remain-assess_h-gap)
+            c.text('التقدير: '+(event.get('assessment_ar') or 'لا يتوفر تقدير مدعوم.'),(x,ay,w,assess_h),27,False,BLUE)
+            c.text('للمتابعة: '+(event.get('watch_ar') or 'انتظار تحديث موثق.'),(x,ay+assess_h+gap,w,watch_h),26,False,GREEN)
+    c.text(refs(event,index),(x,ref_y,w,ref_h),20 if compact else 25,False,MUTED)
 
 def stats(c,brief):
     events=brief['events']; health=brief['health']; active=sum(r.get('status') in ('active','social_only') for r in health)
@@ -139,12 +165,15 @@ def page1(brief,path):
 def region_card(c,region,event,index,box):
     x,y,w,h=box; c.d.rectangle((x,y,x+w,y+h),outline=BORDER,width=2)
     color=SEVERITY[event['severity']][1] if event else MUTED
-    c.text(REGIONS[region],(x+20,y+14,w-40,43),27,True,color); c.rule(x+20,y+59,w-40,color)
+    c.text(REGIONS[region],(x+20,y+12,w-40,38),25,True,color); c.rule(x+20,y+54,w-40,color)
     if not event:
-        c.text('لا يوجد تحديث مؤهل خلال نافذة التغطية الحالية.',(x+20,y+78,w-40,h-94),27,False,MUTED); return
-    c.text(event['title_ar'],(x+20,y+75,w-40,76),29,True)
-    c.text(event['summary_ar'],(x+20,y+151,w-40,78),24)
-    c.text(f'[{index}] {SEVERITY[event["severity"]][0]} | {event["status_ar"]}',(x+20,y+h-38,w-40,31),21,True,color)
+        c.text('لا يوجد تحديث مؤهل خلال نافذة التغطية الحالية.',(x+20,y+72,w-40,h-90),25,False,MUTED); return
+    title_y=y+68; title_h=58; ref_h=27; ref_y=y+h-ref_h-8
+    c.text(event['title_ar'],(x+20,title_y,w-40,title_h),26,True)
+    summary_y=title_y+title_h+4
+    summary_h=max(38,ref_y-summary_y-5)
+    c.text(event['summary_ar'],(x+20,summary_y,w-40,summary_h),20)
+    c.text(f'[{index}] {SEVERITY[event["severity"]][0]} | {event["status_ar"]}',(x+20,ref_y,w-40,ref_h),18,True,color)
 
 def page2(brief,path):
     c=Canvas(); masthead(c,brief,2,'الموقف الإقليمي — تغطية جميع مناطق المسؤولية'); events=brief['events']
@@ -170,7 +199,7 @@ def page3(brief,path):
     else: c.text('لا يوجد تحديث مؤهل في هذه النافذة.',(x,y,w,160),32,False,MUTED)
     box=c.panel((115,1100,1120,900),'الأردن',GREEN); x,y,w,h=box
     if jo:
-        for row,(i,e) in enumerate(jo): event_card(c,e,i,(x,y+row*310,w,292),analysis=True,compact=True)
+        for row,(i,e) in enumerate(jo): event_card(c,e,i,(x,y+row*370,w,350),analysis=True,compact=True)
     else: c.text('لا يوجد تحديث مؤهل في هذه النافذة.',(x,y,w,160),32,False,MUTED)
     box=c.panel((1285,280,1190,1720),'تفاصيل إضافية',GOLD); x,y,w,h=box
     for row,(i,e) in enumerate(additional): event_card(c,e,i,(x,y+row*224,w,210),analysis=False,compact=True)
