@@ -1,4 +1,4 @@
 {
-  "triggered_at": "2026-09-20T03:24:00+04:00",
-  "reason": "apply_flag_based_legibility_revision_and_send"
+  "triggered_at": "2026-09-20T03:31:00+04:00",
+  "reason": "send_corrected_flag_based_high_legibility_brief"
 }
