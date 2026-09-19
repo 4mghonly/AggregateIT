@@ -118,3 +118,13 @@ financial stories rejected; changed casualty numbers and invented citations
 rejected; publication windows correct across midnight; legacy webhook fallback
 blocked; duplicate/uncertain delivery tested. Live completion additionally needs
 successful collection, model translation and confirmed delivery to the new channel.
+
+
+## Locked visual format
+
+The Arabic briefing uses the approved three-slide light dashboard design. Page 1 is
+locked to: UAE news on the left, main development with a compact vector scope map in
+the centre, follow-up priorities on the right, and the three lower panels
+"التغييرات منذ الإحاطة السابقة" / "سياق دولي" / "الخلاصة التحليلية".
+The scope map includes Somalia as its own region and is deliberately slightly smaller
+than the earlier mock-up. Do not revert to the old dense commander-card layout.

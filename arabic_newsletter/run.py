@@ -60,7 +60,8 @@ def main():
                     write_json(args.output/'editorial_draft.json',state.get('last_editorial_draft') or {})
                     write_json(args.output/'editorial_review.json',state.get('last_editorial_review') or [])
                 brief=dict(sample=False,window_start=start.isoformat(),window_end=end.isoformat(),events=events,
-                  input_count=len(articles),health=health,rejected=rejected)
+                  input_count=len(articles),health=health,rejected=rejected,
+                  previous_events=state.get('previous_events') or [])
                 if args.send and not events: raise RuntimeError('No qualified events; empty publication blocked, see health artifact')
             paths,clipped=render(brief,args.output)
             write_json(args.output/'briefing.json',brief)
