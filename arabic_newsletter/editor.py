@@ -233,8 +233,10 @@ For a morning edition, provide a fuller overnight synthesis. For other editions,
 Return JSON only:
 {
  "situation_ar":"3-5 analytical sentences",
+ "dynamics_ar":"3-5 analytical sentences on escalation/de-escalation, posture, borders, maritime or strategic infrastructure where supported",
  "cross_region_ar":"3-5 analytical sentences",
- "risk_ar":"2-4 analytical sentences covering uncertainty and escalation/de-escalation",
+ "implications_ar":"3-5 analytical sentences on likely regional security, diplomatic, infrastructure or humanitarian implications",
+ "risk_ar":"2-4 analytical sentences covering uncertainty and alternative interpretations",
  "watch_ar":["4-6 concise indicators to watch"]
 }
 All prose must be Modern Standard Arabic. Use only names/numbers already present in the validated events.'''
@@ -252,8 +254,10 @@ def build_analysis(events,state,morning=False):
             'title_ar':e.get('title_ar',''),'summary_ar':e.get('summary_ar',''),
             'assessment_ar':e.get('assessment_ar',''),'watch_ar':e.get('watch_ar','')
         })
-    limits={'situation_ar':1200 if morning else 900,
-            'cross_region_ar':1100 if morning else 800,
+    limits={'situation_ar':1300 if morning else 950,
+            'dynamics_ar':1150 if morning else 850,
+            'cross_region_ar':1150 if morning else 850,
+            'implications_ar':1100 if morning else 800,
             'risk_ar':900 if morning else 650}
     result=client.chat(
         ANALYSIS_SYSTEM,
@@ -286,8 +290,12 @@ def build_analysis(events,state,morning=False):
     if not out['situation_ar']:
         seeds=[e.get('assessment_ar') or e.get('summary_ar') for e in events if e.get('assessment_ar') or e.get('summary_ar')]
         out['situation_ar']=' '.join(clean(x) for x in seeds[:4])[:limits['situation_ar']]
+    if not out['dynamics_ar']:
+        out['dynamics_ar']=' '.join(clean(e.get('assessment_ar','')) for e in events[:4] if e.get('assessment_ar'))[:limits['dynamics_ar']]
     if not out['cross_region_ar']:
         out['cross_region_ar']=' '.join(clean(e.get('summary_ar','')) for e in events[:3])[:limits['cross_region_ar']]
+    if not out['implications_ar']:
+        out['implications_ar']=' '.join(clean(e.get('assessment_ar','')) for e in events[2:6] if e.get('assessment_ar'))[:limits['implications_ar']]
     if not out['risk_ar']:
         risks=[clean(e.get('watch_ar','')) for e in events if e.get('watch_ar')]
         out['risk_ar']=' '.join(risks[:3])[:limits['risk_ar']]
