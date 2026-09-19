@@ -1,9 +1,10 @@
 # Arabic Newsletter
 
-An isolated geopolitical / military / security edition on branch **Arabic**.
-Base: `6edc1157e6a17f48b638d4f634d58ce3d54a68ea`. All implementation files are new;
-no inherited file is edited or imported. The only new file outside this directory
-is `.github/workflows/arabic-newsletter.yml`.
+An isolated geopolitical / security edition on branch **Arabic**.
+This branch is intentionally minimal: the runtime lives in `arabic_newsletter/`
+and the only GitHub Actions workflow is `.github/workflows/arabic-newsletter.yml`.
+Legacy market, English briefing, Gazette, daily/weekly digest and general engine
+components have been removed from this branch.
 
 ## Approved scope
 
@@ -20,7 +21,7 @@ is `.github/workflows/arabic-newsletter.yml`.
   strategic infrastructure and conflict-related humanitarian reporting.
 - Include cautious, explicitly labelled analytical assessments and watch points.
 - Exclude financial feeds, market prices, tickers, crypto and business sentiment.
-  Inherited financial files remain dormant and untouched.
+  Legacy market and non-Arabic delivery code is not present on this branch.
 
 ## Runtime
 
@@ -39,11 +40,13 @@ rather than drawing disconnected Arabic letters. All output and state lives unde
 
 ## Secrets and deployment
 
-Required **new** GitHub Actions secret: `DISCORD_WEBHOOK_ARABIC` for the new channel.
-It never falls back to `DISCORD_WEBHOOK`. Daily and weekly digests remain bound to
-`DISCORD_WEBHOOK` only and must never reference `DISCORD_WEBHOOK_ARABIC`; an offline
-test enforces that routing boundary. Set the Arabic webhook in repository Settings →
-Secrets and variables → Actions. Never commit a webhook or API key.
+Required GitHub Actions secret: `DISCORD_WEBHOOK_ARABIC` for the Arabic briefing channel.
+It never falls back to `DISCORD_WEBHOOK`, and the Arabic branch contains no legacy
+Discord sender. The former default-branch sender workflows for Market Pulse / engine,
+Gazette slides, daily digest, weekly review and executive briefing are disabled by
+removing their workflow files, so they cannot post automatically. Set the Arabic
+webhook in repository Settings → Secrets and variables → Actions. Never commit a
+webhook or API key.
 
 The workflow can reuse existing `QWEN_API_KEY` and `QWEN_BASE_URL` secrets without
 changing them. Optional isolated overrides: `ARABIC_LLM_API_KEY`,
@@ -55,8 +58,8 @@ and syntax only, not authentication.
 GitHub cron does not run a workflow existing only on a non-default branch.
 The connected scheduled automation instead edits **only** the dedicated new
 `arabic_newsletter/trigger.json` on **Arabic**. Its push runs the new workflow.
-No default-branch workflow, original file or default branch setting changes.
-A self-hosted alternative can run the same CLI under cron:
+The default branch keeps its non-delivery utility workflows, but its legacy Discord
+delivery workflows are disabled. A self-hosted alternative can run the same CLI under cron:
 `30 5,11,17,23 * * *` (UTC), equivalent to the four UAE times. Use only one scheduler.
 
 ## Evidence and source policy

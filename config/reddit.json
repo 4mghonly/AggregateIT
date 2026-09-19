@@ -1,7 +1,0 @@
-[
-  {"sub": "stocks", "priority": "Low"},
-  {"sub": "wallstreetbets", "priority": "Low"},
-  {"sub": "investing", "priority": "Low"},
-  {"sub": "options", "priority": "Low"},
-  {"sub": "Economics", "priority": "Low"}
-]

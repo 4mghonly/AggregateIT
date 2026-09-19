@@ -1,6 +1,0 @@
-feedparser
-aiohttp
-requests
-trafilatura
-matplotlib
-ddgs

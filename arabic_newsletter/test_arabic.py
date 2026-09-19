@@ -127,10 +127,16 @@ class DeliveryTests(unittest.TestCase):
         with patch.dict(os.environ,{'DISCORD_WEBHOOK_ARABIC':'','DISCORD_WEBHOOK':'https://discord.com/api/webhooks/123/token'}):
             with self.assertRaises(DeliveryError): webhook_url()
 
-    def test_legacy_digests_cannot_reference_arabic_webhook(self):
+    def test_branch_is_arabic_only(self):
         root=Path(__file__).resolve().parents[1]
-        for rel in ('daily.py','weekly.py','.github/workflows/daily.yml','.github/workflows/weekly.yml'):
-            self.assertNotIn('DISCORD_WEBHOOK_ARABIC',(root/rel).read_text(encoding='utf-8'),rel)
+        workflow_dir=root/'.github'/'workflows'
+        workflows={p.name for p in workflow_dir.glob('*.yml')}
+        self.assertEqual(workflows,{'arabic-newsletter.yml'})
+        workflow=(workflow_dir/'arabic-newsletter.yml').read_text(encoding='utf-8')
+        self.assertIn('DISCORD_WEBHOOK_ARABIC',workflow)
+        self.assertNotIn('secrets.DISCORD_WEBHOOK }}',workflow)
+        for rel in ('main.py','market.py','slide.py','daily.py','weekly.py','briefing.py','tv.py','config'):
+            self.assertFalse((root/rel).exists(),rel)
     def test_success_then_duplicate_suppression(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(Path(d)/'state'); path=Path(d)/'slide.png'; path.write_bytes(b'png')
