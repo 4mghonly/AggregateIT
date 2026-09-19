@@ -28,12 +28,15 @@ FINANCE = ('stock market','earnings','dividend','forex','crypto','bitcoin','nasd
  'share price','wall street','market rally','interest rate','inflation data','أسهم','بورصة','عملات مشفرة',
  'بيتكوين','أرباح الشركات','سعر الذهب','أسعار النفط','سعر النفط','سعر الصرف','سوق المال','الفائدة',
  'بورس','رمزارز','bourse','boursier')
-UAE_SECONDARY = ('uae','emirates','abu dhabi','dubai','sharjah','ajman','fujairah','ras al khaimah',
- 'umm al quwain','president','crown prince','cabinet','government','ministry','police','civil defence',
+UAE_SECONDARY = ('president','crown prince','cabinet','government','ministry','police','civil defence',
  'emergency','airport','aviation','airspace','port','border','critical infrastructure','public safety',
- 'الإمارات','الامارات','أبوظبي','ابوظبي','دبي','الشارقة','عجمان','الفجيرة','رأس الخيمة','راس الخيمة',
- 'أم القيوين','ام القيوين','الرئيس','ولي العهد','مجلس الوزراء','الحكومة','وزارة','شرطة','الدفاع المدني',
- 'طوارئ','مطار','طيران','مجال جوي','ميناء','حدود','بنية تحتية','سلامة عامة')
+ 'الرئيس','ولي العهد','مجلس الوزراء','الحكومة','وزارة','شرطة','الدفاع المدني','طوارئ','مطار','طيران',
+ 'مجال جوي','ميناء','حدود','بنية تحتية','سلامة عامة')
+UAE_CONTEXT = ('uae','emirates','abu dhabi','dubai','sharjah','ajman','fujairah','ras al khaimah','umm al quwain',
+ 'الإمارات','الامارات','أبوظبي','ابوظبي','دبي','الشارقة','عجمان','الفجيرة','رأس الخيمة','راس الخيمة','أم القيوين','ام القيوين')
+UAE_ROUTINE = ('hotel','restaurant','brunch','shopping','fashion','property','real estate','investment','investor',
+ 'tourism','concert','festival','sport','football','retail','هوتيل','فندق','مطعم','تسوق','عقار','استثمار','سياحة',
+ 'حفلة','مهرجان','رياضة','كرة القدم','تجزئة')
 
 def clean(value):
     value = unicodedata.normalize('NFKC', str(value or ''))
@@ -58,8 +61,8 @@ def preliminary_relevant(text, language='en'):
 def uae_secondary_relevant(text):
     """Controlled lower threshold for the dedicated UAE command-news panel."""
     text=clean(text).casefold()
-    if any(k in text for k in FINANCE): return False
-    return any(k in text for k in UAE_SECONDARY)
+    if any(k in text for k in FINANCE) or any(k in text for k in UAE_ROUTINE): return False
+    return any(k in text for k in UAE_CONTEXT) and any(k in text for k in UAE_SECONDARY)
 
 def edition_window(now=None):
     """03:30, 09:30, 15:30, 21:30 UAE; most recent due six-hour edition."""
