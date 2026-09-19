@@ -166,19 +166,19 @@ def _globe(c,cx,cy,r=40,color=NAVY):
     c.d.arc((cx-r,cy-r//2,cx+r,cy+r//2),180,360,fill=color,width=3)
 
 def masthead(c,brief,page,title):
-    _skyline(c)
-    _flag(c,60,44,1.0)
+    # Clean white masthead matching the approved analytical-dashboard reference.
+    c.d.rectangle((0,0,W,155),fill=PAPER)
+    _flag(c,58,34,0.72)
     end=datetime.fromisoformat(brief['window_end']).astimezone(UAE)
-    c.text('أغريغيت | موجز المشهد الجيوسياسي والأمني',(1870,36,1760,72),50,True,NAVY)
-    c.text('قراءة معمقة لمشهد إقليمي متغير',(2080,112,1520,50),31,True,NAVY2)
-    _globe(c,3690,78,42,NAVY)
-    c.text('رؤية أوسع لفهم أعمق لقرار أكثر استنارة',(3350,120,310,84),22,True,MUTED,'center')
+    c.text('أغريغيت | موجز القيادة الجيوسياسي والأمني',(1960,24,1620,62),45,True,INK)
+    c.text('قراءة معمقة لمشهد إقليمي متغير',(2320,86,1260,42),25,True,NAVY2)
+    _globe(c,3668,58,34,NAVY)
     date_ar=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year} | {end.strftime('%H:%M')} بتوقيت الإمارات"
-    c.text(date_ar,(580,38,1160,48),25,True,INK,'left')
-    c.text('معلومات موثقة قدر الإمكان.. وقراءة أكثر استنارة',(580,94,1160,40),23,False,MUTED,'left')
-    c.text(title,(1260,178,1320,54),30,True,NAVY,'center')
-    if brief.get('sample'):
-        c.text('نموذج تصميم تجريبي — ليس أخباراً حقيقية',(1250,218,1340,32),19,True,RED,'center')
+    c.text(date_ar,(150,28,1350,42),24,True,INK,'left')
+    c.text('معلومات موثقة قدر الإمكان.. لقرارات أكثر استنارة',(150,82,1350,34),20,False,MUTED,'left')
+    c.text(title,(1350,118,1140,32),20,True,NAVY,'center')
+    c.rule(55,154,W-110,BORDER,2)
+
 
 def _panel(c,box,title,color=NAVY,header_h=88):
     x,y,w,h=map(int,box)
@@ -225,17 +225,17 @@ def _stats_values(brief):
 
 def stats(c,brief):
     vals=list(reversed(_stats_values(brief)))
-    margin=55; gap=18
-    w=(W-2*margin-gap*7)//8
-    y=268; h=166
+    margin=55; gap=10
+    card_w=(W-2*margin-gap*7)//8
+    y=168; h=128
     for i,(label,value,color) in enumerate(vals):
-        x=margin+i*(w+gap)
-        c.shadow((x,y,w,h),offset=5,radius=20)
-        c.rounded((x,y,w,h),fill=PAPER,outline='#D4E1E8',radius=20,width=2)
-        c.d.rounded_rectangle((x+12,y+12,x+80,y+80),radius=22,fill='#EEF7F7')
-        c.d.ellipse((x+31,y+31,x+61,y+61),outline=color,width=5)
-        c.text(label,(x+92,y+20,w-112,44),24,True,color)
-        c.text(str(value),(x+92,y+72,w-112,68),36,True,INK)
+        x=margin+i*(card_w+gap)
+        c.rounded((x,y,card_w,h),fill=PAPER,outline='#D8E1E7',radius=14,width=2)
+        c.d.line((x+86,y+18,x+86,y+h-18),fill='#E3E9ED',width=2)
+        c.d.ellipse((x+23,y+35,x+63,y+75),outline=color,width=5)
+        c.text(label,(x+102,y+18,card_w-118,34),19,True,NAVY)
+        c.text(str(value),(x+102,y+58,card_w-118,48),29,True,INK)
+
 
 def _event_by_region(events):
     out={}
@@ -361,100 +361,190 @@ def _analysis_summary(events):
     high=sum(e.get('severity')=='high' for e in events)
     return f'{assessment} تغطي هذه الدورة {covered} منطقة وبها {high} تطورات مصنفة أولوية مرتفعة. استمرار الرصد مطلوب مع الحفاظ على الفصل بين الوقائع والتقدير.'
 
+TOPIC_AR={
+    'diplomacy':'الدبلوماسية والاتصالات',
+    'military':'التحركات العسكرية',
+    'security':'الأمن والاستقرار',
+    'political_stability':'الاستقرار السياسي',
+    'humanitarian_conflict':'الأوضاع الإنسانية',
+    'sanctions':'العقوبات والقيود',
+    'strategic_infrastructure':'البنية التحتية الاستراتيجية',
+}
+
+def _topic_distribution(events,limit=5):
+    counts={}
+    for e in events:
+        key=e.get('topic') or 'security'
+        counts[key]=counts.get(key,0)+1
+    total=max(1,sum(counts.values()))
+    ranked=sorted(counts.items(),key=lambda kv:(-kv[1],kv[0]))[:limit]
+    return [(TOPIC_AR.get(k,k),v,round(v*100/total)) for k,v in ranked]
+
+def _detail_row(c,event,index,box):
+    x,y,w,h=map(int,box)
+    color=SEVERITY.get(event.get('severity','low'),('منخفض',MUTED))[1]
+    c.d.line((x,y+h,x+w,y+h),fill='#E2E8EC',width=2)
+    c.rounded((x+w-72,y+18,52,52),fill=PALE_BLUE,outline=None,radius=10,width=1)
+    c.text(str(index),(x+w-72,y+27,52,32),20,True,NAVY,'center')
+    tile_x=x+w-300
+    c.rounded((tile_x,y+12,190,h-24),fill='#EEF3F6',outline='#DCE5EA',radius=12,width=1)
+    c.text(REGIONS.get(event.get('region'),'إقليمي'),(tile_x+10,y+38,170,50),17,True,color,'center')
+    c.text(event.get('title_ar',''),(x+8,y+14,w-330,56),21,True,NAVY)
+    c.text(event.get('summary_ar',''),(x+8,y+72,w-330,h-84),16,False,INK)
+
+def _alerts_panel(c,box,events):
+    x,y,w,h=_panel(c,box,'مؤشرات الإنذار والمتابعة',GREEN)
+    items=sorted(events,key=lambda e:({'high':0,'medium':1,'low':2}.get(e.get('severity'),3)))[:4]
+    if not items:
+        c.text('لا توجد مؤشرات إنذار مؤهلة في هذه النافذة.',(x,y,w,120),22,True,MUTED); return
+    step=max(108,h//len(items))
+    for i,e in enumerate(items):
+        sev,color=SEVERITY.get(e.get('severity','low'),('منخفض',GREEN))
+        c.text(sev,(x+w-140,y+i*step+12,120,30),16,True,color,'center')
+        c.text(e.get('title_ar',''),(x+8,y+i*step+8,w-165,52),19,True,INK)
+        c.text(e.get('watch_ar',''),(x+8,y+i*step+62,w-30,step-72),15,False,MUTED)
+        c.rule(x,y+(i+1)*step-4,w,BORDER,1)
+
+def _assess_panel(c,box,events):
+    x,y,w,h=_panel(c,box,'التقديرات التحليلية',PURPLE)
+    vals=_assessments(events,3)
+    if not vals:
+        c.text('لا تتوفر تقديرات تحليلية مدعومة في هذه النافذة.',(x,y,w,110),22,True,MUTED); return
+    step=max(98,h//len(vals))
+    for i,item in enumerate(vals):
+        c.rounded((x+w-52,y+i*step+8,40,40),fill='#EEE8F7',outline=None,radius=9,width=1)
+        c.text(str(i+1),(x+w-52,y+i*step+15,40,24),16,True,PURPLE,'center')
+        c.text(item,(x+8,y+i*step,w-74,step-8),17,False,INK)
+
+def _regional_implications(events,limit=4):
+    out=[]
+    for e in events:
+        a=e.get('assessment_ar')
+        if a and a not in out: out.append(a)
+        if len(out)>=limit: break
+    return out
+
+def _discussion_panel(c,box,brief):
+    x,y,w,h=_panel(c,box,'الرصد الاجتماعي واتجاهات الخطاب',BLUE)
+    events=brief.get('events',[])
+    c.text('أبرز موضوعات النقاش خلال نافذة الست ساعات',(x,y,w,40),22,True,NAVY)
+    yy=y+52
+    for i,(name,count,pct) in enumerate(_topic_distribution(events,5)):
+        cy=yy+i*66
+        c.rounded((x+w-50,cy,40,40),fill=PALE_BLUE,outline=None,radius=10,width=1)
+        c.text(str(i+1),(x+w-50,cy+7,40,24),16,True,NAVY,'center')
+        c.text(name,(x+8,cy+4,w-185,30),18,True,INK)
+        base_w=w-220; bar_w=max(12,int(base_w*pct/100))
+        c.d.rounded_rectangle((x+8,cy+42,x+8+base_w,cy+52),radius=5,fill='#E7EDF1')
+        c.d.rounded_rectangle((x+8,cy+42,x+8+bar_w,cy+52),radius=5,fill=[RED,GOLD,BLUE,GREEN,PURPLE][i%5])
+        c.text(f'{pct}%',(x+w-140,cy+8,76,26),16,True,INK,'center')
+    divider=yy+5*66+8
+    c.rule(x,divider,w,BORDER,2)
+    c.text('حالة الإسناد في المواد المنشورة',(x,divider+16,w,34),21,True,NAVY)
+    social=sum(any(s.get('kind')=='social' for s in e.get('sources',[])) for e in events)
+    attributed=sum(e.get('status_ar')=='تقرير منسوب' for e in events)
+    high=sum(e.get('severity')=='high' for e in events)
+    cards=[('رصد اجتماعي',social,TEAL),('تقارير منسوبة',attributed,BLUE),('أولوية مرتفعة',high,RED)]
+    cw=(w-24)//3
+    for i,(label,val,color) in enumerate(cards):
+        xx=x+i*(cw+12)
+        c.rounded((xx,divider+60,cw,120),fill='#F8FBFC',outline='#E0E8ED',radius=12,width=1)
+        c.text(str(val),(xx+8,divider+74,cw-16,40),27,True,color,'center')
+        c.text(label,(xx+8,divider+114,cw-16,30),16,True,INK,'center')
+    ny=divider+205
+    c.text('أبرز الروايات المتداولة',(x,ny,w,34),21,True,NAVY)
+    social_items=_social_items(events,4)
+    narratives=social_items or [e.get('title_ar','') for e in events[:4]]
+    for i,item in enumerate(narratives[:4]):
+        c.text('• '+item,(x+8,ny+40+i*50,w-16,42),16,False,INK)
+    caution_y=y+h-142
+    c.rounded((x,caution_y,w,128),fill=PALE_RED,outline='#F1C9CE',radius=12,width=1)
+    c.text('معلومة متداولة تتطلب الحذر',(x+18,caution_y+12,w-36,30),18,True,RED)
+    caution=(social_items[0] if social_items else 'لا توجد حالياً إشارة اجتماعية منفردة تستدعي التحذير؛ يستمر الرصد مع الفصل بين الادعاء والخبر.')
+    c.text(caution,(x+18,caution_y+48,w-36,64),15,False,INK)
+
+def _global_indicators(c,box,brief):
+    x,y,w,h=_panel(c,box,'مؤشرات عالمية ذات صلة',PURPLE)
+    events=brief.get('events',[])
+    vals=[
+        ('أمن الملاحة',sum(any(k in (e.get('title_ar','')+' '+e.get('summary_ar','')) for k in ('البحر الأحمر','الملاحة','ميناء','خليج عدن')) for e in events),BLUE),
+        ('تصعيد مرتفع',sum(e.get('severity')=='high' for e in events),RED),
+        ('مسارات دبلوماسية',sum(e.get('topic')=='diplomacy' for e in events),GREEN),
+        ('نطاقات محدثة',len({e.get('region') for e in events if e.get('region')}),GOLD),
+    ]
+    step=max(48,h//4)
+    for i,(label,val,color) in enumerate(vals):
+        yy=y+i*step
+        c.text(label,(x+8,yy,w-165,30),16,True,INK)
+        c.text(str(val),(x+w-150,yy,72,30),18,True,color,'center')
+        c.text('↑' if val else '→',(x+w-66,yy,46,30),18,True,color,'center')
+
 def page1(brief,path):
     c=Canvas()
-    masthead(c,brief,1,'المشهد العام')
+    masthead(c,brief,1,'التحليل والرصد')
     stats(c,brief)
     events=brief.get('events',[])
-    uae=[e for e in events if is_uae(e)][:3]
-    priorities=sorted(events,key=lambda e:({'high':0,'medium':1,'low':2}.get(e.get('severity'),3)))[:3]
-
-    left=_panel(c,(55,470,885,1100),'أخبار الإمارات',NAVY)
-    lx,ly,lw,lh=left
-    if uae:
-        card_h=(lh-28*2)//3
-        for i,e in enumerate(uae):
-            _mini_event(c,e,i+1,(lx,ly+i*(card_h+28),lw,card_h))
+    _discussion_panel(c,(55,330,980,1690),brief)
+    cx,cy,cw,ch=_panel(c,(1070,330,1650,1340),'التحليل التفصيلي لأبرز التطورات',RED)
+    rows=events[:6]
+    if rows:
+        rh=ch//6
+        for i,e in enumerate(rows):
+            _detail_row(c,e,i+1,(cx,cy+i*rh,cw,rh))
     else:
-        c.text('لا يوجد تحديث إماراتي مؤهل في نافذة الست ساعات الحالية.',(lx,ly,lw,180),30,True,MUTED)
-
-    cx,cy,cw,ch=_panel(c,(975,470,1880,1100),'التطور الرئيسي',NAVY)
-    if events:
-        lead=events[0]
-        c.text(lead.get('title_ar',''),(cx,cy,cw,110),37,True,INK)
-        c.text(lead.get('summary_ar',''),(cx,cy+116,cw,205),27,False,INK)
-        map_w=1540; map_h=515
-        map_x=cx+(cw-map_w)//2
-        vector_map(c,(map_x,cy+330,map_w,map_h),events)
-        c.text('المصدر: '+(' / '.join(s.get('source','') for s in lead.get('sources',[])[:3]) or '—'),
-               (cx,cy+866,cw,42),18,False,MUTED)
-    else:
-        c.text('لا توجد مواد مستوفية لشروط النشر في النافذة المحددة.',(cx,cy,cw,200),35,True,MUTED)
-
-    rx,ry,rw,rh=_panel(c,(2890,470,895,1100),'أولويات المتابعة',NAVY)
-    if priorities:
-        card_h=(rh-28*2)//3
-        for i,e in enumerate(priorities):
-            _mini_event(c,e,i+1,(rx,ry+i*(card_h+28),rw,card_h))
-    else:
-        c.text('لا توجد أولويات إضافية في هذه النافذة.',(rx,ry,rw,180),30,True,MUTED)
-
-    bx,by,bw,bh=_panel(c,(55,1605,1250,455),'التغيرات منذ الإحاطة السابقة',GREEN)
-    _numbered_lines(c,_changes(brief),(bx,by,bw,bh),23,INK,4)
-
-    bx,by,bw,bh=_panel(c,(1340,1605,1215,455),'سياق دولي',NAVY)
-    _numbered_lines(c,_world_context(events),(bx,by,bw,bh),23,INK,4)
-
-    bx,by,bw,bh=_panel(c,(2590,1605,1195,455),'الخلاصة التحليلية',GOLD)
-    c.text(_analysis_summary(events),(bx,by,bw,bh-74),25,True,INK)
-    c.rounded((bx,by+bh-65,bw,55),fill=PALE_GOLD,outline='#E6D09C',radius=14,width=1)
-    c.text(f'تغطية شاملة لـ {len(REGIONS)} نطاقاً جغرافياً — من الخليج إلى شمال أفريقيا وآسيا والقرن الأفريقي والصومال.',
-           (bx+18,by+bh-55,bw-36,38),18,True,GOLD,'center')
-
-    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1030,2092,1790,34),18,False,MUTED,'center')
+        c.text('لا توجد تطورات مؤهلة خلال نافذة التغطية.',(cx,cy,cw,150),26,True,MUTED)
+    bx,by,bw,bh=_panel(c,(1070,1700,805,320),'التغيرات منذ الإحاطة السابقة',GOLD)
+    _numbered_lines(c,_changes(brief,4),(bx,by,bw,bh),17,INK,4)
+    bx,by,bw,bh=_panel(c,(1905,1700,815,320),'انعكاسات محتملة على المصالح الإقليمية',TEAL)
+    _numbered_lines(c,_regional_implications(events,4),(bx,by,bw,bh),17,INK,4)
+    _alerts_panel(c,(2755,330,1030,690),events)
+    _assess_panel(c,(2755,1050,1030,520),events)
+    _global_indicators(c,(2755,1600,1030,420),brief)
+    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1010,2094,1820,30),17,False,MUTED,'center')
     c.text('الصفحة 1 من 3',(58,2090,280,34),18,True,MUTED,'left')
     c.save(path)
     return c.truncated
 
+
 def _region_card(c,region,event,index,box):
     x,y,w,h=map(int,box)
     color=SEVERITY.get((event or {}).get('severity','low'),('منخفض',MUTED))[1] if event else '#8BA4B4'
-    c.shadow((x,y,w,h),offset=5,radius=18)
-    c.rounded((x,y,w,h),fill=PAPER,outline='#D7E2E9',radius=18,width=2)
-    c.d.rounded_rectangle((x,y,x+w,y+58),radius=18,fill=color)
-    c.d.rectangle((x,y+40,x+w,y+58),fill=color)
-    c.text(REGIONS[region],(x+20,y+10,w-40,38),23,True,'white')
+    c.rounded((x,y,w,h),fill=PAPER,outline='#D9E2E8',radius=12,width=2)
+    c.d.rectangle((x,y,x+w,y+48),fill=color)
+    c.text(REGIONS[region],(x+18,y+7,w-36,32),20,True,'white')
     if not event:
-        c.text('لا يوجد تحديث مؤهل خلال نافذة التغطية الحالية.',(x+22,y+78,w-44,h-94),21,False,MUTED)
+        c.text('لا يوجد تحديث مؤهل خلال النافذة الحالية.',(x+18,y+70,w-36,h-86),18,False,MUTED)
         return
-    c.text(event.get('title_ar',''),(x+22,y+76,w-44,70),24,True,INK)
-    c.text(event.get('summary_ar',''),(x+22,y+150,w-44,h-194),19,False,INK)
-    c.text(f'[{index}] {event.get("status_ar","")}',(x+22,y+h-34,w-44,26),15,True,color)
+    c.text(event.get('title_ar',''),(x+18,y+64,w-36,54),20,True,INK)
+    c.text(event.get('summary_ar',''),(x+18,y+120,w-36,h-150),16,False,INK)
+    c.text(f'[{index}] {event.get("status_ar","")}',(x+18,y+h-28,w-36,20),13,True,color)
+
 
 def page2(brief,path):
     c=Canvas()
     masthead(c,brief,2,'المشهد الإقليمي التفصيلي')
+    stats(c,brief)
     events=brief.get('events',[])
     first=_event_by_region(events)
     indexes={}
     for i,e in enumerate(events,1):
         indexes.setdefault(e.get('region'),i)
     regions=list(REGIONS)
-    cols=3
-    gap_x=28; gap_y=22
-    left=55; top=300
+    cols=3; rows=6
+    left=55; top=330; gap_x=22; gap_y=18
     card_w=(W-110-gap_x*(cols-1))//cols
-    rows=5
-    card_h=(1745-gap_y*(rows-1))//rows
+    card_h=(1705-gap_y*(rows-1))//rows
     for n,region in enumerate(regions):
         col=n%cols; row=n//cols
         x=left+col*(card_w+gap_x)
         y=top+row*(card_h+gap_y)
         _region_card(c,region,first.get(region),indexes.get(region,0),(x,y,card_w,card_h))
-    c.text('15 نطاقاً جغرافياً مستقلاً — الصومال يظهر كنطاق مستقل عن القرن الأفريقي.',(900,2070,2040,38),20,True,NAVY,'center')
+    c.text(f'{len(REGIONS)} نطاقاً مستقلاً — مصر وعُمان والصومال تظهر كنطاقات مستقلة في التغطية.',
+           (840,2055,2160,34),18,True,NAVY,'center')
     c.text('الصفحة 2 من 3',(58,2090,280,34),18,True,MUTED,'left')
     c.save(path)
     return c.truncated
+
 
 def _social_items(events,limit=6):
     out=[]
@@ -484,47 +574,42 @@ def _watch_items(events,limit=6):
 
 def page3(brief,path):
     c=Canvas()
-    masthead(c,brief,3,'الرصد والتحليل ومؤشرات المتابعة')
+    masthead(c,brief,3,'الخلاصة التنفيذية والرصد المفتوح')
+    stats(c,brief)
     events=brief.get('events',[])
-
-    x,y,w,h=_panel(c,(55,300,1170,760),'التغيرات منذ الإحاطة السابقة',GREEN)
-    _numbered_lines(c,_changes(brief,6),(x,y,w,h),23,INK,6)
-
-    x,y,w,h=_panel(c,(55,1090,1170,945),'سياق دولي أوسع',NAVY)
-    _numbered_lines(c,_world_context(events,7),(x,y,w,h),23,INK,7)
-
-    x,y,w,h=_panel(c,(1260,300,1230,760),'الرصد الاجتماعي والمصادر المفتوحة',TEAL)
+    lx,ly,lw,lh=_panel(c,(55,330,1080,1690),'الإمارات | عُمان | مصر',BLUE)
+    uae=next((e for e in events if is_uae(e)),None)
+    oman=next((e for e in events if e.get('region')=='oman'),None)
+    egypt=next((e for e in events if e.get('region')=='egypt'),None)
+    selected=[('الإمارات',uae,GREEN),('عُمان',oman,TEAL),('مصر',egypt,GOLD)]
+    block_h=(lh-32)//3
+    for i,(label,e,color) in enumerate(selected):
+        yy=ly+i*(block_h+16)
+        c.text(label,(lx,yy,lw,34),23,True,color)
+        c.rule(lx,yy+40,lw,BORDER,2)
+        if e:
+            c.text(e.get('title_ar',''),(lx,yy+56,lw,70),22,True,INK)
+            c.text(e.get('summary_ar',''),(lx,yy+130,lw,block_h-170),18,False,INK)
+        else:
+            c.text('لا يوجد تحديث مؤهل خلال نافذة التغطية الحالية.',(lx,yy+62,lw,100),18,False,MUTED)
+    mx,my,mw,mh=_panel(c,(1170,330,1510,820),'السياق الدولي الأوسع',NAVY)
+    _numbered_lines(c,_world_context(events,6),(mx,my,mw,mh),20,INK,6)
+    mx,my,mw,mh=_panel(c,(1170,1180,1510,840),'الرصد الاجتماعي والمصادر المفتوحة',TEAL)
     social=_social_items(events,6)
     if social:
-        _numbered_lines(c,social,(x,y,w,h),21,INK,6)
+        _numbered_lines(c,social,(mx,my,mw,mh),19,INK,6)
     else:
-        c.text('لا توجد مواد اجتماعية مؤهلة في هذه النافذة. المواد الاجتماعية لا تُعامل كتأكيد مستقل.',
-               (x,y,w,180),26,True,MUTED)
-        c.rounded((x,y+215,w,115),fill=PALE_GREEN,outline='#C9E8DB',radius=16,width=1)
-        c.text('منهج الرصد: إشارات اجتماعية → إسناد للمصدر → فصل الادعاء عن الخبر → مراجعة قبل الإدراج.',
-               (x+22,y+238,w-44,70),20,True,GREEN,'center')
-
-    x,y,w,h=_panel(c,(1260,1090,1230,945),'مؤشرات الإنذار والمتابعة',BLUE)
-    _numbered_lines(c,_watch_items(events,7),(x,y,w,h),22,INK,7)
-
-    x,y,w,h=_panel(c,(2525,300,1260,1735),'الخلاصة التحليلية',GOLD)
-    c.text(_analysis_summary(events),(x,y,w,260),29,True,INK)
-    c.rule(x,y+280,w,GOLD,3)
-    c.text('تقديرات تحليلية',(x,y+310,w,46),25,True,GOLD)
-    _numbered_lines(c,_assessments(events,6),(x,y+372,w,770),22,INK,6)
-    c.rule(x,y+1165,w,BORDER,2)
-    c.text('مؤشرات التغطية',(x,y+1195,w,44),24,True,NAVY)
-    vals=_stats_values(brief)
-    yy=y+1255
-    for i,(label,value,color) in enumerate(vals[:6]):
-        row=i//2; col=i%2
-        xx=x+col*(w//2)
-        c.rounded((xx,yy+row*126,w//2-18,104),fill='#F8FBFC',outline='#DDE7EC',radius=14,width=1)
-        c.text(label,(xx+14,yy+row*126+12,w//2-46,34),18,True,color)
-        c.text(str(value),(xx+14,yy+row*126+48,w//2-46,42),25,True,INK)
+        c.text('لا توجد مواد اجتماعية مؤهلة في هذه النافذة. الرصد الاجتماعي لا يُعامل كتأكيد مستقل.',
+               (mx,my,mw,150),22,True,MUTED)
+    _alerts_panel(c,(2715,330,1070,620),events)
+    _assess_panel(c,(2715,980,1070,590),events)
+    gx,gy,gw,gh=_panel(c,(2715,1600,1070,420),'التغيرات منذ الإحاطة السابقة',GOLD)
+    _numbered_lines(c,_changes(brief,4),(gx,gy,gw,gh),17,INK,4)
+    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1010,2094,1820,30),17,False,MUTED,'center')
     c.text('الصفحة 3 من 3',(58,2090,280,34),18,True,MUTED,'left')
     c.save(path)
     return c.truncated
+
 
 def render(brief,output):
     output=Path(output)
