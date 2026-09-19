@@ -440,14 +440,14 @@ check("AAA +3% 1h move detected", "AAA" in hm and abs(hm["AAA"]["hour_chg"] - 3.
 check("BBB sub-1% excluded", "BBB" not in hm, sorted(hm))
 os.remove(prev_path)
 
-print("[T47] Alert routing buckets by webhook_env")
+print("[T47] Alert routing is pinned to the primary Discord webhook")
 rules_t = {"mention_role": "here", "rules": [
     {"type": "importance", "value": "Critical", "mention": True, "webhook_env": "DISCORD_WEBHOOK_CRIT"},
     {"type": "ticker", "value": "TSLA", "mention": False}]}
 items_t = [{"analysis": {"importance": "Critical", "tickers": ["TSLA"], "event": "X"}, "cluster": {}}]
 bk = alerts.route_alerts(items_t, rules_t)
-check("critical routed to CRIT env", "DISCORD_WEBHOOK_CRIT" in bk, sorted(bk))
-check("ticker rule to default env", "DISCORD_WEBHOOK" in bk, sorted(bk))
+check("alternate webhook override ignored", "DISCORD_WEBHOOK_CRIT" not in bk, sorted(bk))
+check("all alerts routed to default env", set(bk) == {"DISCORD_WEBHOOK"}, sorted(bk))
 
 print("[T48] Macro config: futures+commodities capped, index futures separate")
 mc = json.load(open(os.path.join(os.path.dirname(os.path.abspath(main.__file__)), "config", "macro.json")))
