@@ -61,33 +61,8 @@ jobs:
         run: |
           END="$(date --iso-8601=seconds)"
           python -m arabic_newsletter.run --end "$END" --output arabic_newsletter/runtime/preview
-      - name: Render and push approved Arabic layout sample
-        if: "startsWith(github.event.head_commit.message, 'Arabic sample:')"
-        run: |
-          python -m arabic_newsletter.run --sample --output arabic_newsletter/runtime/discord-sample
-          python - <<'PY'
-          import json, os
-          from contextlib import ExitStack
-          from pathlib import Path
-          import requests
-
-          webhook=os.environ.get("DISCORD_WEBHOOK_ARABIC","").strip()
-          if not webhook:
-              raise SystemExit("DISCORD_WEBHOOK_ARABIC missing")
-          paths=[
-              Path("arabic_newsletter/runtime/discord-sample/arabic-p1.png"),
-              Path("arabic_newsletter/runtime/discord-sample/arabic-p2.png"),
-              Path("arabic_newsletter/runtime/discord-sample/arabic-p3.png"),
-          ]
-          with ExitStack() as stack:
-              files={f"files[{i}]":(p.name,stack.enter_context(p.open("rb")),"image/png") for i,p in enumerate(paths)}
-              payload={"content":"نموذج تصميم تجريبي للموجز العربي — ليس أخباراً حقيقية","allowed_mentions":{"parse":[]}}
-              r=requests.post(webhook,params={"wait":"true"},data={"payload_json":json.dumps(payload,ensure_ascii=False)},files=files,timeout=(10,60))
-          r.raise_for_status()
-          print("Arabic layout sample delivered; message ID:",r.json().get("id"))
-          PY
       - name: Collect, translate, verify and render live slides
-        if: "!startsWith(github.event.head_commit.message, 'Arabic preview:') && !startsWith(github.event.head_commit.message, 'Arabic sample:')"
+        if: "!startsWith(github.event.head_commit.message, 'Arabic preview:')"
         run: |
           if [ -n "$DISCORD_WEBHOOK_ARABIC" ]; then
             python -m arabic_newsletter.run --send
