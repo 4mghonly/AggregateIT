@@ -13,7 +13,7 @@ from arabic_newsletter.core import UAE, REGIONS
 
 W,H=3840,2160
 ROOT=Path(__file__).resolve().parent
-BG='#F7F9FA'; PAPER='#FFFFFF'; INK='#102846'; MUTED='#68798A'; BORDER='#D8E1E7'
+BG='#F7F9FA'; PAPER='#FFFFFF'; INK='#071B31'; MUTED='#4F6070'; BORDER='#CDD8E0'
 NAVY='#0B5D92'; NAVY_DARK='#153D64'; SKY='#2A96CF'; RED='#C62836'; RED_DARK='#9E202B'
 GREEN='#167B5A'; TEAL='#15939A'; GOLD='#B8892C'; AMBER='#E89B1C'; PURPLE='#7652A8'
 PALE_BLUE='#E9F4FA'; PALE_GREEN='#EAF6F1'; PALE_RED='#FDEBEC'; PALE_GOLD='#FBF3DF'; PALE_PURPLE='#F0EBF8'
@@ -28,6 +28,35 @@ REGION_ASSET={
  'palestine_israel':'palestine_israel','jordan':'jordan'}
 STORY_ASSET={'palestine_israel':'gaza','yemen':'red_sea','iran':'iran_story','levant':'syria_story',
              'syria':'syria_story','energy':'energy','china_us':'china_us','gcc':'gcc'}
+
+REGION_COLORS={
+ 'gcc':'#8E2430','oman':'#A8434A','iran':'#2F6F5D','turkey':'#6F4A8E','iraq':'#8A5A44',
+ 'yemen':'#B06A3C','egypt':'#3C7B84','sudan':'#9A3E44','north_africa':'#545D9B',
+ 'sahel':'#3C6F99','horn':'#2F7F8A','somalia':'#4D8EB8','pakistan':'#3E775A',
+ 'afghanistan':'#6F645C','levant':'#675487','palestine_israel':'#4F657A','jordan':'#8B6B3F'
+}
+REGION_FLAGS={
+ 'gcc':['AE','SA','QA','KW','BH','OM'],'oman':['OM'],'iran':['IR'],'turkey':['TR'],'iraq':['IQ'],
+ 'yemen':['YE'],'egypt':['EG'],'sudan':['SD'],'north_africa':['DZ','LY','TN','MA'],
+ 'sahel':['ML','NE','BF'],'horn':['ET','DJ','ER'],'somalia':['SO'],'pakistan':['PK'],
+ 'afghanistan':['AF'],'levant':['LB','SY'],'palestine_israel':['PS','IL'],'jordan':['JO']
+}
+
+def sanitize_text(text):
+    s=str(text or '')
+    for bad in ('\ufffd','\u25a1','\u25a0','\ufeff','\u200e','\u200f'):
+        s=s.replace(bad,'')
+    s=s.replace('|','—')
+    s=re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]','',s)
+    return re.sub(r'\s+',' ',s).strip()
+
+def event_country_codes(e):
+    codes=[]
+    for s in e.get('sources',[]) or []:
+        code=(s.get('country') or '').upper().strip()
+        if len(code)==2 and code not in codes:
+            codes.append(code)
+    return codes[:3] or REGION_FLAGS.get(e.get('region'),['AE'])[:3]
 
 class Canvas:
     def __init__(self):
@@ -72,6 +101,7 @@ class Canvas:
     def text(self,text,box,size=32,bold=False,color=INK,align='right',min_size=14,line_ratio=1.35):
         x,y,w,h=map(int,box)
         if w<=0 or h<=0: return
+        text=sanitize_text(text)
         s=size; lines=[]; step=1
         while s>=min_size:
             f=self.font(s,bold); step=max(1,int(s*line_ratio)); lines=self.wrap(text,w,f)
@@ -150,8 +180,93 @@ class Canvas:
             self.d.polygon([(sx-9,y+h*.62),(sx,y+h*.10),(sx+9,y+h*.62)],fill=accent)
         self.d.rounded_rectangle((x,y,x+w,y+h),radius=radius,outline='#C9D7E0',width=2)
 
+    def country_flag(self,code,box):
+        x,y,w,h=map(int,box); code=(code or '').upper()
+        self.rounded((x,y,w,h),'#FFFFFF','#C7D3DB',8,2)
+        x+=2; y+=2; w-=4; h-=4
+        def horiz(cols):
+            hh=h/len(cols)
+            for i,col in enumerate(cols): self.d.rectangle((x,y+i*hh,x+w,y+(i+1)*hh),fill=col)
+        def vert(cols):
+            ww=w/len(cols)
+            for i,col in enumerate(cols): self.d.rectangle((x+i*ww,y,x+(i+1)*ww,y+h),fill=col)
+        if code=='AE':
+            rw=w*.25; self.d.rectangle((x,y,x+rw,y+h),fill='#D51F2B')
+            self.d.rectangle((x+rw,y,x+w,y+h/3),fill='#159447')
+            self.d.rectangle((x+rw,y+h/3,x+w,y+2*h/3),fill='white')
+            self.d.rectangle((x+rw,y+2*h/3,x+w,y+h),fill='#111111')
+        elif code=='SA':
+            self.d.rectangle((x,y,x+w,y+h),fill='#138A45'); self.d.rectangle((x+w*.24,y+h*.58,x+w*.78,y+h*.66),fill='white')
+        elif code=='QA':
+            self.d.rectangle((x,y,x+w*.34,y+h),fill='white'); self.d.rectangle((x+w*.34,y,x+w,y+h),fill='#8A1538')
+        elif code=='KW':
+            horiz(['#159447','white','#CE2B37']); self.d.polygon([(x,y),(x+w*.25,y+h*.18),(x+w*.25,y+h*.82),(x,y+h)],fill='#111111')
+        elif code=='BH':
+            self.d.rectangle((x,y,x+w*.32,y+h),fill='white'); self.d.rectangle((x+w*.32,y,x+w,y+h),fill='#D6293E')
+        elif code=='OM':
+            horiz(['white','#D8232A','#159447']); self.d.rectangle((x,y,x+w*.22,y+h),fill='#D8232A')
+        elif code=='IR': horiz(['#239F40','white','#DA0000'])
+        elif code=='TR':
+            self.d.rectangle((x,y,x+w,y+h),fill='#E30A17'); self.d.ellipse((x+w*.34,y+h*.25,x+w*.62,y+h*.75),fill='white'); self.d.ellipse((x+w*.41,y+h*.29,x+w*.64,y+h*.71),fill='#E30A17')
+        elif code=='IQ': horiz(['#CE1126','white','#111111']); self.d.rectangle((x+w*.37,y+h*.46,x+w*.63,y+h*.54),fill='#138A45')
+        elif code=='YE': horiz(['#CE1126','white','#111111'])
+        elif code=='EG':
+            horiz(['#CE1126','white','#111111']); self.d.ellipse((x+w*.47,y+h*.44,x+w*.53,y+h*.56),fill='#C6A234')
+        elif code=='SD':
+            horiz(['#D21034','white','#111111']); self.d.polygon([(x,y),(x+w*.28,y+h/2),(x,y+h)],fill='#007229')
+        elif code=='ML': vert(['#14B53A','#FCD116','#CE1126'])
+        elif code=='NE':
+            horiz(['#E05206','white','#0DB02B']); self.d.ellipse((x+w*.46,y+h*.43,x+w*.54,y+h*.57),fill='#E05206')
+        elif code=='BF': horiz(['#EF2B2D','#009E49'])
+        elif code=='DZ':
+            vert(['#006233','white']); self.d.ellipse((x+w*.44,y+h*.31,x+w*.61,y+h*.69),outline='#D21034',width=max(2,int(h*.06)))
+        elif code=='LY': horiz(['#E70013','#111111','#239E46'])
+        elif code=='TN':
+            self.d.rectangle((x,y,x+w,y+h),fill='#E70013'); self.d.ellipse((x+w*.40,y+h*.27,x+w*.60,y+h*.73),fill='white')
+        elif code=='MA':
+            self.d.rectangle((x,y,x+w,y+h),fill='#C1272D'); self.d.ellipse((x+w*.48,y+h*.46,x+w*.52,y+h*.54),fill='#006233')
+        elif code=='PK':
+            self.d.rectangle((x,y,x+w*.24,y+h),fill='white'); self.d.rectangle((x+w*.24,y,x+w,y+h),fill='#115740'); self.d.ellipse((x+w*.49,y+h*.29,x+w*.68,y+h*.71),fill='white'); self.d.ellipse((x+w*.55,y+h*.27,x+w*.71,y+h*.67),fill='#115740')
+        elif code=='AF': vert(['#111111','#BE1221','#007A36'])
+        elif code=='ET': horiz(['#078930','#FCDD09','#DA121A'])
+        elif code=='DJ':
+            horiz(['#6AB2E7','#12AD2B']); self.d.polygon([(x,y),(x+w*.34,y+h/2),(x,y+h)],fill='white')
+        elif code=='ER':
+            self.d.polygon([(x,y),(x+w,y+h/2),(x,y+h)],fill='#EA0437'); self.d.polygon([(x,y),(x+w,y),(x+w,y+h/2)],fill='#12AD2B'); self.d.polygon([(x,y+h),(x+w,y+h),(x+w,y+h/2)],fill='#4189DD')
+        elif code=='SO':
+            self.d.rectangle((x,y,x+w,y+h),fill='#4189DD'); self.d.ellipse((x+w*.47,y+h*.43,x+w*.53,y+h*.57),fill='white')
+        elif code=='LB':
+            horiz(['#ED1C24','white','#ED1C24']); self.d.polygon([(x+w*.50,y+h*.32),(x+w*.42,y+h*.62),(x+w*.58,y+h*.62)],fill='#00A651')
+        elif code=='SY':
+            horiz(['#007A3D','white','#000000'])
+            for ox in (.42,.50,.58): self.d.ellipse((x+w*ox-3,y+h*.47-3,x+w*ox+3,y+h*.53+3),fill='#CE1126')
+        elif code=='PS':
+            horiz(['#111111','white','#007A3D']); self.d.polygon([(x,y),(x+w*.28,y+h/2),(x,y+h)],fill='#CE1126')
+        elif code=='IL':
+            self.d.rectangle((x,y,x+w,y+h),fill='white'); self.d.rectangle((x,y+h*.20,x+w,y+h*.29),fill='#0038B8'); self.d.rectangle((x,y+h*.71,x+w,y+h*.80),fill='#0038B8')
+        elif code=='JO':
+            horiz(['#111111','white','#007A3D']); self.d.polygon([(x,y),(x+w*.30,y+h/2),(x,y+h)],fill='#CE1126')
+        else:
+            self.d.rectangle((x,y,x+w,y+h),fill='#E8EEF2')
+        self.d.rounded_rectangle((x-2,y-2,x+w+2,y+h+2),radius=8,outline='#BFCBD3',width=2)
+
+    def flag_group(self,codes,box):
+        x,y,w,h=map(int,box); codes=list(dict.fromkeys(codes or []))[:6]
+        if not codes: codes=['AE']
+        gap=10
+        if len(codes)<=3:
+            fw=min(180,(w-gap*(len(codes)-1))//len(codes)); fh=min(h,round(fw*.62))
+            total=fw*len(codes)+gap*(len(codes)-1); sx=x+(w-total)//2; sy=y+(h-fh)//2
+            for i,code in enumerate(codes): self.country_flag(code,(sx+i*(fw+gap),sy,fw,fh))
+        else:
+            cols=3; rows=(len(codes)+2)//3; fw=(w-gap*(cols-1))//cols; fh=min((h-gap*(rows-1))//rows,round(fw*.62))
+            totalh=rows*fh+gap*(rows-1); sy=y+(h-totalh)//2
+            for i,code in enumerate(codes):
+                col=i%3; row=i//3; self.country_flag(code,(x+col*(fw+gap),sy+row*(fh+gap),fw,fh))
+
     def save(self,path):
-        self.image.save(path,optimize=True)
+        # PNG is lossless; a low compression level reduces CPU work without altering sharpness.
+        self.image.save(path,format='PNG',compress_level=3,dpi=(144,144))
 
 def _flag(c,x,y,w=150,h=88):
     c.d.rectangle((x,y,x+w,y+h),fill='white',outline='#B9C8D2',width=2)
@@ -185,10 +300,10 @@ def masthead(c,brief,page):
     _banner_skyline(c)
     _flag(c,55,38,155,92)
     end=datetime.fromisoformat(brief['window_end']).astimezone(UAE)
-    dt=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year}  |  {end.strftime('%H:%M')} بتوقيت الإمارات"
-    c.text(dt,(235,40,1350,48),27,True,INK,'left')
+    dt=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year} — {end.strftime('%H:%M')} بتوقيت الإمارات"
+    c.text(dt,(235,36,1350,54),31,True,INK,'left')
     c.text('معلومات موثقة.. لقرارات أكثر استنارة',(235,98,1200,38),21,False,MUTED,'left')
-    c.text('أغريغيت | موجز القيادة الجيوسياسي والأمني',(2110,34,1410,70),49,True,INK)
+    c.text('أغريغيت — موجز القيادة الجيوسياسي والأمني',(2050,30,1470,78),55,True,INK)
     c.text('قراءة معمقة لمشهد إقليمي متغير',(2380,106,1130,42),27,True,NAVY_DARK)
     _globe(c,3668,77,42)
     c.text('رؤية أوسع\nلفهم أعمق\nلقرار أكثر استنارة',(3525,125,290,90),18,True,NAVY_DARK,'center',14)
@@ -209,18 +324,17 @@ def stats(c,brief):
         ('تقارير مدخلة',brief.get('input_count',0),NAVY),
         ('مصادر مستجدة',sum(h.get('status') in ('active','social_only') for h in health),GREEN),
         ('أخبار الإمارات',sum(is_uae(e) for e in events),NAVY),
-        ('مناطق بتحديث',f"{len({e.get('region') for e in events if e.get('region')})}/{len(REGIONS)}",GREEN),
+        ('مناطق بتحديث',f"{len({e.get('region') for e in events if e.get('region')})} من {len(REGIONS)}",GREEN),
         ('أولوية مرتفعة',sum(e.get('severity')=='high' for e in events),RED),
         ('أحداث',len(events),GOLD),
     ]
     margin=55; gap=16; y=260; h=150; cw=(W-2*margin-gap*7)//8
     for i,(label,value,color) in enumerate(vals):
         x=margin+i*(cw+gap)
-        c.rounded((x,y,cw,h),PAPER,'#D9E4EA',16,2)
-        c.d.ellipse((x+24,y+39,x+84,y+99),outline=color,width=7)
-        c.text(label,(x+103,y+20,cw-122,42),25,True,color)
-        c.text(str(value),(x+103,y+68,cw-122,61),42,True,INK)
-
+        c.rounded((x,y,cw,h),PAPER,'#CCD8E0',16,2)
+        c.d.rectangle((x,y,x+9,y+h),fill=color)
+        c.text(label,(x+25,y+18,cw-50,42),28,True,color,'center')
+        c.text(str(value),(x+25,y+68,cw-50,62),46,True,INK,'center')
 def panel(c,box,title,color):
     x,y,w,h=map(int,box)
     c.rounded(box,PAPER,BORDER,16,2)
@@ -269,13 +383,12 @@ def story_row(c,e,i,box):
     label,color,pale=severity(e)
     if i>1: c.line(x,y,x+w,y,BORDER,2)
     number_badge(c,x+w-70,y+22,i,PALE_BLUE,NAVY_DARK,60)
-    c.asset(story_asset(e,i),(x+46,y+20,300,h-40),14)
-    c.text(compact(e.get('title_ar',''),95),(x+375,y+12,w-735,60),35,True,NAVY_DARK)
-    c.text(compact(e.get('summary_ar',''),150),(x+375,y+76,w-735,h-92),27,False,INK)
+    c.flag_group(event_country_codes(e),(x+46,y+30,300,h-60))
+    c.text(compact(e.get('title_ar',''),88),(x+375,y+10,w-735,66),38,True,NAVY_DARK)
+    c.text(compact(e.get('summary_ar',''),135),(x+375,y+82,w-735,h-96),30,True,INK)
     c.rounded((x+w-335,y+16,185,48),pale,None,10,0)
     c.text(label,(x+w-328,y+23,170,32),21,True,color,'center')
     c.text(REGIONS.get(e.get('region'),'إقليمي'),(x+w-320,y+76,155,35),20,True,MUTED,'center')
-    c.d.ellipse((x+w-125,y+78,x+w-93,y+110),fill='#DEE7EC')
 
 def uae_panel(c,box,events):
     x,y,w,h=panel(c,box,'أخبار الإمارات',NAVY)
@@ -339,7 +452,7 @@ def alert_panel(c,box,events):
         c.rounded((x+w-190,yy+12,155,44),pale,None,10,0)
         c.text(label,(x+w-184,yy+19,143,29),21,True,col,'center')
         c.text(compact(e.get('title_ar',''),95),(x+6,yy+3,w-230,66),27,True,INK)
-        c.text(compact(e.get('summary_ar',''),105),(x+6,yy+75,w-24,step-85),20,False,MUTED)
+        c.text(compact(e.get('summary_ar',''),95),(x+6,yy+75,w-24,step-85),22,True,MUTED)
         if i<3: c.line(x,yy+step-4,x+w,yy+step-4,BORDER,1)
 
 def assessments_panel(c,box,events):
@@ -349,7 +462,7 @@ def assessments_panel(c,box,events):
     for i,t in enumerate(vals):
         yy=y+i*step
         number_badge(c,x+w-58,yy+10,i+1,PALE_PURPLE,PURPLE,48)
-        c.text(t,(x+6,yy+2,w-84,step-12),24,False,INK)
+        c.text(t,(x+6,yy+2,w-84,step-12),27,True,INK)
 
 def numbered_list(c,items,box,color=GOLD,limit=4):
     x,y,w,h=map(int,box)
@@ -357,7 +470,7 @@ def numbered_list(c,items,box,color=GOLD,limit=4):
     step=max(52,h//max(1,len(items)))
     for i,t in enumerate(items):
         number_badge(c,x+w-48,y+i*step+4,i+1,'#F5E7C3',GOLD,40)
-        c.text(t,(x+4,y+i*step,w-68,step-6),21,False,INK)
+        c.text(t,(x+4,y+i*step,w-68,step-6),23,True,INK)
 
 def changes(brief,limit=4):
     cur=brief.get('events',[])
