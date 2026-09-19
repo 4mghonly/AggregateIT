@@ -1,0 +1,39 @@
+name: One-shot corrected Arabic format
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/arabic-format-preview-trigger
+permissions:
+  actions: read
+  contents: read
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download validated Arabic preview
+        uses: actions/download-artifact@v4
+        with:
+          name: arabic-newsletter-35452457098
+          path: artifact
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 35452457098
+      - name: Locate three approved-format slides
+        run: |
+          find artifact -type f -name 'arabic-p*.png' -print
+          test -f artifact/preview/arabic-p1.png
+          test -f artifact/preview/arabic-p2.png
+          test -f artifact/preview/arabic-p3.png
+      - name: Send exactly one corrected Arabic briefing
+        env:
+          DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
+        run: |
+          test -n "$DISCORD_WEBHOOK_ARABIC"
+          curl --fail-with-body --silent --show-error             -F 'payload_json={"content":"معاينة التنسيق العربي المصحح — ثلاث شرائح فقط","allowed_mentions":{"parse":[]}}'             -F 'files[0]=@artifact/preview/arabic-p1.png;type=image/png'             -F 'files[1]=@artifact/preview/arabic-p2.png;type=image/png'             -F 'files[2]=@artifact/preview/arabic-p3.png;type=image/png'             "$DISCORD_WEBHOOK_ARABIC?wait=true" > response.json
+          python - <<'PY'
+          import json
+          data=json.load(open('response.json'))
+          print('Discord message ID:', data.get('id'))
+          PY
