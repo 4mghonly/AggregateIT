@@ -181,7 +181,7 @@ def page2(brief,path):
     indexes={}
     for i,e in enumerate(events,1):
         if e['region'] not in first: first[e['region']]=e; indexes[e['region']]=i
-    regions=list(REGIONS); cols=2; card_w=1768; card_h=238; gap_x=74; gap_y=8; start_y=278
+    regions=list(REGIONS); cols=2; card_w=1768; card_h=216; gap_x=74; gap_y=8; start_y=278
     for n,region in enumerate(regions):
         col=n%cols; row=n//cols; x=115+col*(card_w+gap_x); y=start_y+row*(card_h+gap_y)
         region_card(c,region,first.get(region),indexes.get(region,0),(x,y,card_w,card_h))

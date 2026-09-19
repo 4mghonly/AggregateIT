@@ -15,7 +15,7 @@ REGIONS = {
     'gcc': 'الخليج', 'iran': 'إيران', 'turkey': 'تركيا', 'iraq': 'العراق',
     'yemen': 'اليمن', 'sudan': 'السودان', 'sahel': 'الساحل الأفريقي',
     'north_africa': 'شمال أفريقيا', 'pakistan': 'باكستان',
-    'afghanistan': 'أفغانستان', 'horn': 'القرن الأفريقي', 'levant': 'لبنان وسوريا',
+    'afghanistan': 'أفغانستان', 'horn': 'القرن الأفريقي', 'somalia': 'الصومال', 'levant': 'لبنان وسوريا',
     'palestine_israel': 'فلسطين / إسرائيل', 'jordan': 'الأردن',
 }
 SECURITY = ('war','military','missile','drone','attack','defen','diploma','sanction','embargo','border',

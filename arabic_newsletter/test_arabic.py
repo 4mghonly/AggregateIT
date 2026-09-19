@@ -126,6 +126,11 @@ class DeliveryTests(unittest.TestCase):
     def test_no_old_webhook_fallback(self):
         with patch.dict(os.environ,{'DISCORD_WEBHOOK_ARABIC':'','DISCORD_WEBHOOK':'https://discord.com/api/webhooks/123/token'}):
             with self.assertRaises(DeliveryError): webhook_url()
+
+    def test_legacy_digests_cannot_reference_arabic_webhook(self):
+        root=Path(__file__).resolve().parents[1]
+        for rel in ('daily.py','weekly.py','.github/workflows/daily.yml','.github/workflows/weekly.yml'):
+            self.assertNotIn('DISCORD_WEBHOOK_ARABIC',(root/rel).read_text(encoding='utf-8'),rel)
     def test_success_then_duplicate_suppression(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(Path(d)/'state'); path=Path(d)/'slide.png'; path.write_bytes(b'png')
@@ -163,6 +168,7 @@ class RenderTests(unittest.TestCase):
                     with Image.open(path) as image: self.assertEqual(image.size,(3840,2160))
     def test_sample_covers_every_region(self):
         brief=fixture()
+        self.assertIn('somalia',REGIONS)
         self.assertEqual(set(REGIONS),{e['region'] for e in brief['events']})
         self.assertGreaterEqual(sum(any(s.get('country')=='AE' for s in e['sources']) for e in brief['events']),3)
 

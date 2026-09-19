@@ -7,15 +7,15 @@ is `.github/workflows/arabic-newsletter.yml`.
 
 ## Approved scope
 
-- Modern Standard Arabic from original-language evidence; two 3840×2160 PNG slides
+- Modern Standard Arabic from original-language evidence; three 3840×2160 PNG slides
   in the approved Gazette palette and panel geometry, with native RTL shaping.
 - Every six hours: **03:30 / 09:30 / 15:30 / 21:30 Asia/Dubai**. Each edition covers
   its previous six-hour publication window. Publication can be delayed by runner queues.
 - GCC (AE/SA/QA/KW/BH/OM), Iran, Turkey, Iraq, Yemen, Sudan, Sahel
   (Mali/Burkina Faso/Niger/Mauritania/Chad/Senegal), North Africa
   (Algeria/Tunisia/Morocco/Egypt/Libya, including Western Sahara developments),
-  Pakistan, Afghanistan, Horn (Somalia including Somaliland developments,
-  Ethiopia/Djibouti/Eritrea), Palestine/Israel, Lebanon, Syria, Jordan.
+  Pakistan, Afghanistan, Horn (Ethiopia/Djibouti/Eritrea), Somalia (including
+  Somaliland developments), Palestine/Israel, Lebanon, Syria, Jordan.
 - Include diplomacy, conflict, security, instability, sanctions, arms embargoes,
   strategic infrastructure and conflict-related humanitarian reporting.
 - Include cautious, explicitly labelled analytical assessments and watch points.
@@ -40,8 +40,10 @@ rather than drawing disconnected Arabic letters. All output and state lives unde
 ## Secrets and deployment
 
 Required **new** GitHub Actions secret: `DISCORD_WEBHOOK_ARABIC` for the new channel.
-It never falls back to `DISCORD_WEBHOOK`. Set it in repository Settings → Secrets
-and variables → Actions. Never commit a webhook or API key.
+It never falls back to `DISCORD_WEBHOOK`. Daily and weekly digests remain bound to
+`DISCORD_WEBHOOK` only and must never reference `DISCORD_WEBHOOK_ARABIC`; an offline
+test enforces that routing boundary. Set the Arabic webhook in repository Settings →
+Secrets and variables → Actions. Never commit a webhook or API key.
 
 The workflow can reuse existing `QWEN_API_KEY` and `QWEN_BASE_URL` secrets without
 changing them. Optional isolated overrides: `ARABIC_LLM_API_KEY`,

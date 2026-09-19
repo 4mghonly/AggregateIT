@@ -1596,7 +1596,7 @@
   {
     "id": "s056",
     "name": "Radio Ergo",
-    "region": "horn",
+    "region": "somalia",
     "country": "SO",
     "checked_at": "2026-09-18T08:46:26.424899+00:00",
     "status": "active",
@@ -1634,7 +1634,7 @@
   {
     "id": "s057",
     "name": "SONNA",
-    "region": "horn",
+    "region": "somalia",
     "country": "SO",
     "checked_at": "2026-09-18T08:46:26.520239+00:00",
     "status": "failed",
@@ -1648,7 +1648,7 @@
   {
     "id": "s058",
     "name": "Goobjoog",
-    "region": "horn",
+    "region": "somalia",
     "country": "SO",
     "checked_at": "2026-09-18T08:46:26.742036+00:00",
     "status": "active",

@@ -1739,7 +1739,7 @@
   {
     "id": "s056",
     "name": "Radio Ergo",
-    "region": "horn",
+    "region": "somalia",
     "country": "SO",
     "language": "so",
     "website": "https://radioergo.org",
@@ -1781,7 +1781,7 @@
   {
     "id": "s057",
     "name": "SONNA",
-    "region": "horn",
+    "region": "somalia",
     "country": "SO",
     "language": "ar",
     "website": "https://sonna.so/ar",
@@ -1798,7 +1798,7 @@
   {
     "id": "s058",
     "name": "Goobjoog",
-    "region": "horn",
+    "region": "somalia",
     "country": "SO",
     "language": "so",
     "website": "https://goobjoog.com",
@@ -2640,7 +2640,7 @@
   {
     "id": "s094",
     "name": "Hiiraan Online",
-    "region": "horn",
+    "region": "somalia",
     "country": "SO",
     "language": "en",
     "website": "https://www.hiiraan.com",

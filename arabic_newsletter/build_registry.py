@@ -59,9 +59,9 @@ ISPR|pakistan|PK|en|https://ispr.gov.pk||official_military
 TOLOnews|afghanistan|AF|fa|https://tolonews.com/fa|https://tolonews.com/feed|broadcaster
 Pajhwok|afghanistan|AF|en|https://pajhwok.com|https://pajhwok.com/feed/|publisher
 Amu TV|afghanistan|AF|fa|https://amu.tv/fa|https://amu.tv/fa/feed/|broadcaster
-Radio Ergo|horn|SO|so|https://radioergo.org|https://radioergo.org/feed/|local_radio
-SONNA|horn|SO|ar|https://sonna.so/ar|https://sonna.so/ar/feed/|official
-Goobjoog|horn|SO|so|https://goobjoog.com|https://goobjoog.com/feed/|broadcaster
+Radio Ergo|somalia|SO|so|https://radioergo.org|https://radioergo.org/feed/|local_radio
+SONNA|somalia|SO|ar|https://sonna.so/ar|https://sonna.so/ar/feed/|official
+Goobjoog|somalia|SO|so|https://goobjoog.com|https://goobjoog.com/feed/|broadcaster
 Addis Standard|horn|ET|en|https://addisstandard.com|https://addisstandard.com/feed/|publisher
 ENA|horn|ET|en|https://www.ena.et/web/eng||official
 ADI|horn|DJ|fr|https://www.adi.dj||official

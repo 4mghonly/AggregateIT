@@ -13,7 +13,8 @@ BASE={
  'north_africa':'تحركات أمنية ودبلوماسية في شمال أفريقيا مع تركيز على الحدود والممرات البحرية',
  'pakistan':'إسلام آباد تراجع إجراءات الأمن الداخلي والحدودي والتنسيق العسكري',
  'afghanistan':'كابل تبحث ملفات الأمن الحدودي والعلاقات الإقليمية مع دول الجوار',
- 'horn':'تطورات أمنية وسياسية في القرن الأفريقي ومتابعة الملاحة في البحر الأحمر',
+ 'horn':'تطورات أمنية وسياسية في إثيوبيا وجيبوتي وإريتريا ومتابعة الملاحة في البحر الأحمر',
+ 'somalia':'الصومال: تطورات أمنية وسياسية ومتابعة الأوضاع في مقديشو والأقاليم',
  'levant':'لبنان وسوريا: متابعة أمن الحدود والانتشار العسكري والاتصالات السياسية',
  'palestine_israel':'فلسطين / إسرائيل: تطورات ميدانية واتصالات بشأن غزة والضفة والقدس',
  'jordan':'الأردن يرفع مستوى المتابعة الأمنية والدبلوماسية لتطورات الإقليم',
@@ -41,7 +42,7 @@ def event(region,title,severity,country,index,long=False):
 def fixture(long=False):
     start,end=edition_window(datetime.now(timezone.utc)); events=[]
     countries={'gcc':'AE','iran':'IR','turkey':'TR','iraq':'IQ','yemen':'YE','sudan':'SD','sahel':'ML',
-      'north_africa':'EG','pakistan':'PK','afghanistan':'AF','horn':'SO','levant':'LB','palestine_israel':'PS','jordan':'JO'}
+      'north_africa':'EG','pakistan':'PK','afghanistan':'AF','horn':'ET','somalia':'SO','levant':'LB','palestine_israel':'PS','jordan':'JO'}
     for i,region in enumerate(REGIONS):
         sev='high' if region in ('palestine_israel','iran','yemen','sudan') else 'medium'
         e=event(region,BASE[region],sev,countries[region],i,long); e['sources'][0]['published']=end.timestamp()-600; events.append(e)
