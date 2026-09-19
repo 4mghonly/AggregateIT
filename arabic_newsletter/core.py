@@ -12,8 +12,8 @@ from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 ROOT = Path(__file__).parent
 UAE = timezone(timedelta(hours=4))
 REGIONS = {
-    'gcc': 'الخليج', 'iran': 'إيران', 'turkey': 'تركيا', 'iraq': 'العراق',
-    'yemen': 'اليمن', 'sudan': 'السودان', 'sahel': 'الساحل الأفريقي',
+    'gcc': 'الخليج', 'oman': 'عُمان', 'iran': 'إيران', 'turkey': 'تركيا', 'iraq': 'العراق',
+    'yemen': 'اليمن', 'egypt': 'مصر', 'sudan': 'السودان', 'sahel': 'الساحل الأفريقي',
     'north_africa': 'شمال أفريقيا', 'pakistan': 'باكستان',
     'afghanistan': 'أفغانستان', 'horn': 'القرن الأفريقي', 'somalia': 'الصومال', 'levant': 'لبنان وسوريا',
     'palestine_israel': 'فلسطين / إسرائيل', 'jordan': 'الأردن',

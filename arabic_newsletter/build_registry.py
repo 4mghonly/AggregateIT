@@ -19,7 +19,7 @@ SPA|gcc|SA|ar|https://www.spa.gov.sa||official
 QNA|gcc|QA|ar|https://www.qna.org.qa/ar-QA||official
 KUNA|gcc|KW|ar|https://www.kuna.net.kw||official
 BNA|gcc|BH|ar|https://www.bna.bh||official
-ONA|gcc|OM|ar|https://omannews.gov.om||official
+ONA|oman|OM|ar|https://omannews.gov.om||official
 The National|gcc|AE|en|https://www.thenationalnews.com|https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml|publisher
 Al Arabiya|gcc|SA|ar|https://www.alarabiya.net|https://www.alarabiya.net/feed/rss2/ar.xml|broadcaster
 IRNA|iran|IR|fa|https://www.irna.ir|https://www.irna.ir/rss|official
@@ -49,8 +49,8 @@ APS Algeria|north_africa|DZ|ar|https://www.aps.dz||official
 TAP|north_africa|TN|ar|https://www.tap.info.tn/ar||official
 MAP|north_africa|MA|ar|https://www.mapnews.ma/ar||official
 Hespress|north_africa|MA|ar|https://www.hespress.com|https://www.hespress.com/feed|publisher
-Mada Masr|north_africa|EG|ar|https://www.madamasr.com/ar|https://www.madamasr.com/ar/feed/|publisher
-Ahram Online|north_africa|EG|en|https://english.ahram.org.eg||state_publisher
+Mada Masr|egypt|EG|ar|https://www.madamasr.com/ar|https://www.madamasr.com/ar/feed/|publisher
+Ahram Online|egypt|EG|en|https://english.ahram.org.eg||state_publisher
 Libya Al Ahrar|north_africa|LY|ar|https://libyaalahrar.tv|https://libyaalahrar.tv/feed/|broadcaster
 Al Wasat|north_africa|LY|ar|https://alwasat.ly||publisher
 Dawn|pakistan|PK|en|https://www.dawn.com|https://www.dawn.com/feeds/home|publisher

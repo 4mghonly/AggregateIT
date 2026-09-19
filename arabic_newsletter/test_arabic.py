@@ -51,6 +51,14 @@ class CoreTests(unittest.TestCase):
         links=social_links(soup,'https://example.com')
         self.assertEqual(len(links),1); self.assertEqual(links[0]['verified_via'],'https://example.com')
 
+    def test_egypt_and_oman_sources_are_first_class_regions(self):
+        root=Path(__file__).resolve().parent
+        sources=json.loads((root/'sources.json').read_text(encoding='utf-8'))
+        self.assertTrue(any(s.get('country')=='EG' for s in sources))
+        self.assertTrue(any(s.get('country')=='OM' for s in sources))
+        self.assertTrue(all(s.get('region')=='egypt' for s in sources if s.get('country')=='EG'))
+        self.assertTrue(all(s.get('region')=='oman' for s in sources if s.get('country')=='OM'))
+
 class EditorialTests(unittest.TestCase):
     def setUp(self):
         self.article=dict(id='a',region='iraq',country='IQ',language='en',title='Officials report a border attack in Iraq',text='Officials report a border attack with 12 injuries.',
@@ -175,6 +183,9 @@ class RenderTests(unittest.TestCase):
     def test_sample_covers_every_region(self):
         brief=fixture()
         self.assertIn('somalia',REGIONS)
+        self.assertIn('egypt',REGIONS)
+        self.assertIn('oman',REGIONS)
+        self.assertEqual(len(REGIONS),17)
         self.assertEqual(set(REGIONS),{e['region'] for e in brief['events']})
         self.assertGreaterEqual(sum(any(s.get('country')=='AE' for s in e['sources']) for e in brief['events']),3)
 

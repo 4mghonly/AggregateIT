@@ -8,13 +8,14 @@ components have been removed from this branch.
 
 ## Approved scope
 
-- Modern Standard Arabic from original-language evidence; three 3840×2160 PNG slides
+- Modern Standard Arabic from original-language evidence; three 3840×2160 PNG slides in the approved clean analytical-dashboard format
   in the approved Gazette palette and panel geometry, with native RTL shaping.
 - Every six hours: **03:30 / 09:30 / 15:30 / 21:30 Asia/Dubai**. Each edition covers
   its previous six-hour publication window. Publication can be delayed by runner queues.
-- GCC (AE/SA/QA/KW/BH/OM), Iran, Turkey, Iraq, Yemen, Sudan, Sahel
+- GCC (AE/SA/QA/KW/BH), **Oman** as a dedicated country view, Iran, Turkey, Iraq,
+  Yemen, **Egypt** as a dedicated country view, Sudan, Sahel
   (Mali/Burkina Faso/Niger/Mauritania/Chad/Senegal), North Africa
-  (Algeria/Tunisia/Morocco/Egypt/Libya, including Western Sahara developments),
+  (Algeria/Tunisia/Morocco/Libya, including Western Sahara developments),
   Pakistan, Afghanistan, Horn (Ethiopia/Djibouti/Eritrea), Somalia (including
   Somaliland developments), Palestine/Israel, Lebanon, Syria, Jordan.
 - Include diplomacy, conflict, security, instability, sanctions, arms embargoes,

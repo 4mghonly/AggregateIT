@@ -458,7 +458,7 @@
   {
     "id": "s016",
     "name": "ONA",
-    "region": "gcc",
+    "region": "oman",
     "country": "OM",
     "language": "ar",
     "website": "https://omannews.gov.om",
@@ -1408,7 +1408,7 @@
   {
     "id": "s046",
     "name": "Mada Masr",
-    "region": "north_africa",
+    "region": "egypt",
     "country": "EG",
     "language": "ar",
     "website": "https://www.madamasr.com/ar",
@@ -1424,7 +1424,7 @@
   {
     "id": "s047",
     "name": "Ahram Online",
-    "region": "north_africa",
+    "region": "egypt",
     "country": "EG",
     "language": "en",
     "website": "https://english.ahram.org.eg",
@@ -2350,7 +2350,7 @@
   {
     "id": "s073",
     "name": "Oman Observer",
-    "region": "gcc",
+    "region": "oman",
     "country": "OM",
     "language": "en",
     "website": "https://www.omanobserver.om",
@@ -2543,7 +2543,7 @@
   {
     "id": "s087",
     "name": "Egypt Independent",
-    "region": "north_africa",
+    "region": "egypt",
     "country": "EG",
     "language": "en",
     "website": "https://www.egyptindependent.com",

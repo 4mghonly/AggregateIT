@@ -3,11 +3,13 @@ from datetime import datetime, timezone
 from .core import REGIONS, edition_window
 
 BASE={
- 'gcc':'الإمارات تراجع إجراءات الجاهزية في الموانئ والمطارات بالتوازي مع اتصالات إقليمية',
+ 'gcc':'الإمارات ودول الخليج تراجع إجراءات الجاهزية في الموانئ والمطارات بالتوازي مع اتصالات إقليمية',
+ 'oman':'عُمان تتابع أمن الملاحة والموانئ والاتصالات الإقليمية من مسقط إلى بحر العرب',
  'iran':'طهران تعلن تحديثاً بشأن الانتشار العسكري والاتصالات الدبلوماسية الإقليمية',
  'turkey':'أنقرة تكثف المشاورات الأمنية والدبلوماسية بشأن تطورات الإقليم',
  'iraq':'بغداد تتابع أمن الحدود وتحركات الفصائل والاتصالات مع دول الجوار',
  'yemen':'تقارير عن تحركات عسكرية ومفاوضات مرتبطة بأمن البحر الأحمر',
+ 'egypt':'مصر تتابع أمن قناة السويس وسيناء وتكثف الاتصالات الدبلوماسية بشأن تطورات الإقليم',
  'sudan':'تطورات ميدانية واتصالات سياسية بشأن مسار القتال وحماية المدنيين',
  'sahel':'متابعة الانتشار الأمني والتحولات السياسية وتهديد الجماعات المسلحة في الساحل',
  'north_africa':'تحركات أمنية ودبلوماسية في شمال أفريقيا مع تركيز على الحدود والممرات البحرية',
@@ -42,7 +44,7 @@ def event(region,title,severity,country,index,long=False):
 def fixture(long=False):
     start,end=edition_window(datetime.now(timezone.utc)); events=[]
     countries={'gcc':'AE','iran':'IR','turkey':'TR','iraq':'IQ','yemen':'YE','sudan':'SD','sahel':'ML',
-      'north_africa':'EG','pakistan':'PK','afghanistan':'AF','horn':'ET','somalia':'SO','levant':'LB','palestine_israel':'PS','jordan':'JO'}
+      'north_africa':'DZ','egypt':'EG','oman':'OM','pakistan':'PK','afghanistan':'AF','horn':'ET','somalia':'SO','levant':'LB','palestine_israel':'PS','jordan':'JO'}
     for i,region in enumerate(REGIONS):
         sev='high' if region in ('palestine_israel','iran','yemen','sudan') else 'medium'
         e=event(region,BASE[region],sev,countries[region],i,long); e['sources'][0]['published']=end.timestamp()-600; events.append(e)
