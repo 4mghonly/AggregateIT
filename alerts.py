@@ -1,4 +1,4 @@
-"""alerts.py — custom alert rules with per-rule webhook routing."""
+"""alerts.py — custom alert rules routed through the primary Discord webhook only."""
 import os, json
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -21,13 +21,12 @@ def match_rules(a, cluster, rules):
     return hits
 
 def route_alerts(digest_items, rules=None):
-    """Bucket alert lines by target webhook env name."""
+    """Bucket all non-Arabic alerts into the primary DISCORD_WEBHOOK only."""
     rules = rules or load_rules()
     buckets = {}
     for x in digest_items:
         for r in match_rules(x["analysis"], x["cluster"], rules):
-            env = r.get("webhook_env") or "DISCORD_WEBHOOK"
-            b = buckets.setdefault(env, {"lines": [], "mention": False})
+            b = buckets.setdefault("DISCORD_WEBHOOK", {"lines": [], "mention": False})
             b["lines"].append("🚨 [%s:%s] %s" % (r.get("type"), r.get("value"), x["analysis"].get("event", "")[:100]))
             b["mention"] = b["mention"] or bool(r.get("mention"))
     return buckets

@@ -124,7 +124,7 @@ class DeliveryTests(unittest.TestCase):
             with self.assertRaises(DeliveryError): webhook_url()
     def test_success_then_duplicate_suppression(self):
         with tempfile.TemporaryDirectory() as d:
-            state=State(Path(d)/'state'); path=Path(d)/'test.txt'; path.write_text('عربي')
+            state=State(Path(d)/'state'); path=Path(d)/'slide.png'; path.write_bytes(b'png')
             response=Mock(status_code=200); response.json.return_value={'id':'123'}
             with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post',return_value=response) as post:
                 self.assertEqual(send(state,'edition',[path]),'123'); self.assertEqual(send(state,'edition',[path]),'123')
@@ -132,11 +132,19 @@ class DeliveryTests(unittest.TestCase):
             state.close()
     def test_timeout_is_uncertain_and_not_retried(self):
         with tempfile.TemporaryDirectory() as d:
-            state=State(Path(d)/'state'); path=Path(d)/'test.txt'; path.write_text('عربي')
+            state=State(Path(d)/'state'); path=Path(d)/'slide.png'; path.write_bytes(b'png')
             with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post',side_effect=requests.Timeout) as post:
                 with self.assertRaises(DeliveryError): send(state,'edition',[path])
                 with self.assertRaises(DeliveryError): send(state,'edition',[path])
                 self.assertEqual(post.call_count,1); self.assertEqual(state.delivery('edition')[0],'uncertain')
+            state.close()
+
+    def test_only_png_slides_can_reach_arabic_webhook(self):
+        with tempfile.TemporaryDirectory() as d:
+            state=State(Path(d)/'state'); path=Path(d)/'sources-ar.txt'; path.write_text('مصادر')
+            with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post') as post:
+                with self.assertRaises(DeliveryError): send(state,'edition',[path])
+                post.assert_not_called()
             state.close()
 
 class RenderTests(unittest.TestCase):

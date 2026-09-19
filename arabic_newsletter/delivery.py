@@ -1,4 +1,4 @@
-"""Dedicated Discord delivery. No fallback channel; uncertain sends require reconciliation."""
+"""Dedicated Arabic-slide Discord delivery. No fallback channel; uncertain sends require reconciliation."""
 import os
 import json
 import re
@@ -6,6 +6,7 @@ import time
 from contextlib import ExitStack
 from urllib.parse import urlsplit, urlunsplit
 import requests
+from pathlib import Path
 
 class DeliveryError(RuntimeError): pass
 
@@ -17,6 +18,11 @@ def webhook_url():
     return urlunsplit((p.scheme,p.netloc,p.path,'wait=true',''))
 
 def send(state,edition,paths):
+    # Hard isolation boundary: the Arabic webhook accepts rendered slide PNGs only.
+    # Sources, reports, JSON, text files, and any other artifact must never be attached.
+    if not paths or any(Path(p).suffix.lower()!='.png' for p in paths):
+        raise DeliveryError('DISCORD_WEBHOOK_ARABIC accepts Arabic slide PNGs only')
+    paths=[Path(p) for p in paths]
     url=webhook_url()
     prior=state.delivery(edition)
     if prior:
@@ -28,7 +34,7 @@ def send(state,edition,paths):
     for attempt in range(2):
         try:
             with ExitStack() as stack:
-                files={f'files[{i}]':(p.name,stack.enter_context(p.open('rb')),'image/png' if p.suffix=='.png' else 'text/plain; charset=utf-8') for i,p in enumerate(paths)}
+                files={f'files[{i}]':(p.name,stack.enter_context(p.open('rb')),'image/png') for i,p in enumerate(paths)}
                 r=requests.post(url,data={'payload_json':json.dumps({'content':'النشرة الجيوسياسية والعسكرية والأمنية | '+edition+' | بتوقيت الإمارات',
                   'allowed_mentions':{'parse':[]}},ensure_ascii=False)},files=files,timeout=(10,60))
         except requests.RequestException:

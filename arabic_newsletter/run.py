@@ -67,7 +67,7 @@ def main():
             write_json(args.output/'render_report.json',{'visually_shortened_blocks':clipped,'full_text':'sources-ar.txt','dimensions':[3840,2160]})
             refs=args.output/'sources-ar.txt'; references(brief,refs)
             if args.send:
-                message_id=send(state,brief['window_end'],paths+[refs])
+                message_id=send(state,brief['window_end'],paths)
                 state.put('previous_events',[{'title_ar':e['title_ar'],'summary_ar':e['summary_ar'],'source_ids':e['source_ids']} for e in brief['events']])
                 print('Arabic edition delivered; message ID:',message_id)
             else: print('Arabic slides rendered; no delivery requested')
