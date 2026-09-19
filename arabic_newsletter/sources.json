@@ -2744,9 +2744,10 @@
     "website": "https://en.ammonnews.net",
     "feed": "https://en.ammonnews.net/rss.php?id=2&type=news",
     "affiliation": "independent",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19"
   }
 ]
