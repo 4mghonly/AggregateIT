@@ -3,11 +3,11 @@ import argparse
 import fcntl
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from .core import ROOT, State, edition_window, live_window, write_json
 from .collect import audit, collect
-from .editor import Client, synthesize
+from .editor import Client, synthesize, build_analysis
 from .delivery import webhook_url, send
 from .render import render, references
 from .sample import fixture
@@ -37,11 +37,19 @@ def main():
                 if args.send: webhook_url()
                 print('Arabic configuration preflight passed' if args.probe_model else 'Arabic configuration present; API authentication not tested'); return
             if args.audit: audit(args.output); return
-            if args.sample: brief=fixture(args.long)
+            if args.sample:
+                brief=fixture(args.long)
+                brief['morning']=False
+                brief['analysis']={}
+
             else:
                 now=datetime.fromisoformat(args.end) if args.end else None
                 if now and now.tzinfo is None: parser.error('--end must include a timezone')
                 start,end=edition_window(now) if now else live_window(); edition=end.isoformat()
+                morning=end.hour==6
+                # The 06:00 UAE edition is the start-of-day product and carries
+                # a wider overnight collection window for a heavier synthesis.
+                collection_start=end-timedelta(hours=12) if end.hour==6 else start
                 if args.send:
                     webhook_url(); Client(state)
                     prior=state.delivery(edition)
@@ -49,7 +57,7 @@ def main():
                     if prior: raise RuntimeError('Previous delivery requires reconciliation')
                 audit_registry=ROOT/'runtime'/'audit'/'discovered_sources.json'
                 registry=json.loads(audit_registry.read_text()) if audit_registry.exists() else None
-                articles,health=collect(start,end,registry=registry)
+                articles,health=collect(collection_start,end,registry=registry)
                 args.output.mkdir(parents=True,exist_ok=True)
                 write_json(args.output/'collection_health.json',health)
                 write_json(args.output/'source_evidence.json',articles)
@@ -59,8 +67,9 @@ def main():
                 finally:
                     write_json(args.output/'editorial_draft.json',state.get('last_editorial_draft') or {})
                     write_json(args.output/'editorial_review.json',state.get('last_editorial_review') or [])
-                brief=dict(sample=False,window_start=start.isoformat(),window_end=end.isoformat(),events=events,
-                  input_count=len(articles),health=health,rejected=rejected,
+                analysis=build_analysis(events,state,morning=morning)
+                brief=dict(sample=False,window_start=collection_start.isoformat(),window_end=end.isoformat(),events=events,
+                  input_count=len(articles),health=health,rejected=rejected,analysis=analysis,morning=morning,
                   previous_events=state.get('previous_events') or [])
                 if args.send and not events: raise RuntimeError('No qualified events; empty publication blocked, see health artifact')
             paths,clipped=render(brief,args.output)
