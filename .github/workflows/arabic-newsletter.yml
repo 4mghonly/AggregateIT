@@ -56,7 +56,13 @@ jobs:
       - name: Audit sources from runner
         if: "!startsWith(github.event.head_commit.message, 'Arabic newsletter: scheduled')"
         run: python -m arabic_newsletter.run --audit --output arabic_newsletter/runtime/audit
+      - name: Render current-data preview without Discord delivery
+        if: "startsWith(github.event.head_commit.message, 'Arabic preview:')"
+        run: |
+          END="$(date --iso-8601=seconds)"
+          python -m arabic_newsletter.run --end "$END" --output arabic_newsletter/runtime/preview
       - name: Collect, translate, verify and render live slides
+        if: "!startsWith(github.event.head_commit.message, 'Arabic preview:')"
         run: |
           if [ -n "$DISCORD_WEBHOOK_ARABIC" ]; then
             python -m arabic_newsletter.run --send
@@ -79,5 +85,6 @@ jobs:
             arabic_newsletter/runtime/output/
             arabic_newsletter/runtime/sample/
             arabic_newsletter/runtime/audit/
+            arabic_newsletter/runtime/preview/
           retention-days: 7
           if-no-files-found: warn

@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import patch, Mock
 import requests
 from PIL import Image
-from .core import State, canonical, edition_window, live_window, preliminary_relevant
+from .core import State, canonical, edition_window, live_window, preliminary_relevant, uae_secondary_relevant, REGIONS
 from .collect import entry_time, social_links
 from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError
 from .delivery import send, webhook_url, DeliveryError
@@ -38,6 +38,10 @@ class CoreTests(unittest.TestCase):
         self.assertTrue(preliminary_relevant('Military sanctions on arms exports'))
         self.assertTrue(preliminary_relevant('هجمات على البنية التحتية قرب الحدود','ar'))
         self.assertFalse(preliminary_relevant('ارتفاع سعر الذهب وأرباح الشركات','ar'))
+    def test_uae_secondary_threshold_is_controlled(self):
+        self.assertTrue(uae_secondary_relevant('UAE civil defence updates emergency readiness at Dubai airport'))
+        self.assertFalse(uae_secondary_relevant('UAE hotel launches luxury brunch and investment offer'))
+
     def test_tracking_url_deduplication(self):
         self.assertEqual(canonical('https://site.test/a/?utm_source=x&id=2#top'),'https://site.test/a?id=2')
     def test_missing_publication_never_becomes_now(self):
@@ -152,9 +156,16 @@ class RenderTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d,patch('socket.socket',side_effect=AssertionError('No network during rendering')):
             normal=fixture(); empty=copy.deepcopy(normal); empty['events']=[]; empty['health']=[]
             for i,brief in enumerate([normal,empty,fixture(True)]):
-                paths,_=render(brief,Path(d)/str(i))
+                paths,clipped=render(brief,Path(d)/str(i))
+                self.assertEqual(len(paths),3)
+                if i==2: self.assertEqual(clipped,0)
                 for path in paths:
                     with Image.open(path) as image: self.assertEqual(image.size,(3840,2160))
+    def test_sample_covers_every_region(self):
+        brief=fixture()
+        self.assertEqual(set(REGIONS),{e['region'] for e in brief['events']})
+        self.assertGreaterEqual(sum(any(s.get('country')=='AE' for s in e['sources']) for e in brief['events']),3)
+
     def test_sample_never_financial(self):
         text=json.dumps(fixture(),ensure_ascii=False)
         for word in ('NASDAQ','Bitcoin','بورصة','استثمار'): self.assertNotIn(word,text)

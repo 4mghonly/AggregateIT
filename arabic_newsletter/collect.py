@@ -9,7 +9,7 @@ from urllib.parse import urljoin, urlsplit
 import feedparser
 import requests
 from bs4 import BeautifulSoup
-from .core import ROOT, canonical, clean, digest, preliminary_relevant, write_json
+from .core import ROOT, canonical, clean, digest, preliminary_relevant, uae_secondary_relevant, write_json
 
 HEADERS={'User-Agent':'AggregateIT-Arabic/1.0 (public news briefing; RSS reader)'}
 SOCIAL_HOSTS={'t.me':'telegram','twitter.com':'x','x.com':'x','youtube.com':'youtube','www.youtube.com':'youtube',
@@ -200,7 +200,9 @@ def collect(start,end,discover=False,registry=None):
     seen=set(); selected=[]
     for item in sorted(items,key=lambda x:x['published'] or 0,reverse=True):
         if not item['published'] or not start.timestamp() <= item['published'] < end.timestamp(): continue
-        if not preliminary_relevant(item['title']+' '+item['text'],item['language']): continue
+        material=item['title']+' '+item['text']
+        if not preliminary_relevant(material,item['language']):
+            if item.get('country')!='AE' or not uae_secondary_relevant(material): continue
         key=digest(clean(item['title']).casefold())
         if item['id'] in seen or key in seen: continue
         seen.update([item['id'],key]); selected.append(item)
@@ -208,20 +210,20 @@ def collect(start,end,discover=False,registry=None):
     buckets={}
     for item in selected: buckets.setdefault(item['region'],{}).setdefault(item['source_id'],[]).append(item)
     balanced=[]
-    while buckets and len(balanced)<72:
+    while buckets and len(balanced)<112:
         for region in list(buckets):
             publishers=buckets[region]
             sid=next(iter(publishers)); group=publishers.pop(sid)
             balanced.append(group.pop(0))
             if group: publishers[sid]=group
             if not publishers: del buckets[region]
-            if len(balanced)>=72: break
+            if len(balanced)>=112: break
     return balanced,sorted(health,key=lambda x:x['id'])
 
 def audit(output):
     sources=json.loads((ROOT/'sources.json').read_text()); reports=[]; discovered=[]
     with ThreadPoolExecutor(max_workers=8) as pool:
-        futures={pool.submit(collect_source,s,True):s for s in sources}
+        futures={pool.submit(collect_source,s,True):s for s in sources if s.get('enabled',True)}
         for f in as_completed(futures):
             s=futures[f]
             try: _,report=f.result()

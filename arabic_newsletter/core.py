@@ -15,7 +15,8 @@ REGIONS = {
     'gcc': 'الخليج', 'iran': 'إيران', 'turkey': 'تركيا', 'iraq': 'العراق',
     'yemen': 'اليمن', 'sudan': 'السودان', 'sahel': 'الساحل الأفريقي',
     'north_africa': 'شمال أفريقيا', 'pakistan': 'باكستان',
-    'afghanistan': 'أفغانستان', 'horn': 'القرن الأفريقي', 'levant': 'بلاد الشام',
+    'afghanistan': 'أفغانستان', 'horn': 'القرن الأفريقي', 'levant': 'لبنان وسوريا',
+    'palestine_israel': 'فلسطين / إسرائيل', 'jordan': 'الأردن',
 }
 SECURITY = ('war','military','missile','drone','attack','defen','diploma','sanction','embargo','border',
  'ceasefire','terror','insurgen','coup','security','troop','naval','nuclear','election','negotiat','foreign minister',
@@ -27,6 +28,12 @@ FINANCE = ('stock market','earnings','dividend','forex','crypto','bitcoin','nasd
  'share price','wall street','market rally','interest rate','inflation data','أسهم','بورصة','عملات مشفرة',
  'بيتكوين','أرباح الشركات','سعر الذهب','أسعار النفط','سعر النفط','سعر الصرف','سوق المال','الفائدة',
  'بورس','رمزارز','bourse','boursier')
+UAE_SECONDARY = ('uae','emirates','abu dhabi','dubai','sharjah','ajman','fujairah','ras al khaimah',
+ 'umm al quwain','president','crown prince','cabinet','government','ministry','police','civil defence',
+ 'emergency','airport','aviation','airspace','port','border','critical infrastructure','public safety',
+ 'الإمارات','الامارات','أبوظبي','ابوظبي','دبي','الشارقة','عجمان','الفجيرة','رأس الخيمة','راس الخيمة',
+ 'أم القيوين','ام القيوين','الرئيس','ولي العهد','مجلس الوزراء','الحكومة','وزارة','شرطة','الدفاع المدني',
+ 'طوارئ','مطار','طيران','مجال جوي','ميناء','حدود','بنية تحتية','سلامة عامة')
 
 def clean(value):
     value = unicodedata.normalize('NFKC', str(value or ''))
@@ -47,6 +54,12 @@ def preliminary_relevant(text, language='en'):
         return False
     # Unknown-language items reach the multilingual classifier, never silently disappear.
     return security or language not in ('en', 'ar', 'fr', 'tr', 'fa', 'ur')
+
+def uae_secondary_relevant(text):
+    """Controlled lower threshold for the dedicated UAE command-news panel."""
+    text=clean(text).casefold()
+    if any(k in text for k in FINANCE): return False
+    return any(k in text for k in UAE_SECONDARY)
 
 def edition_window(now=None):
     """03:30, 09:30, 15:30, 21:30 UAE; most recent due six-hour edition."""
