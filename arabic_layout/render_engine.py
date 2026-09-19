@@ -240,6 +240,15 @@ def rank_events(events,exclude_uae=False):
     pool=[e for e in events if not(exclude_uae and is_uae(e))]
     return sorted(pool,key=lambda e:({'high':0,'medium':1,'low':2}.get(e.get('severity'),3),e.get('region','')))
 
+def featured_events(events,limit=6,exclude_uae=False):
+    out=[]; seen=set()
+    for e in rank_events(events,exclude_uae=exclude_uae):
+        region=e.get('region')
+        if region in seen: continue
+        seen.add(region); out.append(e)
+        if len(out)>=limit: break
+    return out
+
 def story_asset(e,i):
     r=e.get('region')
     if r in STORY_ASSET: return STORY_ASSET[r]
