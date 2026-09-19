@@ -4,6 +4,7 @@ on:
     branches: [Arabic]
     paths:
       - arabic_newsletter/**
+      - arabic_layout/**
       - .github/workflows/arabic-newsletter.yml
 # A branch-only schedule cannot use GitHub cron. The connected six-hour
 # automation updates arabic_newsletter/trigger.json on Arabic to emit a push.
