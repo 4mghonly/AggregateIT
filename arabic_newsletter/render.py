@@ -117,7 +117,7 @@ def is_uae(event):
 
 def _mini_card(c,event,index,box,accent=BLUE):
     x,y,w,h=map(int,box)
-    _,sev,_=SEVERITY.get(event.get('severity'),SEVERITY['low'])
+    _,sev=SEVERITY.get(event.get('severity'),SEVERITY['low'])
     pale=PALE_RED if event.get('severity')=='high' else PALE_GOLD if event.get('severity')=='medium' else PALE_GREEN
     c.d.rounded_rectangle((x,y,x+w,y+h),radius=14,fill=pale,outline=BORDER,width=1)
     c.d.ellipse((x+w-58,y+20,x+w-20,y+58),fill=sev)
