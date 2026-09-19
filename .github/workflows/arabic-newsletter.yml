@@ -21,7 +21,7 @@ jobs:
       ARABIC_STATE_DIR: arabic_newsletter/runtime/state
       ARABIC_LLM_API_KEY: ${{ secrets.ARABIC_LLM_API_KEY || secrets.QWEN_API_KEY }}
       ARABIC_LLM_BASE_URL: ${{ secrets.ARABIC_LLM_BASE_URL || secrets.QWEN_BASE_URL }}
-      ARABIC_LLM_MODEL: ${{ vars.ARABIC_LLM_MODEL || vars.QWEN_MODEL || 'qwen3.8-flash' }}
+      ARABIC_LLM_MODEL: qwen3.8-omni-flash
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
     steps:
       - uses: actions/checkout@v4
