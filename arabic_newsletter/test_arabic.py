@@ -19,20 +19,20 @@ from bs4 import BeautifulSoup
 
 class CoreTests(unittest.TestCase):
     def test_six_hour_windows_at_uae_boundary(self):
-        start,end=edition_window(datetime.fromisoformat('2026-09-18T11:30:00+00:00'))
-        self.assertEqual(end.isoformat(),'2026-09-18T15:30:00+04:00')
+        start,end=edition_window(datetime.fromisoformat('2026-09-18T02:00:00+00:00'))
+        self.assertEqual(end.isoformat(),'2026-09-18T06:00:00+04:00')
         self.assertEqual((end-start).total_seconds(),21600)
-        _,before=edition_window(datetime.fromisoformat('2026-09-18T11:29:59+00:00'))
-        self.assertEqual(before.hour,9)
+        _,before=edition_window(datetime.fromisoformat('2026-09-18T01:59:59+00:00'))
+        self.assertEqual(before.hour,0)
     def test_early_scheduler_waits_for_intended_edition(self):
         with patch('arabic_newsletter.core.time.sleep') as sleep:
-            _,end=live_window(datetime.fromisoformat('2026-09-18T11:29:00+00:00'))
-            self.assertEqual(end.isoformat(),'2026-09-18T15:30:00+04:00')
+            _,end=live_window(datetime.fromisoformat('2026-09-18T01:59:00+00:00'))
+            self.assertEqual(end.isoformat(),'2026-09-18T06:00:00+04:00')
             self.assertEqual(sum(c.args[0] for c in sleep.call_args_list),60)
 
     def test_midnight_rollover(self):
         _,end=edition_window(datetime.fromisoformat('2026-09-18T01:00:00+04:00'))
-        self.assertEqual(end.isoformat(),'2026-09-17T21:30:00+04:00')
+        self.assertEqual(end.isoformat(),'2026-09-18T00:00:00+04:00')
     def test_finance_removed_security_exception(self):
         self.assertFalse(preliminary_relevant('Bitcoin rallies as stock market earnings rise'))
         self.assertTrue(preliminary_relevant('Military sanctions on arms exports'))
