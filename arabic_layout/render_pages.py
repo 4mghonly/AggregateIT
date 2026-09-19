@@ -91,10 +91,10 @@ def analytics_social(c,box,events):
         c.text(lab,(xx+8,sy+143,cw-16,36),24,True,col,'center')
     ny=sy+260
     c.text('أبرز الروايات المتداولة',(x,ny,w,40),27,True,NAVY_DARK)
-    narratives=[compact(e.get('title_ar',''),78) for e in featured_events(events,4)]
+    narratives=[compact(e.get('title_ar',''),82) for e in featured_events(events,6)]
     for i,t in enumerate(narratives):
-        number_badge(c,x+w-42,ny+51+i*70,i+1,'#EAF2FB',NAVY_DARK,36)
-        c.text(t,(x+5,ny+48+i*70,w-60,53),21,False,INK)
+        number_badge(c,x+w-42,ny+48+i*66,i+1,'#EAF2FB',NAVY_DARK,36)
+        c.text(t,(x+5,ny+45+i*66,w-60,52),22,False,INK)
     cy=y+h-150
     c.rounded((x,cy,w,135),PALE_RED,'#F0C9CE',11,1)
     c.text('معلومة متداولة تتطلب الحذر',(x+16,cy+12,w-32,37),25,True,RED)
