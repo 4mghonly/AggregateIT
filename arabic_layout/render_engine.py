@@ -217,17 +217,17 @@ def stats(c,brief):
     for i,(label,value,color) in enumerate(vals):
         x=margin+i*(cw+gap)
         c.rounded((x,y,cw,h),PAPER,'#D9E4EA',16,2)
-        c.d.ellipse((x+26,y+43,x+78,y+95),outline=color,width=6)
-        c.text(label,(x+98,y+24,cw-120,36),21,True,color)
-        c.text(str(value),(x+98,y+72,cw-120,55),34,True,INK)
+        c.d.ellipse((x+24,y+39,x+84,y+99),outline=color,width=7)
+        c.text(label,(x+103,y+20,cw-122,42),25,True,color)
+        c.text(str(value),(x+103,y+68,cw-122,61),42,True,INK)
 
 def panel(c,box,title,color):
     x,y,w,h=map(int,box)
     c.rounded(box,PAPER,BORDER,16,2)
-    c.d.rounded_rectangle((x,y,x+w,y+86),radius=16,fill=color)
-    c.d.rectangle((x,y+68,x+w,y+86),fill=color)
-    c.text(title,(x+24,y+14,w-48,54),33,True,'white')
-    return x+22,y+108,w-44,h-126
+    c.d.rounded_rectangle((x,y,x+w,y+90),radius=16,fill=color)
+    c.d.rectangle((x,y+70,x+w,y+90),fill=color)
+    c.text(title,(x+24,y+12,w-48,62),43,True,'white')
+    return x+22,y+112,w-44,h-130
 
 def number_badge(c,x,y,n,color=PALE_BLUE,ink=NAVY_DARK,size=54):
     c.rounded((x,y,size,size),color,None,12,0)
@@ -247,31 +247,39 @@ def story_asset(e,i):
     if i==4: return 'china_us'
     return REGION_ASSET.get(r,'gcc')
 
+def compact(text,limit=150):
+    text=re.sub(r'\\s+',' ',str(text or '')).strip()
+    if len(text)<=limit: return text
+    for sep in ('。','؟','!','.','؛',':'):
+        cut=text.find(sep,45)
+        if cut>0 and cut+1<=limit: return text[:cut+1]
+    return text[:max(20,limit-1)].rstrip()+'…'
+
 def story_row(c,e,i,box):
     x,y,w,h=map(int,box)
     label,color,pale=severity(e)
     if i>1: c.line(x,y,x+w,y,BORDER,2)
-    number_badge(c,x+w-64,y+20,i)
-    c.asset(story_asset(e,i),(x+54,y+18,290,h-36),14)
-    c.text(e.get('title_ar',''),(x+370,y+14,w-720,50),27,True,NAVY_DARK)
-    c.text(e.get('summary_ar',''),(x+370,y+69,w-720,h-88),18,False,INK)
-    c.rounded((x+w-330,y+16,175,42),pale,None,10,0)
-    c.text(label,(x+w-320,y+23,155,27),17,True,color,'center')
-    c.text(REGIONS.get(e.get('region'),'إقليمي'),(x+w-315,y+72,150,30),16,True,MUTED,'center')
-    c.d.ellipse((x+w-120,y+76,x+w-96,y+100),fill='#E1E8EC')
+    number_badge(c,x+w-70,y+22,i,PALE_BLUE,NAVY_DARK,60)
+    c.asset(story_asset(e,i),(x+46,y+20,300,h-40),14)
+    c.text(compact(e.get('title_ar',''),95),(x+375,y+12,w-735,60),35,True,NAVY_DARK)
+    c.text(compact(e.get('summary_ar',''),150),(x+375,y+76,w-735,h-92),27,False,INK)
+    c.rounded((x+w-335,y+16,185,48),pale,None,10,0)
+    c.text(label,(x+w-328,y+23,170,32),21,True,color,'center')
+    c.text(REGIONS.get(e.get('region'),'إقليمي'),(x+w-320,y+76,155,35),20,True,MUTED,'center')
+    c.d.ellipse((x+w-125,y+78,x+w-93,y+110),fill='#DEE7EC')
 
 def uae_panel(c,box,events):
     x,y,w,h=panel(c,box,'أخبار الإمارات',NAVY)
     u=[e for e in events if is_uae(e)][:3]
     if not u:
-        c.text('لا يوجد تحديث إماراتي مؤهل خلال نافذة الست ساعات الحالية.',(x,y,w,130),22,True,MUTED)
+        c.text('لا يوجد تحديث إماراتي مؤهل خلال نافذة الست ساعات الحالية.',(x,y,w,150),29,True,MUTED)
         return
     step=h//3
     for i,e in enumerate(u):
         yy=y+i*step
-        number_badge(c,x+w-62,yy+14,i+1)
-        c.text(e.get('title_ar',''),(x+10,yy+8,w-88,50),24,True,NAVY_DARK)
-        c.text(e.get('summary_ar',''),(x+10,yy+62,w-88,step-72),17,False,INK)
+        number_badge(c,x+w-66,yy+15,i+1,PALE_BLUE,NAVY_DARK,58)
+        c.text(compact(e.get('title_ar',''),90),(x+10,yy+5,w-94,65),31,True,NAVY_DARK)
+        c.text(compact(e.get('summary_ar',''),145),(x+10,yy+75,w-94,step-86),24,False,INK)
         if i<2: c.line(x,yy+step-5,x+w,yy+step-5,BORDER,1)
 
 def topic_distribution(events,limit=4):
@@ -285,32 +293,32 @@ def topic_distribution(events,limit=4):
 
 def social_panel(c,box,events):
     x,y,w,h=panel(c,box,'الرصد الاجتماعي واتجاهات الخطاب',SKY)
-    c.text('أبرز موضوعات النقاش (خلال 6 ساعات)',(x,y,w,42),23,True,NAVY_DARK)
-    yy=y+56
+    c.text('أبرز موضوعات النقاش (خلال 6 ساعات)',(x,y,w,48),29,True,NAVY_DARK)
+    yy=y+62
     colors=[RED,AMBER,SKY,GREEN]
     topics=topic_distribution(events,4)
     for i,(name,count,pct) in enumerate(topics):
-        cy=yy+i*63
-        number_badge(c,x+w-43,cy,i+1,'#DFF3F2',TEAL,38)
-        c.text(name,(x+4,cy,w-210,34),17,True,INK)
-        base=w-255
-        c.d.rounded_rectangle((x+4,cy+41,x+4+base,cy+52),radius=6,fill='#E7ECEF')
-        c.d.rounded_rectangle((x+4,cy+41,x+4+max(12,int(base*pct/100)),cy+52),radius=6,fill=colors[i])
-        c.text(f'{pct}%',(x+w-180,cy+5,80,28),17,True,INK,'center')
-    sy=yy+4*63+25
+        cy=yy+i*70
+        number_badge(c,x+w-48,cy,i+1,'#DFF3F2',TEAL,42)
+        c.text(name,(x+4,cy,w-220,39),23,True,INK)
+        base=w-270
+        c.d.rounded_rectangle((x+4,cy+47,x+4+base,cy+61),radius=7,fill='#E7ECEF')
+        c.d.rounded_rectangle((x+4,cy+47,x+4+max(14,int(base*pct/100)),cy+61),radius=7,fill=colors[i])
+        c.text(f'{pct}٪',(x+w-192,cy+5,90,31),22,True,INK,'center')
+    sy=yy+4*70+25
     c.line(x,sy,x+w,sy,BORDER,1)
-    c.text('اتجاهات السرد والمشاعر',(x,sy+18,w,36),23,True,NAVY_DARK)
-    cards=[('إيجابي','56%',GREEN,PALE_GREEN),('سلبي','31%',RED,PALE_RED),('محايد','13%',NAVY,PALE_BLUE)]
+    c.text('اتجاهات السرد والمشاعر',(x,sy+18,w,42),29,True,NAVY_DARK)
+    cards=[('إيجابي','56٪',GREEN,PALE_GREEN),('سلبي','31٪',RED,PALE_RED),('محايد','13٪',NAVY,PALE_BLUE)]
     cw=(w-24)//3
     for i,(lab,val,col,pale) in enumerate(cards):
         xx=x+i*(cw+12)
-        c.rounded((xx,sy+64,cw,150),pale,'#E2E8EC',12,1)
-        c.text(val,(xx+8,sy+77,cw-16,52),34,True,col,'center')
-        c.text(lab,(xx+8,sy+127,cw-16,32),20,True,col,'center')
-    caution_y=y+h-145
-    c.rounded((x,caution_y,w,130),PALE_RED,'#F2D0D4',12,1)
-    c.text('معلومة متداولة تتطلب الحذر',(x+16,caution_y+14,w-32,32),20,True,RED)
-    c.text('أي ادعاء اجتماعي غير مؤكد يبقى منسوباً لمصدره ولا يعامل كخبر مثبت.',(x+16,caution_y+54,w-32,62),16,False,INK)
+        c.rounded((xx,sy+70,cw,160),pale,'#E2E8EC',12,1)
+        c.text(val,(xx+8,sy+82,cw-16,62),44,True,col,'center')
+        c.text(lab,(xx+8,sy+142,cw-16,36),24,True,col,'center')
+    caution_y=y+h-150
+    c.rounded((x,caution_y,w,135),PALE_RED,'#F2D0D4',12,1)
+    c.text('معلومة متداولة تتطلب الحذر',(x+16,caution_y+12,w-32,37),25,True,RED)
+    c.text('أي ادعاء اجتماعي غير مؤكد يبقى منسوباً لمصدره ولا يعامل كخبر مثبت.',(x+16,caution_y+56,w-32,61),20,False,INK)
 
 def alert_panel(c,box,events):
     x,y,w,h=panel(c,box,'مؤشرات الإنذار والمتابعة',GREEN)
@@ -319,28 +327,28 @@ def alert_panel(c,box,events):
     for i,e in enumerate(items):
         yy=y+i*step
         label,col,pale=severity(e)
-        c.rounded((x+w-180,yy+12,145,40),pale,None,10,0)
-        c.text(label,(x+w-174,yy+19,133,26),17,True,col,'center')
-        c.text(e.get('title_ar',''),(x+6,yy+4,w-220,55),20,True,INK)
-        c.text(e.get('watch_ar',''),(x+6,yy+62,w-18,step-70),16,False,MUTED)
+        c.rounded((x+w-190,yy+12,155,44),pale,None,10,0)
+        c.text(label,(x+w-184,yy+19,143,29),21,True,col,'center')
+        c.text(compact(e.get('title_ar',''),95),(x+6,yy+3,w-230,66),27,True,INK)
+        c.text(compact(e.get('summary_ar',''),105),(x+6,yy+75,w-24,step-85),20,False,MUTED)
         if i<3: c.line(x,yy+step-4,x+w,yy+step-4,BORDER,1)
 
 def assessments_panel(c,box,events):
     x,y,w,h=panel(c,box,'التقديرات التحليلية',PURPLE)
-    vals=[e.get('assessment_ar') for e in rank_events(events) if e.get('assessment_ar')][:3]
+    vals=[compact(e.get('assessment_ar'),135) for e in rank_events(events) if e.get('assessment_ar')][:3]
     step=h//max(1,len(vals))
     for i,t in enumerate(vals):
         yy=y+i*step
-        number_badge(c,x+w-52,yy+8,i+1,PALE_PURPLE,PURPLE,42)
-        c.text(t,(x+6,yy,w-75,step-8),18,False,INK)
+        number_badge(c,x+w-58,yy+10,i+1,PALE_PURPLE,PURPLE,48)
+        c.text(t,(x+6,yy+2,w-84,step-12),24,False,INK)
 
 def numbered_list(c,items,box,color=GOLD,limit=4):
     x,y,w,h=map(int,box)
-    items=[t for t in items if t][:limit]
-    step=max(48,h//max(1,len(items)))
+    items=[compact(t,100) for t in items if t][:limit]
+    step=max(52,h//max(1,len(items)))
     for i,t in enumerate(items):
-        number_badge(c,x+w-44,y+i*step+3,i+1,'#F5E7C3',GOLD,36)
-        c.text(t,(x+4,y+i*step,w-60,step-5),16,False,INK)
+        number_badge(c,x+w-48,y+i*step+4,i+1,'#F5E7C3',GOLD,40)
+        c.text(t,(x+4,y+i*step,w-68,step-6),21,False,INK)
 
 def changes(brief,limit=4):
     cur=brief.get('events',[])
@@ -375,7 +383,8 @@ def indicator_table(c,box,events):
     step=h//4
     for i,(lab,val,col) in enumerate(vals):
         yy=y+i*step
-        c.text(lab,(x+8,yy,w-170,34),17,True,INK)
-        c.rounded((x+w-135,yy+2,110,36),'#F8FAFC',BORDER,9,1)
-        c.text(str(val),(x+w-128,yy+7,96,24),18,True,col,'center')
+        c.text(lab,(x+8,yy,w-180,38),22,True,INK)
+        c.rounded((x+w-145,yy+2,120,40),'#F8FAFC',BORDER,9,1)
+        c.text(str(val),(x+w-138,yy+8,106,27),23,True,col,'center')
         if i<3: c.line(x,yy+step-4,x+w,yy+step-4,BORDER,1)
+
