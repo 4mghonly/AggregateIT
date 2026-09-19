@@ -8,31 +8,11 @@ from datetime import datetime
 from pathlib import Path
 import os
 import re
-from PIL import Image, ImageDraw, ImageFont, ImageOps, features
-from io import BytesIO
-import base64
+from PIL import Image, ImageDraw, ImageFont, features
 from arabic_newsletter.core import UAE, REGIONS
 
 W,H=3840,2160
 ROOT=Path(__file__).resolve().parent
-ASSETS=ROOT/'assets'
-ATLAS_PARTS=[ASSETS/f'briefing_atlas.b64.{i:02d}' for i in range(1,9)]
-_ATLAS_CACHE=None
-def _atlas_image():
-    global _ATLAS_CACHE
-    if _ATLAS_CACHE is None:
-        if not all(p.exists() for p in ATLAS_PARTS): return None
-        raw=''.join(p.read_text(encoding='ascii').strip() for p in ATLAS_PARTS)
-        _ATLAS_CACHE=Image.open(BytesIO(base64.b64decode(raw))).convert('RGB')
-    return _ATLAS_CACHE.copy()
-ATLAS_CROPS={
- 'skyline':(0,0,960,135),'gcc':(0,135,240,135),'oman':(240,135,240,135),'iran':(480,135,240,135),'turkey':(720,135,240,135),
- 'iraq':(0,270,240,135),'yemen':(240,270,240,135),'egypt':(480,270,240,135),'sudan':(720,270,240,135),
- 'north_africa':(0,405,240,135),'sahel':(240,405,240,135),'horn':(480,405,240,135),'somalia':(720,405,240,135),
- 'pakistan':(0,540,240,135),'afghanistan':(240,540,240,135),'levant':(480,540,240,135),'palestine_israel':(720,540,240,135),
- 'jordan':(0,675,240,135),'gaza':(240,675,240,135),'red_sea':(480,675,240,135),'iran_story':(720,675,240,135),
- 'syria_story':(0,810,240,135),'energy':(240,810,240,135),'china_us':(480,810,240,135)}
-
 BG='#F7F9FA'; PAPER='#FFFFFF'; INK='#102846'; MUTED='#68798A'; BORDER='#D8E1E7'
 NAVY='#0B5D92'; NAVY_DARK='#153D64'; SKY='#2A96CF'; RED='#C62836'; RED_DARK='#9E202B'
 GREEN='#167B5A'; TEAL='#15939A'; GOLD='#B8892C'; AMBER='#E89B1C'; PURPLE='#7652A8'
@@ -117,19 +97,58 @@ class Canvas:
 
     def asset(self,name,box,radius=12):
         x,y,w,h=map(int,box)
-        atlas=_atlas_image()
-        if atlas is None or name not in ATLAS_CROPS:
-            self.rounded(box,fill='#EEF3F6',outline=BORDER,radius=radius,width=1); return
-        ax,ay,aw,ah=ATLAS_CROPS[name]
-        im=atlas.crop((ax,ay,ax+aw,ay+ah))
-        im=ImageOps.fit(im,(w,h),method=Image.Resampling.LANCZOS)
-        if radius>0:
-            mask=Image.new('L',(w,h),0)
-            md=ImageDraw.Draw(mask)
-            md.rounded_rectangle((0,0,w,h),radius=radius,fill=255)
-            self.image.paste(im,(x,y),mask)
+        palette={
+            'gcc':('#DCEFF7','#2A8BC0'),'oman':('#F1E4D0','#B88340'),'iran':('#E6E9EC','#647484'),
+            'turkey':('#E3EEF4','#3277A5'),'iraq':('#E7E3D5','#8C6A3C'),'yemen':('#EAD8C5','#A86C32'),
+            'egypt':('#E6EEF2','#3E7C9B'),'sudan':('#E7E5D7','#8B7852'),'north_africa':('#E4EEF1','#4D8AA3'),
+            'sahel':('#EFE0C7','#A87337'),'horn':('#DDEEF1','#2790A0'),'somalia':('#DDEFF5','#348DB5'),
+            'pakistan':('#E1ECE8','#32745F'),'afghanistan':('#E6DED4','#8D6549'),'levant':('#E7E3DD','#796B62'),
+            'palestine_israel':('#E8ECEF','#5E7182'),'jordan':('#E9E1D7','#96724B'),
+            'gaza':('#E7E7E7','#666666'),'red_sea':('#DDECF4','#236B99'),'iran_story':('#E8E9E9','#68747D'),
+            'syria_story':('#E9E1D7','#917354'),'energy':('#F0E1CC','#A75B26'),'china_us':('#E5E9F0','#385F92')
+        }
+        bg,accent=palette.get(name,('#E9EEF2','#59788D'))
+        self.rounded((x,y,w,h),bg,'#D5E0E6',radius,1)
+        self.d.rectangle((x+2,y+2,x+w-2,y+int(h*.62)),fill=bg)
+        self.d.rectangle((x+2,y+int(h*.62),x+w-2,y+h-2),fill='#CFDCE2')
+        if name=='red_sea':
+            self.d.rectangle((x+2,y+int(h*.58),x+w-2,y+h-2),fill='#8FC3D8')
+            self.d.polygon([(x+w*.18,y+h*.60),(x+w*.75,y+h*.60),(x+w*.65,y+h*.76),(x+w*.28,y+h*.76)],fill='#415868')
+            self.d.rectangle((x+w*.38,y+h*.36,x+w*.58,y+h*.60),fill='#536B79')
+            self.line(x+w*.48,y+h*.18,x+w*.48,y+h*.37,'#435B6B',3)
+        elif name=='energy':
+            self.d.rectangle((x+2,y+2,x+w-2,y+h-2),fill='#E6C99A')
+            for ox in (.22,.56):
+                cx=x+w*ox
+                self.line(cx,y+h*.72,cx+w*.16,y+h*.30,'#483829',5)
+                self.line(cx+w*.16,y+h*.30,cx+w*.26,y+h*.48,'#483829',5)
+                self.line(cx+w*.08,y+h*.42,cx+w*.22,y+h*.42,'#483829',5)
+        elif name=='china_us':
+            self.d.rectangle((x+2,y+2,x+w/2,y+h-2),fill='#C72732')
+            self.d.rectangle((x+w/2,y+2,x+w-2,y+h-2),fill='#E9E9E9')
+            for j in range(6):
+                self.d.rectangle((x+w/2,y+8+j*h/7,x+w-2,y+8+(j+.45)*h/7),fill='#C43B44')
+            self.d.rectangle((x+w/2,y+2,x+w*.72,y+h*.48),fill='#35568B')
+        elif name in ('afghanistan','pakistan'):
+            self.d.polygon([(x+5,y+h*.62),(x+w*.22,y+h*.28),(x+w*.40,y+h*.58),(x+w*.60,y+h*.20),(x+w*.86,y+h*.62)],fill='#8D969A')
+            self.d.polygon([(x+5,y+h*.70),(x+w*.28,y+h*.42),(x+w*.49,y+h*.69),(x+w*.68,y+h*.36),(x+w-5,y+h*.69)],fill='#ADB5B8')
+        elif name in ('gaza','syria_story','levant','palestine_israel','jordan','yemen','sahel','oman'):
+            for i in range(7):
+                bx=x+10+i*(w-20)/7
+                bh=h*(.18+.07*(i%3))
+                self.d.rectangle((bx,y+h*.62-bh,bx+(w-35)/8,y+h*.62),fill=accent)
+                self.d.rectangle((bx+5,y+h*.62-bh+7,bx+10,y+h*.62-bh+12),fill='#E6D7BA')
+            if name=='oman':
+                self.d.ellipse((x+w*.58,y+h*.22,x+w*.78,y+h*.42),outline=accent,width=4)
+                self.line(x+w*.68,y+h*.20,x+w*.68,y+h*.58,accent,4)
         else:
-            self.image.paste(im,(x,y))
+            for i in range(10):
+                bw=max(7,int(w*.055)); gap=(w-28)/10
+                bx=x+14+i*gap; top=y+h*(.20+.08*((i*3)%5))
+                self.d.rectangle((bx,top,bx+bw,y+h*.62),fill=accent)
+            sx=x+w*.56
+            self.d.polygon([(sx-9,y+h*.62),(sx,y+h*.10),(sx+9,y+h*.62)],fill=accent)
+        self.d.rounded_rectangle((x,y,x+w,y+h),radius=radius,outline='#C9D7E0',width=2)
 
     def save(self,path):
         self.image.save(path,optimize=True)
@@ -147,15 +166,23 @@ def _globe(c,cx,cy,r=42):
     c.d.ellipse((cx-r//2,cy-r,cx+r//2,cy+r),outline=NAVY_DARK,width=3)
     c.line(cx-r,cy,cx+r,cy,NAVY_DARK,3)
 
+def _banner_skyline(c):
+    c.d.rectangle((650,0,3200,238),fill='#F7FBFD')
+    base=214
+    for i in range(42):
+        x=690+i*58
+        height=38+((i*37)%105)
+        w=22+((i*11)%24)
+        c.d.rectangle((x,base-height,x+w,base),fill='#C9DBE5')
+        if i%4==0:
+            c.line(x+w/2,base-height-18,x+w/2,base-height,'#B4CBD7',2)
+    bx=1760
+    c.d.polygon([(bx-18,base),(bx,28),(bx+18,base)],fill='#AFC8D7')
+    c.line(bx,8,bx,34,'#91AFBF',3)
+
 def masthead(c,brief,page):
     c.d.rectangle((0,0,W,245),fill=PAPER)
-    atlas=_atlas_image()
-    if atlas is not None:
-        ax,ay,aw,ah=ATLAS_CROPS['skyline']
-        sky=atlas.crop((ax,ay,ax+aw,ay+ah)).resize((2150,405),Image.Resampling.LANCZOS)
-        fade=Image.new('RGB',sky.size,'white')
-        sky=Image.blend(sky,fade,.42)
-        c.image.paste(sky,(690,-35))
+    _banner_skyline(c)
     _flag(c,55,38,155,92)
     end=datetime.fromisoformat(brief['window_end']).astimezone(UAE)
     dt=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year}  |  {end.strftime('%H:%M')} بتوقيت الإمارات"
