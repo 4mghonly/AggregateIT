@@ -1,9 +1,9 @@
 """Approved three-slide Arabic geopolitical briefing layout.
 
-The first page follows the map-centred visual approved for Discord:
-UAE news at left, a dominant central development panel with a compact vector map,
-follow-up priorities at right, KPI cards above, and three analytical panels below.
-All drawing is offline, RTL-shaped, measured, and bounded.
+The first page follows the clean analytical-dashboard reference approved for Discord:
+social/chatter analysis at left, six detailed developments in the center, alert and
+assessment panels at right, with compact KPI cards above and analytical deltas below.
+All drawing is offline, deterministic, RTL-shaped, measured, and bounded.
 """
 from datetime import datetime
 from pathlib import Path
@@ -170,23 +170,23 @@ def masthead(c,brief,page,title):
     c.d.rectangle((0,0,W,155),fill=PAPER)
     _flag(c,58,34,0.72)
     end=datetime.fromisoformat(brief['window_end']).astimezone(UAE)
-    c.text('أغريغيت | موجز القيادة الجيوسياسي والأمني',(1960,24,1620,62),45,True,INK)
-    c.text('قراءة معمقة لمشهد إقليمي متغير',(2320,86,1260,42),25,True,NAVY2)
+    c.text('أغريغيت | موجز القيادة الجيوسياسي والأمني',(1830,20,1730,72),52,True,INK)
+    c.text('قراءة معمقة لمشهد إقليمي متغير',(2250,88,1320,46),28,True,NAVY2)
     _globe(c,3668,58,34,NAVY)
     date_ar=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year} | {end.strftime('%H:%M')} بتوقيت الإمارات"
-    c.text(date_ar,(150,28,1350,42),24,True,INK,'left')
-    c.text('معلومات موثقة قدر الإمكان.. لقرارات أكثر استنارة',(150,82,1350,34),20,False,MUTED,'left')
-    c.text(title,(1350,118,1140,32),20,True,NAVY,'center')
+    c.text(date_ar,(150,26,1350,46),28,True,INK,'left')
+    c.text('معلومات موثقة قدر الإمكان.. لقرارات أكثر استنارة',(150,84,1350,38),22,False,MUTED,'left')
+    c.text(title,(1350,116,1140,36),23,True,NAVY,'center')
     c.rule(55,154,W-110,BORDER,2)
 
 
-def _panel(c,box,title,color=NAVY,header_h=88):
+def _panel(c,box,title,color=NAVY,header_h=92):
     x,y,w,h=map(int,box)
     c.shadow((x,y,w,h),offset=7,radius=24)
     c.rounded((x,y,w,h),fill=PAPER,outline=BORDER,radius=24,width=2)
     c.d.rounded_rectangle((x,y,x+w,y+header_h),radius=24,fill=color)
     c.d.rectangle((x,y+header_h-24,x+w,y+header_h),fill=color)
-    c.text(title,(x+28,y+18,w-56,52),31,True,'white')
+    c.text(title,(x+28,y+17,w-56,58),36,True,'white')
     return x+28,y+header_h+20,w-56,h-header_h-38
 
 def _circle_number(c,cx,cy,n,color):
@@ -233,8 +233,8 @@ def stats(c,brief):
         c.rounded((x,y,card_w,h),fill=PAPER,outline='#D8E1E7',radius=14,width=2)
         c.d.line((x+86,y+18,x+86,y+h-18),fill='#E3E9ED',width=2)
         c.d.ellipse((x+23,y+35,x+63,y+75),outline=color,width=5)
-        c.text(label,(x+102,y+18,card_w-118,34),19,True,NAVY)
-        c.text(str(value),(x+102,y+58,card_w-118,48),29,True,INK)
+        c.text(label,(x+102,y+16,card_w-118,38),22,True,NAVY)
+        c.text(str(value),(x+102,y+58,card_w-118,54),34,True,INK)
 
 
 def _event_by_region(events):
@@ -376,21 +376,33 @@ def _topic_distribution(events,limit=5):
     for e in events:
         key=e.get('topic') or 'security'
         counts[key]=counts.get(key,0)+1
+    # If editorial classification is too concentrated, use region coverage as a
+    # deterministic secondary breakdown rather than leaving most of the panel empty.
+    if len(counts)<limit:
+        for e in events:
+            key='region:'+str(e.get('region') or '')
+            if key!='region:':
+                counts[key]=counts.get(key,0)+1
     total=max(1,sum(counts.values()))
     ranked=sorted(counts.items(),key=lambda kv:(-kv[1],kv[0]))[:limit]
-    return [(TOPIC_AR.get(k,k),v,round(v*100/total)) for k,v in ranked]
+    out=[]
+    for k,v in ranked:
+        label=REGIONS.get(k[7:],k) if k.startswith('region:') else TOPIC_AR.get(k,k)
+        out.append((label,v,round(v*100/total)))
+    return out
 
 def _detail_row(c,event,index,box):
     x,y,w,h=map(int,box)
     color=SEVERITY.get(event.get('severity','low'),('منخفض',MUTED))[1]
+    c.d.rectangle((x+w-8,y+8,x+w,y+h-8),fill=color)
     c.d.line((x,y+h,x+w,y+h),fill='#E2E8EC',width=2)
     c.rounded((x+w-72,y+18,52,52),fill=PALE_BLUE,outline=None,radius=10,width=1)
     c.text(str(index),(x+w-72,y+27,52,32),20,True,NAVY,'center')
     tile_x=x+w-300
     c.rounded((tile_x,y+12,190,h-24),fill='#EEF3F6',outline='#DCE5EA',radius=12,width=1)
-    c.text(REGIONS.get(event.get('region'),'إقليمي'),(tile_x+10,y+38,170,50),17,True,color,'center')
-    c.text(event.get('title_ar',''),(x+8,y+14,w-330,56),21,True,NAVY)
-    c.text(event.get('summary_ar',''),(x+8,y+72,w-330,h-84),16,False,INK)
+    c.text(REGIONS.get(event.get('region'),'إقليمي'),(tile_x+10,y+34,170,58),22,True,color,'center')
+    c.text(event.get('title_ar',''),(x+8,y+12,w-330,68),27,True,NAVY)
+    c.text(event.get('summary_ar',''),(x+8,y+84,w-330,h-94),20,False,INK)
 
 def _alerts_panel(c,box,events):
     x,y,w,h=_panel(c,box,'مؤشرات الإنذار والمتابعة',GREEN)
@@ -400,9 +412,9 @@ def _alerts_panel(c,box,events):
     step=max(108,h//len(items))
     for i,e in enumerate(items):
         sev,color=SEVERITY.get(e.get('severity','low'),('منخفض',GREEN))
-        c.text(sev,(x+w-140,y+i*step+12,120,30),16,True,color,'center')
-        c.text(e.get('title_ar',''),(x+8,y+i*step+8,w-165,52),19,True,INK)
-        c.text(e.get('watch_ar',''),(x+8,y+i*step+62,w-30,step-72),15,False,MUTED)
+        c.text(sev,(x+w-150,y+i*step+10,130,34),19,True,color,'center')
+        c.text(e.get('title_ar',''),(x+8,y+i*step+6,w-175,62),23,True,INK)
+        c.text(e.get('watch_ar',''),(x+8,y+i*step+72,w-30,step-80),18,False,MUTED)
         c.rule(x,y+(i+1)*step-4,w,BORDER,1)
 
 def _assess_panel(c,box,events):
@@ -414,7 +426,7 @@ def _assess_panel(c,box,events):
     for i,item in enumerate(vals):
         c.rounded((x+w-52,y+i*step+8,40,40),fill='#EEE8F7',outline=None,radius=9,width=1)
         c.text(str(i+1),(x+w-52,y+i*step+15,40,24),16,True,PURPLE,'center')
-        c.text(item,(x+8,y+i*step,w-74,step-8),17,False,INK)
+        c.text(item,(x+8,y+i*step,w-74,step-8),20,False,INK)
 
 def _regional_implications(events,limit=4):
     out=[]
@@ -427,20 +439,20 @@ def _regional_implications(events,limit=4):
 def _discussion_panel(c,box,brief):
     x,y,w,h=_panel(c,box,'الرصد الاجتماعي واتجاهات الخطاب',BLUE)
     events=brief.get('events',[])
-    c.text('أبرز موضوعات النقاش خلال نافذة الست ساعات',(x,y,w,40),22,True,NAVY)
+    c.text('أبرز موضوعات النقاش خلال نافذة الست ساعات',(x,y,w,44),26,True,NAVY)
     yy=y+52
     for i,(name,count,pct) in enumerate(_topic_distribution(events,5)):
         cy=yy+i*66
         c.rounded((x+w-50,cy,40,40),fill=PALE_BLUE,outline=None,radius=10,width=1)
         c.text(str(i+1),(x+w-50,cy+7,40,24),16,True,NAVY,'center')
-        c.text(name,(x+8,cy+4,w-185,30),18,True,INK)
+        c.text(name,(x+8,cy+2,w-185,34),21,True,INK)
         base_w=w-220; bar_w=max(12,int(base_w*pct/100))
         c.d.rounded_rectangle((x+8,cy+42,x+8+base_w,cy+52),radius=5,fill='#E7EDF1')
         c.d.rounded_rectangle((x+8,cy+42,x+8+bar_w,cy+52),radius=5,fill=[RED,GOLD,BLUE,GREEN,PURPLE][i%5])
         c.text(f'{pct}%',(x+w-140,cy+8,76,26),16,True,INK,'center')
     divider=yy+5*66+8
     c.rule(x,divider,w,BORDER,2)
-    c.text('حالة الإسناد في المواد المنشورة',(x,divider+16,w,34),21,True,NAVY)
+    c.text('حالة الإسناد في المواد المنشورة',(x,divider+14,w,38),25,True,NAVY)
     social=sum(any(s.get('kind')=='social' for s in e.get('sources',[])) for e in events)
     attributed=sum(e.get('status_ar')=='تقرير منسوب' for e in events)
     high=sum(e.get('severity')=='high' for e in events)
@@ -450,18 +462,18 @@ def _discussion_panel(c,box,brief):
         xx=x+i*(cw+12)
         c.rounded((xx,divider+60,cw,120),fill='#F8FBFC',outline='#E0E8ED',radius=12,width=1)
         c.text(str(val),(xx+8,divider+74,cw-16,40),27,True,color,'center')
-        c.text(label,(xx+8,divider+114,cw-16,30),16,True,INK,'center')
+        c.text(label,(xx+8,divider+112,cw-16,34),18,True,INK,'center')
     ny=divider+205
-    c.text('أبرز الروايات المتداولة',(x,ny,w,34),21,True,NAVY)
+    c.text('أبرز الروايات المتداولة',(x,ny,w,38),25,True,NAVY)
     social_items=_social_items(events,4)
     narratives=social_items or [e.get('title_ar','') for e in events[:4]]
     for i,item in enumerate(narratives[:4]):
-        c.text('• '+item,(x+8,ny+40+i*50,w-16,42),16,False,INK)
+        c.text('• '+item,(x+8,ny+42+i*58,w-16,50),19,False,INK)
     caution_y=y+h-142
     c.rounded((x,caution_y,w,128),fill=PALE_RED,outline='#F1C9CE',radius=12,width=1)
-    c.text('معلومة متداولة تتطلب الحذر',(x+18,caution_y+12,w-36,30),18,True,RED)
+    c.text('معلومة متداولة تتطلب الحذر',(x+18,caution_y+10,w-36,34),21,True,RED)
     caution=(social_items[0] if social_items else 'لا توجد حالياً إشارة اجتماعية منفردة تستدعي التحذير؛ يستمر الرصد مع الفصل بين الادعاء والخبر.')
-    c.text(caution,(x+18,caution_y+48,w-36,64),15,False,INK)
+    c.text(caution,(x+18,caution_y+50,w-36,64),17,False,INK)
 
 def _global_indicators(c,box,brief):
     x,y,w,h=_panel(c,box,'مؤشرات عالمية ذات صلة',PURPLE)
@@ -475,8 +487,8 @@ def _global_indicators(c,box,brief):
     step=max(48,h//4)
     for i,(label,val,color) in enumerate(vals):
         yy=y+i*step
-        c.text(label,(x+8,yy,w-165,30),16,True,INK)
-        c.text(str(val),(x+w-150,yy,72,30),18,True,color,'center')
+        c.text(label,(x+8,yy,w-165,34),19,True,INK)
+        c.text(str(val),(x+w-150,yy,72,34),22,True,color,'center')
         c.text('↑' if val else '→',(x+w-66,yy,46,30),18,True,color,'center')
 
 def page1(brief,path):
@@ -500,7 +512,7 @@ def page1(brief,path):
     _alerts_panel(c,(2755,330,1030,690),events)
     _assess_panel(c,(2755,1050,1030,520),events)
     _global_indicators(c,(2755,1600,1030,420),brief)
-    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1010,2094,1820,30),17,False,MUTED,'center')
+    c.text('المعلومات منسوبة إلى مصادرها | التحليل الآلي ليس تحققاً مستقلاً',(1010,2096,1820,28),18,False,MUTED,'center')
     c.text('الصفحة 1 من 3',(58,2090,280,34),18,True,MUTED,'left')
     c.save(path)
     return c.truncated
