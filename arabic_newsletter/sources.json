@@ -1745,8 +1745,8 @@
     "website": "https://radioergo.org",
     "feed": "https://radioergo.org/feed/",
     "affiliation": "local_radio",
-    "enabled": true,
-    "verification_status": "active",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [
       {
@@ -1775,7 +1775,8 @@
       }
     ],
     "verified_at": "2026-09-18T08:46:26.424899+00:00",
-    "verification_environment": "GitHub Actions run 35326029801"
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s057",
@@ -1951,12 +1952,13 @@
     "website": "https://www.adi.dj",
     "feed": "https://www.adi.dj/rss",
     "affiliation": "official",
-    "enabled": true,
-    "verification_status": "active",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "verified_at": "2026-09-18T08:46:27.545357+00:00",
-    "verification_environment": "GitHub Actions run 35326029801"
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s062",
@@ -2279,74 +2281,16 @@
     "name": "Petra",
     "region": "jordan",
     "country": "JO",
-    "language": "ar",
-    "website": "https://petra.gov.jo",
-    "feed": "",
+    "language": "en",
+    "website": "https://www.petra.gov.jo/en/",
     "affiliation": "official",
-    "enabled": false,
-    "verification_status": "failed",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
     "social_policy": "discover_from_publisher_website",
-    "social": [
-      {
-        "platform": "x",
-        "url": "https://x.com/Petranews/status/2100284064544534673",
-        "verified_via": "https://petra.gov.jo",
-        "status": "publisher_linked",
-        "collection": "discovery_only",
-        "approved": false
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/reel/1072636875728760",
-        "verified_via": "https://petra.gov.jo",
-        "status": "publisher_linked",
-        "collection": "discovery_only",
-        "approved": false
-      },
-      {
-        "platform": "youtube",
-        "url": "https://www.youtube.com/embed/sY-hW699tPI",
-        "verified_via": "https://petra.gov.jo",
-        "status": "publisher_linked",
-        "collection": "discovery_only",
-        "approved": false
-      },
-      {
-        "platform": "x",
-        "url": "http://x.com/Petranews",
-        "verified_via": "https://petra.gov.jo",
-        "status": "publisher_linked",
-        "collection": "discovery_only",
-        "approved": false
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/Petranews",
-        "verified_via": "https://petra.gov.jo",
-        "status": "publisher_linked",
-        "collection": "discovery_only",
-        "approved": false
-      },
-      {
-        "platform": "youtube",
-        "url": "http://youtube.com/Petranews",
-        "verified_via": "https://petra.gov.jo",
-        "status": "publisher_linked",
-        "collection": "discovery_only",
-        "approved": false
-      },
-      {
-        "platform": "telegram",
-        "url": "http://t.me/Petranews",
-        "verified_via": "https://petra.gov.jo",
-        "status": "publisher_linked",
-        "collection": "supported",
-        "approved": false
-      }
-    ],
+    "social": [],
     "verified_at": "2026-09-18T08:46:30.686511+00:00",
     "verification_environment": "GitHub Actions run 35326029801",
-    "retired_reason": "failed_source_audit_2026-09-19"
+    "retired_reason": "repaired_endpoint_pending_reaudit_2026-09-19"
   },
   {
     "id": "s071",
@@ -2425,10 +2369,11 @@
     "language": "en",
     "website": "https://www.arabnews.com/saudiarabia",
     "affiliation": "commercial",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s075",
@@ -2452,10 +2397,11 @@
     "language": "en",
     "website": "https://www.gdnonline.com",
     "affiliation": "commercial",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s077",
@@ -2492,10 +2438,11 @@
     "language": "en",
     "website": "https://www.kurdistan24.net/en",
     "affiliation": "commercial",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s080",
@@ -2505,10 +2452,11 @@
     "language": "en",
     "website": "https://sabanews.info/en",
     "affiliation": "state_media",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s081",
@@ -2531,10 +2479,11 @@
     "language": "ar",
     "website": "https://south24.net",
     "affiliation": "independent",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s083",
@@ -2557,10 +2506,11 @@
     "language": "fr",
     "website": "https://www.tsa-algerie.dz",
     "affiliation": "independent",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s085",
@@ -2570,10 +2520,11 @@
     "language": "ar",
     "website": "https://www.mosaiquefm.net/ar/actualite-tunisie",
     "affiliation": "commercial",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s086",
@@ -2583,10 +2534,11 @@
     "language": "en",
     "website": "https://www.moroccoworldnews.com/morocco/",
     "affiliation": "independent",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s087",
@@ -2623,10 +2575,11 @@
     "language": "en",
     "website": "https://www.radio.gov.pk",
     "affiliation": "public_broadcaster",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s090",
@@ -2731,11 +2684,12 @@
     "language": "en",
     "website": "https://www.972mag.com",
     "affiliation": "independent",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "feed": "https://www.972mag.com/feed/"
+    "feed": "https://www.972mag.com/feed/",
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s098",
@@ -2745,10 +2699,11 @@
     "language": "en",
     "website": "https://en.royanews.tv/news",
     "affiliation": "commercial",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s099",
@@ -2758,10 +2713,11 @@
     "language": "en",
     "website": "https://jordantimes.com",
     "affiliation": "commercial",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   },
   {
     "id": "s100",
@@ -2771,9 +2727,10 @@
     "language": "en",
     "website": "https://www.naharnet.com",
     "affiliation": "independent",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
   }
 ]
