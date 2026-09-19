@@ -65,9 +65,9 @@ def uae_secondary_relevant(text):
     return any(k in text for k in UAE_CONTEXT) and any(k in text for k in UAE_SECONDARY)
 
 def edition_window(now=None):
-    """03:30, 09:30, 15:30, 21:30 UAE; most recent due six-hour edition."""
+    """00:00, 06:00, 12:00, 18:00 UAE; most recent due six-hour edition."""
     now = (now or datetime.now(timezone.utc)).astimezone(UAE)
-    anchor = now.replace(hour=3, minute=30, second=0, microsecond=0)
+    anchor = now.replace(hour=0, minute=0, second=0, microsecond=0)
     end = anchor + timedelta(hours=6 * int((now-anchor).total_seconds() // 21600))
     return end-timedelta(hours=6), end
 
