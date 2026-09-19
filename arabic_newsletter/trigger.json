@@ -1,5 +1,6 @@
 {
-  "requested_at": "2026-09-19T15:17:23.585Z",
-  "purpose": "retry one-shot Arabic Discord output preview",
-  "nonce": "2026-09-19T15:17:23.585Z"
+  "requested_at": "2026-09-19T16:15:52.708Z",
+  "purpose": "one-shot production sample of approved map-centred Arabic layout",
+  "layout": "map-centred",
+  "nonce": "2026-09-19T16:15:52.708Z"
 }
