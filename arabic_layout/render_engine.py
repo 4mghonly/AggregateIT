@@ -46,7 +46,7 @@ def sanitize_text(text):
     s=str(text or '')
     for bad in ('\ufffd','\u25a1','\u25a0','\ufeff','\u200e','\u200f'):
         s=s.replace(bad,'')
-    s=s.replace('|','—')
+    s=s.replace('|','،').replace('—','،').replace('–','،').replace(' / ',' و ')
     s=re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]','',s)
     return re.sub(r'\s+',' ',s).strip()
 
@@ -73,8 +73,8 @@ class Canvas:
             root=Path(custom)
             candidates += [root/('NotoSansArabic-Bold.ttf' if bold else 'NotoSansArabic-Regular.ttf')]
         candidates += [
-            Path('/usr/share/fonts/truetype/noto')/('NotoSansArabic-Bold.ttf' if bold else 'NotoSansArabic-Regular.ttf'),
-            Path('/usr/share/fonts/truetype/dejavu')/('DejaVuSans-Bold.ttf' if bold else 'DejaVuSans.ttf')]
+            Path('/usr/share/fonts/truetype/dejavu')/('DejaVuSans-Bold.ttf' if bold else 'DejaVuSans.ttf'),
+            Path('/usr/share/fonts/truetype/noto')/('NotoSansArabic-Bold.ttf' if bold else 'NotoSansArabic-Regular.ttf')]
         for p in candidates:
             if p.exists(): return ImageFont.truetype(str(p),size,layout_engine=ImageFont.Layout.RAQM)
         raise RuntimeError('Arabic font not found')
@@ -300,10 +300,10 @@ def masthead(c,brief,page):
     _banner_skyline(c)
     _flag(c,55,38,155,92)
     end=datetime.fromisoformat(brief['window_end']).astimezone(UAE)
-    dt=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year} — {end.strftime('%H:%M')} بتوقيت الإمارات"
+    dt=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year}، {end.strftime('%H:%M')} بتوقيت الإمارات"
     c.text(dt,(235,36,1350,54),31,True,INK,'left')
     c.text('معلومات موثقة.. لقرارات أكثر استنارة',(235,98,1200,38),21,False,MUTED,'left')
-    c.text('أغريغيت — موجز القيادة الجيوسياسي والأمني',(2050,30,1470,78),55,True,INK)
+    c.text('أغريغيت: موجز القيادة الجيوسياسي والأمني',(2050,30,1470,78),55,True,INK)
     c.text('قراءة معمقة لمشهد إقليمي متغير',(2380,106,1130,42),27,True,NAVY_DARK)
     _globe(c,3668,77,42)
     c.text('رؤية أوسع\nلفهم أعمق\nلقرار أكثر استنارة',(3525,125,290,90),18,True,NAVY_DARK,'center',14)
