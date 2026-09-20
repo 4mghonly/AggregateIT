@@ -10,9 +10,7 @@ from policy import can_send, can_send_digest, can_send_alert
 from analysis_fallback import build as build_fallback_analysis
 import llm
 from llm import chat
-_ok, _det = llm.preflight()
-LLM_AVAILABLE = _ok
-print("QWEN PREFLIGHT:", "OK" if _ok else "FAIL " + _det)
+LLM_AVAILABLE, _det = False, "not checked"
 import social, audit
 try:
     from verify import verify_event
