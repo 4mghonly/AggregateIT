@@ -516,10 +516,15 @@ def analyze_event(c, prior):
             return None, "schema invalid: " + "; ".join(errs)
         except requests.exceptions.Timeout:
             HEALTH["qwen_fail"] += 1
+            log_failure("qwen", c.get("event_id") or c.get("entity") or "event", "timeout")
+            print("QWEN EVENT FALLBACK: timeout", c.get("event_id") or c.get("entity") or "event", flush=True)
             return fallback_event_analysis(c, prior, "timeout"), None
         except Exception as e:
             HEALTH["qwen_fail"] += 1
-            return fallback_event_analysis(c, prior, f"{type(e).__name__}: {str(e)[:120]}"), None
+            reason=f"{type(e).__name__}: {str(e)[:120]}"
+            log_failure("qwen", c.get("event_id") or c.get("entity") or "event", reason)
+            print("QWEN EVENT FALLBACK:", reason, c.get("event_id") or c.get("entity") or "event", flush=True)
+            return fallback_event_analysis(c, prior, reason), None
     return None, "unknown"
     # ================= DISCORD DIGEST =================
 SENT_EMOJI = {"bullish": "🟢 Bullish", "bearish": "🔴 Bearish", "neutral": "⚪ Neutral", "na": "➖ N/A"}
