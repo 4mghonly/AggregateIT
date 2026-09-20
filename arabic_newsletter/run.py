@@ -8,7 +8,7 @@ from pathlib import Path
 from .core import ROOT, State, edition_window, live_window, write_json
 from .collect import audit, collect
 from .editor import Client, synthesize, build_analysis
-from .delivery import webhook_url, send
+from .delivery import webhook_info, send
 from .render import render, references
 from .sample import fixture
 
@@ -32,9 +32,9 @@ def main():
             if args.preflight:
                 client=Client(state)
                 if args.probe_model:
-                    client.chat('Return JSON only.',{'request':'Return {"ok":true}'},30)
-                    print('Arabic model API probe passed')
-                if args.send: webhook_url()
+                    client.chat('Return JSON only.',{'request':'Return {"ok":true}'},30,use_cache=False)
+                    print('Arabic model API live probe passed')
+                if args.send: webhook_info()
                 print('Arabic configuration preflight passed' if args.probe_model else 'Arabic configuration present; API authentication not tested'); return
             if args.audit: audit(args.output); return
             if args.sample:
@@ -54,7 +54,9 @@ def main():
                     webhook_url(); Client(state)
                     prior=state.delivery(edition)
                     if prior and prior[0]=='sent': print('Edition already delivered'); return
-                    if prior: raise RuntimeError('Previous delivery requires reconciliation')
+                    if prior and prior[0] in ('sending','uncertain'):
+                        raise RuntimeError('Previous delivery is ambiguous and requires reconciliation')
+                    # Confirmed failed HTTP deliveries are safe to retry; send() clears them.
                 audit_registry=ROOT/'runtime'/'audit'/'discovered_sources.json'
                 registry=json.loads(audit_registry.read_text()) if audit_registry.exists() else None
                 articles,health=collect(collection_start,end,registry=registry)

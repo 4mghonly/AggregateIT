@@ -9,9 +9,9 @@ import unittest
 from unittest.mock import patch, Mock
 import requests
 from PIL import Image
-from .core import State, canonical, edition_window, live_window, preliminary_relevant, uae_secondary_relevant, REGIONS
+from .core import State, canonical, clean, edition_window, live_window, preliminary_relevant, uae_secondary_relevant, REGIONS
 from .collect import entry_time, social_links
-from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError
+from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
 from .sample import fixture
@@ -44,6 +44,8 @@ class CoreTests(unittest.TestCase):
 
     def test_tracking_url_deduplication(self):
         self.assertEqual(canonical('https://site.test/a/?utm_source=x&id=2#top'),'https://site.test/a?id=2')
+    def test_invalid_decode_markers_are_removed(self):
+        self.assertEqual(clean('خبر\ufffd مهم\u200f'),'خبر مهم')
     def test_missing_publication_never_becomes_now(self):
         self.assertIsNone(entry_time({'updated_parsed':(2026,9,18,0,0,0,0,0,0)}))
     def test_publisher_linked_social_excludes_share_buttons(self):
@@ -67,6 +69,10 @@ class EditorialTests(unittest.TestCase):
           assessment_ar='لا تكفي المعلومات لتحديد تداعيات الهجوم.',watch_ar='متابعة تحديثات المصدر.',severity='high',source_ids=['a'],
           evidence=[{'id':'a','quote':'Officials report a border attack with 12 injuries.'}])
     def validate(self,event=None): return validate_events({'events':[event or self.event]},[self.article])
+    def test_message_json_accepts_fences_and_text_blocks(self):
+        self.assertEqual(_message_json({'content':'\x60\x60\x60json\n{"ok":true}\n\x60\x60\x60'}),{'ok':True})
+        self.assertEqual(_message_json({'content':[{'type':'text','text':'prefix {"ok": true} suffix'}]}),{'ok':True})
+
     def test_one_correction_then_same_review_gate(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(d)
@@ -153,6 +159,17 @@ class DeliveryTests(unittest.TestCase):
                 self.assertEqual(send(state,'edition',[path]),'123'); self.assertEqual(send(state,'edition',[path]),'123')
                 self.assertEqual(post.call_count,1)
             state.close()
+    def test_confirmed_failed_delivery_can_retry(self):
+        with tempfile.TemporaryDirectory() as d:
+            state=State(Path(d)/'state'); path=Path(d)/'slide.png'; path.write_bytes(b'png')
+            failed=Mock(status_code=400)
+            success=Mock(status_code=200); success.json.return_value={'id':'456','channel_id':'789'}
+            with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post',side_effect=[failed,success]) as post:
+                with self.assertRaises(DeliveryError): send(state,'edition',[path])
+                self.assertEqual(send(state,'edition',[path]),'456')
+                self.assertEqual(post.call_count,2)
+            state.close()
+
     def test_timeout_is_uncertain_and_not_retried(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(Path(d)/'state'); path=Path(d)/'slide.png'; path.write_bytes(b'png')

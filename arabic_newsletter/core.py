@@ -39,8 +39,12 @@ UAE_ROUTINE = ('hotel','restaurant','brunch','shopping','fashion','property','re
  'حفلة','مهرجان','رياضة','كرة القدم','تجزئة')
 
 def clean(value):
-    value = unicodedata.normalize('NFKC', str(value or ''))
-    return re.sub(r'\s+', ' ', re.sub(r'[\u200b-\u200f\u202a-\u202e\u2066-\u2069]', '', value)).strip()
+    raw=str(value or '')
+    raw=''.join(ch for ch in raw if ch!='\ufffd' and not (0xD800 <= ord(ch) <= 0xDFFF))
+    value=unicodedata.normalize('NFKC', raw)
+    value=re.sub(r'[\u200b-\u200f\u202a-\u202e\u2066-\u2069]', '', value)
+    value=''.join(' ' if unicodedata.category(ch).startswith('C') else ch for ch in value)
+    return re.sub(r'\s+', ' ', value).strip()
 
 def canonical(url):
     p = urlsplit(url)
@@ -112,5 +116,8 @@ class State:
     def mark(self, edition, status, message_id=None):
         with self.db:
             self.db.execute('UPDATE deliveries SET status=?,message_id=? WHERE edition=?',(status,message_id,edition))
+    def clear_delivery(self, edition):
+        with self.db:
+            self.db.execute('DELETE FROM deliveries WHERE edition=?',(edition,))
     def close(self):
         self.db.close()

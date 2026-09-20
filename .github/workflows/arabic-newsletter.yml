@@ -105,7 +105,7 @@ jobs:
         run: python -m arabic_newsletter.run --preflight --probe-model
 
       - name: Audit sources from runner
-        if: steps.mode.outputs.live != 'true' && steps.mode.outputs.preview != 'true'
+        if: github.event_name == 'workflow_dispatch' && steps.mode.outputs.live != 'true' && steps.mode.outputs.preview != 'true'
         run: python -m arabic_newsletter.run --audit --output arabic_newsletter/runtime/audit
 
       - name: Render current-data preview without Discord delivery
