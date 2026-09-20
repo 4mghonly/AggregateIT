@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: "0 6 * * 1"         # Monday 10:00 GST
   workflow_dispatch:
+concurrency:
+  group: aggregateit-writers
+  cancel-in-progress: false
+
 jobs:
   calibrate:
     runs-on: ubuntu-latest
