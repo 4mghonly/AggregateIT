@@ -61,7 +61,7 @@ Multi-source claims without ≥2 independent families are downgraded and capped.
 | engine.yml | hourly at :07 | offline regression gate → ingest/analyze/store; legacy digest delivery disabled |
 | tv_refresh.yml | scheduled + weekly | universe + market/macro snapshots |
 | slide.yml | daily 15:30 UAE + manual | two-page Gazette with confirmed Discord receipt |
-| calibration.yml | weekly | calibration report |
+| calibration.yml | weekly | current event/market association diagnostic (not predictive backtesting) |
 | backup.yml | weekly | state database backup |
 | history.yml | manual | event search |
 | search.yml | manual | ticker search |
