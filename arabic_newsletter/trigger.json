@@ -1,5 +1,5 @@
 {
   "triggered_at": "2026-09-20T12:02:58+04:00",
-  "reason": "retry 12:00 UAE edition after reliability fixes",
-  "manual_retry": "2026-09-20T12:08:00+04:00"
+  "reason": "retry after editorial envelope normalization",
+  "manual_retry": "2026-09-20T12:13:00+04:00"
 }
