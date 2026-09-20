@@ -6,13 +6,29 @@ on:
       - arabic_newsletter/**
       - arabic_layout/**
       - .github/workflows/arabic-newsletter.yml
-# A branch-only schedule cannot use GitHub cron. The connected six-hour
-# automation updates arabic_newsletter/trigger.json on Arabic to emit a push.
+  workflow_dispatch:
+    inputs:
+      deliver:
+        description: "Deliver a live Arabic briefing to Discord"
+        required: false
+        type: boolean
+        default: false
+      preview:
+        description: "Render a current-data preview without Discord delivery"
+        required: false
+        type: boolean
+        default: false
+
+# Scheduled 00/06/12/18 UAE wake-ups are emitted by the connected external
+# trigger as commits named "Arabic newsletter: scheduled ...". GitHub cron
+# cannot directly schedule a workflow that exists only on a non-default branch.
 permissions:
   contents: read
 concurrency:
-  group: arabic-newsletter-only
-  cancel-in-progress: true
+  group: arabic-newsletter-${{ github.ref }}
+  # A development push must never cancel an in-flight production briefing.
+  cancel-in-progress: false
+
 jobs:
   arabic:
     if: github.ref == 'refs/heads/Arabic'
@@ -29,16 +45,41 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+
+      - name: Determine run mode
+        id: mode
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_MESSAGE: ${{ github.event.head_commit.message }}
+          DISPATCH_DELIVER: ${{ inputs.deliver }}
+          DISPATCH_PREVIEW: ${{ inputs.preview }}
+        run: |
+          python - <<'PY'
+          import os
+          event=os.getenv("EVENT_NAME","")
+          message=os.getenv("HEAD_MESSAGE","")
+          live=(event=="push" and (message.startswith("Arabic newsletter: scheduled") or message.startswith("Arabic live:"))) or os.getenv("DISPATCH_DELIVER","").lower()=="true"
+          preview=(event=="push" and message.startswith("Arabic preview:")) or os.getenv("DISPATCH_PREVIEW","").lower()=="true"
+          if live:
+              preview=False
+          with open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8") as fh:
+              fh.write(f"live={'true' if live else 'false'}\n")
+              fh.write(f"preview={'true' if preview else 'false'}\n")
+          print("Arabic workflow mode:", "live" if live else ("preview" if preview else "validation"))
+          PY
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: pip
           cache-dependency-path: arabic_newsletter/requirements.txt
+
       - name: Install isolated dependencies and Arabic fonts
         run: |
           python -m pip install -r arabic_newsletter/requirements.txt
           sudo apt-get update -qq
           sudo apt-get install -y fonts-dejavu-core fonts-noto-core libraqm0
+
       - name: Restore Arabic state only
         id: restore
         uses: actions/cache/restore@v4
@@ -46,37 +87,61 @@ jobs:
           path: arabic_newsletter/runtime/state
           key: arabic-state-v1-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: arabic-state-v1-
+
       - name: Test Arabic pipeline
-        if: "!startsWith(github.event.head_commit.message, 'Arabic newsletter: scheduled')"
+        if: steps.mode.outputs.live != 'true'
         run: python -m unittest arabic_newsletter.test_arabic -v
+
       - name: Render long Arabic sample
-        if: "!startsWith(github.event.head_commit.message, 'Arabic newsletter: scheduled')"
+        if: steps.mode.outputs.live != 'true'
         run: python -m arabic_newsletter.run --sample --long --output arabic_newsletter/runtime/sample
-      - name: Validate Arabic model configuration
+
+      - name: Validate live Arabic model and Discord route
+        if: steps.mode.outputs.live == 'true'
+        run: python -m arabic_newsletter.run --preflight --probe-model --send
+
+      - name: Validate Arabic model for preview
+        if: steps.mode.outputs.preview == 'true'
         run: python -m arabic_newsletter.run --preflight --probe-model
+
       - name: Audit sources from runner
-        if: "!startsWith(github.event.head_commit.message, 'Arabic newsletter: scheduled')"
+        if: steps.mode.outputs.live != 'true' && steps.mode.outputs.preview != 'true'
         run: python -m arabic_newsletter.run --audit --output arabic_newsletter/runtime/audit
+
       - name: Render current-data preview without Discord delivery
-        if: "startsWith(github.event.head_commit.message, 'Arabic preview:')"
+        if: steps.mode.outputs.preview == 'true'
         run: |
           END="$(date --iso-8601=seconds)"
           python -m arabic_newsletter.run --end "$END" --output arabic_newsletter/runtime/preview
-      - name: Collect, translate, verify and render live slides
-        if: "!startsWith(github.event.head_commit.message, 'Arabic preview:')"
+
+      - name: Collect, translate, verify, render and deliver live slides
+        if: steps.mode.outputs.live == 'true'
+        run: python -m arabic_newsletter.run --send
+
+      - name: Alert Arabic channel when a live briefing fails
+        if: failure() && steps.mode.outputs.live == 'true'
+        continue-on-error: true
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          if [ -n "$DISCORD_WEBHOOK_ARABIC" ]; then
-            python -m arabic_newsletter.run --send
-          else
-            python -m arabic_newsletter.run
-            echo "::warning::Live slides rendered but delivery requires DISCORD_WEBHOOK_ARABIC."
-          fi
+          python - <<'PY'
+          import os
+          from urllib.parse import urlsplit, urlunsplit
+          import requests
+          raw=os.getenv("DISCORD_WEBHOOK_ARABIC","").strip()
+          if raw:
+              p=urlsplit(raw)
+              url=urlunsplit((p.scheme,p.netloc,p.path,"wait=true",""))
+              requests.post(url,json={"content":"⚠️ تعذر إصدار النشرة العربية المجدولة. سجل التشغيل: "+os.getenv("RUN_URL","")},timeout=(10,20))
+          PY
+
       - name: Preserve Arabic delivery ledger even after failures
         if: always()
         uses: actions/cache/save@v4
         with:
           path: arabic_newsletter/runtime/state
           key: arabic-state-v1-${{ github.run_id }}-${{ github.run_attempt }}
+
       - name: Upload Arabic samples, sources and run reports
         if: always()
         uses: actions/upload-artifact@v4
