@@ -15,6 +15,10 @@ on:
         required: false
         type: string
         default: "168"
+concurrency:
+  group: aggregateit-writers
+  cancel-in-progress: false
+
 jobs:
   search:
     runs-on: ubuntu-latest
