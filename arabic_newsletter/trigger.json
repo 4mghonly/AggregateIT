@@ -1,7 +1,4 @@
 {
-  "triggered_at": "2026-09-20T12:02:58+04:00",
-  "reason": "retry after editorial envelope normalization",
-  "manual_retry": "2026-09-20T12:13:00+04:00",
-  "reliability_live_verification": "2026-09-20T13:27:00+04:00",
-  "collector_reaudit": "2026-09-20T10:58:00Z"
+  "triggered_at": "2026-09-20T18:03:02+04:00",
+  "reason": "scheduled Arabic geopolitical/security briefing"
 }
