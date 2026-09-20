@@ -1,0 +1,67 @@
+name: Repository Health
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.py'
+      - 'config/**'
+      - '.github/workflows/**'
+      - 'requirements.txt'
+      - 'README.md'
+      - 'PROJECT.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: repo-health-main
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install validation dependencies
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install pillow pyyaml
+      - name: Compile Python
+        run: python -m py_compile *.py
+      - name: Run core regression suite
+        env:
+          QWEN_API_KEY: ""
+          QWEN_FALLBACK_API_KEY: ""
+        run: python tests.py
+      - name: Run Gazette layout tests
+        run: python -m unittest -v test_gazette_layout
+      - name: Validate YAML, JSON and configuration uniqueness
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import yaml
+          for path in Path('.github/workflows').glob('*.yml'):
+              with path.open(encoding='utf-8') as fh:
+                  yaml.safe_load(fh)
+              print('yaml ok', path)
+          for path in Path('config').glob('*.json'):
+              json.loads(path.read_text(encoding='utf-8'))
+              print('json ok', path)
+          sources=json.loads(Path('config/sources.json').read_text(encoding='utf-8'))
+          urls=[(row.get('Url') or '').replace('http://','https://').rstrip('/').lower() for row in sources]
+          urls=[x for x in urls if x]
+          assert len(urls)==len(set(urls)), 'duplicate canonical source URL'
+          tickers=json.loads(Path('config/tickers.json').read_text(encoding='utf-8'))
+          syms=[row.get('t') for row in tickers if row.get('t')]
+          assert len(syms)==len(set(syms)), 'duplicate ticker symbol'
+          assert Path('README.md').exists()
+          assert not Path('README. md').exists()
+          PY
+      - name: Check conflict markers and obvious committed secrets
+        run: |
+          ! grep -RInE '^(<<<<<<<|>>>>>>>)( |$)' --exclude-dir=.git .
+          ! grep -RInE 'https://(discord|discordapp)\.com/api(/v[0-9]+)?/webhooks/[0-9]+/[A-Za-z0-9_-]{20,}' --exclude-dir=.git .
+          ! grep -RInE '(sk-|qwen-|dashscope-)[A-Za-z0-9_-]{24,}' --exclude-dir=.git .
