@@ -702,5 +702,18 @@ check("calibration labels current-snapshot methodology", "not subsequent-outcome
 check("current mover overlap is computed from ticker-signalled events",
       rep73["by_importance"]["High"]["current_mover_overlap_pct"]==100.0,rep73["by_importance"]["High"])
 
+print("[T74] Reddit ingestion has one canonical path")
+main_src74=open(os.path.join(os.path.dirname(os.path.abspath(main.__file__)),"main.py"),encoding="utf-8").read()
+check("engine does not duplicate social Reddit with direct RSS", "fetch_reddit(s, x" not in main_src74)
+main.HEALTH.update({"rss_ok":1,"rss_empty":0,"rss_fail":0,
+                    "reddit_ok":0,"reddit_empty":1,"reddit_fail":0,
+                    "github_ok":1,"github_empty":0,"github_fail":0,
+                    "qwen_ok":1,"qwen_fail":0,"qwen_invalid":0,
+                    "discord_ok":0,"discord_fail":0,"discord_skipped":1,
+                    "tv_movers_loaded":1,"tv_universe_loaded":1})
+h74=main.build_health({"run":"reddit-empty","new":0,"matched":0},{"fresh_init":False})
+check("empty Reddit is visible without becoming a transport failure",
+      h74["overall"]=="GREEN" and any("Reddit social coverage empty" in n for n in h74.get("notes",[])),h74)
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
