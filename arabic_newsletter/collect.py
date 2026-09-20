@@ -110,13 +110,25 @@ def article_page(source,url):
         body=tag.get('content','') if tag else ''
     return source_item(source,title,body,url,published)
 
+def source_relevant(source,text):
+    if preliminary_relevant(text,source.get('language','en')): return True
+    return source.get('country')=='AE' and uae_secondary_relevant(text)
+
+def article_path_candidate(path):
+    parts=[part for part in path.strip('/').split('/') if part]
+    if len(parts)>=2 or re.search(r'[0-9]{3,}',path): return True
+    if len(parts)==1:
+        slug=parts[0]
+        return len(slug)>=24 and slug.count('-')>=3
+    return False
+
 def webpage_items(source,soup):
     links={}; host=urlsplit(source['website']).hostname
     for a in soup.select('a[href]'):
         title=clean(a.get_text(' ',strip=True)); url=urljoin(source['website'],a['href']); p=urlsplit(url)
         if p.hostname!=host or p.scheme not in ('http','https') or len(title)<25 or len(title)>250: continue
-        if not re.search(r'/[^/]+/[^/]+|[0-9]{3,}',p.path): continue
-        if not preliminary_relevant(title,source['language']): continue
+        if not article_path_candidate(p.path): continue
+        if not source_relevant(source,title): continue
         links.setdefault(canonical(url),title)
     out=[]
     for url in list(links)[:3]:
@@ -201,8 +213,7 @@ def collect(start,end,discover=False,registry=None):
     for item in sorted(items,key=lambda x:x['published'] or 0,reverse=True):
         if not item['published'] or not start.timestamp() <= item['published'] < end.timestamp(): continue
         material=item['title']+' '+item['text']
-        if not preliminary_relevant(material,item['language']):
-            if item.get('country')!='AE' or not uae_secondary_relevant(material): continue
+        if not source_relevant(item,material): continue
         key=digest(clean(item['title']).casefold())
         if item['id'] in seen or key in seen: continue
         seen.update([item['id'],key]); selected.append(item)

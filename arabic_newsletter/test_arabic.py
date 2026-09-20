@@ -10,7 +10,7 @@ from unittest.mock import patch, Mock
 import requests
 from PIL import Image
 from .core import State, canonical, clean, edition_window, live_window, preliminary_relevant, uae_secondary_relevant, REGIONS
-from .collect import entry_time, social_links
+from .collect import entry_time, social_links, article_path_candidate, source_relevant
 from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope, _review_envelope
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
@@ -52,6 +52,15 @@ class CoreTests(unittest.TestCase):
         soup=BeautifulSoup('<a href="https://t.me/OfficialExample">Telegram</a><a href="https://x.com/intent/tweet">share</a>','html.parser')
         links=social_links(soup,'https://example.com')
         self.assertEqual(len(links),1); self.assertEqual(links[0]['verified_via'],'https://example.com')
+
+    def test_wordpress_single_slug_article_path_is_accepted(self):
+        self.assertTrue(article_path_candidate('/afghanistan-condemns-mosque-attack-in-khyber-pakhtunkhwa/'))
+        self.assertFalse(article_path_candidate('/latest-news/'))
+
+    def test_page_fallback_uses_uae_secondary_threshold(self):
+        source={'country':'AE','language':'en'}
+        self.assertTrue(source_relevant(source,'UAE civil defence updates emergency readiness at Dubai airport'))
+        self.assertFalse(source_relevant(source,'Dubai hotel launches luxury brunch'))
 
     def test_egypt_and_oman_sources_are_first_class_regions(self):
         root=Path(__file__).resolve().parent
