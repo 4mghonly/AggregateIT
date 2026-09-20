@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: "0 6 * * 0"            # Sunday 10:00 UAE
   workflow_dispatch:
+concurrency:
+  group: aggregateit-writers
+  cancel-in-progress: false
+
 jobs:
   backup:
     runs-on: ubuntu-latest
