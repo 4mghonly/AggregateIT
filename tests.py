@@ -665,5 +665,11 @@ audit_src69 = open(audit.__file__).read()
 check("Bluesky identities audited", "check_bluesky" in audit_src69 and '"BSKY"' in audit_src69)
 check("Mastodon identities audited", "check_mastodon" in audit_src69 and '"MASTO"' in audit_src69)
 
+print("[T70] Main import is network-lazy")
+main_src70 = open(os.path.join(os.path.dirname(os.path.abspath(main.__file__)), "main.py"), encoding="utf-8").read()
+prefix70 = main_src70.split("async def main():",1)[0]
+check("no import-time Qwen preflight", "llm.preflight()" not in prefix70)
+check("no import-time market self-heal call", "\nensure_market_data()\n" not in prefix70)
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
