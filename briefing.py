@@ -292,14 +292,14 @@ def main():
     mode = os.environ.get("BRIEFING_MODE", "MORNING").upper()
     webhook = os.environ.get("DISCORD_WEBHOOK")
     if not webhook:
-        print("FATAL: DISCORD_WEBHOOK secret is not set."); return
+        raise RuntimeError("DISCORD_WEBHOOK secret is not set")
     embeds = build_mini() if mode == "MINI" else build_exec(mode)
     try:
-        r = requests.post(webhook, json={"embeds": embeds})
+        r = requests.post(webhook, json={"embeds": embeds}, timeout=(10,30))
         r.raise_for_status()
-        print(f"✅ {mode} executive briefing delivered ({len(embeds)} panels)!")
     except Exception as e:
-        print(f"Failed to send briefing: {e}")
+        raise RuntimeError(f"{mode} briefing delivery failed: {e}") from e
+    print(f"✅ {mode} executive briefing delivered ({len(embeds)} panels)!")
 
 if __name__ == "__main__":
     main()
