@@ -6,7 +6,7 @@ import market
 
 def main():
     wh = os.environ.get("DISCORD_WEBHOOK")
-    if not wh: print("FATAL: DISCORD_WEBHOOK missing"); return
+    if not wh: raise RuntimeError("DISCORD_WEBHOOK missing")
     store = SQLiteStore()
     rows = store.recent_all_events(hours=24)
     pulse = market.load_market_pulse() or {}
@@ -33,7 +33,7 @@ def main():
              "color": 0x34495E, "fields": fields,
              "footer": {"text": "AggregateIT Intelligence Terminal"},
              "timestamp": datetime.now(timezone.utc).isoformat()}
-    r = requests.post(wh, json={"embeds": [embed]})
+    r = requests.post(wh, json={"embeds": [embed]}, timeout=(10,30))
     r.raise_for_status()
     print("✅ Daily digest delivered!")
 
