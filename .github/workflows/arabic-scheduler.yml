@@ -21,7 +21,7 @@ jobs:
   arabic-production:
     # The push trigger exists only to recover/bootstrap this scheduler. Ordinary
     # main changes never run the Arabic product.
-    if: github.event_name != 'push' || startsWith(github.event.head_commit.message, 'Arabic scheduler: recover')
+    if: "${{ github.event_name != 'push' || startsWith(github.event.head_commit.message, 'Arabic scheduler') }}"
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
