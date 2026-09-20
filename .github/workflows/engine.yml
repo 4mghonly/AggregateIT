@@ -20,8 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       - name: Install dependencies
@@ -37,14 +37,14 @@ jobs:
           python tests.py
           rm -rf data reports __pycache__
       - name: Restore data cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: data/
           key: data-${{ github.run_id }}-engine
           restore-keys: |
             data-
       - name: Restore reports cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: reports/
           key: reports-${{ github.run_id }}-engine
@@ -71,7 +71,7 @@ jobs:
         run: python main.py
       - name: Upload engine health report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: intel-report
           path: reports/
