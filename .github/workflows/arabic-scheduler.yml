@@ -119,7 +119,7 @@ jobs:
           PY
 
       - name: Preserve production Arabic state
-        if: always()
+        if: always() && steps.due.outputs.needs_delivery == 'true'
         uses: actions/cache/save@v5
         with:
           path: arabic_newsletter/runtime/state
