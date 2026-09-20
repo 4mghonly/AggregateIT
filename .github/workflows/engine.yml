@@ -2,6 +2,10 @@ name: News Intelligence Engine
 on:
   schedule:
     - cron: "0 * * * *"
+  push:
+    branches: [main]
+    paths:
+      - .github/engine-trigger
   workflow_dispatch:
     inputs:
       dry_run:
