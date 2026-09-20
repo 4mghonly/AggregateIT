@@ -31,7 +31,7 @@ python -m pip install -r arabic_newsletter/requirements.txt
 python -m unittest arabic_newsletter.test_arabic -v
 python -m arabic_newsletter.run --sample --long
 python -m arabic_newsletter.run --audit
-python -m arabic_newsletter.run --preflight --send
+python -m arabic_newsletter.run --preflight --probe-model --probe-discord
 python -m arabic_newsletter.run --send
 ```
 
@@ -54,12 +54,13 @@ changing them. Optional isolated overrides: `ARABIC_LLM_API_KEY`,
 `ARABIC_LLM_BASE_URL` (secrets) and `ARABIC_LLM_MODEL` (repository variable).
 The workflow uses `qwen3.8-omni-flash`. Live preflight bypasses the model cache, performs a real API probe, and verifies the dedicated Arabic Discord webhook route before publication.
 
-GitHub cron does not run a workflow existing only on a non-default branch.
-The connected scheduled automation instead edits **only** the dedicated new
-`arabic_newsletter/trigger.json` on **Arabic**. Its push runs the new workflow.
-The default branch keeps its non-delivery utility workflows, but its legacy Discord
-delivery workflows are disabled. A self-hosted alternative can run the same CLI under cron:
-`0 20,2,8,14 * * *` (UTC, with 20:00 belonging to the previous UTC date), equivalent to 00:00/06:00/12:00/18:00 UAE. Use only one scheduler.
+GitHub cron only schedules workflows from the default branch. Production timing is
+therefore owned by a tiny launcher workflow on **main** that runs at
+`0 2,8,14,20 * * *` UTC (06:00/12:00/18:00/00:00 UAE), checks out **Arabic**,
+and executes only this isolated runtime with `DISCORD_WEBHOOK_ARABIC`. The launcher
+does not import or execute the main engine. The Arabic branch workflow remains for
+tests, previews and explicit manual live runs. The former commit-based external
+scheduler is retired; `trigger.json` is no longer a production scheduling mechanism.
 
 ## Evidence and source policy
 
@@ -77,12 +78,12 @@ and unreviewed social links remain discovery-only; availability is never fabrica
 Items without a publication timestamp cannot become fresh news merely because
 retrieved now. Same-URL and same-title duplicates are removed before the model;
 multilingual/syndicated event copies are grouped during synthesis and review.
-Model inputs and outputs are bounded and cached. At most six editorial model HTTP requests per run, including retries.
+Model inputs and outputs are bounded and cached. At most eight editorial model HTTP requests per synthesis/review client, including retries.
 If every event is rejected, one correction pass uses the reviewers’ reasons and
 then repeats the same deterministic checks and editorial review. A second failed
 review blocks publication; there is no unbounded correction loop. The cached preflight probe
 can use up to two additional requests on its first run. Early scheduler wakeups
-within two minutes of an edition boundary wait for that boundary.
+within ten minutes of an edition boundary target and wait for that boundary.
 Each event needs literal supporting evidence, known article IDs, Arabic prose,
 supported numeric values and an editorial consistency review. All published
 claims remain attributed: a model review is not independent verification.

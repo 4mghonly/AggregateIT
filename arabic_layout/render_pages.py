@@ -40,17 +40,17 @@ def _assessment_panel(c,box,events):
     vals=[e.get('assessment_ar') for e in rank_events(events) if e.get('assessment_ar')][:5]
     list_block(c,vals,(x,y,w,h),OLIVE,24,5)
 
-def _social_panel(c,box,events):
-    x,y,w,h=panel(c,box,'الرصد الاجتماعي، سياق مساعد',BLUE)
-    topics=topic_distribution(events,5)
-    if not topics:
-        c.text('لا تتوافر مؤشرات اجتماعية كافية.',(x,y,w,h),25,True,MUTED); return
-    step=h//len(topics)
-    for i,(name,count,pct) in enumerate(topics):
+def _source_mix_panel(c,box,brief):
+    x,y,w,h=panel(c,box,'مزيج المصادر المستخدمة',BLUE,'توزيع لغات المصادر في الأحداث المؤهلة')
+    rows=source_distribution(brief,6)
+    if not rows:
+        c.text('لم تُستخدم مصادر في أحداث مؤهلة خلال هذه الدورة.',(x,y,w,h),25,True,MUTED); return
+    step=h//len(rows)
+    for i,(name,count,pct) in enumerate(rows):
         yy=y+i*step
-        c.text(name,(x,yy,w-180,34),23,True,INK)
-        c.text(f'{pct}٪',(x+w-150,yy,130,34),22,True,BLUE,'center')
-        base=w-190
+        c.text(name,(x,yy,w-235,34),23,True,INK)
+        c.text(f'{count} مصدر، {pct}٪',(x+w-215,yy,195,34),20,True,BLUE,'center')
+        base=w-235
         c.d.rounded_rectangle((x,yy+42,x+base,yy+54),radius=6,fill='#E1E6E3')
         c.d.rounded_rectangle((x,yy+42,x+max(12,int(base*pct/100)),yy+54),radius=6,fill=BLUE)
 
@@ -59,10 +59,10 @@ def page1(brief,path):
     _uae_panel(c,(55,420,930,650),events)
     bx,by,bw,bh=panel(c,(55,1090,930,390),'التغيرات منذ الإحاطة السابقة',SAND)
     list_block(c,changes(brief,5),(bx,by,bw,bh),SAND,23,5)
-    _social_panel(c,(55,1500,930,510),events)
+    _source_mix_panel(c,(55,1500,930,510),brief)
 
     x,y,w,h=panel(c,(1010,420,1740,1080),'أبرز التطورات',COMMAND,'مرتبة حسب الأهمية مع الحفاظ على التنوع الجغرافي')
-    rows=featured_events(events,5,exclude_uae=True); rh=h//max(1,len(rows))
+    rows=featured_events(events,6,exclude_uae=True); rh=h//max(1,len(rows))
     for i,e in enumerate(rows): row_event(c,e,i+1,(x,y+i*rh,w,rh))
     bx,by,bw,bh=panel(c,(1010,1520,1740,490),'انعكاسات محتملة على الأمن الإقليمي',TEAL)
     list_block(c,implications(events,5),(bx,by,bw,bh),TEAL,25,5)

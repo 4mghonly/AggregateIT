@@ -19,9 +19,9 @@ on:
         type: boolean
         default: false
 
-# Scheduled 00/06/12/18 UAE wake-ups are emitted by the connected external
-# trigger as commits named "Arabic newsletter: scheduled ...". GitHub cron
-# cannot directly schedule a workflow that exists only on a non-default branch.
+# Production 00/06/12/18 UAE timing is owned by the default-branch launcher.
+# This branch workflow is intentionally limited to validation, preview and
+# explicit manual/live recovery runs so Arabic remains operationally isolated.
 permissions:
   contents: read
 concurrency:
@@ -58,7 +58,7 @@ jobs:
           import os
           event=os.getenv("EVENT_NAME","")
           message=os.getenv("HEAD_MESSAGE","")
-          live=(event=="push" and (message.startswith("Arabic newsletter: scheduled") or message.startswith("Arabic live:"))) or os.getenv("DISPATCH_DELIVER","").lower()=="true"
+          live=(event=="push" and message.startswith("Arabic live:")) or os.getenv("DISPATCH_DELIVER","").lower()=="true"
           preview=(event=="push" and message.startswith("Arabic preview:")) or os.getenv("DISPATCH_PREVIEW","").lower()=="true"
           if live:
               preview=False
@@ -89,7 +89,6 @@ jobs:
           for path in (
               Path("arabic_newsletter/sources.json"),
               Path("arabic_newsletter/glossary.json"),
-              Path("arabic_newsletter/trigger.json"),
           ):
               json.loads(path.read_text(encoding="utf-8"))
               print("validated", path)
@@ -124,7 +123,7 @@ jobs:
 
       - name: Validate live Arabic model and Discord route
         if: steps.mode.outputs.live == 'true'
-        run: python -m arabic_newsletter.run --preflight --probe-model --send
+        run: python -m arabic_newsletter.run --preflight --probe-model --probe-discord
 
       - name: Validate Arabic model for preview
         if: steps.mode.outputs.preview == 'true'

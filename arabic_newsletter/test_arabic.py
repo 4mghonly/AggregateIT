@@ -9,9 +9,9 @@ import unittest
 from unittest.mock import patch, Mock
 import requests
 from PIL import Image
-from .core import State, canonical, clean, edition_window, live_window, preliminary_relevant, uae_secondary_relevant, REGIONS
+from .core import State, canonical, clean, edition_window, live_window, scheduled_window, preliminary_relevant, uae_secondary_relevant, REGIONS
 from .collect import entry_time, social_links, article_path_candidate, source_relevant
-from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope, _review_envelope
+from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope, _review_envelope, _bounded_articles
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
 from .sample import fixture
@@ -33,6 +33,12 @@ class CoreTests(unittest.TestCase):
     def test_midnight_rollover(self):
         _,end=edition_window(datetime.fromisoformat('2026-09-18T01:00:00+04:00'))
         self.assertEqual(end.isoformat(),'2026-09-18T00:00:00+04:00')
+
+    def test_three_minute_early_midnight_wake_targets_midnight(self):
+        _,end=scheduled_window(datetime.fromisoformat('2026-09-20T19:57:00+00:00'))
+        self.assertEqual(end.isoformat(),'2026-09-21T00:00:00+04:00')
+        _,older=scheduled_window(datetime.fromisoformat('2026-09-20T19:49:00+00:00'))
+        self.assertEqual(older.isoformat(),'2026-09-20T18:00:00+04:00')
     def test_finance_removed_security_exception(self):
         self.assertFalse(preliminary_relevant('Bitcoin rallies as stock market earnings rise'))
         self.assertTrue(preliminary_relevant('Military sanctions on arms exports'))
@@ -46,8 +52,9 @@ class CoreTests(unittest.TestCase):
         self.assertEqual(canonical('https://site.test/a/?utm_source=x&id=2#top'),'https://site.test/a?id=2')
     def test_invalid_decode_markers_are_removed(self):
         self.assertEqual(clean('خبر\ufffd مهم\u200f'),'خبر مهم')
-    def test_missing_publication_never_becomes_now(self):
-        self.assertIsNone(entry_time({'updated_parsed':(2026,9,18,0,0,0,0,0,0)}))
+    def test_atom_updated_timestamp_is_accepted_without_inventing_retrieval_time(self):
+        self.assertIsNotNone(entry_time({'updated_parsed':(2026,9,18,0,0,0,0,0,0)}))
+        self.assertIsNone(entry_time({}))
     def test_publisher_linked_social_excludes_share_buttons(self):
         soup=BeautifulSoup('<a href="https://t.me/OfficialExample">Telegram</a><a href="https://x.com/intent/tweet">share</a>','html.parser')
         links=social_links(soup,'https://example.com')
@@ -90,6 +97,14 @@ class EditorialTests(unittest.TestCase):
     def test_review_schema_normalizes_string_indexes(self):
         self.assertEqual(_review_envelope({'review':{'approved':['0'],'reasons':{}}},1)['approved'],[0])
         with self.assertRaises(EditorialError): _review_envelope({'approved':[True]},1)
+
+    def test_bounded_articles_preserve_language_diversity(self):
+        articles=[]
+        for i in range(6):
+            articles.append(dict(self.article,id=f'ar{i}',source_id='arabic',language='ar',region='iraq',text='x'*800))
+        articles.append(dict(self.article,id='en1',source_id='english',language='en',region='iraq',text='y'*800))
+        bounded=_bounded_articles(articles,char_limit=3500,text_limit=800)
+        self.assertIn('en',{a['language'] for a in bounded})
 
     def test_compact_recovery_after_unparseable_full_synthesis(self):
         with tempfile.TemporaryDirectory() as d:

@@ -131,13 +131,14 @@ def masthead(c,brief,page):
 def stats(c,brief):
     events=brief.get('events',[]); health=brief.get('health',[])
     period='12 ساعة' if brief.get('morning') else '6 ساعات'
+    coverage=brief.get('coverage') or {}
     vals=[
       ('الفترة',period,STEEL),('مدخلات',brief.get('input_count',0),STEEL),
       ('مصادر نشطة',sum(h.get('status') in ('active','social_only') for h in health),OLIVE),
+      ('مصادر غير عربية',coverage.get('non_arabic_event_sources',0),PURPLE),
       ('مناطق',f"{len({e.get('region') for e in events if e.get('region')})} من {len(REGIONS)}",BLUE),
       ('مرتفعة',sum(e.get('severity')=='high' for e in events),ALERT),
       ('متوسطة',sum(e.get('severity')=='medium' for e in events),AMBER),
-      ('منخفضة',sum(e.get('severity')=='low' for e in events),OLIVE),
       ('أحداث',len(events),COMMAND)
     ]
     margin=55; gap=14; y=240; h=145; cw=(W-2*margin-gap*7)//8
@@ -214,8 +215,10 @@ def list_block(c,items,box,color=COMMAND,size=25,limit=6):
         c.rounded((x+w-48,yy+4,38,38),color,None,8,0); c.center(str(i+1),x+w-29,yy+23,17,True,'#FFFFFF')
         c.text(item,(x+4,yy,w-66,step-6),size,False,INK,min_size=20)
 
-def topic_distribution(events,limit=5):
-    counts={}
-    for e in events: counts[e.get('region')]=counts.get(e.get('region'),0)+1
+LANGUAGE_LABELS={'ar':'العربية','en':'الإنجليزية','fa':'الفارسية','tr':'التركية','fr':'الفرنسية','ur':'الأردية','so':'الصومالية','unknown':'أخرى'}
+
+def source_distribution(brief,limit=6):
+    counts=(brief.get('coverage') or {}).get('event_source_languages') or {}
     total=max(1,sum(counts.values()))
-    return [(REGIONS.get(k,k),v,round(v*100/total)) for k,v in sorted(counts.items(),key=lambda z:(-z[1],str(z[0])))[:limit]]
+    rows=sorted(counts.items(),key=lambda z:(-z[1],str(z[0])))[:limit]
+    return [(LANGUAGE_LABELS.get(k,k),v,round(v*100/total)) for k,v in rows]

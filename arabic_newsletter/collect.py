@@ -35,8 +35,10 @@ def text_html(value):
     return clean(BeautifulSoup(value or '', 'html.parser').get_text(' '))
 
 def entry_time(entry):
-    # Publication date, never retrieval date or an old story's modification date.
-    stamp=entry.get('published_parsed') or entry.get('created_parsed')
+    # Prefer explicit publication/creation time. Atom commonly exposes only
+    # updated_parsed, which is still publisher-supplied time and is safer than
+    # substituting retrieval time. Strict edition-window filtering still applies.
+    stamp=entry.get('published_parsed') or entry.get('created_parsed') or entry.get('updated_parsed')
     if stamp: return calendar.timegm(stamp)
     return None
 
@@ -128,13 +130,16 @@ def webpage_items(source,soup):
         title=clean(a.get_text(' ',strip=True)); url=urljoin(source['website'],a['href']); p=urlsplit(url)
         if p.hostname!=host or p.scheme not in ('http','https') or len(title)<25 or len(title)>250: continue
         if not article_path_candidate(p.path): continue
-        if not source_relevant(source,title): continue
-        links.setdefault(canonical(url),title)
+        key=canonical(url)
+        # Headline relevance is a priority signal, not a hard gate. Foreign-language
+        # and terse headlines often reveal their security relevance only in body text.
+        links.setdefault(key,(title,0 if source_relevant(source,title) else 1))
     out=[]
-    for url in list(links)[:3]:
+    ordered=sorted(links.items(),key=lambda row:row[1][1])[:6]
+    for url,_meta in ordered:
         try:
             item=article_page(source,url)
-            if item: out.append(item)
+            if item and source_relevant(source,item['title']+' '+item['text']): out.append(item)
         except FetchError: pass
     return out
 
@@ -152,7 +157,8 @@ def youtube(source,url):
 
 def collect_source(source, discover=False):
     result={'id':source['id'],'name':source['name'],'region':source['region'],'country':source['country'],
-       'checked_at':datetime.now(timezone.utc).isoformat(),'status':'failed','items':0,'social':[],'errors':[]}
+       'language':source.get('language','unknown'),'checked_at':datetime.now(timezone.utc).isoformat(),
+       'status':'failed','items':0,'social':[],'errors':[]}
     items=[]; soup=None; feeds=[source['feed']] if source.get('feed') else []
     if discover or not feeds:
         try:
@@ -207,7 +213,8 @@ def collect(start,end,discover=False,registry=None):
             try: found,report=future.result()
             except Exception as e:
                 found=[]; report={'id':source['id'],'name':source['name'],'region':source['region'],
-                  'country':source['country'],'status':'failed','items':0,'errors':[type(e).__name__],'social':[]}
+                  'country':source['country'],'language':source.get('language','unknown'),
+                  'status':'failed','items':0,'errors':[type(e).__name__],'social':[]}
             items.extend(found); health.append(report)
     seen=set(); selected=[]
     for item in sorted(items,key=lambda x:x['published'] or 0,reverse=True):

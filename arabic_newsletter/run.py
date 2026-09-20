@@ -3,6 +3,7 @@ import argparse
 import fcntl
 import json
 import os
+from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
 from .core import ROOT, State, edition_window, live_window, write_json
@@ -17,12 +18,14 @@ def main():
     modes=parser.add_mutually_exclusive_group()
     modes.add_argument('--sample',action='store_true'); modes.add_argument('--audit',action='store_true')
     modes.add_argument('--preflight',action='store_true')
-    parser.add_argument('--probe-model',action='store_true'); parser.add_argument('--long',action='store_true'); parser.add_argument('--send',action='store_true')
+    parser.add_argument('--probe-model',action='store_true'); parser.add_argument('--probe-discord',action='store_true')
+    parser.add_argument('--long',action='store_true'); parser.add_argument('--send',action='store_true')
     parser.add_argument('--end',help='ISO timestamp for a replay; requires timezone')
     parser.add_argument('--output',type=Path,default=ROOT/'runtime'/'output')
     args=parser.parse_args()
     if args.sample and args.send: parser.error('Synthetic samples cannot be delivered')
     if args.end and args.send: parser.error('Historical replay cannot be delivered')
+    if args.preflight and args.send: parser.error('--preflight never publishes; use --probe-discord to test routing')
     state_dir=Path(os.getenv('ARABIC_STATE_DIR',str(ROOT/'runtime'/'state')))
     state_dir.mkdir(parents=True,exist_ok=True)
     with (state_dir/'run.lock').open('w') as lock:
@@ -34,7 +37,7 @@ def main():
                 if args.probe_model:
                     client.chat('Return JSON only.',{'request':'Return {"ok":true}'},30,use_cache=False)
                     print('Arabic model API live probe passed')
-                if args.send: webhook_info()
+                if args.probe_discord: webhook_info()
                 print('Arabic configuration preflight passed' if args.probe_model else 'Arabic configuration present; API authentication not tested'); return
             if args.audit: audit(args.output); return
             if args.sample:
@@ -71,9 +74,17 @@ def main():
                     write_json(args.output/'editorial_review_raw.json',state.get('last_editorial_review_raw') or {})
                     write_json(args.output/'editorial_review.json',state.get('last_editorial_review') or [])
                 analysis=build_analysis(events,state,morning=morning)
+                event_sources={s.get('id'):s for e in events for s in e.get('sources',[]) if s.get('id')}
+                coverage={
+                  'article_languages':dict(Counter(a.get('language','unknown') for a in articles)),
+                  'active_source_languages':dict(Counter(h.get('language','unknown') for h in health if h.get('status') in ('active','social_only'))),
+                  'event_source_languages':dict(Counter(s.get('language','unknown') for s in event_sources.values())),
+                  'event_source_count':len(event_sources),
+                  'non_arabic_event_sources':sum(s.get('language')!='ar' for s in event_sources.values()),
+                }
                 brief=dict(sample=False,window_start=collection_start.isoformat(),window_end=end.isoformat(),events=events,
                   input_count=len(articles),health=health,rejected=rejected,analysis=analysis,morning=morning,
-                  empty_cycle=not bool(events),previous_events=state.get('previous_events') or [])
+                  coverage=coverage,empty_cycle=not bool(events),previous_events=state.get('previous_events') or [])
                 if args.send and not events:
                     print('No qualified events; delivering an explicit no-material-change status briefing',flush=True)
             paths,clipped=render(brief,args.output)
