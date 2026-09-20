@@ -1,7 +1,7 @@
 name: News Intelligence Engine
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "7 * * * *"        # avoid top-of-hour Actions congestion
   push:
     branches: [main]
     paths:
