@@ -1,7 +1,7 @@
 """Correctness baseline for AggregateIT POC. Run: python tests.py"""
 import sys, os, json, time, tempfile, subprocess
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import main, tv, briefing, market, social, context, audit
+import main, tv, briefing, market, social, context, audit, calibrate
 from storage import SQLiteStore
 
 PASS = 0; FAIL = 0
@@ -685,6 +685,22 @@ check("quiet reachable adapters stay GREEN", h71["overall"]=="GREEN", h71)
 print("[T72] Fallback model content normalization")
 check("text block list normalized", llm._content_text({"content":[{"type":"text","text":"{\"ok\":true}"}]}) == '{"ok":true}')
 check("dict content normalized", '"ok": true' in llm._content_text({"content":{"ok":True}}))
+
+print("[T73] Calibration uses canonical event ticker signals")
+ev73={"entity":"NVDA","title":"Nvidia event","severity":"High",
+      "triggers_json":json.dumps(["NVDA", "MK-01 · Mega-Cap Earnings"])}
+check("event ticker extracted from canonical signals", calibrate.event_tickers(ev73,{"NVDA","TSLA"})=={"NVDA"},
+      calibrate.event_tickers(ev73,{"NVDA","TSLA"}))
+geo73={"entity":"IRAN","title":"Iran security update","severity":"High",
+       "triggers_json":json.dumps(["ME-04 · Strait of Hormuz"])}
+check("non-ticker geopolitical entity excluded", calibrate.event_tickers(geo73,{"NVDA","TSLA"})==set(),
+      calibrate.event_tickers(geo73,{"NVDA","TSLA"}))
+class CalStore73:
+    def recent_all_events(self,hours=168,limit=500): return [ev73,geo73]
+rep73=calibrate.build_report(CalStore73(),{"sig":{"NVDA":{}},"hour_movers":[]})
+check("calibration labels current-snapshot methodology", "not subsequent-outcome" in rep73["methodology"], rep73["methodology"])
+check("current mover overlap is computed from ticker-signalled events",
+      rep73["by_importance"]["High"]["current_mover_overlap_pct"]==100.0,rep73["by_importance"]["High"])
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
