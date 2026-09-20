@@ -6,6 +6,10 @@ on:
     - cron: "30 20 * * 1-5"
     - cron: "30 3 * * *"      # pre-briefing snapshot so the 04:00 UTC MINI wire has a fresh pulse
   workflow_dispatch:
+concurrency:
+  group: aggregateit-writers
+  cancel-in-progress: false
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
