@@ -18,6 +18,7 @@ FALLBACK_API_KEY = os.environ.get("QWEN_FALLBACK_API_KEY", "")
 FALLBACK_BASE_URL = (os.environ.get("QWEN_FALLBACK_BASE_URL") or BASE_URL).rstrip("/")
 DEFAULT_MODEL = "qwen3.8-flash"
 MODEL = os.environ.get("QWEN_MODEL") or DEFAULT_MODEL
+FALLBACK_MODEL = os.environ.get("QWEN_FALLBACK_MODEL", "").strip()
 MAX_CALLS = int(os.environ.get("QWEN_MAX_CALLS") or 40)
 PROMPT_VERSION = 1
 USAGE_FILE = os.path.join(BASE, "reports", "token_usage.json")
@@ -94,25 +95,39 @@ def preflight():
         if API_KEY:
             r=_request(BASE_URL,API_KEY,payload,20)
             if r.status_code==200: return True,"ok"
+            if _quota_exhausted(r) and FALLBACK_MODEL:
+                alt=dict(payload); alt["model"]=FALLBACK_MODEL
+                print("QWEN PRIMARY MODEL QUOTA EXHAUSTED; probing fallback model",flush=True)
+                fr=_request(BASE_URL,API_KEY,alt,20)
+                if fr.status_code==200: return True,"fallback-model-ok"
+                r=fr
             if not (_quota_exhausted(r) and FALLBACK_API_KEY):
                 return False,"HTTP %d %s" % (r.status_code,r.text[:120])
             print("QWEN PRIMARY QUOTA EXHAUSTED; probing fallback credential",flush=True)
-        r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,payload,20)
+        model=FALLBACK_MODEL or MODEL
+        alt={"model":model,"messages":[{"role":"user","content":"ping"}],"max_tokens":1}
+        r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,alt,20)
         return (True,"fallback-ok") if r.status_code==200 else (False,"fallback HTTP %d %s" % (r.status_code,r.text[:120]))
-    except Exception as e:
-        return False,str(e)[:120]
+    except Exception as ex:
+        return False,str(ex)[:120]
 
 def _post(messages, model, temperature, max_tokens, timeout):
     payload={"model":model,"temperature":temperature,"max_tokens":max_tokens,"messages":messages}
     if API_KEY:
         r=_request(BASE_URL,API_KEY,payload,timeout)
+        if _quota_exhausted(r) and FALLBACK_MODEL and model!=FALLBACK_MODEL:
+            print("QWEN MODEL QUOTA EXHAUSTED; using fallback model %s" % FALLBACK_MODEL,flush=True)
+            alt=dict(payload); alt["model"]=FALLBACK_MODEL
+            r=_request(BASE_URL,API_KEY,alt,timeout)
     elif FALLBACK_API_KEY:
-        r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,payload,timeout)
+        alt=dict(payload); alt["model"]=FALLBACK_MODEL or model
+        r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,alt,timeout)
     else:
         raise LLMPermanent("Qwen credentials missing")
     if _quota_exhausted(r) and FALLBACK_API_KEY:
         print("QWEN PRIMARY QUOTA EXHAUSTED; using fallback credential",flush=True)
-        r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,payload,timeout)
+        alt=dict(payload); alt["model"]=FALLBACK_MODEL or model
+        r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,alt,timeout)
     if r.status_code in (429,500,502,503,504):
         raise LLMTransient("HTTP %d" % r.status_code)
     if 400 <= r.status_code < 500:
@@ -140,8 +155,9 @@ def chat(messages, model=None, temperature=0.3, timeout=90, max_tokens=2000):
             obj = _post(messages, model, temperature, max_tokens, timeout)
             content = obj["choices"][0]["message"]["content"]
             u = obj.get("usage", {})
-            _log_usage(model, u.get("prompt_tokens"), u.get("completion_tokens"))
-            led[key] = {"status": "success", "model": model, "ts": time.time(), "response": content}
+            used_model=obj.get("model") or model
+            _log_usage(used_model, u.get("prompt_tokens"), u.get("completion_tokens"))
+            led[key] = {"status": "success", "model": used_model, "ts": time.time(), "response": content}
             _save_ledger(led)
             return content
         except LLMTransient as e:
