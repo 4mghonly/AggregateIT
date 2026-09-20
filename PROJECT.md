@@ -27,8 +27,9 @@ The product should answer five questions reliably:
 - Market context across equities, indices, futures, commodities, FX, rates, volatility,
   sectors, and selected crypto assets.
 - Separate fact, assessment, social-signal, and market-price layers.
-- Hourly intelligence digests, daily briefings, weekly reviews, alerts, searchable history,
-  source-health reporting, and the two-page Aggregate Gazette.
+- Hourly collection and event-state refresh, searchable history, source-health reporting,
+  and the two-page Aggregate Gazette. Legacy digest/daily/weekly builders are retained but
+  intentionally unscheduled to prevent duplicate Discord products.
 - Low-cost model routing through an OpenAI-compatible endpoint such as Qwen or OpenRouter.
 
 ### Out of scope for the current production layer
@@ -61,7 +62,7 @@ TradingView scanner
 
 | Component | Responsibility |
 |---|---|
-| `main.py` | Collection orchestration, scoring, clustering, analysis, event lifecycle, and digest delivery |
+| `main.py` | Collection orchestration, scoring, clustering, analysis, and event lifecycle; scheduled legacy digest delivery is disabled |
 | `social.py` | Bounded social, community, and specialist-blog collection |
 | `storage.py` | SQLite canonical event, claim, item-state, run, and timeline storage |
 | `tv.py` / `market.py` | Market universe, live/previous-session snapshots, macro board, and regime signals |
@@ -102,8 +103,9 @@ gaps could appear intermittently even after a successful engine or market refres
 **Immediate mitigation:** refresh market, macro, and social data inside the Gazette job and
 fall back from a 24-hour event window to 72 hours with an explicit diagnostic.
 
-**Required production fix:** move canonical state from Actions cache to Neon/Postgres or
-another transactional store. Keep Actions cache only for disposable acceleration data.
+**Current mitigation:** every workflow touching the shared cache is serialized through one
+Actions concurrency group, preventing overlapping stale writers. A transactional store such
+as Neon/Postgres remains the preferred durability upgrade for cross-run exactly-once guarantees.
 
 ### 4.4 Market and curve panels depended on previous snapshots
 
@@ -263,8 +265,8 @@ Each new source must have:
 
 A release is acceptable when:
 
-- `python -m py_compile *.py` passes.
-- `python tests.py` passes with no regression failures.
+- `python -m py_compile *.py` passes in the hourly engine gate.
+- `python tests.py` passes with no regression failures before live collection.
 - JSON configuration files parse and contain no duplicate IDs or URLs.
 - A dry run produces non-overlapping, readable Gazette pages.
 - Missing inputs render explicit diagnostics instead of fabricated zeroes.
@@ -310,7 +312,7 @@ A release is acceptable when:
 - Repository behavior and documentation agree.
 - Slide 2 receives canonical event fields and shows input freshness.
 - Cash indices, index futures, commodities, FX, and rates are represented explicitly.
-- Scheduled Gazette generation runs once and refreshes market/social inputs first.
+- Scheduled Gazette generation runs once, refreshes market/social inputs first, validates its Discord route, and requires a message receipt.
 - Social collection cannot be monopolized by a single platform.
 - Invalid social identities and YouTube sources are removed, and ten live specialist feeds are configured.
 - The remaining cache-race limitation is documented as a production blocker rather than
