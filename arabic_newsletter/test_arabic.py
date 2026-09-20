@@ -91,6 +91,23 @@ class EditorialTests(unittest.TestCase):
         self.assertEqual(_review_envelope({'review':{'approved':['0'],'reasons':{}}},1)['approved'],[0])
         with self.assertRaises(EditorialError): _review_envelope({'approved':[True]},1)
 
+    def test_compact_recovery_after_unparseable_full_synthesis(self):
+        with tempfile.TemporaryDirectory() as d:
+            state=State(d)
+            with patch('arabic_newsletter.editor.Client') as client:
+                client.return_value.chat.side_effect=[
+                    EditorialError('Invalid or truncated model JSON after retry'),
+                    {'events':[copy.deepcopy(self.event)]},
+                    {'approved':[0]}
+                ]
+                events,_=synthesize([self.article],state)
+                self.assertEqual(len(events),1)
+                self.assertEqual(client.return_value.chat.call_count,3)
+                recovery_call=client.return_value.chat.call_args_list[1]
+                self.assertLessEqual(len(recovery_call.args[1]['articles'][0]['text']),850)
+                self.assertFalse(recovery_call.kwargs.get('use_cache',True))
+            state.close()
+
     def test_one_correction_then_same_review_gate(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(d)
