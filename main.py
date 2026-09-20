@@ -129,9 +129,18 @@ def title_hash(title):
 
 CASHTAG = re.compile(r"\$([A-Za-z]{1,6})\b")
 
+def _phrase_present(text, phrase):
+    phrase=(phrase or "").strip().lower()
+    if not phrase: return False
+    # Keyword phrases are semantic tokens, not arbitrary substrings. Boundaries
+    # prevent acronyms such as SEC/SMR from matching "second"/"Smriti".
+    if re.fullmatch(r"[\w\s.\-/]+",phrase):
+        return re.search(r"(?<!\w)"+re.escape(phrase)+r"(?!\w)",text) is not None
+    return phrase in text
+
 def find_matches(text):
     low = text.lower()
-    return [e for e in KEYWORDS_DATA if any(p in low for p in e["phrases"])]
+    return [e for e in KEYWORDS_DATA if any(_phrase_present(low,p) for p in e["phrases"])]
 
 # ================= EXPLAINABLE SCORING =================
 def score_item(i):
