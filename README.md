@@ -72,7 +72,7 @@ Multi-source claims without ≥2 independent families are downgraded and capped.
 ## Secrets
 
 Required secrets: `QWEN_API_KEY`, `QWEN_BASE_URL`, `DISCORD_WEBHOOK`,
-`GITHUB_TOKEN` (automatic in Actions). The primary model is `qwen3.8-flash`; quota exhaustion falls back to `qwen3.8-omni-flash` on the same configured endpoint/credential.
+`GITHUB_TOKEN` (automatic in Actions). The primary model is `qwen3.8-omni-flash`. The LLM wrapper can optionally use separately configured fallback credentials/model, but production currently validates Omni Flash directly before live analysis.
 
 Optional source adapters: `SOCIAL_PROXY_URL`, `RSSHUB_BASE_URL`, `RSS_BRIDGE_URL`,
 `REDDIT_CLIENT_ID`, and `REDDIT_CLIENT_SECRET`. Without those values the collector uses
