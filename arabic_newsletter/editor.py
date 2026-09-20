@@ -234,6 +234,31 @@ def _event_envelope(result):
         return {'events':[result]}
     return result
 
+def _review_envelope(result,count):
+    """Normalize harmless review schema drift while keeping approval fail-closed."""
+    if not isinstance(result,dict):
+        raise EditorialError('Invalid editorial review')
+    if isinstance(result.get('review'),dict):
+        result=result['review']
+    approved=result.get('approved')
+    if isinstance(approved,int) and not isinstance(approved,bool):
+        approved=[approved]
+    if not isinstance(approved,list):
+        raise EditorialError('Invalid editorial review')
+    normalized=[]
+    for value in approved:
+        if isinstance(value,bool):
+            raise EditorialError('Invalid editorial review')
+        if isinstance(value,str) and value.strip().isdigit():
+            value=int(value.strip())
+        if not isinstance(value,int) or value<0 or value>=count:
+            raise EditorialError('Invalid editorial review')
+        if value not in normalized:
+            normalized.append(value)
+    reasons=result.get('reasons')
+    if not isinstance(reasons,dict): reasons={}
+    return {'approved':normalized,'reasons':reasons}
+
 def synthesize(articles,state):
     if not articles: return [],[]
     # Source snippets are explicitly bounded; never send entire pages or old conversation context.
@@ -256,10 +281,12 @@ def synthesize(articles,state):
         events,rejected=validate_events(result,validation_articles)
         review={'approved':[],'reasons':{'all':'No events passed deterministic evidence checks'}}
         if events:
-            review=client.chat(REVIEW,{'events':events,'articles':bounded},1500)
-            approved=review.get('approved')
-            if not isinstance(approved,list) or any(type(i)!=int or i<0 or i>=len(events) for i in approved):
-                raise EditorialError('Invalid editorial review')
+            review_ids={source_id for event in events for source_id in event.get('source_ids',[])}
+            review_articles=[article for article in bounded if article.get('id') in review_ids]
+            raw_review=client.chat(REVIEW,{'events':events,'articles':review_articles},1800,temperature=0.05)
+            state.put('last_editorial_review_raw',raw_review)
+            review=_review_envelope(raw_review,len(events))
+            approved=review['approved']
         else: approved=[]
         audit.append({'pass':correction,'validation_failures':rejected,'review':review})
         state.put('last_editorial_review',audit)

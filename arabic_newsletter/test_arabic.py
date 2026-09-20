@@ -11,7 +11,7 @@ import requests
 from PIL import Image
 from .core import State, canonical, clean, edition_window, live_window, preliminary_relevant, uae_secondary_relevant, REGIONS
 from .collect import entry_time, social_links
-from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope
+from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope, _review_envelope
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
 from .sample import fixture
@@ -77,6 +77,10 @@ class EditorialTests(unittest.TestCase):
         event=copy.deepcopy(self.event)
         self.assertEqual(_event_envelope(event),{'events':[event]})
         self.assertEqual(_event_envelope({'event':event}),{'events':[event]})
+
+    def test_review_schema_normalizes_string_indexes(self):
+        self.assertEqual(_review_envelope({'review':{'approved':['0'],'reasons':{}}},1)['approved'],[0])
+        with self.assertRaises(EditorialError): _review_envelope({'approved':[True]},1)
 
     def test_one_correction_then_same_review_gate(self):
         with tempfile.TemporaryDirectory() as d:

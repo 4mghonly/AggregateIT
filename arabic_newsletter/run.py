@@ -68,6 +68,7 @@ def main():
                     events,rejected=synthesize(articles,state)
                 finally:
                     write_json(args.output/'editorial_draft.json',state.get('last_editorial_draft') or {})
+                    write_json(args.output/'editorial_review_raw.json',state.get('last_editorial_review_raw') or {})
                     write_json(args.output/'editorial_review.json',state.get('last_editorial_review') or [])
                 analysis=build_analysis(events,state,morning=morning)
                 brief=dict(sample=False,window_start=collection_start.isoformat(),window_end=end.isoformat(),events=events,
