@@ -27,11 +27,11 @@ def build_weekly(store, hours=168):
 def main():
     wh = os.environ.get("DISCORD_WEBHOOK")
     if not wh:
-        print("FATAL: DISCORD_WEBHOOK secret is not set."); return
+        raise RuntimeError("DISCORD_WEBHOOK secret is not set")
     embed = build_weekly(SQLiteStore())
     if not embed:
         print("No events this week - skipping."); return
-    r = requests.post(wh, json={"embeds": [embed]})
+    r = requests.post(wh, json={"embeds": [embed]}, timeout=(10,30))
     r.raise_for_status()
     print("✅ Weekly review delivered!")
 
