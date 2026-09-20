@@ -46,7 +46,9 @@ CASHTAG_ONLY = {
     "SNOW","JOBS","CARS","BEER","DECK",
     "HAS","APP","TECH","NOW","COST","BALL","WELL","POOL","ICE","AMP","DOC","FOX","PARA"
 }
-HEALTH = {"rss_ok":0,"rss_fail":0,"reddit_ok":0,"reddit_fail":0,"github_ok":0,"github_fail":0,
+HEALTH = {"rss_ok":0,"rss_empty":0,"rss_fail":0,
+          "reddit_ok":0,"reddit_empty":0,"reddit_fail":0,
+          "github_ok":0,"github_empty":0,"github_fail":0,
           "qwen_ok":0,"qwen_fail":0,"qwen_invalid":0,"discord_ok":0,"discord_fail":0,"discord_skipped":0,
           "tv_movers_loaded":0,"tv_universe_loaded":0}
 ERRORS = []
@@ -175,6 +177,7 @@ async def fetch_text(session, url, sem, headers=None):
         try:
             async with session.get(url, timeout=aiohttp.ClientTimeout(total=20), headers=headers) as r:
                 if r.status == 200: return await r.text()
+                log_failure("http", url, "HTTP %d" % r.status)
         except Exception as e:
             log_failure("http", url, e)
     return None
@@ -189,8 +192,10 @@ async def fetch_rss(session, src, sem):
                 "category": src.get("Category", ""), "url": e.get("link", ""),
                 "title": e.get("title", ""), "text": re.sub("<[^>]+>", "", e.get("summary", "")),
                 "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
-    HEALTH["rss_ok" if out else "rss_fail"] += 1
-    audit.record(name, bool(out))
+    if txt is None: HEALTH["rss_fail"] += 1
+    elif out: HEALTH["rss_ok"] += 1
+    else: HEALTH["rss_empty"] += 1
+    audit.record(name, txt is not None)
     return out
 
 async def fetch_reddit(session, r, sem):
@@ -204,7 +209,9 @@ async def fetch_reddit(session, r, sem):
                 "url": entry.get("link", ""), "title": title,
                 "text": re.sub("<[^>]+>", "", entry.get("summary", "")),
                 "ts": calendar.timegm(entry.published_parsed) if entry.get("published_parsed") else time.time()})
-    HEALTH["reddit_ok" if out else "reddit_fail"] += 1
+    if txt is None: HEALTH["reddit_fail"] += 1
+    elif out: HEALTH["reddit_ok"] += 1
+    else: HEALTH["reddit_empty"] += 1
     return out
 
 def parse_iso_ts(ts_str):
@@ -215,10 +222,11 @@ def parse_iso_ts(ts_str):
 async def fetch_github(session, repo, sem, since_iso):
     hdrs = dict(UA)
     if os.environ.get("GITHUB_TOKEN"): hdrs["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
-    out = []
+    out = []; reachable = False
     for ep, kind in (("releases?per_page=5", "release"), (f"commits?per_page=5&since={since_iso}", "commit")):
         txt = await fetch_text(session, f"https://api.github.com/repos/{repo}/{ep}", sem, hdrs)
-        if not txt: continue
+        if txt is None: continue
+        reachable = True
         try:
             data = json.loads(txt)
             if isinstance(data, list):
@@ -228,7 +236,9 @@ async def fetch_github(session, repo, sem, since_iso):
                         "url": it.get("html_url", ""), "title": (it.get("name") or it.get("commit", {}).get("message") or "")[:200],
                         "text": (it.get("body") or it.get("commit", {}).get("message") or "")[:4000], "ts": ts})
         except Exception: pass
-    HEALTH["github_ok" if out else "github_fail"] += 1
+    if not reachable: HEALTH["github_fail"] += 1
+    elif out: HEALTH["github_ok"] += 1
+    else: HEALTH["github_empty"] += 1
     return out
 
 def full_text(url, fallback):
