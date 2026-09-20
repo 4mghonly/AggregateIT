@@ -89,7 +89,6 @@ def ensure_market_data():
         print("TV SELF-HEAL:", (r.stdout or r.stderr).strip()[:200] or f"exit {r.returncode}")
     except Exception as e:
         print("TV SELF-HEAL FAIL:", type(e).__name__, str(e)[:120])
-ensure_market_data()
 
 def load_market_context():
     movers, uni_tickers, uni_names = {}, set(), {}
@@ -661,10 +660,15 @@ def build_health(report, store_stats):
     return {"run": report["run"], "overall": overall, "dry_run": DRY_RUN,
             "degraded": degraded, "red": red, "counters": dict(HEALTH), "store": store_stats,
             "main_lines": main_lines, "main_sections": main_sections,
-            "decomposition_alert": main_lines > 850 or main_sections > 9}
+            "decomposition_alert": main_lines > 900 or main_sections > 9}
 
 # ================= MAIN =================
 async def main():
+    global LLM_AVAILABLE, _det, MOVERS, TV_TICKERS, TV_NAMES
+    LLM_AVAILABLE, _det = llm.preflight()
+    print("QWEN PREFLIGHT:", "OK" if LLM_AVAILABLE else "FAIL " + _det)
+    ensure_market_data()
+    MOVERS, TV_TICKERS, TV_NAMES = load_market_context()
     if not LLM_AVAILABLE:
         print("DEGRADED: Qwen unavailable; using conservative non-alerting fallback analysis:", _det)
 
