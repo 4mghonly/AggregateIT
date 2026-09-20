@@ -10,7 +10,7 @@ components have been removed from this branch.
 
 - Modern Standard Arabic from original-language evidence; three 3840×2160 PNG slides in the approved clean analytical-dashboard format
   in the approved Gazette palette and panel geometry, with native RTL shaping.
-- Every six hours: **03:30 / 09:30 / 15:30 / 21:30 Asia/Dubai**. Each edition covers
+- Every six hours: **00:00 / 06:00 / 12:00 / 18:00 Asia/Dubai**. Each edition covers
   its previous six-hour publication window. Publication can be delayed by runner queues.
 - GCC (AE/SA/QA/KW/BH), **Oman** as a dedicated country view, Iran, Turkey, Iraq,
   Yemen, **Egypt** as a dedicated country view, Sudan, Sahel
@@ -52,16 +52,14 @@ webhook or API key.
 The workflow can reuse existing `QWEN_API_KEY` and `QWEN_BASE_URL` secrets without
 changing them. Optional isolated overrides: `ARABIC_LLM_API_KEY`,
 `ARABIC_LLM_BASE_URL` (secrets) and `ARABIC_LLM_MODEL` (repository variable).
-The workflow's default model matches the existing slide workflow; model/API
-compatibility must be demonstrated on a live run. Preflight validates presence
-and syntax only, not authentication.
+The workflow uses `qwen3.8-omni-flash`. Live preflight bypasses the model cache, performs a real API probe, and verifies the dedicated Arabic Discord webhook route before publication.
 
 GitHub cron does not run a workflow existing only on a non-default branch.
 The connected scheduled automation instead edits **only** the dedicated new
 `arabic_newsletter/trigger.json` on **Arabic**. Its push runs the new workflow.
 The default branch keeps its non-delivery utility workflows, but its legacy Discord
 delivery workflows are disabled. A self-hosted alternative can run the same CLI under cron:
-`30 5,11,17,23 * * *` (UTC), equivalent to the four UAE times. Use only one scheduler.
+`0 20,2,8,14 * * *` (UTC, with 20:00 belonging to the previous UTC date), equivalent to 00:00/06:00/12:00/18:00 UAE. Use only one scheduler.
 
 ## Evidence and source policy
 
@@ -105,8 +103,7 @@ not real-world incident prevalence or quantified geopolitical risk.
   Cache eviction can lose delivery history. A persistent runner/state volume is
   preferred where exactly-once guarantees are required; this implementation does
   not claim exactly-once delivery across cache loss.
-- Empty/failed collection, invalid model output or failed editorial checks block
-  publication. Failure remains visible in Actions and uploaded diagnostic artifacts.
+- Total source-collection failure still blocks publication. A cycle with active sources but no qualified events publishes an explicit no-material-change briefing; invalid model output or failed editorial checks remain visible in diagnostics. Failure remains visible in Actions and uploaded diagnostic artifacts.
 - Cross-language semantic deduplication and translation still require quality
   monitoring; deterministic guards cannot prove every interpretation correct.
 - Region-level source health is not a claim that every country is fully covered.
@@ -123,9 +120,4 @@ successful collection, model translation and confirmed delivery to the new chann
 
 ## Locked visual format
 
-The Arabic briefing uses the approved three-slide light dashboard design. Page 1 is
-locked to: UAE news on the left, main development with a compact vector scope map in
-the centre, follow-up priorities on the right, and the three lower panels
-"التغييرات منذ الإحاطة السابقة" / "سياق دولي" / "الخلاصة التحليلية".
-The scope map includes Somalia as its own region and is deliberately slightly smaller
-than the earlier mock-up. Do not revert to the old dense commander-card layout.
+The Arabic briefing uses the approved three-slide, image-free command-brief design. It is typography-first, uses no generated imagery or vector maps, preserves the regional dashboard on page 2, and reserves page 3 for expanded evidence-bound analysis. Do not reintroduce decorative rendering that competes with legibility.
