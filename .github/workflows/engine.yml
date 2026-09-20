@@ -56,8 +56,8 @@ jobs:
           ENGINE_DELIVERY: "false"
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
-          QWEN_FALLBACK_API_KEY: ${{ secrets.ARABIC_LLM_API_KEY }}
-          QWEN_FALLBACK_BASE_URL: ${{ secrets.ARABIC_LLM_BASE_URL }}
+          QWEN_FALLBACK_API_KEY: ${{ secrets.QWEN_FALLBACK_API_KEY }}
+          QWEN_FALLBACK_BASE_URL: ${{ secrets.QWEN_FALLBACK_BASE_URL }}
           QWEN_MODEL: qwen3.8-omni-flash
           QWEN_MAX_CALLS: "10"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
