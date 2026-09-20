@@ -41,7 +41,7 @@ jobs:
       ARABIC_LLM_MODEL: qwen3.8-omni-flash
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
@@ -68,7 +68,7 @@ jobs:
           print("Arabic workflow mode:", "live" if live else ("preview" if preview else "validation"))
           PY
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: pip
@@ -97,7 +97,7 @@ jobs:
 
       - name: Restore Arabic state only
         id: restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: arabic_newsletter/runtime/state
           key: arabic-state-v1-${{ github.run_id }}-${{ github.run_attempt }}
@@ -152,14 +152,14 @@ jobs:
 
       - name: Preserve Arabic delivery ledger even after failures
         if: always()
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: arabic_newsletter/runtime/state
           key: arabic-state-v1-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload Arabic samples, sources and run reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: arabic-newsletter-${{ github.run_id }}
           path: |
