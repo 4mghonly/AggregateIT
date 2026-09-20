@@ -55,12 +55,16 @@ changing them. Optional isolated overrides: `ARABIC_LLM_API_KEY`,
 The workflow uses `qwen3.8-omni-flash`. Live preflight bypasses the model cache, performs a real API probe, and verifies the dedicated Arabic Discord webhook route before publication.
 
 GitHub cron only schedules workflows from the default branch. Production timing is
-therefore owned by a tiny launcher workflow on **main** that runs at
-`0 2,8,14,20 * * *` UTC (06:00/12:00/18:00/00:00 UAE), checks out **Arabic**,
-and executes only this isolated runtime with `DISCORD_WEBHOOK_ARABIC`. The launcher
-does not import or execute the main engine. The Arabic branch workflow remains for
-tests, previews and explicit manual live runs. The former commit-based external
-scheduler is retired; `trigger.json` is no longer a production scheduling mechanism.
+therefore owned by a tiny launcher workflow on **main** using
+`0,15 2,8,14,20 * * 0-6` UTC. This gives every Arabic edition a primary wake-up at
+06:00/12:00/18:00/00:00 UAE and a +15 minute recovery wake-up, on all seven days
+including Saturday and Sunday. The recovery wake-up reads the Arabic delivery ledger
+first and exits before model calls when that edition is already confirmed sent. The
+launcher checks out **Arabic** and executes only this isolated runtime with
+`DISCORD_WEBHOOK_ARABIC`; it does not import, execute, or reschedule the main Gazette.
+The Arabic branch workflow remains for tests, previews and explicit manual live runs.
+The former commit-based external scheduler is retired; `trigger.json` is no longer a
+production scheduling mechanism.
 
 ## Evidence and source policy
 
