@@ -14,6 +14,7 @@ from .collect import entry_time, social_links, article_path_candidate, source_re
 from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope, _review_envelope, _bounded_articles
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
+from arabic_layout.render_pages import page2_region_plan
 from .sample import fixture
 from bs4 import BeautifulSoup
 
@@ -259,6 +260,16 @@ class RenderTests(unittest.TestCase):
                 if i==2: self.assertLessEqual(clipped,90)
                 for path in paths:
                     with Image.open(path) as image: self.assertEqual(image.size,(3840,2160))
+    def test_page2_uses_only_active_region_cards_and_preserves_full_monitoring_list(self):
+        brief=fixture()
+        limited=copy.deepcopy(brief)
+        limited['events']=[e for e in limited['events'] if e['region'] in ('iran','iraq','somalia','pakistan','levant')]
+        active,quiet,first=page2_region_plan(limited['events'])
+        self.assertEqual(set(active),{'iran','iraq','somalia','pakistan','levant'})
+        self.assertEqual(len(active)+len(quiet),len(REGIONS))
+        self.assertTrue(set(active).isdisjoint(quiet))
+        self.assertEqual(set(first),set(active))
+
     def test_sample_covers_every_region(self):
         brief=fixture()
         self.assertIn('somalia',REGIONS)

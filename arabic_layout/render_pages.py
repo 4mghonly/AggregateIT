@@ -74,29 +74,70 @@ def page1(brief,path):
 def _region_card(c,region,e,n,box):
     x,y,w,h=map(int,box); color=REGION_COLORS.get(region,STEEL)
     c.rounded(box,PAPER,'#C9D0CC',11,2)
-    c.d.rectangle((x,y,x+w,y+54),fill=color)
-    c.rounded((x+12,y+8,40,38),'#F4F6F4',None,7,0); c.center(str(n),x+32,y+27,18,True,color)
-    c.text(REGIONS[region],(x+65,y+6,w-82,38),27,True,'#FFFFFF','center')
+    c.d.rectangle((x,y,x+w,y+58),fill=color)
+    c.rounded((x+12,y+10,40,38),'#F4F6F4',None,7,0); c.center(str(n),x+32,y+29,18,True,color)
+    c.text(REGIONS[region],(x+65,y+8,w-82,38),28,True,'#FFFFFF','center')
     if e:
         label,col,pale=severity(e)
-        c.rounded((x+w-138,y+68,120,35),pale,None,7,0); c.text(label,(x+w-132,y+73,108,24),17,True,col,'center')
-        c.text(compact(e.get('title_ar',''),96),(x+18,y+68,w-175,58),27,True,INK)
-        c.text(compact(e.get('summary_ar',''),118),(x+18,y+132,w-36,h-178),22,False,INK)
+        c.rounded((x+w-144,y+76,126,38),pale,None,7,0); c.text(label,(x+w-138,y+81,114,26),18,True,col,'center')
+        c.text(compact(e.get('title_ar',''),120),(x+18,y+74,w-184,74),30,True,INK)
+        source_names=[]
+        for src in e.get('sources',[]):
+            name=src.get('source')
+            lang=LANGUAGE_LABELS.get(src.get('language'),src.get('language') or '')
+            label_src=(name+'، '+lang).strip('، ')
+            if label_src and label_src not in source_names: source_names.append(label_src)
+        source_line='المصادر: '+' | '.join(source_names[:3]) if source_names else 'المصادر: غير متاحة في العرض المختصر'
+        c.text(compact(e.get('summary_ar',''),250),(x+18,y+158,w-36,max(96,h-278)),25,False,INK,min_size=20,line_ratio=1.36)
+        c.text(compact(source_line,150),(x+18,y+h-94,w-36,38),19,True,MUTED,min_size=17)
         status='متوتر' if e.get('severity')=='high' else ('حذر ومراقبة' if e.get('severity')=='medium' else 'مستقر نسبياً')
     else:
-        c.text('لا يوجد تحديث مؤهل خلال نافذة التغطية الحالية.',(x+18,y+92,w-36,88),23,True,MUTED)
         status='مراقبة'
-    c.d.rectangle((x+14,y+h-36,x+w-14,y+h-14),fill='#EEF1EE')
-    c.text('الوضع العام: '+status,(x+22,y+h-34,w-44,20),16,True,color,'center')
+    c.d.rectangle((x+14,y+h-40,x+w-14,y+h-14),fill='#EEF1EE')
+    c.text('الوضع العام: '+status,(x+22,y+h-38,w-44,22),17,True,color,'center')
+
+def page2_region_plan(events):
+    first={}
+    for e in events:
+        region=e.get('region')
+        if region in REGIONS and region not in first: first[region]=e
+    ranked=rank_events(list(first.values()))
+    active=[e.get('region') for e in ranked if e.get('region') in REGIONS][:9]
+    quiet=[r for r in REGIONS if r not in active]
+    return active,quiet,first
+
+def _coverage_strip(c,box,active,quiet):
+    x,y,w,h=panel(c,box,'التغطية الإقليمية الكاملة',STEEL,'المناطق غير المعروضة أعلاه ما زالت تحت المراقبة حتى دون تطور مؤهل')
+    ordered=active+quiet
+    cols=6; gap=12
+    rows=(len(ordered)+cols-1)//cols
+    cw=(w-gap*(cols-1))//cols
+    ch=(h-gap*(rows-1))//rows
+    for i,region in enumerate(ordered):
+        row=i//cols; col=i%cols; xx=x+col*(cw+gap); yy=y+row*(ch+gap)
+        is_active=region in active
+        color=REGION_COLORS.get(region,STEEL)
+        c.rounded((xx,yy,cw,ch),PALE_BLUE if is_active else '#F3F5F3',color if is_active else BORDER,9,2 if is_active else 1)
+        c.text(REGIONS[region],(xx+10,yy+8,cw-20,30),20,True,color if is_active else MUTED,'center',min_size=17)
+        c.text('تطور مؤهل' if is_active else 'مراقبة مستمرة',(xx+10,yy+40,cw-20,24),15,True,color if is_active else MUTED,'center',min_size=14)
 
 def page2(brief,path):
-    c=Canvas(); masthead(c,brief,2); stats(c,brief); events=brief.get('events',[]); first={}
-    for e in events: first.setdefault(e.get('region'),e)
-    regions=list(REGIONS); left=55; top=420; gx=24; gy=16
-    cw=(W-110-gx*2)//3; ch=(1585-gy*5)//6
-    for i,r in enumerate(regions):
-        col=i%3; row=i//3
-        _region_card(c,r,first.get(r),i+1,(left+col*(cw+gx),top+row*(ch+gy),cw,ch))
+    c=Canvas(); masthead(c,brief,2); stats(c,brief); events=brief.get('events',[])
+    active,quiet,first=page2_region_plan(events)
+    # Use the canvas for evidence, not empty placeholders. Up to nine active regions
+    # receive large cards; all 17 regions remain visible in the compact coverage strip.
+    left=55; top=420; gx=24; gy=18; active_h=1110
+    if active:
+        cols=3; rows=(len(active)+cols-1)//cols
+        cw=(W-110-gx*(cols-1))//cols
+        ch=(active_h-gy*(rows-1))//rows
+        for i,r in enumerate(active):
+            col=i%cols; row=i//cols
+            _region_card(c,r,first[r],i+1,(left+col*(cw+gx),top+row*(ch+gy),cw,ch))
+    else:
+        bx,by,bw,bh=panel(c,(55,420,W-110,1110),'المشهد الإقليمي',COMMAND)
+        c.text('لا توجد تطورات مؤهلة بعد تطبيق التحقق التحريري في نافذة التغطية الحالية.',(bx,by,bw,bh),34,True,MUTED,'center')
+    _coverage_strip(c,(55,1555,W-110,455),active,quiet)
     _footer(c,2); c.save(path); return c.clipped
 
 def _analysis_text(c,box,title,text,color,subtitle=None):
