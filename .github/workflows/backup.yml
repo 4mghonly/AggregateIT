@@ -11,15 +11,15 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - uses: actions/checkout@v5
+      - uses: actions/cache@v5
         with:
           path: data
           key: data-${{ github.run_id }}-backup
           restore-keys: |
             data-
       - name: Upload state database
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: state-db-backup
           path: data/state.db
