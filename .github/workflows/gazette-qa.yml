@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       - run: pip install matplotlib requests pillow
@@ -27,7 +27,7 @@ jobs:
           python -m unittest -v test_gazette_layout
       - name: Upload clearly labelled synthetic samples
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: gazette-offline-samples
           path: qa-samples/
