@@ -4,8 +4,8 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with: { python-version: "3.11" }
       - run: pip install aiohttp feedparser
       - run: python audit.py
@@ -15,6 +15,6 @@ jobs:
           RSS_BRIDGE_URL: ${{ secrets.RSS_BRIDGE_URL || vars.RSS_BRIDGE_URL }}
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with: { name: audit-report, path: audit_report.json }
