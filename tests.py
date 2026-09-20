@@ -715,5 +715,12 @@ h74=main.build_health({"run":"reddit-empty","new":0,"matched":0},{"fresh_init":F
 check("empty Reddit is visible without becoming a transport failure",
       h74["overall"]=="GREEN" and any("Reddit social coverage empty" in n for n in h74.get("notes",[])),h74)
 
+print("[T75] Keyword acronyms require token boundaries")
+ids75=lambda text:{x["id"] for x in main.find_matches(text)}
+check("SMR does not match inside Smriti", "EN-10" not in ids75("Smriti Mandhana breaks a cricket record"), ids75("Smriti Mandhana breaks a cricket record"))
+check("SEC does not match inside security", "XA-10" not in ids75("regional security officials issue an update"), ids75("regional security officials issue an update"))
+check("standalone SMR still matches energy cluster", "EN-10" in ids75("Utility approves SMR nuclear project"), ids75("Utility approves SMR nuclear project"))
+check("standalone SEC still matches digital-assets cluster", "XA-10" in ids75("SEC issues new crypto custody guidance"), ids75("SEC issues new crypto custody guidance"))
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
