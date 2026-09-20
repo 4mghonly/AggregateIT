@@ -30,6 +30,42 @@ Return {"events":[{"region":"one allowed region key","topic":"one allowed topic"
 
 class EditorialError(RuntimeError): pass
 
+def _message_json(message):
+    """Accept strict JSON, fenced JSON, or OpenAI-compatible text blocks."""
+    if not isinstance(message,dict):
+        raise ValueError('message object required')
+    content=message.get('content')
+    if isinstance(content,dict):
+        return content
+    if isinstance(content,list):
+        parts=[]
+        for item in content:
+            if isinstance(item,str):
+                parts.append(item)
+            elif isinstance(item,dict):
+                value=item.get('text') or item.get('content')
+                if isinstance(value,str): parts.append(value)
+        content=''.join(parts)
+    if not isinstance(content,str):
+        raise ValueError('text content required')
+    text=content.strip()
+    if text.startswith('```'):
+        text=re.sub(r'^\x60\x60\x60(?:json)?\s*','',text,flags=re.I)
+        text=re.sub(r'\s*\x60\x60\x60$','',text)
+    try:
+        obj=json.loads(text)
+        if isinstance(obj,dict): return obj
+    except ValueError:
+        pass
+    decoder=json.JSONDecoder()
+    for match in re.finditer(r'\{',text):
+        try:
+            obj,_=decoder.raw_decode(text[match.start():])
+            if isinstance(obj,dict): return obj
+        except ValueError:
+            continue
+    raise ValueError('complete JSON object not found')
+
 class Client:
     def __init__(self,state):
         self.state=state; self.calls=0
@@ -39,11 +75,12 @@ class Client:
         if not self.key: raise EditorialError('Missing ARABIC_LLM_API_KEY or QWEN_API_KEY')
         if not self.model: raise EditorialError('Missing ARABIC_LLM_MODEL or QWEN_MODEL')
         if urlsplit(self.base).scheme!='https': raise EditorialError('LLM endpoint must use HTTPS')
-    def chat(self,system,data,max_tokens=9000,temperature=0.18):
+    def chat(self,system,data,max_tokens=9000,temperature=0.18,use_cache=True):
         messages=[{'role':'system','content':system},{'role':'user','content':json.dumps(data,ensure_ascii=False)}]
-        cache_key='llm:v2:'+digest(self.base+self.model+json.dumps(messages,ensure_ascii=False,sort_keys=True))
-        cached=self.state.get(cache_key)
-        if cached is not None: return cached
+        cache_key='llm:v3:'+digest(self.base+self.model+json.dumps(messages,ensure_ascii=False,sort_keys=True))
+        if use_cache:
+            cached=self.state.get(cache_key)
+            if cached is not None: return cached
         payload={'model':self.model,'messages':messages,'temperature':temperature,'max_tokens':max_tokens,
           'response_format':{'type':'json_object'}}
         host=urlsplit(self.base).hostname or ''
@@ -66,7 +103,6 @@ class Client:
                 except ValueError: detail='non-JSON error response'
                 detail=detail.replace(self.key,'[redacted]').replace(self.base,'[endpoint]')
                 detail=re.sub(r'https?://\S+','[url]',detail)[:350]
-                # Providers differ on optional JSON/thinking request extensions.
                 if r.status_code==400 and attempt==0 and any(k in detail.lower() for k in ('response_format','enable_thinking')):
                     disabled=self.state.get(features_key) or []
                     for field in ('response_format','enable_thinking'):
@@ -76,15 +112,24 @@ class Client:
                 raise EditorialError(f'Model HTTP {r.status_code}: {detail}')
             try:
                 response=r.json()
-                if response['choices'][0].get('finish_reason')=='length': raise ValueError('truncated')
-                result=json.loads(response['choices'][0]['message']['content'])
-                if not isinstance(result,dict): raise ValueError('object required')
-            except (ValueError,KeyError,IndexError,TypeError): raise EditorialError('Invalid or truncated model JSON') from None
-            usage=self.state.get('usage') or {'calls':0,'input_tokens':0,'output_tokens':0}
-            usage['calls']+=1
-            usage['input_tokens']+=response.get('usage',{}).get('prompt_tokens',0)
-            usage['output_tokens']+=response.get('usage',{}).get('completion_tokens',0)
-            self.state.put('usage',usage); self.state.put(cache_key,result)
+                choice=response['choices'][0]
+                finish=choice.get('finish_reason')
+                usage=self.state.get('usage') or {'calls':0,'input_tokens':0,'output_tokens':0}
+                usage['calls']+=1
+                usage['input_tokens']+=response.get('usage',{}).get('prompt_tokens',0) or 0
+                usage['output_tokens']+=response.get('usage',{}).get('completion_tokens',0) or 0
+                self.state.put('usage',usage)
+                if finish in ('length','max_tokens'): raise ValueError('truncated')
+                result=_message_json(choice['message'])
+            except (ValueError,KeyError,IndexError,TypeError):
+                if attempt==0:
+                    payload['temperature']=min(temperature,0.05)
+                    payload['max_tokens']=min(max(int(payload.get('max_tokens',max_tokens)*1.25),max_tokens),12000)
+                    print('Arabic LLM returned malformed/truncated JSON; retrying once with stricter decoding budget',flush=True)
+                    time.sleep(1)
+                    continue
+                raise EditorialError('Invalid or truncated model JSON after retry') from None
+            if use_cache: self.state.put(cache_key,result)
             return result
         raise EditorialError('Model retry budget exhausted')
 
