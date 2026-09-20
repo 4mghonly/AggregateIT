@@ -10,7 +10,7 @@ from unittest.mock import patch, Mock
 import requests
 from PIL import Image
 from .core import State, canonical, clean, edition_window, live_window, scheduled_window, preliminary_relevant, uae_secondary_relevant, REGIONS
-from .collect import entry_time, social_links, article_path_candidate, source_relevant
+from .collect import entry_time, social_links, article_path_candidate, source_relevant, production_sources
 from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope, _review_envelope, _bounded_articles
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
@@ -68,6 +68,18 @@ class CoreTests(unittest.TestCase):
         source={'country':'AE','language':'en'}
         self.assertTrue(source_relevant(source,'UAE civil defence updates emergency readiness at Dubai airport'))
         self.assertFalse(source_relevant(source,'Dubai hotel launches luxury brunch'))
+
+    def test_failed_source_audits_are_rotated_back_into_production(self):
+        end=datetime.fromisoformat('2026-09-21T00:00:00+04:00')
+        sources=[{'id':'live','enabled':True,'language':'ar','verification_status':'active'}]
+        sources += [{'id':f'en{i:02}','enabled':False,'language':'en','verification_status':'failed','retired_reason':'failed_source_audit_2026-09-19'} for i in range(25)]
+        sources += [{'id':f'ar{i:02}','enabled':False,'language':'ar','verification_status':'failed','retired_reason':'failed_source_audit_2026-09-19'} for i in range(10)]
+        sources += [{'id':'recovered','enabled':False,'language':'en','verification_status':'active','retired_reason':'failed_source_audit_2026-09-19'}]
+        selected=production_sources(sources,end)
+        ids={s['id'] for s in selected}
+        self.assertIn('live',ids); self.assertIn('recovered',ids)
+        self.assertEqual(sum(s['id'].startswith('en') for s in selected),18)
+        self.assertEqual(sum(s['id'].startswith('ar') for s in selected),6)
 
     def test_egypt_and_oman_sources_are_first_class_regions(self):
         root=Path(__file__).resolve().parent

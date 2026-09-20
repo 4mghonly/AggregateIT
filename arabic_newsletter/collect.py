@@ -203,11 +203,28 @@ def collect_source(source, discover=False):
     if items and result['status']!='active': result['status']='social_only'
     return items,result
 
+def production_sources(sources,end,non_arab_retry=18,arab_retry=6):
+    """Keep healthy sources live and rotate failed-audit sources back through collection."""
+    always=[s for s in sources if s.get('enabled',True) or s.get('verification_status')=='active']
+    retry=[s for s in sources if s not in always and str(s.get('retired_reason','')).startswith('failed_source_audit_')]
+    cycle=int(end.timestamp()//21600)
+    def rotate(rows,count,salt):
+        if not rows or count<=0: return []
+        rows=sorted(rows,key=lambda x:x.get('id',''))
+        start=(cycle*salt) % len(rows)
+        ordered=rows[start:]+rows[:start]
+        return ordered[:min(count,len(ordered))]
+    non_arab=[s for s in retry if s.get('language')!='ar']
+    arab=[s for s in retry if s.get('language')=='ar']
+    chosen=always+rotate(non_arab,non_arab_retry,7)+rotate(arab,arab_retry,5)
+    return list({s['id']:s for s in chosen}.values())
+
 def collect(start,end,discover=False,registry=None):
     sources=registry or json.loads((ROOT/'sources.json').read_text())
+    selected_sources=sources if discover else production_sources(sources,end)
     items=[]; health=[]
     with ThreadPoolExecutor(max_workers=8) as pool:
-        futures={pool.submit(collect_source,s,discover):s for s in sources if s.get('enabled',True)}
+        futures={pool.submit(collect_source,s,discover):s for s in selected_sources}
         for future in as_completed(futures):
             source=futures[future]
             try: found,report=future.result()
@@ -241,7 +258,9 @@ def collect(start,end,discover=False,registry=None):
 def audit(output):
     sources=json.loads((ROOT/'sources.json').read_text()); reports=[]; discovered=[]
     with ThreadPoolExecutor(max_workers=8) as pool:
-        futures={pool.submit(collect_source,s,True):s for s in sources if s.get('enabled',True)}
+        # Audit the whole registry. A transient failure must not permanently
+        # exclude a source from future recovery checks.
+        futures={pool.submit(collect_source,s,True):s for s in sources}
         for f in as_completed(futures):
             s=futures[f]
             try: _,report=f.result()

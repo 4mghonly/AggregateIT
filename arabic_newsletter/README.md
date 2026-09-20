@@ -68,7 +68,9 @@ scheduler is retired; `trigger.json` is no longer a production scheduling mechan
 of universal access. `--audit` discovers feeds and publisher-linked social URLs,
 tests parsing and records dated-item counts. The audit report distinguishes
 network failures, forbidden pages, unparseable feeds and undiscovered feeds.
-A failed source remains visible as a coverage gap and is retried on later runs.
+A failed source remains visible as a coverage gap. Production rotates a bounded
+retry batch through prior audit failures (weighted toward non-Arabic sources), while
+`--audit` probes the entire registry so a transient outage cannot retire a source forever.
 No paywall bypass, private group collection, CAPTCHA bypass, or guessed account IDs.
 
 RSS/Atom, dated article pages, reviewed publisher-linked public Telegram channels
