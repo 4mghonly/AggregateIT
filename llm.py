@@ -52,6 +52,7 @@ class LLMPermanent(RuntimeError): pass
 class LLMTransient(RuntimeError): pass
 
 _calls = 0
+_force_fallback_model = False
 print("LLM MODEL:", MODEL, "| budget:", MAX_CALLS)
 
 def _load_json(path, fallback):
@@ -89,6 +90,7 @@ def _log_usage(model, inp, outp, cached=False):
     except Exception: pass
 
 def preflight():
+    global _force_fallback_model
     if not API_KEY and not FALLBACK_API_KEY: return False, "Qwen credentials missing"
     payload={"model":MODEL,"messages":[{"role":"user","content":"ping"}],"max_tokens":1}
     try:
@@ -99,7 +101,9 @@ def preflight():
                 alt=dict(payload); alt["model"]=FALLBACK_MODEL
                 print("QWEN PRIMARY MODEL QUOTA EXHAUSTED; probing fallback model",flush=True)
                 fr=_request(BASE_URL,API_KEY,alt,20)
-                if fr.status_code==200: return True,"fallback-model-ok"
+                if fr.status_code==200:
+                    _force_fallback_model=True
+                    return True,"fallback-model-ok"
                 r=fr
             if not (_quota_exhausted(r) and FALLBACK_API_KEY):
                 return False,"HTTP %d %s" % (r.status_code,r.text[:120])
@@ -112,13 +116,19 @@ def preflight():
         return False,str(ex)[:120]
 
 def _post(messages, model, temperature, max_tokens, timeout):
+    global _force_fallback_model
     payload={"model":model,"temperature":temperature,"max_tokens":max_tokens,"messages":messages}
     if API_KEY:
-        r=_request(BASE_URL,API_KEY,payload,timeout)
-        if _quota_exhausted(r) and FALLBACK_MODEL and model!=FALLBACK_MODEL:
-            print("QWEN MODEL QUOTA EXHAUSTED; using fallback model %s" % FALLBACK_MODEL,flush=True)
+        if _force_fallback_model and FALLBACK_MODEL and model==MODEL:
             alt=dict(payload); alt["model"]=FALLBACK_MODEL
             r=_request(BASE_URL,API_KEY,alt,timeout)
+        else:
+            r=_request(BASE_URL,API_KEY,payload,timeout)
+            if _quota_exhausted(r) and FALLBACK_MODEL and model!=FALLBACK_MODEL:
+                print("QWEN MODEL QUOTA EXHAUSTED; using fallback model %s" % FALLBACK_MODEL,flush=True)
+                alt=dict(payload); alt["model"]=FALLBACK_MODEL
+                r=_request(BASE_URL,API_KEY,alt,timeout)
+                if r.status_code==200: _force_fallback_model=True
     elif FALLBACK_API_KEY:
         alt=dict(payload); alt["model"]=FALLBACK_MODEL or model
         r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,alt,timeout)
