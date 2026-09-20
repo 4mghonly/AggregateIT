@@ -1,12 +1,11 @@
-name: Calibration Loop
+name: Event-Market Association Diagnostic
 on:
   schedule:
-    - cron: "0 6 * * 1"         # Monday 10:00 GST
+    - cron: "0 6 * * 1"         # Monday 10:00 UAE
   workflow_dispatch:
 concurrency:
   group: aggregateit-writers
   cancel-in-progress: false
-
 jobs:
   calibrate:
     runs-on: ubuntu-latest
@@ -21,10 +20,13 @@ jobs:
           key: data-${{ github.run_id }}-calibration
           restore-keys: |
             data-
-      - name: Run calibration
+      - name: Refresh latest market snapshot
+        run: python tv.py --pulse || echo "::warning::Pulse refresh failed; diagnostic will use the latest cached snapshot."
+      - name: Run event-market association diagnostic
         run: python calibrate.py
       - uses: actions/upload-artifact@v6
         if: always()
         with:
-          name: calibration-report
+          name: event-market-association
           path: reports/calibration_report.json
+          if-no-files-found: warn
