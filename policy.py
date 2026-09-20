@@ -1,16 +1,12 @@
 """policy.py — Send gating, quiet hours, and volume control.
 GST = UTC+4.
 
-General Quiet Hours:
+General Quiet Hours for legacy digest/briefing/alert senders:
 - Mon-Fri 02:00-08:00 GST (22:00-04:00 UTC previous day)
-- Weekend: Fri 22:00 GST to Sun 12:00 GST (quiet except limited window)
+- Weekend: Fri 22:00 GST to Sun 12:00 GST.
 
-Slide-Specific Rules (independent from general quiet):
-- Mon-Fri: Allowed, EXCEPT 02:00-06:00 GST (4-hour maintenance window)
-- Saturday: Completely disabled
-- Sunday: Allowed from 13:00 GST (pre-futures open preparation)
-
-Critical alerts always break quiet."""
+The production Gazette has its own explicit workflow schedule and does not use this
+legacy quiet-hours gate. Critical alerts always break quiet."""
 import time
 from datetime import datetime, timezone, timedelta
 
@@ -33,31 +29,12 @@ def is_quiet(ts=None):
     if 2 <= h < 8: return True
     return False
 
-def is_slide_quiet(ts=None):
-    """Slide-specific quiet hours (more permissive)."""
-    dt = datetime.fromtimestamp(ts or time.time(), tz=GST)
-    wd = dt.weekday()
-    h = dt.hour
-
-    # Saturday: completely disabled
-    if wd == 5: return True
-    
-    # Sunday: only allowed from 13:00 GST
-    if wd == 6 and h < 13: return True
-    
-    # Mon-Fri: quiet only 02:00-06:00 GST (4-hour window)
-    if wd <= 4 and 2 <= h < 6: return True
-    
-    return False
-
 def can_send(kind, importance=None):
     """kind: pulse, briefing, digest, slide, daily, alert."""
     if importance == 'Critical': return True
     
-    if kind == 'slide':
-        return not is_slide_quiet()
-    
-    # All other content types follow general quiet hours
+    # The production Gazette is scheduled independently by slide.yml.
+    if kind == 'slide': return True
     return not is_quiet()
 
 def can_send_digest(item):
