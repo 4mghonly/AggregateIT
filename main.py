@@ -198,22 +198,6 @@ async def fetch_rss(session, src, sem):
     audit.record(name, txt is not None)
     return out
 
-async def fetch_reddit(session, r, sem):
-    txt = await fetch_text(session, f"https://www.reddit.com/r/{r['sub']}/new/.rss", sem)
-    out = []
-    if txt:
-        parsed = feedparser.parse(txt)
-        for entry in parsed.entries[:PRIO_LIMIT.get(r["priority"], 3)]:
-            title = entry.get("title", "").split(" :: ")[0]
-            out.append({"source_type": "reddit", "source_name": "r/" + r["sub"], "category": "Reddit",
-                "url": entry.get("link", ""), "title": title,
-                "text": re.sub("<[^>]+>", "", entry.get("summary", "")),
-                "ts": calendar.timegm(entry.published_parsed) if entry.get("published_parsed") else time.time()})
-    if txt is None: HEALTH["reddit_fail"] += 1
-    elif out: HEALTH["reddit_ok"] += 1
-    else: HEALTH["reddit_empty"] += 1
-    return out
-
 def parse_iso_ts(ts_str):
     if not ts_str: return None
     try: return datetime.fromisoformat(ts_str.replace("Z", "+00:00")).timestamp()
@@ -648,7 +632,7 @@ def _ratio(ok, fail):
     return 1.0 if total == 0 else ok / total
 
 def build_health(report, store_stats):
-    degraded = []; red = []
+    degraded = []; red = []; notes = []
     rss_r = _ratio(HEALTH["rss_ok"], HEALTH["rss_fail"])
     reddit_r = _ratio(HEALTH["reddit_ok"], HEALTH["reddit_fail"])
     gh_r = _ratio(HEALTH["github_ok"], HEALTH["github_fail"])
@@ -656,6 +640,8 @@ def build_health(report, store_stats):
         degraded.append(f"{HEALTH['rss_fail']} RSS feeds failed ({rss_r:.0%} ok)")
     if (HEALTH["rss_ok"] + HEALTH["rss_fail"]) and rss_r < 0.5: red.append("RSS success below 50%")
     if (HEALTH["reddit_ok"] + HEALTH["reddit_fail"]) and reddit_r < 0.8: degraded.append(f"Reddit degraded ({reddit_r:.0%} ok)")
+    if HEALTH["reddit_empty"] and not HEALTH["reddit_ok"]:
+        notes.append("Reddit social coverage empty; OAuth/public fallbacks returned no items in this window")
     if (HEALTH["github_ok"] + HEALTH["github_fail"]) and gh_r < 0.8: degraded.append(f"GitHub degraded ({gh_r:.0%} ok)")
     if HEALTH["qwen_fail"]: degraded.append(f"{HEALTH['qwen_fail']} Qwen API failures")
     if HEALTH["qwen_invalid"]: degraded.append(f"{HEALTH['qwen_invalid']} Qwen outputs rejected")
@@ -673,7 +659,7 @@ def build_health(report, store_stats):
         main_lines = len(content.splitlines()); main_sections = content.count("# ================= ")
     except Exception: pass
     return {"run": report["run"], "overall": overall, "dry_run": DRY_RUN,
-            "degraded": degraded, "red": red, "counters": dict(HEALTH), "store": store_stats,
+            "degraded": degraded, "red": red, "notes": notes, "counters": dict(HEALTH), "store": store_stats,
             "main_lines": main_lines, "main_sections": main_sections,
             "decomposition_alert": main_lines > 900 or main_sections > 9}
 
@@ -687,13 +673,14 @@ async def main():
     if not LLM_AVAILABLE:
         print("DEGRADED: Qwen unavailable; using conservative non-alerting fallback analysis:", _det)
 
-    sem, sem_rd = asyncio.Semaphore(20), asyncio.Semaphore(4)
+    sem = asyncio.Semaphore(20)
     since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
     social_items = social.fetch_all(since.timestamp())
+    reddit_social=[i for i in social_items if i.get("source_type") in ("reddit","reddit_comment")]
+    HEALTH["reddit_ok" if reddit_social else "reddit_empty"] += 1
     async with aiohttp.ClientSession(headers=UA) as s:
         batches = await asyncio.gather(
             *[fetch_rss(s, x, sem) for x in RSS],
-            *[fetch_reddit(s, x, sem_rd) for x in REDDIT],
             *[fetch_github(s, x["_url"].split("github.com/")[1], sem, since.isoformat()) for x in GH])
     items = [i for b in batches if b for i in b] + social_items
 
