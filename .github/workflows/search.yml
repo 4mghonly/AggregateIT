@@ -6,6 +6,10 @@ on:
         description: "Ticker or company name (e.g. nvidia)"
         required: true
         type: string
+concurrency:
+  group: aggregateit-writers
+  cancel-in-progress: false
+
 jobs:
   search:
     runs-on: ubuntu-latest
