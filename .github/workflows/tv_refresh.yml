@@ -4,7 +4,6 @@ on:
     - cron: "30 12 * * 1"
     - cron: "59 13-19 * * 1-5"
     - cron: "30 20 * * 1-5"
-    - cron: "30 3 * * *"      # pre-briefing snapshot so the 04:00 UTC MINI wire has a fresh pulse
   workflow_dispatch:
 concurrency:
   group: aggregateit-writers
