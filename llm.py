@@ -14,6 +14,8 @@ from datetime import datetime, timezone
 BASE = os.path.dirname(os.path.abspath(__file__))
 API_KEY = os.environ.get("QWEN_API_KEY", "")
 BASE_URL = os.environ.get("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1").rstrip("/")
+FALLBACK_API_KEY = os.environ.get("QWEN_FALLBACK_API_KEY", "")
+FALLBACK_BASE_URL = (os.environ.get("QWEN_FALLBACK_BASE_URL") or BASE_URL).rstrip("/")
 DEFAULT_MODEL = "qwen3.8-flash"
 MODEL = os.environ.get("QWEN_MODEL") or DEFAULT_MODEL
 MAX_CALLS = int(os.environ.get("QWEN_MAX_CALLS") or 40)
@@ -21,11 +23,28 @@ PROMPT_VERSION = 1
 USAGE_FILE = os.path.join(BASE, "reports", "token_usage.json")
 LEDGER_FILE = os.path.join(BASE, "data", "qwen_ledger.json")
 
+def _is_dashscope_url(url):
+    return "dashscope" in url or "aliyuncs" in url
+
 def _is_dashscope():
-    # enable_thinking is a DashScope-only extension; other OpenAI-compatible
-    # providers (OpenRouter, Together, etc.) reject it as an unknown/restricted
-    # parameter, so it must not be sent to them.
-    return "dashscope" in BASE_URL or "aliyuncs" in BASE_URL
+    return _is_dashscope_url(BASE_URL)
+
+def _quota_exhausted(response):
+    text=(response.text or "").lower()
+    return response.status_code in (402,403) and any(k in text for k in ("quota","fund","billing","balance","credit"))
+
+def _request(base,key,payload,timeout):
+    body=dict(payload)
+    if _is_dashscope_url(base): body["enable_thinking"] = False
+    r=requests.post(base + "/chat/completions",
+        headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"},
+        json=body, timeout=timeout)
+    if r.status_code == 400 and "enable_thinking" in r.text and "enable_thinking" in body:
+        body.pop("enable_thinking")
+        r=requests.post(base + "/chat/completions",
+            headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"},
+            json=body, timeout=timeout)
+    return r
 
 class BudgetExceeded(RuntimeError): pass
 class LLMPermanent(RuntimeError): pass
@@ -69,36 +88,35 @@ def _log_usage(model, inp, outp, cached=False):
     except Exception: pass
 
 def preflight():
-    if not API_KEY: return False, "QWEN_API_KEY missing"
+    if not API_KEY and not FALLBACK_API_KEY: return False, "Qwen credentials missing"
+    payload={"model":MODEL,"messages":[{"role":"user","content":"ping"}],"max_tokens":1}
     try:
-        payload = {"model": MODEL, "messages": [{"role": "user", "content": "ping"}],
-                   "max_tokens": 1}
-        if _is_dashscope(): payload["enable_thinking"] = False
-        r = requests.post(BASE_URL + "/chat/completions",
-            headers={"Authorization": "Bearer " + API_KEY, "Content-Type": "application/json"},
-            json=payload, timeout=20)
-        return (True, "ok") if r.status_code == 200 else (False, "HTTP %d %s" % (r.status_code, r.text[:120]))
+        if API_KEY:
+            r=_request(BASE_URL,API_KEY,payload,20)
+            if r.status_code==200: return True,"ok"
+            if not (_quota_exhausted(r) and FALLBACK_API_KEY):
+                return False,"HTTP %d %s" % (r.status_code,r.text[:120])
+            print("QWEN PRIMARY QUOTA EXHAUSTED; probing fallback credential",flush=True)
+        r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,payload,20)
+        return (True,"fallback-ok") if r.status_code==200 else (False,"fallback HTTP %d %s" % (r.status_code,r.text[:120]))
     except Exception as e:
-        return False, str(e)[:120]
+        return False,str(e)[:120]
 
 def _post(messages, model, temperature, max_tokens, timeout):
-    payload = {"model": model, "temperature": temperature, "max_tokens": max_tokens,
-               "messages": messages}
-    if _is_dashscope(): payload["enable_thinking"] = False
-    r = requests.post(BASE_URL + "/chat/completions",
-        headers={"Authorization": "Bearer " + API_KEY, "Content-Type": "application/json"},
-        json=payload, timeout=timeout)
-    if r.status_code == 400 and "enable_thinking" in r.text and "enable_thinking" in payload:
-        # Model rejects the parameter even on DashScope (thinking-only models);
-        # retry once without it so one strict model doesn't break the pipeline.
-        payload.pop("enable_thinking")
-        r = requests.post(BASE_URL + "/chat/completions",
-            headers={"Authorization": "Bearer " + API_KEY, "Content-Type": "application/json"},
-            json=payload, timeout=timeout)
-    if r.status_code in (429, 500, 502, 503, 504):
+    payload={"model":model,"temperature":temperature,"max_tokens":max_tokens,"messages":messages}
+    if API_KEY:
+        r=_request(BASE_URL,API_KEY,payload,timeout)
+    elif FALLBACK_API_KEY:
+        r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,payload,timeout)
+    else:
+        raise LLMPermanent("Qwen credentials missing")
+    if _quota_exhausted(r) and FALLBACK_API_KEY:
+        print("QWEN PRIMARY QUOTA EXHAUSTED; using fallback credential",flush=True)
+        r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,payload,timeout)
+    if r.status_code in (429,500,502,503,504):
         raise LLMTransient("HTTP %d" % r.status_code)
     if 400 <= r.status_code < 500:
-        raise LLMPermanent("HTTP %d %s" % (r.status_code, r.text[:200]))
+        raise LLMPermanent("HTTP %d %s" % (r.status_code,r.text[:200]))
     r.raise_for_status()
     return r.json()
 
