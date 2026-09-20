@@ -682,5 +682,9 @@ main.HEALTH.update({"rss_ok": 5, "rss_empty": 4, "rss_fail": 0,
 h71=main.build_health({"run":"quiet","new":0,"matched":0},{"fresh_init":False})
 check("quiet reachable adapters stay GREEN", h71["overall"]=="GREEN", h71)
 
+print("[T72] Fallback model content normalization")
+check("text block list normalized", llm._content_text({"content":[{"type":"text","text":"{\"ok\":true}"}]}) == '{"ok":true}')
+check("dict content normalized", '"ok": true' in llm._content_text({"content":{"ok":True}}))
+
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
