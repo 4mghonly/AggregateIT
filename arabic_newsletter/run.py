@@ -51,7 +51,7 @@ def main():
                 # a wider overnight collection window for a heavier synthesis.
                 collection_start=end-timedelta(hours=12) if end.hour==6 else start
                 if args.send:
-                    webhook_url(); Client(state)
+                    webhook_info(); Client(state)
                     prior=state.delivery(edition)
                     if prior and prior[0]=='sent': print('Edition already delivered'); return
                     if prior and prior[0] in ('sending','uncertain'):
