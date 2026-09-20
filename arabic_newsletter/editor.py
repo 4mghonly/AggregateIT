@@ -259,7 +259,11 @@ def _review_envelope(result,count):
     if not isinstance(reasons,dict): reasons={}
     return {'approved':normalized,'reasons':reasons}
 
-COMPACT_SYSTEM=SYSTEM+'''\nCOMPACT RELIABILITY FALLBACK. The normal response was not parseable, so produce a smaller response. These limits override the longer guidance above: maximum 10 events; title under 100 characters; summary ONE compact factual sentence under 360 characters; assessment and watch under 170 characters each. Use no more than one evidence quote per cited source, and keep each quote under 140 characters. Prefer omission to elaboration. Preserve geographic breadth across the supplied articles. Return exactly the same top-level {"events":[...]} JSON schema and nothing else.'''\n\ndef _bounded_articles(articles,char_limit=72000,text_limit=1400):
+COMPACT_SYSTEM=SYSTEM+'''
+COMPACT RELIABILITY FALLBACK. The normal response was not parseable, so produce a smaller response. These limits override the longer guidance above: maximum 10 events; title under 100 characters; summary ONE compact factual sentence under 360 characters; assessment and watch under 170 characters each. Use no more than one evidence quote per cited source, and keep each quote under 140 characters. Prefer omission to elaboration. Preserve geographic breadth across the supplied articles. Return exactly the same top-level {"events":[...]} JSON schema and nothing else.
+'''
+
+def _bounded_articles(articles,char_limit=72000,text_limit=1400):
     """Keep the collector's region-balanced order while bounding model context."""
     bounded=[]; count=0
     for a in articles:
