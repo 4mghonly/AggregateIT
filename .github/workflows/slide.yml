@@ -23,6 +23,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt || pip install requests feedparser trafilatura matplotlib
+          pip install pillow
+      - name: Syntax and layout regression checks
+        run: |
+          python -m py_compile slide.py gazette_render.py llm.py briefing.py main.py
+          python -m unittest -v test_gazette_layout
       - name: Restore data cache
         uses: actions/cache@v4
         with:
@@ -37,8 +42,12 @@ jobs:
           key: reports-${{ github.run_id }}-slide
           restore-keys: |
             reports-
+      - name: Confirm Gazette Discord route
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID }}
+        run: python -c "import slide; slide.discord_webhook_info()"
       - name: Refresh Gazette inputs
-        continue-on-error: true
         env:
           SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
           SOCIAL_BUDGET_S: "180"
@@ -47,12 +56,13 @@ jobs:
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
         run: |
-          python tv.py --pulse
-          python tv.py --macro
-          python -c "import social, time; social.fetch_all(time.time() - 86400)"
-      - name: Render Gazette
+          python tv.py --pulse || echo "::warning::Market pulse refresh failed; cached data may be used."
+          python tv.py --macro || echo "::warning::Macro refresh failed; cached data may be used."
+          python -c "import social, time; social.fetch_all(time.time() - 86400)" || echo "::warning::Social refresh failed; cached data may be used."
+      - name: Render and deliver Gazette
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID }}
           QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_MODEL: qwen3.8-flash
@@ -68,3 +78,18 @@ jobs:
             reports/intel_slide_p1.png
             reports/intel_slide_p2.png
           if-no-files-found: warn
+      - name: Alert on Gazette failure
+        if: failure()
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import os, requests
+          from urllib.parse import urlsplit, urlunsplit
+          raw=os.getenv("DISCORD_WEBHOOK","").strip()
+          if raw:
+              p=urlsplit(raw); url=urlunsplit((p.scheme,p.netloc,p.path,"wait=true",""))
+              requests.post(url,json={"content":"⚠️ Aggregate Gazette delivery failed. Run: "+os.getenv("RUN_URL","")},timeout=(10,20))
+          PY

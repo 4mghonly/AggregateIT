@@ -30,8 +30,12 @@ jobs:
           restore-keys: |
             data-
       - name: Search
+        env:
+          INPUT_HOURS: ${{ github.event.inputs.hours }}
+          INPUT_TICKER: ${{ github.event.inputs.ticker }}
+          INPUT_QUERY: ${{ github.event.inputs.query }}
         run: |
-          ARGS="--hours ${{ github.event.inputs.hours }}"
-          [ -n "${{ github.event.inputs.ticker }}" ] && ARGS="$ARGS --ticker ${{ github.event.inputs.ticker }}"
-          [ -n "${{ github.event.inputs.query }}" ] && ARGS="$ARGS --query ${{ github.event.inputs.query }}"
-          python history.py $ARGS
+          args=(--hours "$INPUT_HOURS")
+          [ -n "$INPUT_TICKER" ] && args+=(--ticker "$INPUT_TICKER")
+          [ -n "$INPUT_QUERY" ] && args+=(--query "$INPUT_QUERY")
+          python history.py "${args[@]}"

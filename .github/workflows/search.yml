@@ -21,4 +21,6 @@ jobs:
           restore-keys: |
             data-
       - name: Search
-        run: python tv.py --search "${{ github.event.inputs.query }}"
+        env:
+          INPUT_QUERY: ${{ github.event.inputs.query }}
+        run: python tv.py --search "$INPUT_QUERY"

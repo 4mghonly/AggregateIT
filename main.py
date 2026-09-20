@@ -24,6 +24,7 @@ REPORTS = os.path.join(BASE, "reports")
 os.makedirs(DATA, exist_ok=True); os.makedirs(REPORTS, exist_ok=True)
 
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
+ENGINE_DELIVERY = os.environ.get("ENGINE_DELIVERY", "true").lower() == "true"
 LOOKBACK_H = int(os.environ.get("LOOKBACK_HOURS", "6"))
 MAX_PER_SOURCE = 5
 MAX_ANALYZE = 16
@@ -559,6 +560,9 @@ def _post_discord(wh, payload):
         raise RuntimeError(f"Discord HTTP {r.status_code}: {r.text[:120]}")
 
 def send_market_pulse():
+    if not ENGINE_DELIVERY:
+        HEALTH["discord_skipped"] += 1
+        return
     wh = os.environ.get("DISCORD_WEBHOOK")
     pulse = load_market_pulse()
     if not wh or not pulse: return
@@ -577,6 +581,9 @@ def send_market_pulse():
         HEALTH["discord_fail"] += 1; print("Discord pulse err:", type(e).__name__, str(e)[:200])
 
 def send_digest(digest_items, report):
+    if not ENGINE_DELIVERY:
+        HEALTH["discord_skipped"] += max(1,len(digest_items))
+        return
     wh = os.environ.get("DISCORD_WEBHOOK")
     if not digest_items:
         HEALTH["discord_skipped"] += 1; return

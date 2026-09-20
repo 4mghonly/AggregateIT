@@ -2,6 +2,8 @@
 Bordered panels with fixed zones: no overlaps, no dead whitespace.
 llm.chat token tracking, claims corroboration, social/OSINT lanes."""
 import os, json, re, time, textwrap, requests
+from contextlib import ExitStack
+from urllib.parse import urlsplit, urlunsplit
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -237,17 +239,55 @@ def render_p1(d, a, llm_ok):
 def render_p2(d, a, llm_ok):
     _page2(d, a, llm_ok, P2)
 
+def _discord_webhook_url(wait=False):
+    raw=(os.environ.get("DISCORD_WEBHOOK") or "").strip()
+    p=urlsplit(raw)
+    if p.scheme!="https" or p.hostname not in ("discord.com","discordapp.com") or not re.fullmatch(r"/api(?:/v\d+)?/webhooks/\d+/[A-Za-z0-9_-]+",p.path):
+        raise RuntimeError("DISCORD_WEBHOOK is missing or invalid")
+    return urlunsplit((p.scheme,p.netloc,p.path,"wait=true" if wait else "",""))
+
+def discord_webhook_info():
+    r=requests.get(_discord_webhook_url(False),timeout=(10,20))
+    if r.status_code!=200:
+        raise RuntimeError("Discord webhook probe HTTP %d" % r.status_code)
+    try: info=r.json()
+    except ValueError: raise RuntimeError("Discord webhook probe returned invalid JSON") from None
+    channel=str(info.get("channel_id") or "unknown")
+    expected=(os.environ.get("DISCORD_EXPECTED_CHANNEL_ID") or "").strip()
+    if expected and channel!=expected:
+        raise RuntimeError("Discord webhook points to channel %s, expected %s" % (channel,expected))
+    print("Gazette Discord route confirmed: channel_id=%s webhook_id=%s name=%s" % (
+        channel,str(info.get("id") or "unknown"),str(info.get("name") or "unnamed").replace("\n"," ")[:80]))
+    return info
+
 def send(pages):
-    wh = os.environ.get("DISCORD_WEBHOOK")
-    if not wh: raise RuntimeError("DISCORD_WEBHOOK is not configured")
-    files = []
-    for i, p in enumerate(pages):
-        files.append(("files[%d]" % i, (os.path.basename(p), open(p, "rb"), "image/png")))
-    r = requests.post(wh, files=files,
-                      data={"payload_json": json.dumps({"content": "🗞️ **THE AGGREGATE GAZETTE** (tentative, machine-compiled)"})}, timeout=60)
-    if r.status_code >= 400:
-        raise RuntimeError("Discord HTTP %d: %s" % (r.status_code, r.text[:120]))
-    print("Gazette delivered (2 pages, 4K)!")
+    if not pages or any(not os.path.isfile(p) for p in pages):
+        raise RuntimeError("Gazette pages are missing")
+    discord_webhook_info()
+    url=_discord_webhook_url(True)
+    for attempt in range(2):
+        with ExitStack() as stack:
+            files=[("files[%d]" % i,(os.path.basename(p),stack.enter_context(open(p,"rb")),"image/png")) for i,p in enumerate(pages)]
+            r=requests.post(url,files=files,data={"payload_json":json.dumps({
+                "content":"🗞️ **THE AGGREGATE GAZETTE** (tentative, machine-compiled)",
+                "allowed_mentions":{"parse":[]}})},timeout=(10,60))
+        if r.status_code==429 and attempt==0:
+            try: delay=min(max(float(r.json().get("retry_after",2)),1),30)
+            except (ValueError,TypeError): delay=2
+            time.sleep(delay)
+            continue
+        if r.status_code!=200:
+            raise RuntimeError("Discord HTTP %d: %s" % (r.status_code,r.text[:120]))
+        try:
+            body=r.json(); message_id=str(body["id"]); channel_id=str(body.get("channel_id") or "unknown")
+        except (ValueError,KeyError,TypeError):
+            raise RuntimeError("Discord did not return a verifiable message receipt") from None
+        expected=(os.environ.get("DISCORD_EXPECTED_CHANNEL_ID") or "").strip()
+        if expected and channel_id!=expected:
+            raise RuntimeError("Discord receipt channel mismatch: %s != %s" % (channel_id,expected))
+        print("Gazette delivery confirmed: message_id=%s channel_id=%s pages=%d" % (message_id,channel_id,len(pages)))
+        return message_id
+    raise RuntimeError("Discord rate limit persisted after retry")
 
 if __name__ == "__main__":
     os.makedirs(REPORTS, exist_ok=True)
@@ -255,5 +295,6 @@ if __name__ == "__main__":
     analysis, llm_ok, prev = analyze(data)
     render_p1(data, analysis, llm_ok)
     render_p2(data, analysis, llm_ok)
-    _save_prev(analysis, data)
     send([P1, P2])
+    # Only a confirmed Discord edition becomes the comparison baseline.
+    _save_prev(analysis, data)
