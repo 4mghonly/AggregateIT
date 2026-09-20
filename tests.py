@@ -83,7 +83,8 @@ st.succeed("http://a", "h1", "analyzed", "{}")
 check("analyzed terminal", not st.url_active("http://a"))
 
 print("[T11] System health visibility")
-main.HEALTH.update({"rss_ok": 90, "rss_fail": 5, "reddit_ok": 0, "reddit_fail": 32, "github_ok": 5, "github_fail": 0,
+main.HEALTH.update({"rss_ok": 90, "rss_empty": 0, "rss_fail": 5, "reddit_ok": 0, "reddit_empty": 0, "reddit_fail": 32,
+                    "github_ok": 5, "github_empty": 0, "github_fail": 0,
                     "qwen_ok": 3, "qwen_fail": 0, "qwen_invalid": 0, "discord_ok": 3, "discord_fail": 0, "discord_skipped": 0,
                     "tv_movers_loaded": 10, "tv_universe_loaded": 100})
 h = main.build_health({"run": "x", "new": 1, "matched": 3}, {"fresh_init": False})
@@ -670,6 +671,16 @@ main_src70 = open(os.path.join(os.path.dirname(os.path.abspath(main.__file__)), 
 prefix70 = main_src70.split("async def main():",1)[0]
 check("no import-time Qwen preflight", "llm.preflight()" not in prefix70)
 check("no import-time market self-heal call", "\nensure_market_data()\n" not in prefix70)
+
+print("[T71] Quiet sources are not transport failures")
+main.HEALTH.update({"rss_ok": 5, "rss_empty": 4, "rss_fail": 0,
+                    "reddit_ok": 0, "reddit_empty": 5, "reddit_fail": 0,
+                    "github_ok": 0, "github_empty": 5, "github_fail": 0,
+                    "qwen_ok": 1, "qwen_fail": 0, "qwen_invalid": 0,
+                    "discord_ok": 0, "discord_fail": 0, "discord_skipped": 1,
+                    "tv_movers_loaded": 1, "tv_universe_loaded": 1})
+h71=main.build_health({"run":"quiet","new":0,"matched":0},{"fresh_init":False})
+check("quiet reachable adapters stay GREEN", h71["overall"]=="GREEN", h71)
 
 print(f"\nRESULTS: {PASS} passed, {FAIL} failed")
 sys.exit(1 if FAIL else 0)
