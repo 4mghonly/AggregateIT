@@ -221,6 +221,19 @@ def validate_events(result,articles):
         except (ValueError,KeyError,TypeError) as e: rejected.append({'index':index,'reason':str(e)})
     return events,rejected
 
+def _event_envelope(result):
+    """Normalize common model schema drift without weakening evidence validation."""
+    if not isinstance(result,dict):
+        return result
+    if isinstance(result.get('events'),list):
+        return result
+    if isinstance(result.get('event'),dict):
+        return {'events':[result['event']]}
+    required={'region','topic','title_ar','summary_ar','source_ids','evidence'}
+    if required.issubset(result):
+        return {'events':[result]}
+    return result
+
 def synthesize(articles,state):
     if not articles: return [],[]
     # Source snippets are explicitly bounded; never send entire pages or old conversation context.
@@ -232,8 +245,8 @@ def synthesize(articles,state):
         if count>72000: break
         bounded.append(item)
     client=Client(state)
-    result=client.chat(SYSTEM,{'regions':REGIONS,'topics':sorted(TOPICS),'glossary':json.loads((ROOT/'glossary.json').read_text()),
-      'previous_events':state.get('previous_events') or [],'articles':bounded})
+    result=_event_envelope(client.chat(SYSTEM,{'regions':REGIONS,'topics':sorted(TOPICS),'glossary':json.loads((ROOT/'glossary.json').read_text()),
+      'previous_events':state.get('previous_events') or [],'articles':bounded}))
     state.put('last_editorial_draft',result)
     # Validate against only the evidence actually sent to the model.
     sent={a['id']:a for a in bounded}
@@ -256,11 +269,11 @@ def synthesize(articles,state):
         if not result.get('events') and correction==0: return [],rejected
         if correction==1: break
         # Exactly one correction pass, followed by the SAME independent gates.
-        result=client.chat(SYSTEM,{'regions':REGIONS,'topics':sorted(TOPICS),
+        result=_event_envelope(client.chat(SYSTEM,{'regions':REGIONS,'topics':sorted(TOPICS),
           'glossary':json.loads((ROOT/'glossary.json').read_text()),'articles':bounded,
           'previous_events':state.get('previous_events') or [],
           'task':'Correct the draft using the validation failures and editorial review. Preserve exact evidence and quantities. Remove unsupported statements, ordinary crime and speculative analysis. Short factual summaries are preferable to unsupported elaboration. Return the same events JSON schema; no new facts.',
-          'draft':result,'validated_draft':events,'validation_failures':rejected,'editorial_review':review})
+          'draft':result,'validated_draft':events,'validation_failures':rejected,'editorial_review':review}))
         state.put('last_editorial_draft',result)
     raise EditorialError('Editorial review rejected all events after one correction pass')
 

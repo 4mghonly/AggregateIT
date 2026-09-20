@@ -11,7 +11,7 @@ import requests
 from PIL import Image
 from .core import State, canonical, clean, edition_window, live_window, preliminary_relevant, uae_secondary_relevant, REGIONS
 from .collect import entry_time, social_links
-from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json
+from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
 from .sample import fixture
@@ -72,6 +72,11 @@ class EditorialTests(unittest.TestCase):
     def test_message_json_accepts_fences_and_text_blocks(self):
         self.assertEqual(_message_json({'content':'\x60\x60\x60json\n{"ok":true}\n\x60\x60\x60'}),{'ok':True})
         self.assertEqual(_message_json({'content':[{'type':'text','text':'prefix {"ok": true} suffix'}]}),{'ok':True})
+
+    def test_single_event_schema_is_normalized(self):
+        event=copy.deepcopy(self.event)
+        self.assertEqual(_event_envelope(event),{'events':[event]})
+        self.assertEqual(_event_envelope({'event':event}),{'events':[event]})
 
     def test_one_correction_then_same_review_gate(self):
         with tempfile.TemporaryDirectory() as d:

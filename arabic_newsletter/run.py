@@ -72,15 +72,17 @@ def main():
                 analysis=build_analysis(events,state,morning=morning)
                 brief=dict(sample=False,window_start=collection_start.isoformat(),window_end=end.isoformat(),events=events,
                   input_count=len(articles),health=health,rejected=rejected,analysis=analysis,morning=morning,
-                  previous_events=state.get('previous_events') or [])
-                if args.send and not events: raise RuntimeError('No qualified events; empty publication blocked, see health artifact')
+                  empty_cycle=not bool(events),previous_events=state.get('previous_events') or [])
+                if args.send and not events:
+                    print('No qualified events; delivering an explicit no-material-change status briefing',flush=True)
             paths,clipped=render(brief,args.output)
             write_json(args.output/'briefing.json',brief)
             write_json(args.output/'render_report.json',{'visually_shortened_blocks':clipped,'full_text':'sources-ar.txt','dimensions':[3840,2160]})
             refs=args.output/'sources-ar.txt'; references(brief,refs)
             if args.send:
                 message_id=send(state,brief['window_end'],paths)
-                state.put('previous_events',[{'title_ar':e['title_ar'],'summary_ar':e['summary_ar'],'source_ids':e['source_ids']} for e in brief['events']])
+                if brief['events']:
+                    state.put('previous_events',[{'title_ar':e['title_ar'],'summary_ar':e['summary_ar'],'source_ids':e['source_ids']} for e in brief['events']])
                 print('Arabic edition delivered; message ID:',message_id)
             else: print('Arabic slides rendered; no delivery requested')
         finally: state.close()
