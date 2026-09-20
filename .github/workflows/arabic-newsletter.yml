@@ -93,7 +93,18 @@ jobs:
           ):
               json.loads(path.read_text(encoding="utf-8"))
               print("validated", path)
+          sources=json.loads(Path("arabic_newsletter/sources.json").read_text(encoding="utf-8"))
+          ids=[row["id"] for row in sources]
+          assert len(ids)==len(set(ids)), "duplicate Arabic source id"
+          required={"id","name","region","country","language","affiliation","website"}
+          assert all(required <= set(row) for row in sources), "Arabic source missing required fields"
           PY
+
+      - name: Check Arabic branch conflict markers and obvious committed secrets
+        run: |
+          ! grep -RInE '^(<<<<<<<|>>>>>>>)( |$)' --exclude-dir=.git .
+          ! grep -RInE 'https://(discord|discordapp)\.com/api(/v[0-9]+)?/webhooks/[0-9]+/[A-Za-z0-9_-]{20,}' --exclude-dir=.git .
+          ! grep -RInE '(sk-|qwen-|dashscope-)[A-Za-z0-9_-]{24,}' --exclude-dir=.git .
 
       - name: Restore Arabic state only
         id: restore
