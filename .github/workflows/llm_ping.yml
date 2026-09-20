@@ -23,6 +23,5 @@ jobs:
           QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
           QWEN_FALLBACK_API_KEY: ${{ secrets.ARABIC_LLM_API_KEY }}
           QWEN_FALLBACK_BASE_URL: ${{ secrets.ARABIC_LLM_BASE_URL }}
-          QWEN_MODEL: qwen3.8-flash
-          QWEN_FALLBACK_MODEL: qwen3.8-omni-flash
+          QWEN_MODEL: qwen3.8-omni-flash
         run: python llm_ping.py
