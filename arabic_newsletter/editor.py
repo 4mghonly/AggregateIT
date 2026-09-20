@@ -88,7 +88,7 @@ class Client:
         features_key='api_features:'+digest(self.base+self.model)
         for field in self.state.get(features_key) or []: payload.pop(field,None)
         for attempt in range(2):
-            if self.calls>=6: raise EditorialError('Six-request per-run model budget exhausted')
+            if self.calls>=8: raise EditorialError('Eight-request per-run model budget exhausted')
             self.calls+=1
             try:
                 r=requests.post(self.base+'/chat/completions',headers={'Authorization':'Bearer '+self.key},json=payload,timeout=(10,120))
@@ -259,19 +259,53 @@ def _review_envelope(result,count):
     if not isinstance(reasons,dict): reasons={}
     return {'approved':normalized,'reasons':reasons}
 
+COMPACT_SYSTEM=SYSTEM+'''\nCOMPACT RELIABILITY FALLBACK. The normal response was not parseable, so produce a smaller response. These limits override the longer guidance above: maximum 10 events; title under 100 characters; summary ONE compact factual sentence under 360 characters; assessment and watch under 170 characters each. Use no more than one evidence quote per cited source, and keep each quote under 140 characters. Prefer omission to elaboration. Preserve geographic breadth across the supplied articles. Return exactly the same top-level {"events":[...]} JSON schema and nothing else.'''\n\ndef _bounded_articles(articles,char_limit=72000,text_limit=1400):
+    """Keep the collector's region-balanced order while bounding model context."""
+    bounded=[]; count=0
+    for a in articles:
+        item={k:a.get(k) for k in ('id','region','country','language','title','published','kind','source','affiliation')}
+        item['text']=(a.get('text') or '')[:text_limit]
+        size=len(json.dumps(item,ensure_ascii=False))
+        if bounded and count+size>char_limit: break
+        if not bounded and size>char_limit:
+            item['text']=item['text'][:max(200,text_limit//2)]
+            size=len(json.dumps(item,ensure_ascii=False))
+        bounded.append(item); count+=size
+    return bounded
+
+def _previous_event_context(state,limit=18):
+    """Previous-edition hints are dedup context, not another long evidence corpus."""
+    out=[]
+    for event in (state.get('previous_events') or [])[:limit]:
+        if not isinstance(event,dict): continue
+        out.append({'title_ar':clean(event.get('title_ar',''))[:140],
+                    'source_ids':list(event.get('source_ids') or [])[:6]})
+    return out
+
 def synthesize(articles,state):
     if not articles: return [],[]
     # Source snippets are explicitly bounded; never send entire pages or old conversation context.
-    bounded=[]; count=0
-    for a in articles:
-        item={k:a[k] for k in ('id','language','title','published','kind','source','affiliation')}
-        item['text']=a['text'][:1400]
-        count+=len(json.dumps(item,ensure_ascii=False))
-        if count>72000: break
-        bounded.append(item)
+    bounded=_bounded_articles(articles)
+    previous=_previous_event_context(state)
+    glossary=json.loads((ROOT/'glossary.json').read_text())
     client=Client(state)
-    result=_event_envelope(client.chat(SYSTEM,{'regions':REGIONS,'topics':sorted(TOPICS),'glossary':json.loads((ROOT/'glossary.json').read_text()),
-      'previous_events':state.get('previous_events') or [],'articles':bounded}))
+    request={'regions':REGIONS,'topics':sorted(TOPICS),'glossary':glossary,
+             'previous_events':previous,'articles':bounded}
+    try:
+        result=_event_envelope(client.chat(SYSTEM,request))
+    except EditorialError as exc:
+        # A valid API connection must not lose an edition solely because a large
+        # model response was malformed/truncated. Retry with a smaller balanced
+        # evidence set and compact output, then apply the SAME deterministic
+        # evidence and editorial gates below.
+        if 'Invalid or truncated model JSON' not in str(exc):
+            raise
+        bounded=_bounded_articles(articles,char_limit=36000,text_limit=850)
+        request={'regions':REGIONS,'topics':sorted(TOPICS),'glossary':glossary,
+                 'previous_events':previous,'articles':bounded,
+                 'task':'Compact reliability synthesis after an unparseable full response.'}
+        print('Arabic synthesis switching to compact balanced recovery mode',flush=True)
+        result=_event_envelope(client.chat(COMPACT_SYSTEM,request,max_tokens=6500,temperature=0.05,use_cache=False))
     state.put('last_editorial_draft',result)
     # Validate against only the evidence actually sent to the model.
     sent={a['id']:a for a in bounded}
@@ -297,8 +331,8 @@ def synthesize(articles,state):
         if correction==1: break
         # Exactly one correction pass, followed by the SAME independent gates.
         result=_event_envelope(client.chat(SYSTEM,{'regions':REGIONS,'topics':sorted(TOPICS),
-          'glossary':json.loads((ROOT/'glossary.json').read_text()),'articles':bounded,
-          'previous_events':state.get('previous_events') or [],
+          'glossary':glossary,'articles':bounded,
+          'previous_events':previous,
           'task':'Correct the draft using the validation failures and editorial review. Preserve exact evidence and quantities. Remove unsupported statements, ordinary crime and speculative analysis. Short factual summaries are preferable to unsupported elaboration. Return the same events JSON schema; no new facts.',
           'draft':result,'validated_draft':events,'validation_failures':rejected,'editorial_review':review}))
         state.put('last_editorial_draft',result)
