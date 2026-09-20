@@ -47,6 +47,22 @@ def _request(base,key,payload,timeout):
             json=body, timeout=timeout)
     return r
 
+def _content_text(message):
+    if not isinstance(message, dict):
+        raise ValueError("LLM message must be an object")
+    content=message.get("content")
+    if isinstance(content,str): return content
+    if isinstance(content,dict): return json.dumps(content,ensure_ascii=False)
+    if isinstance(content,list):
+        parts=[]
+        for item in content:
+            if isinstance(item,str): parts.append(item)
+            elif isinstance(item,dict):
+                value=item.get("text") or item.get("content")
+                if isinstance(value,str): parts.append(value)
+        if parts: return "".join(parts)
+    raise ValueError("LLM response content is not usable text")
+
 class BudgetExceeded(RuntimeError): pass
 class LLMPermanent(RuntimeError): pass
 class LLMTransient(RuntimeError): pass
@@ -163,7 +179,7 @@ def chat(messages, model=None, temperature=0.3, timeout=90, max_tokens=2000):
     for attempt in (1, 2):
         try:
             obj = _post(messages, model, temperature, max_tokens, timeout)
-            content = obj["choices"][0]["message"]["content"]
+            content = _content_text(obj["choices"][0]["message"])
             u = obj.get("usage", {})
             used_model=obj.get("model") or model
             _log_usage(used_model, u.get("prompt_tokens"), u.get("completion_tokens"))
