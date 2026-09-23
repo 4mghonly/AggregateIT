@@ -103,6 +103,10 @@ class EditorialTests(unittest.TestCase):
           assessment_ar='لا تكفي المعلومات لتحديد تداعيات الهجوم.',watch_ar='متابعة تحديثات المصدر.',severity='high',source_ids=['a'],
           evidence=[{'id':'a','quote':'Officials report a border attack with 12 injuries.'}])
     def validate(self,event=None): return validate_events({'events':[event or self.event]},[self.article])
+    def test_full_chat_endpoint_is_not_duplicated(self):
+        self.assertEqual(Client._endpoint_url('https://openrouter.ai/api/v1/chat/completions','/chat/completions'),'https://openrouter.ai/api/v1/chat/completions')
+        self.assertEqual(Client._endpoint_url('https://openrouter.ai/api/v1','/chat/completions'),'https://openrouter.ai/api/v1/chat/completions')
+
     def test_primary_and_fallback_routes_are_independent(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(d)
