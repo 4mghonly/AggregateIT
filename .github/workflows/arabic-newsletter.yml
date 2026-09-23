@@ -42,6 +42,7 @@ jobs:
       ARABIC_LLM_FALLBACK_API_KEY: ${{ secrets.ARABIC_LLM_FALLBACK_API_KEY || secrets.QWEN_FALLBACK_API_KEY }}
       ARABIC_LLM_FALLBACK_BASE_URL: ${{ secrets.ARABIC_LLM_FALLBACK_BASE_URL || secrets.QWEN_FALLBACK_BASE_URL }}
       ARABIC_LLM_FALLBACK_MODEL: qwen3.8-flash
+      ARABIC_LLM_FALLBACK_MODELS: qwen-flash,deepseek-v4.1-flash,qwen3.7-plus
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
     steps:
       - uses: actions/checkout@v5
