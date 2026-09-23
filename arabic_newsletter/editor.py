@@ -85,10 +85,10 @@ class Client:
         self.model_index=0
         self.force_fallback_credential=not bool(self.key and self.base and self.model)
         self.auth_header=(os.getenv('ARABIC_LLM_AUTH_HEADER') or 'Authorization').strip()
-        self.auth_scheme=(os.getenv('ARABIC_LLM_AUTH_SCHEME') if 'ARABIC_LLM_AUTH_SCHEME' in os.environ else 'Bearer').strip()
+        self.auth_scheme=(os.getenv('ARABIC_LLM_AUTH_SCHEME') or 'Bearer').strip()
         self.chat_path='/'+(os.getenv('ARABIC_LLM_CHAT_PATH') or 'chat/completions').strip().lstrip('/')
         self.fallback_auth_header=(os.getenv('ARABIC_LLM_FALLBACK_AUTH_HEADER') or 'Authorization').strip()
-        self.fallback_auth_scheme=(os.getenv('ARABIC_LLM_FALLBACK_AUTH_SCHEME') if 'ARABIC_LLM_FALLBACK_AUTH_SCHEME' in os.environ else 'Bearer').strip()
+        self.fallback_auth_scheme=(os.getenv('ARABIC_LLM_FALLBACK_AUTH_SCHEME') or 'Bearer').strip()
         self.fallback_chat_path='/'+(os.getenv('ARABIC_LLM_FALLBACK_CHAT_PATH') or 'chat/completions').strip().lstrip('/')
         try:
             self.request_options=self._json_env('ARABIC_LLM_REQUEST_OPTIONS_JSON')
