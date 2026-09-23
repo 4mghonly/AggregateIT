@@ -73,12 +73,12 @@ class Client:
         self.base=(os.getenv('ARABIC_LLM_BASE_URL') or '').strip().rstrip('/')
         self.model=(os.getenv('ARABIC_LLM_MODEL') or '').strip()
         self.fallback_key=(os.getenv('ARABIC_LLM_FALLBACK_API_KEY') or '').strip()
-        self.fallback_base=(os.getenv('ARABIC_LLM_FALLBACK_BASE_URL') or self.base).strip().rstrip('/')
-        self.fallback_model=(os.getenv('ARABIC_LLM_FALLBACK_MODEL') or self.model).strip()
+        self.fallback_base=(os.getenv('ARABIC_LLM_FALLBACK_BASE_URL') or '').strip().rstrip('/')
+        self.fallback_model=(os.getenv('ARABIC_LLM_FALLBACK_MODEL') or '').strip()
         extra=[m.strip() for m in os.getenv('ARABIC_LLM_FALLBACK_MODELS','').split(',') if m.strip()]
         self.primary_models=[]
         self.fallback_models=[]
-        for model in [self.model]+extra:
+        for model in [self.model]:
             if model and model not in self.primary_models: self.primary_models.append(model)
         for model in [self.fallback_model]+extra:
             if model and model not in self.fallback_models: self.fallback_models.append(model)
@@ -87,14 +87,14 @@ class Client:
         self.auth_header=(os.getenv('ARABIC_LLM_AUTH_HEADER') or 'Authorization').strip()
         self.auth_scheme=(os.getenv('ARABIC_LLM_AUTH_SCHEME') if 'ARABIC_LLM_AUTH_SCHEME' in os.environ else 'Bearer').strip()
         self.chat_path='/'+(os.getenv('ARABIC_LLM_CHAT_PATH') or 'chat/completions').strip().lstrip('/')
-        self.fallback_auth_header=(os.getenv('ARABIC_LLM_FALLBACK_AUTH_HEADER') or self.auth_header).strip()
-        self.fallback_auth_scheme=(os.getenv('ARABIC_LLM_FALLBACK_AUTH_SCHEME') if 'ARABIC_LLM_FALLBACK_AUTH_SCHEME' in os.environ else self.auth_scheme).strip()
-        self.fallback_chat_path='/'+(os.getenv('ARABIC_LLM_FALLBACK_CHAT_PATH') or self.chat_path).strip().lstrip('/')
+        self.fallback_auth_header=(os.getenv('ARABIC_LLM_FALLBACK_AUTH_HEADER') or 'Authorization').strip()
+        self.fallback_auth_scheme=(os.getenv('ARABIC_LLM_FALLBACK_AUTH_SCHEME') if 'ARABIC_LLM_FALLBACK_AUTH_SCHEME' in os.environ else 'Bearer').strip()
+        self.fallback_chat_path='/'+(os.getenv('ARABIC_LLM_FALLBACK_CHAT_PATH') or 'chat/completions').strip().lstrip('/')
         try:
             self.request_options=self._json_env('ARABIC_LLM_REQUEST_OPTIONS_JSON')
             self.extra_headers=self._json_env('ARABIC_LLM_EXTRA_HEADERS_JSON')
-            self.fallback_request_options=self._json_env('ARABIC_LLM_FALLBACK_REQUEST_OPTIONS_JSON') or self.request_options
-            self.fallback_extra_headers=self._json_env('ARABIC_LLM_FALLBACK_EXTRA_HEADERS_JSON') or self.extra_headers
+            self.fallback_request_options=self._json_env('ARABIC_LLM_FALLBACK_REQUEST_OPTIONS_JSON')
+            self.fallback_extra_headers=self._json_env('ARABIC_LLM_FALLBACK_EXTRA_HEADERS_JSON')
         except (ValueError,TypeError) as exc:
             raise EditorialError(str(exc)) from None
         primary_ok=bool(self.key and self.base and self.primary_models)
