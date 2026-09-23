@@ -45,6 +45,11 @@ class CoreTests(unittest.TestCase):
         self.assertTrue(preliminary_relevant('Military sanctions on arms exports'))
         self.assertTrue(preliminary_relevant('هجمات على البنية التحتية قرب الحدود','ar'))
         self.assertFalse(preliminary_relevant('ارتفاع سعر الذهب وأرباح الشركات','ar'))
+    def test_non_english_arabic_languages_are_not_keyword_gated(self):
+        self.assertTrue(preliminary_relevant('Actualité régionale sans mot-clé anglais','fr'))
+        self.assertTrue(preliminary_relevant('Bölgesel gelişmeler hakkında açıklama','tr'))
+        self.assertTrue(preliminary_relevant('تحولات إقليمية','fa'))
+        self.assertFalse(preliminary_relevant('Bitcoin market rally and earnings','fr'))
     def test_uae_secondary_threshold_is_controlled(self):
         self.assertTrue(uae_secondary_relevant('UAE civil defence updates emergency readiness at Dubai airport'))
         self.assertFalse(uae_secondary_relevant('UAE hotel launches luxury brunch and investment offer'))
@@ -256,7 +261,7 @@ class RenderTests(unittest.TestCase):
             normal=fixture(); empty=copy.deepcopy(normal); empty['events']=[]; empty['health']=[]
             for i,brief in enumerate([normal,empty,fixture(True)]):
                 paths,clipped=render(brief,Path(d)/str(i))
-                self.assertEqual(len(paths),2)
+                self.assertEqual(len(paths),3)
                 if i==2: self.assertLessEqual(clipped,90)
                 for path in paths:
                     with Image.open(path) as image: self.assertEqual(image.size,(3840,2160))
