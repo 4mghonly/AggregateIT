@@ -49,7 +49,7 @@ CASHTAG_ONLY = {
 HEALTH = {"rss_ok":0,"rss_empty":0,"rss_fail":0,
           "reddit_ok":0,"reddit_empty":0,"reddit_fail":0,
           "github_ok":0,"github_empty":0,"github_fail":0,
-          "qwen_ok":0,"qwen_fail":0,"qwen_invalid":0,"discord_ok":0,"discord_fail":0,"discord_skipped":0,
+          "llm_ok":0,"llm_fail":0,"llm_invalid":0,"discord_ok":0,"discord_fail":0,"discord_skipped":0,
           "tv_movers_loaded":0,"tv_universe_loaded":0}
 ERRORS = []
 def log_failure(service, url, err):
@@ -475,7 +475,7 @@ def fallback_event_analysis(c, prior, reason):
     return build_fallback_analysis(c, prior, reason, T_BY_SYM, SOCIAL_SOURCE_TYPES)
 def analyze_event(c, prior):
     if not LLM_AVAILABLE:
-        HEALTH["qwen_fail"] += 1
+        HEALTH["llm_fail"] += 1
         return fallback_event_analysis(c, prior, _det), None
     if prior:
         prior_state = (f"Event {prior['event_id']} tracked since "
@@ -499,21 +499,21 @@ def analyze_event(c, prior):
             obj = json.loads(raw_json)
             ok, cleaned, errs = validate_analysis(obj, evidence_text=sources_block)
             if ok:
-                HEALTH["qwen_ok"] += 1
+                HEALTH["llm_ok"] += 1
                 return cleaned, None
             if attempt == 1:
-                HEALTH["qwen_invalid"] += 1
+                HEALTH["llm_invalid"] += 1
                 usr_msg["content"] += "\n\nYour previous response was INVALID (" + "; ".join(errs) + "). Return ONLY the corrected JSON object."
                 continue
-            HEALTH["qwen_invalid"] += 1
+            HEALTH["llm_invalid"] += 1
             return None, "schema invalid: " + "; ".join(errs)
         except requests.exceptions.Timeout:
-            HEALTH["qwen_fail"] += 1
+            HEALTH["llm_fail"] += 1
             log_failure("qwen", c.get("event_id") or c.get("entity") or "event", "timeout")
             print("QWEN EVENT FALLBACK: timeout", c.get("event_id") or c.get("entity") or "event", flush=True)
             return fallback_event_analysis(c, prior, "timeout"), None
         except Exception as e:
-            HEALTH["qwen_fail"] += 1
+            HEALTH["llm_fail"] += 1
             reason=f"{type(e).__name__}: {str(e)[:120]}"
             log_failure("qwen", c.get("event_id") or c.get("entity") or "event", reason)
             print("QWEN EVENT FALLBACK:", reason, c.get("event_id") or c.get("entity") or "event", flush=True)
@@ -652,14 +652,14 @@ def build_health(report, store_stats):
     if HEALTH["reddit_empty"] and not HEALTH["reddit_ok"]:
         notes.append("Reddit social coverage empty; OAuth/public fallbacks returned no items in this window")
     if (HEALTH["github_ok"] + HEALTH["github_fail"]) and gh_r < 0.8: degraded.append(f"GitHub degraded ({gh_r:.0%} ok)")
-    if HEALTH["qwen_fail"]: degraded.append(f"{HEALTH['qwen_fail']} Qwen API failures")
-    if HEALTH["qwen_invalid"]: degraded.append(f"{HEALTH['qwen_invalid']} Qwen outputs rejected")
+    if HEALTH["llm_fail"]: degraded.append(f"{HEALTH['llm_fail']} LLM API failures")
+    if HEALTH["llm_invalid"]: degraded.append(f"{HEALTH['llm_invalid']} LLM outputs rejected")
     if HEALTH["discord_fail"]: degraded.append("Discord delivery failed")
     if HEALTH["tv_movers_loaded"] == 0: degraded.append("TradingView movers missing (run TV refresh)")
     if store_stats.get("fresh_init"): degraded.append("state DB freshly initialized")
-    qwen_total = HEALTH["qwen_ok"] + HEALTH["qwen_fail"]
-    if (not DRY_RUN) and qwen_total and HEALTH["qwen_fail"] > HEALTH["qwen_ok"]:
-        red.append("Qwen failing more than succeeding")
+    qwen_total = HEALTH["llm_ok"] + HEALTH["llm_fail"]
+    if (not DRY_RUN) and qwen_total and HEALTH["llm_fail"] > HEALTH["llm_ok"]:
+        red.append("LLM failing more than succeeding")
     overall = "RED" if red else ("YELLOW" if degraded else "GREEN")
     main_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")
     main_lines = 0; main_sections = 0
@@ -680,7 +680,7 @@ async def main():
     ensure_market_data()
     MOVERS, TV_TICKERS, TV_NAMES = load_market_context()
     if not LLM_AVAILABLE:
-        print("DEGRADED: Qwen unavailable; using conservative non-alerting fallback analysis:", _det)
+        print("DEGRADED: LLM unavailable; using conservative non-alerting fallback analysis:", _det)
 
     sem = asyncio.Semaphore(20)
     since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)

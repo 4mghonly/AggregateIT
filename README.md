@@ -25,7 +25,7 @@ Out of scope (by design, deferred to final advisory layer): automated trading, t
 ## Pipeline
 
 Source → Document → Signal (score + components) → Event (cluster) → Event Update (timeline)
-→ Assessment (Qwen, schema-validated) → Alert / Digest / Briefing.
+→ Assessment (runtime-configured LLM, schema-validated) → Alert / Digest / Briefing.
 
 ## Scoring (explainable)
 
@@ -69,22 +69,26 @@ Multi-source claims without ≥2 independent families are downgraded and capped.
 
 `briefing.py`, `daily.py`, and `weekly.py` remain as legacy/manual builders but have no active scheduled workflow, preventing duplicate Discord products.
 
-## Secrets
+## LLM configuration
 
-Required secrets: `QWEN_API_KEY`, `QWEN_BASE_URL`, `DISCORD_WEBHOOK`,
-`GITHUB_TOKEN` (automatic in Actions). The primary model is `qwen3.8-omni-flash`.
+LLM provider and model selection are runtime-configured; no provider or model is fixed in code.
+GitHub Actions reads credentials from repository Secrets and routing/model choices from repository Variables.
 
-For LLM failover, configure a second provider credential as the repository secret
-`QWEN_FALLBACK_API_KEY`. `QWEN_FALLBACK_BASE_URL` is optional when the fallback key uses
-the same compatible endpoint; otherwise set it to the fallback provider's OpenAI-compatible
-base URL. Production workflows use `qwen3.8-flash` as `QWEN_FALLBACK_MODEL`. The wrapper
-tries the fallback model/credential only when the primary route reports quota/billing
-exhaustion, so normal runs remain on the primary model.
+Primary route:
+- Secret: `LLM_API_KEY` (legacy `QWEN_API_KEY` is accepted by workflows during migration)
+- Variables: `LLM_BASE_URL`, `LLM_MODEL`
 
-Optional source adapters: `SOCIAL_PROXY_URL`, `RSSHUB_BASE_URL`, `RSS_BRIDGE_URL`,
-`REDDIT_CLIENT_ID`, and `REDDIT_CLIENT_SECRET`. Without those values the collector uses
-native public Bluesky/Mastodon feeds and bounded public fallbacks; unavailable lanes are
-reported as empty rather than aborting the engine.
+Optional fallback route:
+- Secret: `LLM_FALLBACK_API_KEY` (legacy `QWEN_FALLBACK_API_KEY` is accepted during migration)
+- Variables: `LLM_FALLBACK_BASE_URL`, `LLM_FALLBACK_MODEL`
+
+Optional provider-compatibility variables: `LLM_AUTH_HEADER`, `LLM_AUTH_SCHEME`, `LLM_CHAT_PATH`,
+`LLM_REQUEST_OPTIONS_JSON`, `LLM_EXTRA_HEADERS_JSON`, plus their `LLM_FALLBACK_*` equivalents.
+
+The Arabic briefing can inherit the generic route or use its own `ARABIC_LLM_*` Secrets/Variables.
+`ARABIC_LLM_FALLBACK_MODELS` is also supplied as a Variable; no model list is embedded in source code.
+
+Other integration credentials remain in GitHub Settings → Secrets and variables → Actions.
 
 ## Persistence
 

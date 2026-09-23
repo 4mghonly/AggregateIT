@@ -81,7 +81,7 @@ def load_window(store, hours=24):
     if items:
         return items, 72, f"⚠️ No events in the last {hours}h — showing the last 72h instead."
     return [], 72, ("⚠️ No events stored at all. The engine has not produced any events "
-                    "(check QWEN_* secrets, engine runs, and the data/ cache).")
+                    "(check LLM secrets/variables, engine runs, and the data/ cache).")
 
 def theme_counts(items):
     counts = {}
@@ -192,7 +192,7 @@ MACRO DATA:
 {macro_text}"""
 
 def generate_macro_read(macro, regime):
-    """Generate a Qwen macro read (schema-validated, injection-shield)."""
+    """Generate an LLM macro read (schema-validated, injection-shield)."""
     from llm import chat
     if not macro or not macro.get("valid"): return None
     inst_map = {i["sym"]: i for i in macro.get("instruments", [])}
