@@ -70,5 +70,24 @@ def fixture(long=False):
         e=event(region,BASE[region],sev,countries[region],i,long); e['sources'][0]['published']=end.timestamp()-600; events.append(e)
     for j,(region,title,sev,country) in enumerate(EXTRA,len(events)):
         e=event(region,title,sev,country,j,long); e['sources'][0]['published']=end.timestamp()-900; events.append(e)
+    analysis={
+      'situation_ar':'تُظهر العينة تزامن مسارات دبلوماسية وأمنية متعددة من دون افتراض رابط سببي بينها. ويظل الأهم لصانع القرار هو التمييز بين الرسائل السياسية والإجراءات التنفيذية القابلة للرصد.',
+      'implications_ar':'أي تغير موثق في الانتشار أو القيود التشغيلية أو ترتيبات الحدود أو الممرات البحرية قد يغيّر قراءة المشهد أكثر من تكرار التصريحات.',
+      'developing_ar':[
+        'مسار التهدئة في غزة بين التفاوض والوصول الإنساني وإيقاع التطورات الميدانية.',
+        'أمن البحر الأحمر والممرات البحرية مع مراقبة أي قيود تشغيلية أو تحركات أمنية جديدة.',
+        'الحدود العراقية والسورية وتحركات الفصائل والاتصالات الرسمية ذات الصلة.',
+        'السودان والقرن الأفريقي وتأثير التطورات الميدانية على الاستقرار والوصول الإنساني.'
+      ],
+      'watch_ar':[
+        'أي إعلان رسمي يغيّر شروط التهدئة أو آليات المساعدات.',
+        'أي تقييد موثق في مجال جوي أو ممر بحري مهم.',
+        'الانتقال من التصريحات إلى إجراءات عسكرية أو أمنية قابلة للرصد.',
+        'بيانات أو اجتماعات رسمية تعكس تنسيقاً إقليمياً جديداً.'
+      ]
+    }
+    coverage={'event_source_count':len(events),'non_arabic_event_sources':6,
+              'event_source_languages':{'ar':max(1,len(events)-6),'en':4,'fa':1,'tr':1}}
     return dict(sample=True,window_start=start.isoformat(),window_end=end.isoformat(),events=events,input_count=84,
-      health=[dict(id='sample-'+r,name='مصدر تجريبي',region=r,country='SAMPLE',status='active') for r in REGIONS])
+      health=[dict(id='sample-'+r,name='مصدر تجريبي',region=r,country='SAMPLE',status='active') for r in REGIONS],
+      analysis=analysis,coverage=coverage,previous_events=[{'title_ar':events[0]['title_ar']}])
