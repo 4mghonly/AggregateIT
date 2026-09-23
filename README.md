@@ -84,6 +84,8 @@ Fallback route Secrets:
 - `LLM_FALLBACK_BASE_URL`
 - `LLM_FALLBACK_MODEL`
 
+The two routes are independent. A complete primary route can operate without any fallback settings, and a complete fallback route can operate without any primary settings. If both are configured, the fallback is used only when the primary route cannot serve the request.
+
 Optional provider-compatibility variables: `LLM_AUTH_HEADER`, `LLM_AUTH_SCHEME`, `LLM_CHAT_PATH`,
 `LLM_REQUEST_OPTIONS_JSON`, `LLM_EXTRA_HEADERS_JSON`, plus their `LLM_FALLBACK_*` equivalents.
 
