@@ -35,7 +35,8 @@ def shape(label, base, model, key, fallback=False):
     )
     if api_root and key:
         try:
-            r=requests.get(api_root.rstrip("/")+"/models",headers=llm._headers(key,fallback),timeout=15)
+            headers=llm._headers(key,fallback)
+            r=requests.get(api_root.rstrip("/")+"/models",headers=headers,timeout=15)
             print(f"{label} MODELS PROBE: HTTP {r.status_code}")
             if r.status_code==200:
                 try:
@@ -45,6 +46,32 @@ def shape(label, base, model, key, fallback=False):
                     print(f"{label} MODEL PRESENT: {bool(model and model in ids)} catalog_size={len(ids)}")
                 except Exception as exc:
                     print(f"{label} MODELS PARSE: {type(exc).__name__}")
+            if host=="openrouter.ai":
+                public=requests.get(api_root.rstrip("/")+"/models",timeout=15)
+                auth=requests.get(api_root.rstrip("/")+"/key",headers=headers,timeout=15)
+                print(f"{label} OPENROUTER PUBLIC MODELS: HTTP {public.status_code}")
+                print(f"{label} OPENROUTER KEY CHECK: HTTP {auth.status_code}")
+                try:
+                    probe=llm._request(raw,key,model,[{"role":"user","content":"ping"}],0,1,20,fallback)
+                    msg=""
+                    try:
+                        obj=probe.json()
+                        err=obj.get("error",{}) if isinstance(obj,dict) else {}
+                        msg=str(err.get("message") or "") if isinstance(err,dict) else str(err)
+                    except Exception:
+                        pass
+                    low=msg.lower()
+                    print(
+                        f"{label} CHAT ERROR CLASS:"
+                        f" http={probe.status_code}"
+                        f" no_endpoints={'no endpoint' in low or 'no allowed provider' in low}"
+                        f" model_not_found={'model' in low and ('not found' in low or 'unknown' in low)}"
+                        f" auth={'auth' in low or 'api key' in low}"
+                        f" rate={'rate' in low or 'limit' in low}"
+                        f" tool={'tool' in low}"
+                    )
+                except Exception as exc:
+                    print(f"{label} CHAT ERROR CLASS: {type(exc).__name__}")
         except Exception as exc:
             print(f"{label} MODELS PROBE: {type(exc).__name__}")
 
