@@ -141,7 +141,9 @@ jobs:
 
       - name: Collect, translate, verify, render and deliver live slides
         if: steps.mode.outputs.live == 'true'
-        run: python -m arabic_newsletter.run --send
+        # Manual live pushes are assessment runs ending now. Scheduled production
+        # on main still calls --send without --manual-now and keeps fixed 6-hour editions.
+        run: python -m arabic_newsletter.run --send --manual-now
 
       - name: Alert Arabic channel when a live briefing fails
         if: failure() && steps.mode.outputs.live == 'true'
