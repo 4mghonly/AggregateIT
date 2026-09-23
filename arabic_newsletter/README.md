@@ -53,7 +53,7 @@ webhook or API key.
 The workflow can reuse existing `QWEN_API_KEY` and `QWEN_BASE_URL` secrets without
 changing them. Optional isolated overrides: `ARABIC_LLM_API_KEY`,
 `ARABIC_LLM_BASE_URL` (secrets) and `ARABIC_LLM_MODEL` (repository variable).
-The workflow uses `qwen3.8-omni-flash`. Live preflight bypasses the model cache, performs a real API probe, and verifies the dedicated Arabic Discord webhook route before publication.
+The workflow does not hard-code a provider or model. Live preflight probes the route configured in GitHub Actions and verifies the dedicated Arabic Discord webhook before publication.
 
 GitHub cron only schedules workflows from the default branch. Production timing is
 therefore owned by a tiny launcher workflow on **main** using

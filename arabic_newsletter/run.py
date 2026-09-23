@@ -162,7 +162,7 @@ def main():
                   for e in events
                 ]
                 llm_health={
-                  'model':state.get('last_model_used') or os.getenv('ARABIC_LLM_MODEL') or os.getenv('QWEN_MODEL'),
+                  'model':state.get('last_model_used') or os.getenv('ARABIC_LLM_MODEL'),
                   'events_returned':len(events),
                   'all_event_text_arabic':all(is_arabic(t) for t in translated) if translated else True,
                   'analysis_present':bool((analysis or {}).get('situation_ar')),

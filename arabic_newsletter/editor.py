@@ -69,147 +69,138 @@ def _message_json(message):
 class Client:
     def __init__(self,state):
         self.state=state; self.calls=0
-        self.key=os.getenv('ARABIC_LLM_API_KEY') or os.getenv('QWEN_API_KEY','')
-        self.base=(os.getenv('ARABIC_LLM_BASE_URL') or os.getenv('QWEN_BASE_URL') or 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1').rstrip('/')
-        self.model=os.getenv('ARABIC_LLM_MODEL') or os.getenv('QWEN_MODEL')
-        self.fallback_key=os.getenv('ARABIC_LLM_FALLBACK_API_KEY') or os.getenv('QWEN_FALLBACK_API_KEY','')
-        self.fallback_base=(os.getenv('ARABIC_LLM_FALLBACK_BASE_URL') or os.getenv('QWEN_FALLBACK_BASE_URL') or self.base).rstrip('/')
-        self.fallback_model=(os.getenv('ARABIC_LLM_FALLBACK_MODEL') or os.getenv('QWEN_FALLBACK_MODEL') or self.model or '').strip()
+        self.key=(os.getenv('ARABIC_LLM_API_KEY') or '').strip()
+        self.base=(os.getenv('ARABIC_LLM_BASE_URL') or '').strip().rstrip('/')
+        self.model=(os.getenv('ARABIC_LLM_MODEL') or '').strip()
+        self.fallback_key=(os.getenv('ARABIC_LLM_FALLBACK_API_KEY') or '').strip()
+        self.fallback_base=(os.getenv('ARABIC_LLM_FALLBACK_BASE_URL') or self.base).strip().rstrip('/')
+        self.fallback_model=(os.getenv('ARABIC_LLM_FALLBACK_MODEL') or self.model).strip()
         extra=[m.strip() for m in os.getenv('ARABIC_LLM_FALLBACK_MODELS','').split(',') if m.strip()]
-        ordered=[self.model,self.fallback_model]+extra
-        self.model_candidates=[]
-        for model in ordered:
-            if model and model not in self.model_candidates: self.model_candidates.append(model)
+        self.primary_models=[]
+        self.fallback_models=[]
+        for model in [self.model]+extra:
+            if model and model not in self.primary_models: self.primary_models.append(model)
+        for model in [self.fallback_model]+extra:
+            if model and model not in self.fallback_models: self.fallback_models.append(model)
         self.model_index=0
-        self.force_fallback=False
-        self.force_fallback_credential=False
-        self.router_key=os.getenv('OPENROUTER_API_KEY','').strip()
-        self.router_base=(os.getenv('ARABIC_OPENROUTER_BASE_URL') or 'https://openrouter.ai/api/v1').rstrip('/')
-        self.router_model=(os.getenv('ARABIC_OPENROUTER_MODEL') or 'deepseek/deepseek-v4.1-flash').strip()
-        self.use_router=False
-        if not self.key and not self.fallback_key: raise EditorialError('Missing Arabic/Qwen LLM credentials')
-        if not self.model and not self.fallback_model: raise EditorialError('Missing Arabic/Qwen LLM model')
-        if urlsplit(self.base).scheme!='https' or urlsplit(self.fallback_base).scheme!='https' or urlsplit(self.router_base).scheme!='https': raise EditorialError('LLM endpoint must use HTTPS')
+        self.force_fallback_credential=not bool(self.key and self.base and self.model)
+        self.auth_header=(os.getenv('ARABIC_LLM_AUTH_HEADER') or 'Authorization').strip()
+        self.auth_scheme=(os.getenv('ARABIC_LLM_AUTH_SCHEME') if 'ARABIC_LLM_AUTH_SCHEME' in os.environ else 'Bearer').strip()
+        self.chat_path='/'+(os.getenv('ARABIC_LLM_CHAT_PATH') or 'chat/completions').strip().lstrip('/')
+        self.fallback_auth_header=(os.getenv('ARABIC_LLM_FALLBACK_AUTH_HEADER') or self.auth_header).strip()
+        self.fallback_auth_scheme=(os.getenv('ARABIC_LLM_FALLBACK_AUTH_SCHEME') if 'ARABIC_LLM_FALLBACK_AUTH_SCHEME' in os.environ else self.auth_scheme).strip()
+        self.fallback_chat_path='/'+(os.getenv('ARABIC_LLM_FALLBACK_CHAT_PATH') or self.chat_path).strip().lstrip('/')
+        try:
+            self.request_options=self._json_env('ARABIC_LLM_REQUEST_OPTIONS_JSON')
+            self.extra_headers=self._json_env('ARABIC_LLM_EXTRA_HEADERS_JSON')
+            self.fallback_request_options=self._json_env('ARABIC_LLM_FALLBACK_REQUEST_OPTIONS_JSON') or self.request_options
+            self.fallback_extra_headers=self._json_env('ARABIC_LLM_FALLBACK_EXTRA_HEADERS_JSON') or self.extra_headers
+        except (ValueError,TypeError) as exc:
+            raise EditorialError(str(exc)) from None
+        primary_ok=bool(self.key and self.base and self.primary_models)
+        fallback_ok=bool(self.fallback_key and self.fallback_base and self.fallback_models)
+        if not primary_ok and not fallback_ok: raise EditorialError('Missing complete Arabic LLM route configuration')
+        for endpoint in [self.base if primary_ok else '', self.fallback_base if fallback_ok else '']:
+            if endpoint and urlsplit(endpoint).scheme!='https': raise EditorialError('LLM endpoint must use HTTPS')
 
     @staticmethod
-    def _quota_exhausted(response):
-        value=(response.text or '').lower()
-        return response.status_code in (402,403) and any(k in value for k in ('quota','fund','billing','balance','credit'))
+    def _json_env(name):
+        raw=(os.getenv(name) or '').strip()
+        if not raw: return {}
+        value=json.loads(raw)
+        if not isinstance(value,dict): raise ValueError(name+' must contain a JSON object')
+        return value
+
+    def _models(self):
+        return self.fallback_models if self.force_fallback_credential else self.primary_models
 
     def _endpoint(self):
-        if self.use_router and self.router_key:
-            return self.router_base,self.router_key,self.router_model
-        model=self.model_candidates[min(self.model_index,len(self.model_candidates)-1)]
-        if self.force_fallback_credential and self.fallback_key:
-            return self.fallback_base,self.fallback_key,model
-        if self.key:
-            return self.base,self.key,model
-        return self.fallback_base,self.fallback_key,model
-
-    @staticmethod
-    def _model_unavailable(response):
-        value=(response.text or '').lower()
-        return response.status_code in (402,403) and any(k in value for k in ('quota','fund','billing','balance','credit','restriction','access denied'))
+        models=self._models()
+        if not models: raise EditorialError('No model configured for active LLM route')
+        model=models[min(self.model_index,len(models)-1)]
+        if self.force_fallback_credential:
+            return self.fallback_base,self.fallback_key,model,True
+        return self.base,self.key,model,False
 
     def _advance_model(self):
-        if self.model_index+1 < len(self.model_candidates):
+        models=self._models()
+        if self.model_index+1 < len(models):
             self.model_index+=1
             return True
         return False
 
-    @staticmethod
-    def _budget_exhausted(response):
-        value=(response.text or '').lower()
-        return response.status_code==429 and 'budget' in value and ('exhaust' in value or 'limit' in value)
+    def _switch_fallback(self):
+        if self.force_fallback_credential or not (self.fallback_key and self.fallback_base and self.fallback_models):
+            return False
+        self.force_fallback_credential=True
+        self.model_index=0
+        print('Arabic primary LLM route unavailable; switching to configured fallback route',flush=True)
+        return True
+
+    def _headers(self,key,fallback):
+        header=self.fallback_auth_header if fallback else self.auth_header
+        scheme=self.fallback_auth_scheme if fallback else self.auth_scheme
+        headers={'Content-Type':'application/json'}
+        headers.update(self.fallback_extra_headers if fallback else self.extra_headers)
+        if header: headers[header]=(f'{scheme} {key}'.strip() if scheme else key)
+        return headers
+
+    def _send(self,base,key,payload,fallback):
+        body=dict(payload)
+        body.update(self.fallback_request_options if fallback else self.request_options)
+        path=self.fallback_chat_path if fallback else self.chat_path
+        return requests.post(base+path,headers=self._headers(key,fallback),json=body,timeout=(10,120))
+
     def chat(self,system,data,max_tokens=9000,temperature=0.18,use_cache=True):
         messages=[{'role':'system','content':system},{'role':'user','content':json.dumps(data,ensure_ascii=False)}]
-        base,key,model=self._endpoint()
-        cache_key='llm:v4:'+digest(base+model+json.dumps(messages,ensure_ascii=False,sort_keys=True))
+        base,key,model,_fallback=self._endpoint()
+        route_fingerprint='|'.join([self.base,self.model,self.fallback_base,self.fallback_model,','.join(self.primary_models),','.join(self.fallback_models)])
+        cache_key='llm:v5:'+digest(route_fingerprint+json.dumps(messages,ensure_ascii=False,sort_keys=True))
         if use_cache:
             cached=self.state.get(cache_key)
             if cached is not None: return cached
         payload={'model':model,'messages':messages,'temperature':temperature,'max_tokens':max_tokens,
           'response_format':{'type':'json_object'}}
-        features_key='api_features:'+digest(base+model)
-        for field in self.state.get(features_key) or []: payload.pop(field,None)
+        decode_retry=False
+        transient_retry=False
 
-        for attempt in range(2):
-            if self.calls>=12: raise EditorialError('Twelve-request per-run model budget exhausted')
-            self.calls+=1
-            base,key,model=self._endpoint()
+        while self.calls < 12:
+            base,key,model,fallback=self._endpoint()
             payload['model']=model
-            host=urlsplit(base).hostname or ''
-            if host.endswith(('aliyuncs.com','dashscope.com')): payload.setdefault('enable_thinking',False)
-            else: payload.pop('enable_thinking',None)
+            features_key='api_features:'+digest(base+model)
+            for field in self.state.get(features_key) or []: payload.pop(field,None)
+            self.calls+=1
             try:
-                r=requests.post(base+'/chat/completions',
-                  headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
+                r=self._send(base,key,payload,fallback)
             except requests.RequestException:
-                if attempt==0: time.sleep(2); continue
-                raise EditorialError('Model network failure') from None
+                if self._advance_model(): continue
+                if self._switch_fallback(): continue
+                if not transient_retry:
+                    transient_retry=True; time.sleep(2); continue
+                raise EditorialError('LLM network failure') from None
 
-            while (self._model_unavailable(r) or self._budget_exhausted(r)) and self._advance_model():
-                base,key,model=self._endpoint()
-                print('Arabic model unavailable; trying configured fallback:',model,flush=True)
-                payload['model']=model
-                host=urlsplit(base).hostname or ''
-                if host.endswith(('aliyuncs.com','dashscope.com')): payload['enable_thinking']=False
-                else: payload.pop('enable_thinking',None)
-                self.calls+=1
-                try:
-                    r=requests.post(base+'/chat/completions',
-                      headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
-                except requests.RequestException:
-                    raise EditorialError('Fallback model network failure') from None
-
-            if self._model_unavailable(r) and self.fallback_key and not self.force_fallback_credential:
-                print('Arabic models unavailable on primary credential; switching to configured fallback credential',flush=True)
-                self.force_fallback_credential=True
-                self.model_index=0
-                base,key,model=self._endpoint()
-                payload['model']=model
-                host=urlsplit(base).hostname or ''
-                if host.endswith(('aliyuncs.com','dashscope.com')): payload['enable_thinking']=False
-                else: payload.pop('enable_thinking',None)
-                self.calls+=1
-                try:
-                    r=requests.post(base+'/chat/completions',
-                      headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
-                except requests.RequestException:
-                    raise EditorialError('Fallback credential network failure') from None
-
-            if (self._model_unavailable(r) or self._budget_exhausted(r)) and self.router_key and not self.use_router:
-                print('Arabic Alibaba route unavailable; switching to OpenRouter fallback',flush=True)
-                self.use_router=True
-                base,key,model=self._endpoint()
-                payload['model']=model
-                payload.pop('enable_thinking',None)
-                self.calls+=1
-                try:
-                    r=requests.post(base+'/chat/completions',
-                      headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
-                except requests.RequestException:
-                    raise EditorialError('OpenRouter fallback network failure') from None
-
-            if r.status_code in (429,500,502,503,504) and attempt==0:
-                time.sleep(2); continue
             if r.status_code!=200:
                 try:
                     err=r.json().get('error',{})
                     detail=str(err.get('message') or err.get('code') or 'request rejected') if isinstance(err,dict) else str(err)
                 except ValueError:
                     detail='non-JSON error response'
-                if self.key: detail=detail.replace(self.key,'[redacted]')
-                if self.fallback_key: detail=detail.replace(self.fallback_key,'[redacted]')
-                if self.router_key: detail=detail.replace(self.router_key,'[redacted]')
-                detail=detail.replace(self.base,'[endpoint]').replace(self.fallback_base,'[endpoint]')
+                for secret in (self.key,self.fallback_key):
+                    if secret: detail=detail.replace(secret,'[redacted]')
+                for endpoint in (self.base,self.fallback_base):
+                    if endpoint: detail=detail.replace(endpoint,'[endpoint]')
                 detail=re.sub(r'https?://\S+','[url]',detail)[:350]
-                if r.status_code==400 and attempt==0 and any(k in detail.lower() for k in ('response_format','enable_thinking')):
+                if r.status_code==400 and 'response_format' in detail.lower() and 'response_format' in payload:
                     disabled=self.state.get(features_key) or []
-                    for field in ('response_format','enable_thinking'):
-                        if field in detail.lower(): payload.pop(field,None); disabled.append(field)
+                    payload.pop('response_format',None); disabled.append('response_format')
                     self.state.put(features_key,list(set(disabled)))
                     continue
+                if self._advance_model():
+                    print('Arabic model route rejected request; trying configured alternate model:',self._models()[self.model_index],flush=True)
+                    continue
+                if self._switch_fallback(): continue
+                if r.status_code in (408,409,425,429,500,502,503,504) and not transient_retry:
+                    transient_retry=True; time.sleep(2); continue
                 raise EditorialError(f'Model HTTP {r.status_code}: {detail}')
 
             try:
@@ -224,17 +215,18 @@ class Client:
                 if finish in ('length','max_tokens'): raise ValueError('truncated')
                 result=_message_json(choice['message'])
             except (ValueError,KeyError,IndexError,TypeError):
-                if attempt==0:
+                if not decode_retry:
+                    decode_retry=True
                     payload['temperature']=min(temperature,0.05)
                     payload['max_tokens']=min(max(int(payload.get('max_tokens',max_tokens)*1.25),max_tokens),12000)
                     print('Arabic LLM returned malformed/truncated JSON; retrying once with stricter decoding budget',flush=True)
                     time.sleep(1)
                     continue
                 raise EditorialError('Invalid or truncated model JSON after retry') from None
-            self.state.put('last_model_used',model)
+            self.state.put('last_model_used',response.get('model') or model)
             if use_cache: self.state.put(cache_key,result)
             return result
-        raise EditorialError('Model retry budget exhausted')
+        raise EditorialError('Twelve-request per-run model budget exhausted')
 
 def is_arabic(text):
     letters=[c for c in text if c.isalpha()]
