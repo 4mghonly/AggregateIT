@@ -75,11 +75,11 @@ LLM provider and model selection are runtime-configured; no provider or model is
 GitHub Actions reads credentials from repository Secrets and routing/model choices from repository Variables.
 
 Primary route:
-- Secret: `LLM_API_KEY` (legacy `QWEN_API_KEY` is accepted by workflows during migration)
+- Secret: `LLM_API_KEY` 
 - Variables: `LLM_BASE_URL`, `LLM_MODEL`
 
 Optional fallback route:
-- Secret: `LLM_FALLBACK_API_KEY` (legacy `QWEN_FALLBACK_API_KEY` is accepted during migration)
+- Secret: `LLM_FALLBACK_API_KEY` 
 - Variables: `LLM_FALLBACK_BASE_URL`, `LLM_FALLBACK_MODEL`
 
 Optional provider-compatibility variables: `LLM_AUTH_HEADER`, `LLM_AUTH_SCHEME`, `LLM_CHAT_PATH`,
