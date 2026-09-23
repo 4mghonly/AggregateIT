@@ -72,7 +72,7 @@ def _cycle_delta(brief):
     return f'{len(new)} تطورات جديدة مقارنة بالإحاطة السابقة' + (f'، أبرزها ضمن: {region_text}.' if region_text else '.')
 
 def _uae_panel(c,box,brief,events):
-    x,y,w,h=panel(c,box,'الإمارات | تغطية موسعة',GREEN if 'GREEN' in globals() else OLIVE,
+    x,y,w,h=panel(c,box,'الإمارات | تغطية موسعة',OLIVE,
                   'قيادة، دبلوماسية، سلامة عامة، طيران، حدود وبنية استراتيجية')
     if not events:
         c.text('لا يوجد تحديث إماراتي مؤهل في النافذة الحالية. يستمر الرصد للمصادر الرسمية والمحلية دون ملء المساحة بمحتوى روتيني.',
