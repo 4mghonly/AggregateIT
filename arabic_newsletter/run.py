@@ -98,6 +98,20 @@ def main():
                     write_json(args.output/'editorial_review_raw.json',state.get('last_editorial_review_raw') or {})
                     write_json(args.output/'editorial_review.json',state.get('last_editorial_review') or [])
                 analysis=build_analysis(events,state,morning=morning)
+                translated=[
+                  ' '.join(str(e.get(k,'')) for k in ('title_ar','summary_ar','assessment_ar','watch_ar'))
+                  for e in events
+                ]
+                llm_health={
+                  'model':os.getenv('ARABIC_LLM_MODEL') or os.getenv('QWEN_MODEL'),
+                  'events_returned':len(events),
+                  'all_event_text_arabic':all(is_arabic(t) for t in translated) if translated else True,
+                  'analysis_present':bool((analysis or {}).get('situation_ar')),
+                  'status':'ok',
+                }
+                if args.send and (not llm_health['all_event_text_arabic'] or (events and not llm_health['analysis_present'])):
+                    raise RuntimeError('Arabic LLM extraction/translation validation failed')
+                write_json(args.output/'llm_health.json',llm_health)
                 event_sources={s.get('id'):s for e in events for s in e.get('sources',[]) if s.get('id')}
                 coverage={
                   'article_languages':dict(Counter(a.get('language','unknown') for a in articles)),
@@ -114,9 +128,13 @@ def main():
                   coverage=coverage,source_health=source_health,empty_cycle=not bool(events),previous_events=state.get('previous_events') or [])
                 if args.send and not events:
                     print('No qualified events; delivering an explicit no-material-change status briefing',flush=True)
+            encoded=json.dumps(brief,ensure_ascii=False)
+            forbidden=('\ufffd','\u25a1','\u25a0','\ufeff','\u202a','\u202b','\u202c','\u202d','\u202e','\u2066','\u2067','\u2068','\u2069')
+            if any(mark in encoded for mark in forbidden):
+                raise RuntimeError('Encoding hygiene gate failed before rendering')
             paths,clipped=render(brief,args.output)
             write_json(args.output/'briefing.json',brief)
-            write_json(args.output/'render_report.json',{'visually_shortened_blocks':clipped,'full_text':'sources-ar.txt','dimensions':[3840,2160]})
+            write_json(args.output/'render_report.json',{'visually_shortened_blocks':clipped,'full_text':'sources-ar.txt','dimensions':[3840,2160],'pages':len(paths)})
             refs=args.output/'sources-ar.txt'; references(brief,refs)
             if args.send:
                 message_id=send(state,edition,paths)
