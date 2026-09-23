@@ -65,14 +65,16 @@ jobs:
           live=(event=="push" and message.startswith("Arabic live:")) or os.getenv("DISPATCH_DELIVER","").lower()=="true"
           preview=(event=="push" and message.startswith("Arabic preview:")) or os.getenv("DISPATCH_PREVIEW","").lower()=="true"
           health=(event=="push" and message.startswith("Arabic health:"))
-          if live:
+          manual=(event=="push" and message.startswith("Arabic manual-live:"))
+          if live or manual:
               preview=False
               health=False
           with open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8") as fh:
               fh.write(f"live={'true' if live else 'false'}\n")
               fh.write(f"preview={'true' if preview else 'false'}\n")
               fh.write(f"health={'true' if health else 'false'}\n")
-          mode="live" if live else ("preview" if preview else ("health" if health else "validation"))
+              fh.write(f"manual={'true' if manual else 'false'}\n")
+          mode="live" if live else ("manual" if manual else ("preview" if preview else ("health" if health else "validation")))
           print("Arabic workflow mode:",mode)
           PY
 
@@ -156,8 +158,16 @@ jobs:
         # on main still calls --send without --manual-now and keeps fixed 6-hour editions.
         run: python -m arabic_newsletter.run --send --manual-now
 
+      - name: Validate dedicated Discord route for reviewed manual briefing
+        if: steps.mode.outputs.manual == 'true'
+        run: python -m arabic_newsletter.run --preflight --probe-discord
+
+      - name: Render and deliver reviewed manual Arabic briefing
+        if: steps.mode.outputs.manual == 'true'
+        run: python -m arabic_newsletter.run --manual-file arabic_newsletter/manual_briefing.json --send
+
       - name: Alert Arabic channel when a live briefing fails
-        if: failure() && steps.mode.outputs.live == 'true'
+        if: failure() && (steps.mode.outputs.live == 'true' || steps.mode.outputs.manual == 'true')
         continue-on-error: true
         env:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
