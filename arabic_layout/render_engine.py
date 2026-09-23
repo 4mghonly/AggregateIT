@@ -6,15 +6,17 @@ Discord viewing at 4K.
 """
 from datetime import datetime
 from pathlib import Path
-import os, re
+import os, re, unicodedata
 from PIL import Image, ImageDraw, ImageFont, features
 from arabic_newsletter.core import UAE, REGIONS
 
 W,H=3840,2160
-BG='#F2F3F0'; PAPER='#FFFFFF'; INK='#111A20'; MUTED='#53606A'; BORDER='#C7CDC8'
-COMMAND='#1F2C33'; OLIVE='#53604A'; SAND='#B3A073'; STEEL='#415A66'
-ALERT='#8B3038'; AMBER='#9A672E'; TEAL='#3B6C6B'; BLUE='#3F6681'; PURPLE='#665875'
-PALE_RED='#F6E7E8'; PALE_AMBER='#F4EEE4'; PALE_GREEN='#E9EFE8'; PALE_BLUE='#E8EFF3'
+# Restrained dark command-brief palette. Panels are deliberately close in tone;
+# accent colors indicate function rather than decoration.
+BG='#08141B'; PAPER='#101D25'; PANEL_ALT='#13232C'; INK='#F1F4F2'; MUTED='#AAB5B6'; BORDER='#344851'
+COMMAND='#D6DCDD'; OLIVE='#68A77D'; SAND='#C6A557'; STEEL='#6AA4C5'
+ALERT='#D5646B'; AMBER='#C99B55'; TEAL='#62A29C'; BLUE='#66A8D0'; PURPLE='#9382A3'
+PALE_RED='#332126'; PALE_AMBER='#342D1F'; PALE_GREEN='#173127'; PALE_BLUE='#172C39'
 SEV={'high':('مرتفع',ALERT,PALE_RED),'medium':('متوسط',AMBER,PALE_AMBER),'low':('منخفض',OLIVE,PALE_GREEN)}
 AR_MONTHS={1:'يناير',2:'فبراير',3:'مارس',4:'أبريل',5:'مايو',6:'يونيو',7:'يوليو',8:'أغسطس',9:'سبتمبر',10:'أكتوبر',11:'نوفمبر',12:'ديسمبر'}
 AR_WEEKDAYS={0:'الاثنين',1:'الثلاثاء',2:'الأربعاء',3:'الخميس',4:'الجمعة',5:'السبت',6:'الأحد'}
@@ -27,12 +29,22 @@ REGION_COLORS={
 }
 
 def sanitize_text(value):
-    s=str(value or '')
-    for bad in ('\ufffd','\u25a1','\u25a0','\ufeff','\u200e','\u200f'):
+    """Normalize Arabic display text and strip glyphs likely to render as boxes."""
+    s=unicodedata.normalize('NFKC',str(value or ''))
+    for bad in ('\ufffd','\u25a1','\u25a0','\ufeff','\u200e','\u200f','\u202a','\u202b','\u202c','\u202d','\u202e','\u2066','\u2067','\u2068','\u2069'):
         s=s.replace(bad,'')
     s=s.replace('|','،').replace('—','،').replace('–','،')
-    s=re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]','',s)
-    return re.sub(r'\s+',' ',s).strip()
+    out=[]
+    for ch in s:
+        cp=ord(ch); cat=unicodedata.category(ch)
+        if cat in ('Cc','Cs','Co','Cf'):
+            continue
+        # Strip emoji/pictographs and dingbats from model/source text. The
+        # briefing uses typography and native shapes only, preventing tofu boxes.
+        if 0x1F000 <= cp <= 0x1FAFF or 0x2600 <= cp <= 0x27BF:
+            continue
+        out.append(ch)
+    return re.sub(r'\s+',' ',''.join(out)).strip()
 
 def compact(text,limit=170):
     text=sanitize_text(text)
@@ -119,13 +131,18 @@ class Canvas:
 def masthead(c,brief,page):
     end=datetime.fromisoformat(brief['window_end']).astimezone(UAE)
     morning=bool(brief.get('morning'))
-    c.text('أغريغيت | الموجز الجيوسياسي والأمني',(2180,34,1500,58),48,True,INK)
-    c.text('دليل موجز لصانع القرار، وقائع منسوبة وتحليل تقديري منفصل',(2180,101,1500,38),24,False,MUTED)
+    subtitles={
+      1:'أولويات اليوم | وقائع أساسية، سياق، وما يجب مراقبته',
+      2:'تقدير تنفيذي | قصص قيد التطور، مؤشرات التحول، والتغطية الإقليمية',
+      3:'المشهد الشامل | الأقاليم، الفاعلون المسلحون، النزاعات والتوترات البحرية',
+    }
+    c.text('أغريغيت | الموجز الجيوسياسي والأمني',(2180,30,1500,60),48,True,INK)
+    c.text(subtitles.get(page,'دليل موجز لصانع القرار'),(2180,96,1500,40),23,False,MUTED)
     dt=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year}، {end.strftime('%H:%M')} بتوقيت الإمارات"
-    c.text(dt,(80,42,1500,44),28,True,INK,'left')
+    c.text(dt,(80,38,1500,44),27,True,INK,'left')
     cycle='إحاطة صباحية موسعة، تغطية ليلية 12 ساعة' if morning else 'إحاطة دورية، نافذة 6 ساعات'
-    c.text(cycle,(80,100,1500,34),22,False,MUTED,'left')
-    c.line(70,165,W-70,165,'#8E8A82',2)
+    c.text(cycle,(80,96,1500,34),21,False,MUTED,'left')
+    c.line(70,164,W-70,164,BORDER,2)
 
 
 def stats(c,brief):
