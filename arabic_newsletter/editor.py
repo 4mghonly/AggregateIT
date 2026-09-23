@@ -402,7 +402,7 @@ Return JSON only:
 }
 All prose must be Modern Standard Arabic. Use only names/numbers already present in the validated events. developing_ar should explain what remains unsettled in a storyline; watch_ar should identify evidence that would indicate a meaningful change. Neither list should duplicate the lead-news wording.'''
 
-def build_analysis(events,state,morning=False):
+def build_analysis(events,state,morning=False,strict=False):
     """Create a bounded executive assessment from already-validated events."""
     if not events:
         return {'situation_ar':'لا تتوافر أحداث مؤهلة لبناء تقدير تحليلي في هذه الدورة.',
