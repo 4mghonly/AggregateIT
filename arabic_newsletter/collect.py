@@ -9,7 +9,7 @@ from urllib.parse import urljoin, urlsplit
 import feedparser
 import requests
 from bs4 import BeautifulSoup
-from .core import ROOT, canonical, clean, digest, preliminary_relevant, uae_secondary_relevant, write_json
+from .core import ROOT, REGIONS, canonical, clean, digest, preliminary_relevant, uae_secondary_relevant, write_json
 
 HEADERS={'User-Agent':'AggregateIT-Arabic/1.0 (public news briefing; RSS reader)'}
 SOCIAL_HOSTS={'t.me':'telegram','twitter.com':'x','x.com':'x','youtube.com':'youtube','www.youtube.com':'youtube',
@@ -219,20 +219,83 @@ def production_sources(sources,end,non_arab_retry=18,arab_retry=6):
     chosen=always+rotate(non_arab,non_arab_retry,7)+rotate(arab,arab_retry,5)
     return list({s['id']:s for s in chosen}.values())
 
-def collect(start,end,discover=False,registry=None):
-    sources=registry or json.loads((ROOT/'sources.json').read_text())
-    selected_sources=sources if discover else production_sources(sources,end)
+def _run_source_batch(sources,discover=False):
+    """Collect a bounded source batch and return items plus health reports."""
     items=[]; health=[]
+    if not sources: return items,health
     with ThreadPoolExecutor(max_workers=8) as pool:
-        futures={pool.submit(collect_source,s,discover):s for s in selected_sources}
+        futures={pool.submit(collect_source,s,discover):s for s in sources}
         for future in as_completed(futures):
             source=futures[future]
-            try: found,report=future.result()
+            try:
+                found,report=future.result()
             except Exception as e:
                 found=[]; report={'id':source['id'],'name':source['name'],'region':source['region'],
                   'country':source['country'],'language':source.get('language','unknown'),
                   'status':'failed','items':0,'errors':[type(e).__name__],'social':[]}
             items.extend(found); health.append(report)
+    return items,health
+
+def _same_region_substitutes(all_sources,attempted,weak_regions,max_per_region=6):
+    """Choose alternate publishers from the same region when live coverage is weak."""
+    attempted=set(attempted); chosen=[]
+    for region in weak_regions:
+        candidates=[s for s in all_sources if s.get('region')==region and s.get('id') not in attempted]
+        # Prefer previously healthy/active publishers, then enabled sources, then
+        # retired audit failures as recovery candidates. Mix languages where possible.
+        candidates.sort(key=lambda s:(
+            0 if s.get('verification_status')=='active' else 1,
+            0 if s.get('enabled',True) else 1,
+            str(s.get('language','')),
+            str(s.get('id',''))
+        ))
+        languages=set(); selected=[]
+        for s in candidates:
+            lang=s.get('language','unknown')
+            if lang not in languages or len(selected)>=3:
+                selected.append(s); languages.add(lang)
+            if len(selected)>=max_per_region: break
+        chosen.extend(selected)
+    return chosen
+
+def collect(start,end,discover=False,registry=None):
+    sources=registry or json.loads((ROOT/'sources.json').read_text())
+    selected_sources=sources if discover else production_sources(sources,end)
+
+    # Pass 1: normal production set.
+    items,health=_run_source_batch(selected_sources,discover)
+    attempted={s['id'] for s in selected_sources}
+
+    # Pass 2: same-region substitution. A region is weak when no selected source
+    # produced a healthy extraction result. This is intentionally based on actual
+    # extraction, not registry labels.
+    if not discover:
+        healthy_regions={h.get('region') for h in health
+                         if h.get('status') in ('active','social_only') and h.get('items',0)>0}
+        weak_regions=[r for r in REGIONS if r not in healthy_regions]
+        substitutes=_same_region_substitutes(sources,attempted,weak_regions)
+        if substitutes:
+            sub_items,sub_health=_run_source_batch(substitutes,False)
+            for report in sub_health:
+                report['substitute']=True
+                report['substitute_region']=report.get('region')
+            items.extend(sub_items); health.extend(sub_health)
+            attempted.update(s['id'] for s in substitutes)
+
+        # One final bounded recovery pass for regions still without active extraction.
+        healthy_regions={h.get('region') for h in health
+                         if h.get('status') in ('active','social_only') and h.get('items',0)>0}
+        remaining=[r for r in REGIONS if r not in healthy_regions]
+        if remaining:
+            more=_same_region_substitutes(sources,attempted,remaining,max_per_region=4)
+            if more:
+                more_items,more_health=_run_source_batch(more,False)
+                for report in more_health:
+                    report['substitute']=True
+                    report['substitute_region']=report.get('region')
+                    report['recovery_pass']=2
+                items.extend(more_items); health.extend(more_health)
+
     seen=set(); selected=[]
     for item in sorted(items,key=lambda x:x['published'] or 0,reverse=True):
         if not item['published'] or not start.timestamp() <= item['published'] < end.timestamp(): continue
@@ -241,6 +304,7 @@ def collect(start,end,discover=False,registry=None):
         key=digest(clean(item['title']).casefold())
         if item['id'] in seen or key in seen: continue
         seen.update([item['id'],key]); selected.append(item)
+
     # Round robin by region, then publisher; a prolific wire cannot consume the entire budget.
     buckets={}
     for item in selected: buckets.setdefault(item['region'],{}).setdefault(item['source_id'],[]).append(item)
@@ -253,7 +317,7 @@ def collect(start,end,discover=False,registry=None):
             if group: publishers[sid]=group
             if not publishers: del buckets[region]
             if len(balanced)>=112: break
-    return balanced,sorted(health,key=lambda x:x['id'])
+    return balanced,sorted(health,key=lambda x:(x.get('region',''),x.get('id','')))
 
 def audit(output):
     sources=json.loads((ROOT/'sources.json').read_text()); reports=[]; discovered=[]
