@@ -55,11 +55,11 @@ jobs:
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
           ENGINE_DELIVERY: "false"
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
           LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
-          LLM_FALLBACK_BASE_URL: ${{ vars.LLM_FALLBACK_BASE_URL }}
-          LLM_MODEL: ${{ vars.LLM_MODEL }}
-          LLM_FALLBACK_MODEL: ${{ vars.LLM_FALLBACK_MODEL }}
+          LLM_FALLBACK_BASE_URL: ${{ secrets.LLM_FALLBACK_BASE_URL }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          LLM_FALLBACK_MODEL: ${{ secrets.LLM_FALLBACK_MODEL }}
           LLM_AUTH_HEADER: ${{ vars.LLM_AUTH_HEADER }}
           LLM_AUTH_SCHEME: ${{ vars.LLM_AUTH_SCHEME }}
           LLM_CHAT_PATH: ${{ vars.LLM_CHAT_PATH }}
