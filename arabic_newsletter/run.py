@@ -21,6 +21,7 @@ def main():
     parser.add_argument('--probe-model',action='store_true'); parser.add_argument('--probe-discord',action='store_true')
     parser.add_argument('--long',action='store_true'); parser.add_argument('--send',action='store_true')
     parser.add_argument('--manual-now',action='store_true',help='Manual live assessment using the rolling six hours ending now; requires --send')
+    parser.add_argument('--manual-file',type=Path,help='Render/send a reviewed evidence-bound briefing JSON without calling the external LLM')
     parser.add_argument('--end',help='ISO timestamp for a replay; requires timezone')
     parser.add_argument('--output',type=Path,default=ROOT/'runtime'/'output')
     args=parser.parse_args()
@@ -28,7 +29,8 @@ def main():
     if args.end and args.send: parser.error('Historical replay cannot be delivered')
     if args.preflight and args.send: parser.error('--preflight never publishes; use --probe-discord to test routing')
     if args.manual_now and not args.send: parser.error('--manual-now requires --send')
-    if args.manual_now and (args.sample or args.audit or args.preflight or args.health_only or args.end): parser.error('--manual-now is only for a current manual live edition')
+    if args.manual_now and (args.sample or args.audit or args.preflight or args.health_only or args.end or args.manual_file): parser.error('--manual-now is only for a current manual live edition')
+    if args.manual_file and (args.sample or args.audit or args.preflight or args.health_only or args.end): parser.error('--manual-file cannot be combined with another mode')
     state_dir=Path(os.getenv('ARABIC_STATE_DIR',str(ROOT/'runtime'/'state')))
     state_dir.mkdir(parents=True,exist_ok=True)
     with (state_dir/'run.lock').open('w') as lock:
@@ -84,6 +86,33 @@ def main():
                 brief=fixture(args.long)
                 brief['morning']=False
                 brief['analysis']=brief.get('analysis') or {}
+
+            elif args.manual_file:
+                brief=json.loads(args.manual_file.read_text(encoding='utf-8'))
+                if brief.get('sample') or not brief.get('events'):
+                    raise RuntimeError('Manual briefing must be real and contain events')
+                if not brief.get('window_end') or not brief.get('window_start'):
+                    raise RuntimeError('Manual briefing requires an explicit evidence window')
+                source_health=brief.get('source_health') or {}
+                unresolved=source_health.get('unresolved_regions',source_health.get('unhealthy_regions',[]))
+                if unresolved:
+                    raise RuntimeError('Manual briefing source-health gate failed: '+','.join(unresolved))
+                llm_health=brief.get('llm_health') or {}
+                if llm_health.get('status')!='ok' or not llm_health.get('all_event_text_arabic') or not llm_health.get('analysis_present'):
+                    raise RuntimeError('Manual briefing LLM/translation health gate failed')
+                translated=[' '.join(str(e.get(k,'')) for k in ('title_ar','summary_ar','assessment_ar','watch_ar')) for e in brief['events']]
+                if not all(is_arabic(t) for t in translated):
+                    raise RuntimeError('Manual briefing contains non-Arabic event prose')
+                for e in brief['events']:
+                    if not e.get('sources') or any(not s.get('url') for s in e.get('sources',[])):
+                        raise RuntimeError('Manual briefing contains an event without source attribution')
+                edition=brief['window_end']
+                if args.send:
+                    webhook_info()
+                    prior=state.delivery(edition)
+                    if prior and prior[0]=='sent': print('Manual edition already delivered'); return
+                    if prior and prior[0] in ('sending','uncertain'):
+                        raise RuntimeError('Previous manual delivery is ambiguous and requires reconciliation')
 
             else:
                 if args.manual_now:
