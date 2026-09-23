@@ -13,7 +13,7 @@ from arabic_newsletter.core import UAE, REGIONS
 W,H=3840,2160
 # Restrained dark command-brief palette. Panels are deliberately close in tone;
 # accent colors indicate function rather than decoration.
-BG='#08141B'; PAPER='#101D25'; PANEL_ALT='#13232C'; INK='#F1F4F2'; MUTED='#AAB5B6'; BORDER='#344851'
+BG='#08141B'; PAPER='#101D25'; PANEL_ALT='#13232C'; INK='#FBFDFC'; MUTED='#C6D0D1'; BORDER='#40545D'
 COMMAND='#D6DCDD'; OLIVE='#68A77D'; SAND='#C6A557'; STEEL='#6AA4C5'
 ALERT='#D5646B'; AMBER='#C99B55'; TEAL='#62A29C'; BLUE='#66A8D0'; PURPLE='#9382A3'
 PALE_RED='#332126'; PALE_AMBER='#342D1F'; PALE_GREEN='#173127'; PALE_BLUE='#172C39'
@@ -67,9 +67,11 @@ class Canvas:
         if custom:
             root=Path(custom)
             candidates.append(root/('NotoSansArabic-Bold.ttf' if bold else 'NotoSansArabic-Regular.ttf'))
+        # Prefer Noto Sans Arabic for dark-screen readability and Arabic shaping.
+        # DejaVu remains a compatibility fallback only.
         candidates += [
-            Path('/usr/share/fonts/truetype/dejavu')/('DejaVuSans-Bold.ttf' if bold else 'DejaVuSans.ttf'),
-            Path('/usr/share/fonts/truetype/noto')/('NotoSansArabic-Bold.ttf' if bold else 'NotoSansArabic-Regular.ttf')]
+            Path('/usr/share/fonts/truetype/noto')/('NotoSansArabic-Bold.ttf' if bold else 'NotoSansArabic-Regular.ttf'),
+            Path('/usr/share/fonts/truetype/dejavu')/('DejaVuSans-Bold.ttf' if bold else 'DejaVuSans.ttf')]
         for p in candidates:
             if p.exists(): return ImageFont.truetype(str(p),size,layout_engine=ImageFont.Layout.RAQM)
         raise RuntimeError('Arabic font not found')
@@ -95,7 +97,7 @@ class Canvas:
         if cur: lines.append(cur)
         return lines
 
-    def text(self,text,box,size=32,bold=False,color=INK,align='right',min_size=19,line_ratio=1.35):
+    def text(self,text,box,size=34,bold=False,color=INK,align='right',min_size=21,line_ratio=1.30):
         x,y,w,h=map(int,box)
         text=sanitize_text(text)
         if not text or w<=0 or h<=0: return
@@ -126,7 +128,9 @@ class Canvas:
         self.d.text((cx,cy),sanitize_text(text),font=f,fill=color,anchor='mm')
 
     def save(self,path):
-        self.image.save(path,format='PNG',compress_level=2,dpi=(144,144))
+        # Keep true 4K pixels and lossless PNG quality. Higher compression reduces
+        # Discord upload size without changing image detail or invoking the LLM.
+        self.image.save(path,format='PNG',compress_level=6,optimize=True,dpi=(192,192))
 
 def masthead(c,brief,page):
     end=datetime.fromisoformat(brief['window_end']).astimezone(UAE)
@@ -136,12 +140,12 @@ def masthead(c,brief,page):
       2:'تقدير تنفيذي | قصص قيد التطور، مؤشرات التحول، والتغطية الإقليمية',
       3:'المشهد الشامل | الأقاليم، الفاعلون المسلحون، النزاعات والتوترات البحرية',
     }
-    c.text('أغريغيت | الموجز الجيوسياسي والأمني',(2180,30,1500,60),48,True,INK)
-    c.text(subtitles.get(page,'دليل موجز لصانع القرار'),(2180,96,1500,40),23,False,MUTED)
+    c.text('أغريغيت | الموجز الجيوسياسي والأمني',(2180,24,1500,68),54,True,INK,min_size=46,line_ratio=1.18)
+    c.text(subtitles.get(page,'دليل موجز لصانع القرار'),(2180,98,1500,44),28,True,MUTED,min_size=24,line_ratio=1.18)
     dt=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year}، {end.strftime('%H:%M')} بتوقيت الإمارات"
-    c.text(dt,(80,38,1500,44),27,True,INK,'left')
+    c.text(dt,(80,34,1500,48),31,True,INK,'left',min_size=27,line_ratio=1.18)
     cycle='إحاطة صباحية موسعة، تغطية ليلية 12 ساعة' if morning else 'إحاطة دورية، نافذة 6 ساعات'
-    c.text(cycle,(80,96,1500,34),21,False,MUTED,'left')
+    c.text(cycle,(80,96,1500,40),25,True,MUTED,'left',min_size=22,line_ratio=1.18)
     c.line(70,164,W-70,164,BORDER,2)
 
 
@@ -160,18 +164,18 @@ def stats(c,brief):
         x=margin+i*(cw+gap)
         c.rounded((x,y,cw,h),PAPER,BORDER,10,1)
         c.d.rectangle((x+cw-7,y+8,x+cw-2,y+h-8),fill=color)
-        c.text(label,(x+24,y+18,cw-48,30),20,False,MUTED,'center')
-        c.text(str(val),(x+24,y+51,cw-48,42),30,True,INK,'center')
+        c.text(label,(x+24,y+13,cw-48,34),23,True,MUTED,'center',min_size=21,line_ratio=1.15)
+        c.text(str(val),(x+24,y+50,cw-48,48),35,True,INK,'center',min_size=31,line_ratio=1.15)
 
 
 def panel(c,box,title,color=COMMAND,subtitle=None):
     x,y,w,h=map(int,box)
     c.rounded(box,PAPER,BORDER,10,1)
-    c.text(title,(x+22,y+14,w-44,44),31,True,color)
+    c.text(title,(x+22,y+10,w-44,50),36,True,color,min_size=31,line_ratio=1.15)
     c.line(x+18,y+66,x+w-18,y+66,color,2)
     header=82
     if subtitle:
-        c.text(subtitle,(x+22,y+76,w-44,32),18,False,MUTED)
+        c.text(subtitle,(x+22,y+74,w-44,38),22,True,MUTED,min_size=19,line_ratio=1.18)
         header=118
     return x+24,y+header,w-48,h-header-24
 
@@ -204,8 +208,8 @@ def row_event(c,e,i,box):
     c.rounded((x+w-76,y+17,56,56),pale,None,10,0); c.center(str(i),x+w-48,y+45,24,True,col)
     c.rounded((x+4,y+17,180,44),REGION_COLORS.get(e.get('region'),STEEL),None,8,0)
     c.text(REGIONS.get(e.get('region'),'إقليمي'),(x+12,y+23,164,30),20,True,'#FFFFFF','center')
-    c.text(compact(e.get('title_ar',''),105),(x+210,y+8,w-500,62),34,True,INK)
-    c.text(compact(e.get('summary_ar',''),175),(x+210,y+74,w-250,h-88),27,False,INK)
+    c.text(compact(e.get('title_ar',''),92),(x+210,y+6,w-500,70),39,True,INK,min_size=29,line_ratio=1.20)
+    c.text(compact(e.get('summary_ar',''),145),(x+210,y+80,w-250,h-94),31,False,INK,min_size=25,line_ratio=1.30)
     c.rounded((x+w-230,y+87,130,38),pale,None,8,0); c.text(label,(x+w-222,y+92,114,27),18,True,col,'center')
 
 def changes(brief,limit=4):
