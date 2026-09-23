@@ -11,7 +11,7 @@ import requests
 from PIL import Image
 from .core import State, canonical, clean, edition_window, live_window, scheduled_window, preliminary_relevant, uae_secondary_relevant, REGIONS
 from .collect import entry_time, social_links, article_path_candidate, source_relevant, production_sources
-from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope, _review_envelope, _bounded_articles
+from .editor import Client, validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope, _review_envelope, _bounded_articles
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
 from arabic_layout.render_pages import page2_region_plan, layout_plan
@@ -103,6 +103,38 @@ class EditorialTests(unittest.TestCase):
           assessment_ar='لا تكفي المعلومات لتحديد تداعيات الهجوم.',watch_ar='متابعة تحديثات المصدر.',severity='high',source_ids=['a'],
           evidence=[{'id':'a','quote':'Officials report a border attack with 12 injuries.'}])
     def validate(self,event=None): return validate_events({'events':[event or self.event]},[self.article])
+    def test_primary_and_fallback_routes_are_independent(self):
+        with tempfile.TemporaryDirectory() as d:
+            state=State(d)
+            primary_env={
+                'ARABIC_LLM_API_KEY':'primary-key',
+                'ARABIC_LLM_BASE_URL':'https://primary.example/v1',
+                'ARABIC_LLM_MODEL':'primary-model',
+                'ARABIC_LLM_FALLBACK_API_KEY':'',
+                'ARABIC_LLM_FALLBACK_BASE_URL':'',
+                'ARABIC_LLM_FALLBACK_MODEL':'',
+                'ARABIC_LLM_FALLBACK_MODELS':'fallback-alt'
+            }
+            with patch.dict(os.environ,primary_env,clear=True):
+                client=Client(state)
+                self.assertEqual(client._endpoint()[:3],('https://primary.example/v1','primary-key','primary-model'))
+                self.assertFalse(client.fallback_base)
+                self.assertFalse(client.fallback_model)
+                self.assertNotIn('fallback-alt',client.primary_models)
+            fallback_env={
+                'ARABIC_LLM_API_KEY':'',
+                'ARABIC_LLM_BASE_URL':'',
+                'ARABIC_LLM_MODEL':'',
+                'ARABIC_LLM_FALLBACK_API_KEY':'fallback-key',
+                'ARABIC_LLM_FALLBACK_BASE_URL':'https://fallback.example/v1',
+                'ARABIC_LLM_FALLBACK_MODEL':'fallback-model'
+            }
+            with patch.dict(os.environ,fallback_env,clear=True):
+                client=Client(state)
+                self.assertTrue(client.force_fallback_credential)
+                self.assertEqual(client._endpoint()[:3],('https://fallback.example/v1','fallback-key','fallback-model'))
+            state.close()
+
     def test_message_json_accepts_fences_and_text_blocks(self):
         self.assertEqual(_message_json({'content':'\x60\x60\x60json\n{"ok":true}\n\x60\x60\x60'}),{'ok':True})
         self.assertEqual(_message_json({'content':[{'type':'text','text':'prefix {"ok": true} suffix'}]}),{'ok':True})
