@@ -139,6 +139,30 @@ class EditorialTests(unittest.TestCase):
                 self.assertEqual(client._endpoint()[:3],('https://fallback.example/v1','fallback-key','fallback-model'))
             state.close()
 
+    def test_invalid_primary_json_switches_to_fallback_route(self):
+        with tempfile.TemporaryDirectory() as d:
+            state=State(d)
+            env={
+                'ARABIC_LLM_API_KEY':'primary-key',
+                'ARABIC_LLM_BASE_URL':'https://primary.example/v1',
+                'ARABIC_LLM_MODEL':'primary-model',
+                'ARABIC_LLM_FALLBACK_API_KEY':'fallback-key',
+                'ARABIC_LLM_FALLBACK_BASE_URL':'https://fallback.example/v1',
+                'ARABIC_LLM_FALLBACK_MODEL':'fallback-model'
+            }
+            bad=Mock(status_code=200)
+            bad.json.return_value={'choices':[{'finish_reason':'stop','message':{'content':'not-json'}}],'usage':{}}
+            good=Mock(status_code=200)
+            good.json.return_value={'choices':[{'finish_reason':'stop','message':{'content':'{"translation":"مرحبا"}'}}],'usage':{},'model':'fallback-model'}
+            with patch.dict(os.environ,env,clear=True):
+                client=Client(state)
+                with patch('arabic_newsletter.editor.requests.post',side_effect=[bad,bad,good]) as post:
+                    result=client.chat('Return JSON only.',{'text':'hello'},80,use_cache=False)
+                    self.assertEqual(result.get('translation'),'مرحبا')
+                    self.assertEqual(post.call_count,3)
+                    self.assertTrue(client.force_fallback_credential)
+            state.close()
+
     def test_message_json_accepts_fences_and_text_blocks(self):
         self.assertEqual(_message_json({'content':'\x60\x60\x60json\n{"ok":true}\n\x60\x60\x60'}),{'ok':True})
         self.assertEqual(_message_json({'content':[{'type':'text','text':'prefix {"ok": true} suffix'}]}),{'ok':True})
