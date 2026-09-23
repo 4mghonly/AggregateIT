@@ -93,31 +93,56 @@ class Client:
         return self.fallback_base,self.fallback_key,self.fallback_model
     def chat(self,system,data,max_tokens=9000,temperature=0.18,use_cache=True):
         messages=[{'role':'system','content':system},{'role':'user','content':json.dumps(data,ensure_ascii=False)}]
-        cache_key='llm:v3:'+digest(self.base+self.model+json.dumps(messages,ensure_ascii=False,sort_keys=True))
+        base,key,model=self._endpoint()
+        cache_key='llm:v4:'+digest(base+model+json.dumps(messages,ensure_ascii=False,sort_keys=True))
         if use_cache:
             cached=self.state.get(cache_key)
             if cached is not None: return cached
-        payload={'model':self.model,'messages':messages,'temperature':temperature,'max_tokens':max_tokens,
+        payload={'model':model,'messages':messages,'temperature':temperature,'max_tokens':max_tokens,
           'response_format':{'type':'json_object'}}
-        host=urlsplit(self.base).hostname or ''
-        if host.endswith(('aliyuncs.com','dashscope.com')): payload['enable_thinking']=False
-        features_key='api_features:'+digest(self.base+self.model)
+        features_key='api_features:'+digest(base+model)
         for field in self.state.get(features_key) or []: payload.pop(field,None)
+
         for attempt in range(2):
             if self.calls>=8: raise EditorialError('Eight-request per-run model budget exhausted')
             self.calls+=1
+            base,key,model=self._endpoint()
+            payload['model']=model
+            host=urlsplit(base).hostname or ''
+            if host.endswith(('aliyuncs.com','dashscope.com')): payload.setdefault('enable_thinking',False)
+            else: payload.pop('enable_thinking',None)
             try:
-                r=requests.post(self.base+'/chat/completions',headers={'Authorization':'Bearer '+self.key},json=payload,timeout=(10,120))
+                r=requests.post(base+'/chat/completions',
+                  headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
             except requests.RequestException:
                 if attempt==0: time.sleep(2); continue
                 raise EditorialError('Model network failure') from None
-            if r.status_code in (429,500,502,503,504) and attempt==0: time.sleep(2); continue
+
+            if self._quota_exhausted(r) and self.fallback_key and not self.force_fallback:
+                print('Arabic primary LLM quota exhausted; switching to configured fallback credential/model',flush=True)
+                self.force_fallback=True
+                base,key,model=self._endpoint()
+                payload['model']=model
+                host=urlsplit(base).hostname or ''
+                if host.endswith(('aliyuncs.com','dashscope.com')): payload['enable_thinking']=False
+                else: payload.pop('enable_thinking',None)
+                try:
+                    r=requests.post(base+'/chat/completions',
+                      headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
+                except requests.RequestException:
+                    raise EditorialError('Fallback model network failure') from None
+
+            if r.status_code in (429,500,502,503,504) and attempt==0:
+                time.sleep(2); continue
             if r.status_code!=200:
                 try:
                     err=r.json().get('error',{})
                     detail=str(err.get('message') or err.get('code') or 'request rejected') if isinstance(err,dict) else str(err)
-                except ValueError: detail='non-JSON error response'
-                detail=detail.replace(self.key,'[redacted]').replace(self.base,'[endpoint]')
+                except ValueError:
+                    detail='non-JSON error response'
+                if self.key: detail=detail.replace(self.key,'[redacted]')
+                if self.fallback_key: detail=detail.replace(self.fallback_key,'[redacted]')
+                detail=detail.replace(self.base,'[endpoint]').replace(self.fallback_base,'[endpoint]')
                 detail=re.sub(r'https?://\S+','[url]',detail)[:350]
                 if r.status_code==400 and attempt==0 and any(k in detail.lower() for k in ('response_format','enable_thinking')):
                     disabled=self.state.get(features_key) or []
@@ -126,6 +151,7 @@ class Client:
                     self.state.put(features_key,list(set(disabled)))
                     continue
                 raise EditorialError(f'Model HTTP {r.status_code}: {detail}')
+
             try:
                 response=r.json()
                 choice=response['choices'][0]
