@@ -76,6 +76,7 @@ class Client:
         self.fallback_base=(os.getenv('ARABIC_LLM_FALLBACK_BASE_URL') or os.getenv('QWEN_FALLBACK_BASE_URL') or self.base).rstrip('/')
         self.fallback_model=(os.getenv('ARABIC_LLM_FALLBACK_MODEL') or os.getenv('QWEN_FALLBACK_MODEL') or self.model or '').strip()
         self.force_fallback=False
+        self.force_fallback_credential=False
         if not self.key and not self.fallback_key: raise EditorialError('Missing Arabic/Qwen LLM credentials')
         if not self.model and not self.fallback_model: raise EditorialError('Missing Arabic/Qwen LLM model')
         if urlsplit(self.base).scheme!='https' or urlsplit(self.fallback_base).scheme!='https': raise EditorialError('LLM endpoint must use HTTPS')
@@ -86,8 +87,10 @@ class Client:
         return response.status_code in (402,403) and any(k in value for k in ('quota','fund','billing','balance','credit'))
 
     def _endpoint(self):
-        if self.force_fallback and self.fallback_key:
+        if self.force_fallback_credential and self.fallback_key:
             return self.fallback_base,self.fallback_key,self.fallback_model
+        if self.force_fallback and self.key:
+            return self.base,self.key,self.fallback_model
         if self.key:
             return self.base,self.key,self.model
         return self.fallback_base,self.fallback_key,self.fallback_model
@@ -118,8 +121,8 @@ class Client:
                 if attempt==0: time.sleep(2); continue
                 raise EditorialError('Model network failure') from None
 
-            if self._quota_exhausted(r) and self.fallback_key and not self.force_fallback:
-                print('Arabic primary LLM quota exhausted; switching to configured fallback credential/model',flush=True)
+            if self._quota_exhausted(r) and not self.force_fallback and self.fallback_model and self.fallback_model!=self.model:
+                print('Arabic primary model quota exhausted; trying fallback model on the same credential',flush=True)
                 self.force_fallback=True
                 base,key,model=self._endpoint()
                 payload['model']=model
@@ -131,6 +134,20 @@ class Client:
                       headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
                 except requests.RequestException:
                     raise EditorialError('Fallback model network failure') from None
+
+            if self._quota_exhausted(r) and self.fallback_key and not self.force_fallback_credential:
+                print('Arabic model quota exhausted; switching to configured fallback credential',flush=True)
+                self.force_fallback_credential=True
+                base,key,model=self._endpoint()
+                payload['model']=model
+                host=urlsplit(base).hostname or ''
+                if host.endswith(('aliyuncs.com','dashscope.com')): payload['enable_thinking']=False
+                else: payload.pop('enable_thinking',None)
+                try:
+                    r=requests.post(base+'/chat/completions',
+                      headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
+                except requests.RequestException:
+                    raise EditorialError('Fallback credential network failure') from None
 
             if r.status_code in (429,500,502,503,504) and attempt==0:
                 time.sleep(2); continue
