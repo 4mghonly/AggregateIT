@@ -14,7 +14,7 @@ from .collect import entry_time, social_links, article_path_candidate, source_re
 from .editor import validate_events, numbers, quote_supported, synthesize, EditorialError, _message_json, _event_envelope, _review_envelope, _bounded_articles
 from .delivery import send, webhook_url, DeliveryError
 from .render import render
-from arabic_layout.render_pages import page2_region_plan
+from arabic_layout.render_pages import page2_region_plan, layout_plan
 from .sample import fixture
 from bs4 import BeautifulSoup
 
@@ -256,10 +256,24 @@ class RenderTests(unittest.TestCase):
             normal=fixture(); empty=copy.deepcopy(normal); empty['events']=[]; empty['health']=[]
             for i,brief in enumerate([normal,empty,fixture(True)]):
                 paths,clipped=render(brief,Path(d)/str(i))
-                self.assertEqual(len(paths),3)
+                self.assertEqual(len(paths),2)
                 if i==2: self.assertLessEqual(clipped,90)
                 for path in paths:
                     with Image.open(path) as image: self.assertEqual(image.size,(3840,2160))
+    def test_layout_slots_never_repeat_news_events(self):
+        brief=fixture()
+        leads,secondary,uae=layout_plan(brief)
+        key=lambda e:e.get('fingerprint') or e.get('title_ar')
+        lead_keys={key(e) for e in leads}
+        secondary_keys={key(e) for e in secondary}
+        uae_keys={key(e) for e in uae}
+        self.assertTrue(lead_keys.isdisjoint(secondary_keys))
+        self.assertTrue(lead_keys.isdisjoint(uae_keys))
+        self.assertTrue(secondary_keys.isdisjoint(uae_keys))
+        self.assertLessEqual(len(leads),3)
+        self.assertLessEqual(len(secondary),6)
+        self.assertLessEqual(len(uae),4)
+
     def test_page2_uses_only_active_region_cards_and_preserves_full_monitoring_list(self):
         brief=fixture()
         limited=copy.deepcopy(brief)
