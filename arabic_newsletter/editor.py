@@ -145,11 +145,17 @@ class Client:
         if header: headers[header]=(f'{scheme} {key}'.strip() if scheme else key)
         return headers
 
+    @staticmethod
+    def _endpoint_url(base,path):
+        base=(base or '').rstrip('/')
+        path='/'+(path or '').lstrip('/')
+        return base if base.endswith(path) else base+path
+
     def _send(self,base,key,payload,fallback):
         body=dict(payload)
         body.update(self.fallback_request_options if fallback else self.request_options)
         path=self.fallback_chat_path if fallback else self.chat_path
-        return requests.post(base+path,headers=self._headers(key,fallback),json=body,timeout=(10,120))
+        return requests.post(self._endpoint_url(base,path),headers=self._headers(key,fallback),json=body,timeout=(10,120))
 
     def chat(self,system,data,max_tokens=9000,temperature=0.18,use_cache=True):
         messages=[{'role':'system','content':system},{'role':'user','content':json.dumps(data,ensure_ascii=False)}]
