@@ -41,15 +41,13 @@ def main():
             if args.preflight:
                 client=Client(state)
                 if args.probe_model:
-                    probe=client.chat(
-                        'Return JSON only. Translate the supplied English sentence into Modern Standard Arabic.',
-                        {'text':'Regional security coordination remains under review.',
-                         'schema':{'translation':'Arabic text only'}},
-                        600,use_cache=False)
-                    translation=str(probe.get('translation','')) if isinstance(probe,dict) else ''
+                    translation=client.probe_text(
+                        'Translate this sentence into Modern Standard Arabic only, with no explanation: '
+                        'Regional security coordination remains under review.'
+                    )
                     if not is_arabic(translation):
                         raise RuntimeError('Arabic LLM translation probe failed: Arabic output not detected')
-                    print('Arabic model extraction/translation live probe passed')
+                    print('Arabic model connectivity/translation live probe passed')
                 if args.probe_discord: webhook_info()
                 print('Arabic configuration preflight passed' if args.probe_model else 'Arabic configuration present; API authentication not tested'); return
             if args.audit: audit(args.output); return
