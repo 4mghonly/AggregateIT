@@ -68,6 +68,7 @@ jobs:
           QWEN_FALLBACK_API_KEY: ${{ secrets.QWEN_FALLBACK_API_KEY }}
           QWEN_FALLBACK_BASE_URL: ${{ secrets.QWEN_FALLBACK_BASE_URL }}
           QWEN_MODEL: qwen3.8-omni-flash
+          QWEN_FALLBACK_MODEL: qwen3.8-flash
           QWEN_MAX_CALLS: "3"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python slide.py
