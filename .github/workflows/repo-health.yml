@@ -32,8 +32,8 @@ jobs:
         run: python -m py_compile *.py
       - name: Run core regression suite
         env:
-          QWEN_API_KEY: ""
-          QWEN_FALLBACK_API_KEY: ""
+          LLM_API_KEY: ""
+          LLM_FALLBACK_API_KEY: ""
         run: python tests.py
       - name: Run Gazette layout tests
         run: python -m unittest -v test_gazette_layout

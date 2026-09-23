@@ -63,13 +63,23 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID }}
-          QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
-          QWEN_BASE_URL: ${{ secrets.QWEN_BASE_URL }}
-          QWEN_FALLBACK_API_KEY: ${{ secrets.QWEN_FALLBACK_API_KEY }}
-          QWEN_FALLBACK_BASE_URL: ${{ secrets.QWEN_FALLBACK_BASE_URL }}
-          QWEN_MODEL: qwen3.8-omni-flash
-          QWEN_FALLBACK_MODEL: qwen3.8-flash
-          QWEN_MAX_CALLS: "3"
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY || secrets.QWEN_API_KEY }}
+          LLM_BASE_URL: ${{ vars.LLM_BASE_URL || secrets.QWEN_BASE_URL }}
+          LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY || secrets.QWEN_FALLBACK_API_KEY }}
+          LLM_FALLBACK_BASE_URL: ${{ vars.LLM_FALLBACK_BASE_URL || secrets.QWEN_FALLBACK_BASE_URL }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+          LLM_FALLBACK_MODEL: ${{ vars.LLM_FALLBACK_MODEL }}
+          LLM_AUTH_HEADER: ${{ vars.LLM_AUTH_HEADER }}
+          LLM_AUTH_SCHEME: ${{ vars.LLM_AUTH_SCHEME }}
+          LLM_CHAT_PATH: ${{ vars.LLM_CHAT_PATH }}
+          LLM_REQUEST_OPTIONS_JSON: ${{ vars.LLM_REQUEST_OPTIONS_JSON }}
+          LLM_EXTRA_HEADERS_JSON: ${{ vars.LLM_EXTRA_HEADERS_JSON }}
+          LLM_FALLBACK_AUTH_HEADER: ${{ vars.LLM_FALLBACK_AUTH_HEADER }}
+          LLM_FALLBACK_AUTH_SCHEME: ${{ vars.LLM_FALLBACK_AUTH_SCHEME }}
+          LLM_FALLBACK_CHAT_PATH: ${{ vars.LLM_FALLBACK_CHAT_PATH }}
+          LLM_FALLBACK_REQUEST_OPTIONS_JSON: ${{ vars.LLM_FALLBACK_REQUEST_OPTIONS_JSON }}
+          LLM_FALLBACK_EXTRA_HEADERS_JSON: ${{ vars.LLM_FALLBACK_EXTRA_HEADERS_JSON }}
+          LLM_MAX_CALLS: "3"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python slide.py
       - name: Upload Gazette pages
