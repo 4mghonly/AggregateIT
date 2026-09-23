@@ -383,7 +383,7 @@ def synthesize(articles,state):
     raise EditorialError('Editorial review rejected all events after one correction pass')
 
 
-ANALYSIS_SYSTEM='''You are producing the assessment page of a professional Arabic security and military briefing. The events supplied to you have already passed deterministic evidence checks. You may synthesize patterns across those validated events and make cautious analytical inferences, but you MUST distinguish inference from fact with language such as "يشير", "يرجح", "قد", "يحتمل", or "من المرجح". Do not invent events, dates, quantities, capabilities, intentions, actors, locations or causal links. Do not infer health, competence or motives of political figures. Do not rank political actors or recommend political choices. Do not add finance or market commentary. Avoid slogans and sensational language.
+ANALYSIS_SYSTEM='''You are producing the assessment page of a professional Arabic geopolitical and security policy brief. The events supplied to you have already passed deterministic evidence checks. You may synthesize patterns across those validated events and make cautious analytical inferences, but you MUST distinguish inference from fact with language such as "يشير", "يرجح", "قد", "يحتمل", or "من المرجح". Do not invent events, dates, quantities, capabilities, intentions, actors, locations or causal links. Do not infer health, competence or motives of political figures. Do not rank political actors or recommend political choices. Do not add finance or market commentary. Avoid slogans and sensational language.
 
 The product should read like a concise daily guide for a policy maker, not a second version of the news page. Do not repeat event titles or restate the same summary sentences. Each analytical section must have a different function. Focus on:
 1) an overall executive assessment of the most consequential pattern;
@@ -463,6 +463,9 @@ def build_analysis(events,state,morning=False):
     if not out['situation_ar']:
         seeds=[e.get('assessment_ar') or e.get('summary_ar') for e in events if e.get('assessment_ar') or e.get('summary_ar')]
         out['situation_ar']=' '.join(clean(x) for x in seeds[:4])[:limits['situation_ar']]
+    if not out['implications_ar']:
+        vals=[clean(e.get('assessment_ar','')) for e in events if e.get('assessment_ar')]
+        out['implications_ar']=' '.join(vals[:4])[:limits['implications_ar']]
     if not out['developing_ar']:
         developing=[]
         for e in events:
