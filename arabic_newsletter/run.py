@@ -44,7 +44,7 @@ def main():
                         'Return JSON only. Translate the supplied English sentence into Modern Standard Arabic.',
                         {'text':'Regional security coordination remains under review.',
                          'schema':{'translation':'Arabic text only'}},
-                        80,use_cache=False)
+                        600,use_cache=False)
                     translation=str(probe.get('translation','')) if isinstance(probe,dict) else ''
                     if not is_arabic(translation):
                         raise RuntimeError('Arabic LLM translation probe failed: Arabic output not detected')
