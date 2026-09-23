@@ -6,9 +6,9 @@ import os
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from .core import ROOT, State, UAE, edition_window, live_window, write_json
+from .core import ROOT, REGIONS, State, UAE, edition_window, live_window, write_json
 from .collect import audit, collect
-from .editor import Client, synthesize, build_analysis
+from .editor import Client, synthesize, build_analysis, is_arabic
 from .delivery import webhook_info, send
 from .render import render, references
 from .sample import fixture
@@ -38,8 +38,15 @@ def main():
             if args.preflight:
                 client=Client(state)
                 if args.probe_model:
-                    client.chat('Return JSON only.',{'request':'Return {"ok":true}'},30,use_cache=False)
-                    print('Arabic model API live probe passed')
+                    probe=client.chat(
+                        'Return JSON only. Translate the supplied English sentence into Modern Standard Arabic.',
+                        {'text':'Regional security coordination remains under review.',
+                         'schema':{'translation':'Arabic text only'}},
+                        80,use_cache=False)
+                    translation=str(probe.get('translation','')) if isinstance(probe,dict) else ''
+                    if not is_arabic(translation):
+                        raise RuntimeError('Arabic LLM translation probe failed: Arabic output not detected')
+                    print('Arabic model extraction/translation live probe passed')
                 if args.probe_discord: webhook_info()
                 print('Arabic configuration preflight passed' if args.probe_model else 'Arabic configuration present; API authentication not tested'); return
             if args.audit: audit(args.output); return
@@ -76,7 +83,26 @@ def main():
                 args.output.mkdir(parents=True,exist_ok=True)
                 write_json(args.output/'collection_health.json',health)
                 write_json(args.output/'source_evidence.json',articles)
-                if not any(r['status'] in ('active','social_only') for r in health): raise RuntimeError('All source collection failed; publication blocked')
+                healthy_by_region={}
+                for region in REGIONS:
+                    healthy_by_region[region]=[
+                        h for h in health
+                        if h.get('region')==region
+                        and h.get('status') in ('active','social_only')
+                        and int(h.get('items') or 0)>0
+                    ]
+                health_summary={
+                  'healthy_regions':sorted(r for r,v in healthy_by_region.items() if v),
+                  'unhealthy_regions':sorted(r for r,v in healthy_by_region.items() if not v),
+                  'active_extractors_by_region':{r:len(v) for r,v in healthy_by_region.items()},
+                  'substitutes_used':sum(bool(h.get('substitute')) for h in health),
+                  'articles_in_window':len(articles),
+                }
+                write_json(args.output/'source_health_summary.json',health_summary)
+                if not any(r['status'] in ('active','social_only') for r in health):
+                    raise RuntimeError('All source collection failed; publication blocked')
+                if health_summary['unhealthy_regions']:
+                    raise RuntimeError('Regional source-health gate failed after same-region substitution: '+','.join(health_summary['unhealthy_regions']))
                 try:
                     events,rejected=synthesize(articles,state)
                 finally:
@@ -91,6 +117,9 @@ def main():
                   'event_source_languages':dict(Counter(s.get('language','unknown') for s in event_sources.values())),
                   'event_source_count':len(event_sources),
                   'non_arabic_event_sources':sum(s.get('language')!='ar' for s in event_sources.values()),
+                  'healthy_regions':health_summary['healthy_regions'],
+                  'active_extractors_by_region':health_summary['active_extractors_by_region'],
+                  'substitutes_used':health_summary['substitutes_used'],
                 }
                 brief=dict(sample=False,window_start=collection_start.isoformat(),window_end=end.isoformat(),events=events,
                   input_count=len(articles),health=health,rejected=rejected,analysis=analysis,morning=morning,
@@ -104,7 +133,8 @@ def main():
             if args.send:
                 message_id=send(state,edition,paths)
                 if brief['events']:
-                    state.put('previous_events',[{'title_ar':e['title_ar'],'summary_ar':e['summary_ar'],'source_ids':e['source_ids']} for e in brief['events']])
+                    keep=('region','topic','title_ar','summary_ar','assessment_ar','watch_ar','severity','fingerprint','source_ids')
+                    state.put('previous_events',[{k:e.get(k) for k in keep} for e in brief['events']])
                 print('Arabic edition delivered; message ID:',message_id)
             else: print('Arabic slides rendered; no delivery requested')
         finally: state.close()
