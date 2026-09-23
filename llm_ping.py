@@ -7,9 +7,12 @@ def shape(label, base, model, key, fallback=False):
     raw=(base or "").strip().rstrip("/")
     parsed=urlsplit(raw) if raw else None
     path=(parsed.path if parsed else "").rstrip("/")
-    openrouter_base=(raw == "https://openrouter.ai/api/v1")
-    openrouter_model=((model or "").strip() == "openrouter/free")
-    openrouter_key=(key or "").startswith("sk-or-v1-")
+    host=(parsed.hostname or "").lower() if parsed else ""
+    chat_path=llm.FALLBACK_CHAT_PATH if fallback else llm.CHAT_PATH
+    effective=llm._endpoint_url(raw,chat_path) if raw else ""
+    effective_parsed=urlsplit(effective) if effective else None
+    effective_path=(effective_parsed.path if effective_parsed else "").rstrip("/")
+    api_root=effective[:-len(chat_path)] if effective and effective.endswith(chat_path) else raw
     print(
         f"{label} CONFIG:"
         f" complete={llm._route_complete(fallback)}"
@@ -17,17 +20,31 @@ def shape(label, base, model, key, fallback=False):
         f" has_host={bool(parsed and parsed.netloc)}"
         f" base_ends_chat={path.endswith('/chat/completions')}"
         f" base_ends_v1={path.endswith('/v1')}"
+        f" effective_ends_chat={effective_path.endswith('/chat/completions')}"
         f" has_query={bool(parsed and parsed.query)}"
         f" model_has_slash={'/' in (model or '')}"
         f" model_looks_url={(model or '').startswith(('http://','https://'))}"
-        f" openrouter_base_exact={openrouter_base}"
-        f" openrouter_free_exact={openrouter_model}"
-        f" openrouter_key_shape={openrouter_key}"
+        f" host_openrouter={host == 'openrouter.ai'}"
+        f" host_alibaba={host.endswith('aliyuncs.com')}"
+        f" path_compatible_mode={'/compatible-mode/v1' in path}"
+        f" path_native_api={'/api/v1' in path}"
+        f" openrouter_base_exact={raw == 'https://openrouter.ai/api/v1'}"
+        f" openrouter_full_exact={raw == 'https://openrouter.ai/api/v1/chat/completions'}"
+        f" openrouter_free_exact={(model or '').strip() == 'openrouter/free'}"
+        f" openrouter_key_shape={(key or '').startswith('sk-or-v1-')}"
     )
-    if raw and key:
+    if api_root and key:
         try:
-            r=requests.get(raw+"/models",headers=llm._headers(key,fallback),timeout=15)
+            r=requests.get(api_root.rstrip("/")+"/models",headers=llm._headers(key,fallback),timeout=15)
             print(f"{label} MODELS PROBE: HTTP {r.status_code}")
+            if r.status_code==200:
+                try:
+                    obj=r.json()
+                    rows=obj.get("data",[]) if isinstance(obj,dict) else []
+                    ids={str(x.get("id","")) for x in rows if isinstance(x,dict)}
+                    print(f"{label} MODEL PRESENT: {bool(model and model in ids)} catalog_size={len(ids)}")
+                except Exception as exc:
+                    print(f"{label} MODELS PARSE: {type(exc).__name__}")
         except Exception as exc:
             print(f"{label} MODELS PROBE: {type(exc).__name__}")
 
