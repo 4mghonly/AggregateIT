@@ -33,7 +33,7 @@ jobs:
   arabic:
     if: github.ref == 'refs/heads/Arabic'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     env:
       ARABIC_STATE_DIR: arabic_newsletter/runtime/state
       ARABIC_LLM_API_KEY: ${{ secrets.ARABIC_LLM_API_KEY || secrets.QWEN_API_KEY }}
@@ -114,7 +114,6 @@ jobs:
           restore-keys: arabic-state-v1-
 
       - name: Test Arabic pipeline
-        if: steps.mode.outputs.live != 'true'
         run: python -m unittest arabic_newsletter.test_arabic -v
 
       - name: Render long Arabic sample
