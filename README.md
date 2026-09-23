@@ -72,20 +72,22 @@ Multi-source claims without ≥2 independent families are downgraded and capped.
 ## LLM configuration
 
 LLM provider and model selection are runtime-configured; no provider or model is fixed in code.
-GitHub Actions reads credentials from repository Secrets and routing/model choices from repository Variables.
+GitHub Actions reads all six essential LLM routing values from repository Secrets.
 
-Primary route:
-- Secret: `LLM_API_KEY` 
-- Variables: `LLM_BASE_URL`, `LLM_MODEL`
+Primary route Secrets:
+- `LLM_API_KEY`
+- `LLM_BASE_URL`
+- `LLM_MODEL`
 
-Optional fallback route:
-- Secret: `LLM_FALLBACK_API_KEY` 
-- Variables: `LLM_FALLBACK_BASE_URL`, `LLM_FALLBACK_MODEL`
+Fallback route Secrets:
+- `LLM_FALLBACK_API_KEY`
+- `LLM_FALLBACK_BASE_URL`
+- `LLM_FALLBACK_MODEL`
 
 Optional provider-compatibility variables: `LLM_AUTH_HEADER`, `LLM_AUTH_SCHEME`, `LLM_CHAT_PATH`,
 `LLM_REQUEST_OPTIONS_JSON`, `LLM_EXTRA_HEADERS_JSON`, plus their `LLM_FALLBACK_*` equivalents.
 
-The Arabic briefing can inherit the generic route or use its own `ARABIC_LLM_*` Secrets/Variables.
+The Arabic briefing inherits these generic Secrets by default, or can use its own `ARABIC_LLM_*` overrides.
 `ARABIC_LLM_FALLBACK_MODELS` is also supplied as a Variable; no model list is embedded in source code.
 
 Other integration credentials remain in GitHub Settings → Secrets and variables → Actions.
