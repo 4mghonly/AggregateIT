@@ -72,9 +72,25 @@ class Client:
         self.key=os.getenv('ARABIC_LLM_API_KEY') or os.getenv('QWEN_API_KEY','')
         self.base=(os.getenv('ARABIC_LLM_BASE_URL') or os.getenv('QWEN_BASE_URL') or 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1').rstrip('/')
         self.model=os.getenv('ARABIC_LLM_MODEL') or os.getenv('QWEN_MODEL')
-        if not self.key: raise EditorialError('Missing ARABIC_LLM_API_KEY or QWEN_API_KEY')
-        if not self.model: raise EditorialError('Missing ARABIC_LLM_MODEL or QWEN_MODEL')
-        if urlsplit(self.base).scheme!='https': raise EditorialError('LLM endpoint must use HTTPS')
+        self.fallback_key=os.getenv('ARABIC_LLM_FALLBACK_API_KEY') or os.getenv('QWEN_FALLBACK_API_KEY','')
+        self.fallback_base=(os.getenv('ARABIC_LLM_FALLBACK_BASE_URL') or os.getenv('QWEN_FALLBACK_BASE_URL') or self.base).rstrip('/')
+        self.fallback_model=(os.getenv('ARABIC_LLM_FALLBACK_MODEL') or os.getenv('QWEN_FALLBACK_MODEL') or self.model or '').strip()
+        self.force_fallback=False
+        if not self.key and not self.fallback_key: raise EditorialError('Missing Arabic/Qwen LLM credentials')
+        if not self.model and not self.fallback_model: raise EditorialError('Missing Arabic/Qwen LLM model')
+        if urlsplit(self.base).scheme!='https' or urlsplit(self.fallback_base).scheme!='https': raise EditorialError('LLM endpoint must use HTTPS')
+
+    @staticmethod
+    def _quota_exhausted(response):
+        value=(response.text or '').lower()
+        return response.status_code in (402,403) and any(k in value for k in ('quota','fund','billing','balance','credit'))
+
+    def _endpoint(self):
+        if self.force_fallback and self.fallback_key:
+            return self.fallback_base,self.fallback_key,self.fallback_model
+        if self.key:
+            return self.base,self.key,self.model
+        return self.fallback_base,self.fallback_key,self.fallback_model
     def chat(self,system,data,max_tokens=9000,temperature=0.18,use_cache=True):
         messages=[{'role':'system','content':system},{'role':'user','content':json.dumps(data,ensure_ascii=False)}]
         cache_key='llm:v3:'+digest(self.base+self.model+json.dumps(messages,ensure_ascii=False,sort_keys=True))
