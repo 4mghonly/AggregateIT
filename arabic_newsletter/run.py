@@ -3,6 +3,7 @@ import argparse
 import fcntl
 import json
 import os
+import time
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -138,7 +139,9 @@ def main():
                     # Confirmed failed HTTP deliveries are safe to retry; send() clears them.
                 audit_registry=ROOT/'runtime'/'audit'/'discovered_sources.json'
                 registry=json.loads(audit_registry.read_text()) if audit_registry.exists() else None
+                phase=time.monotonic(); print('Arabic phase start: collect',flush=True)
                 articles,health=collect(collection_start,end,registry=registry)
+                print(f'Arabic phase complete: collect elapsed_s={time.monotonic()-phase:.1f}',flush=True)
                 args.output.mkdir(parents=True,exist_ok=True)
                 write_json(args.output/'collection_health.json',health)
                 write_json(args.output/'source_evidence.json',articles)
@@ -151,12 +154,16 @@ def main():
                 if args.send and not articles:
                     raise RuntimeError('Live extraction yielded no dated relevant articles; publication blocked')
                 try:
+                    phase=time.monotonic(); print('Arabic phase start: synthesize',flush=True)
                     events,rejected=synthesize(articles,state)
+                    print(f'Arabic phase complete: synthesize elapsed_s={time.monotonic()-phase:.1f}',flush=True)
                 finally:
                     write_json(args.output/'editorial_draft.json',state.get('last_editorial_draft') or {})
                     write_json(args.output/'editorial_review_raw.json',state.get('last_editorial_review_raw') or {})
                     write_json(args.output/'editorial_review.json',state.get('last_editorial_review') or [])
+                phase=time.monotonic(); print('Arabic phase start: analysis',flush=True)
                 analysis=build_analysis(events,state,morning=morning)
+                print(f'Arabic phase complete: analysis elapsed_s={time.monotonic()-phase:.1f}',flush=True)
                 translated=[
                   ' '.join(str(e.get(k,'')) for k in ('title_ar','summary_ar','assessment_ar','watch_ar'))
                   for e in events
@@ -191,12 +198,16 @@ def main():
             forbidden=('\ufffd','\u25a1','\u25a0','\ufeff','\u202a','\u202b','\u202c','\u202d','\u202e','\u2066','\u2067','\u2068','\u2069')
             if any(mark in encoded for mark in forbidden):
                 raise RuntimeError('Encoding hygiene gate failed before rendering')
+            phase=time.monotonic(); print('Arabic phase start: render',flush=True)
             paths,clipped=render(brief,args.output)
+            print(f'Arabic phase complete: render elapsed_s={time.monotonic()-phase:.1f}',flush=True)
             write_json(args.output/'briefing.json',brief)
             write_json(args.output/'render_report.json',{'visually_shortened_blocks':clipped,'full_text':'sources-ar.txt','dimensions':[3840,2160],'pages':len(paths)})
             refs=args.output/'sources-ar.txt'; references(brief,refs)
             if args.send:
+                phase=time.monotonic(); print('Arabic phase start: discord_send',flush=True)
                 message_id=send(state,edition,paths)
+                print(f'Arabic phase complete: discord_send elapsed_s={time.monotonic()-phase:.1f}',flush=True)
                 if brief['events']:
                     keep=('region','topic','title_ar','summary_ar','assessment_ar','watch_ar','severity','fingerprint','source_ids')
                     state.put('previous_events',[{k:e.get(k) for k in keep} for e in brief['events']])
