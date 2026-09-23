@@ -67,8 +67,10 @@ def _message_json(message):
     raise ValueError('complete JSON object not found')
 
 class Client:
-    def __init__(self,state):
+    def __init__(self,state,max_calls=12,read_timeout=120,wall_budget_s=None):
         self.state=state; self.calls=0
+        self.max_calls=max(1,int(max_calls)); self.read_timeout=max(10,int(read_timeout))
+        self.deadline=(time.monotonic()+max(30,int(wall_budget_s))) if wall_budget_s else None
         self.key=(os.getenv('ARABIC_LLM_API_KEY') or '').strip()
         self.base=(os.getenv('ARABIC_LLM_BASE_URL') or '').strip().rstrip('/')
         self.model=(os.getenv('ARABIC_LLM_MODEL') or '').strip()
@@ -155,7 +157,12 @@ class Client:
         body=dict(payload)
         body.update(self.fallback_request_options if fallback else self.request_options)
         path=self.fallback_chat_path if fallback else self.chat_path
-        return requests.post(self._endpoint_url(base,path),headers=self._headers(key,fallback),json=body,timeout=(10,120))
+        read_timeout=self.read_timeout
+        if self.deadline is not None:
+            remaining=self.deadline-time.monotonic()
+            if remaining<=0: raise EditorialError('LLM wall-clock budget exhausted')
+            read_timeout=max(5,min(read_timeout,remaining))
+        return requests.post(self._endpoint_url(base,path),headers=self._headers(key,fallback),json=body,timeout=(10,read_timeout))
 
     def chat(self,system,data,max_tokens=9000,temperature=0.18,use_cache=True):
         messages=[{'role':'system','content':system},{'role':'user','content':json.dumps(data,ensure_ascii=False)}]
@@ -170,7 +177,7 @@ class Client:
         decode_retry=False
         transient_retry=False
 
-        while self.calls < 12:
+        while self.calls < self.max_calls:
             base,key,model,fallback=self._endpoint()
             payload['model']=model
             features_key='api_features:'+digest(base+model)
@@ -258,7 +265,7 @@ class Client:
             self.state.put('last_model_used',response.get('model') or model)
             if use_cache: self.state.put(cache_key,result)
             return result
-        raise EditorialError('Twelve-request per-run model budget exhausted')
+        raise EditorialError(f'{self.max_calls}-request model budget exhausted')
 
 def is_arabic(text):
     letters=[c for c in text if c.isalpha()]
@@ -449,7 +456,7 @@ def synthesize(articles,state):
     bounded=_bounded_articles(articles)
     previous=_previous_event_context(state)
     glossary=json.loads((ROOT/'glossary.json').read_text())
-    client=Client(state)
+    client=Client(state,max_calls=6,read_timeout=90,wall_budget_s=600)
     request={'regions':REGIONS,'topics':sorted(TOPICS),'glossary':glossary,
              'previous_events':previous,'articles':bounded}
     try:
@@ -534,7 +541,7 @@ def build_analysis(events,state,morning=False,strict=False):
     if not events:
         return {'situation_ar':'لا تتوافر أحداث مؤهلة لبناء تقدير تحليلي في هذه الدورة.',
                 'implications_ar':'','developing_ar':[],'watch_ar':[]}
-    client=Client(state)
+    client=Client(state,max_calls=3,read_timeout=60,wall_budget_s=180)
     supplied=[]
     for e in events[:18]:
         supplied.append({
