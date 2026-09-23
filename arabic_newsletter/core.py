@@ -55,12 +55,22 @@ def digest(value):
     return hashlib.sha256(value.encode()).hexdigest()
 
 def preliminary_relevant(text, language='en'):
+    """Language-agnostic first-pass gate.
+
+    English/Arabic keep a deterministic security signal to control volume. Other
+    languages are passed through to the multilingual editorial model unless the
+    item is clearly finance-only. This prevents a missing language-specific
+    keyword from silently deleting a regional security story.
+    """
     text = clean(text).casefold()
     security = any(k in text for k in SECURITY)
-    if any(k in text for k in FINANCE) and not security:
+    finance = any(k in text for k in FINANCE)
+    if finance and not security:
         return False
-    # Unknown-language items reach the multilingual classifier, never silently disappear.
-    return security or language not in ('en', 'ar', 'fr', 'tr', 'fa', 'ur')
+    language = (language or 'unknown').lower()
+    if language not in ('en', 'ar'):
+        return True
+    return security
 
 def uae_secondary_relevant(text):
     """Controlled lower threshold for the dedicated UAE command-news panel."""
