@@ -228,6 +228,15 @@ class Client:
                     print('Arabic LLM returned malformed/truncated JSON; retrying once with stricter decoding budget',flush=True)
                     time.sleep(1)
                     continue
+                if self._advance_model():
+                    decode_retry=False
+                    print('Arabic LLM returned invalid JSON; trying configured alternate model:',self._models()[self.model_index],flush=True)
+                    continue
+                if self._switch_fallback():
+                    decode_retry=False
+                    transient_retry=False
+                    print('Arabic LLM returned invalid JSON; switching to configured fallback route',flush=True)
+                    continue
                 raise EditorialError('Invalid or truncated model JSON after retry') from None
             self.state.put('last_model_used',response.get('model') or model)
             if use_cache: self.state.put(cache_key,result)
