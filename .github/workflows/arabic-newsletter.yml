@@ -63,12 +63,16 @@ jobs:
           message=os.getenv("HEAD_MESSAGE","")
           live=(event=="push" and message.startswith("Arabic live:")) or os.getenv("DISPATCH_DELIVER","").lower()=="true"
           preview=(event=="push" and message.startswith("Arabic preview:")) or os.getenv("DISPATCH_PREVIEW","").lower()=="true"
+          health=(event=="push" and message.startswith("Arabic health:"))
           if live:
               preview=False
+              health=False
           with open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8") as fh:
               fh.write(f"live={'true' if live else 'false'}\n")
               fh.write(f"preview={'true' if preview else 'false'}\n")
-          print("Arabic workflow mode:", "live" if live else ("preview" if preview else "validation"))
+              fh.write(f"health={'true' if health else 'false'}\n")
+          mode="live" if live else ("preview" if preview else ("health" if health else "validation"))
+          print("Arabic workflow mode:",mode)
           PY
 
       - uses: actions/setup-python@v6
@@ -122,6 +126,10 @@ jobs:
       - name: Render long Arabic sample
         if: steps.mode.outputs.live != 'true'
         run: python -m arabic_newsletter.run --sample --long --output arabic_newsletter/runtime/sample
+
+      - name: Verify live source health and extraction only
+        if: steps.mode.outputs.health == 'true'
+        run: python -m arabic_newsletter.run --health-only --output arabic_newsletter/runtime/health
 
       - name: Validate live Arabic model and Discord route
         if: steps.mode.outputs.live == 'true'
@@ -181,5 +189,6 @@ jobs:
             arabic_newsletter/runtime/sample/
             arabic_newsletter/runtime/audit/
             arabic_newsletter/runtime/preview/
+            arabic_newsletter/runtime/health/
           retention-days: 7
           if-no-files-found: warn
