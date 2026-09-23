@@ -148,7 +148,7 @@ class Client:
                 if attempt==0: time.sleep(2); continue
                 raise EditorialError('Model network failure') from None
 
-            while self._model_unavailable(r) and self._advance_model():
+            while (self._model_unavailable(r) or self._budget_exhausted(r)) and self._advance_model():
                 base,key,model=self._endpoint()
                 print('Arabic model unavailable; trying configured fallback:',model,flush=True)
                 payload['model']=model
