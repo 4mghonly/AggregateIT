@@ -83,9 +83,13 @@ class Client:
         self.model_index=0
         self.force_fallback=False
         self.force_fallback_credential=False
+        self.router_key=os.getenv('OPENROUTER_API_KEY','').strip()
+        self.router_base=(os.getenv('ARABIC_OPENROUTER_BASE_URL') or 'https://openrouter.ai/api/v1').rstrip('/')
+        self.router_model=(os.getenv('ARABIC_OPENROUTER_MODEL') or 'deepseek/deepseek-v4.1-flash').strip()
+        self.use_router=False
         if not self.key and not self.fallback_key: raise EditorialError('Missing Arabic/Qwen LLM credentials')
         if not self.model and not self.fallback_model: raise EditorialError('Missing Arabic/Qwen LLM model')
-        if urlsplit(self.base).scheme!='https' or urlsplit(self.fallback_base).scheme!='https': raise EditorialError('LLM endpoint must use HTTPS')
+        if urlsplit(self.base).scheme!='https' or urlsplit(self.fallback_base).scheme!='https' or urlsplit(self.router_base).scheme!='https': raise EditorialError('LLM endpoint must use HTTPS')
 
     @staticmethod
     def _quota_exhausted(response):
@@ -93,6 +97,8 @@ class Client:
         return response.status_code in (402,403) and any(k in value for k in ('quota','fund','billing','balance','credit'))
 
     def _endpoint(self):
+        if self.use_router and self.router_key:
+            return self.router_base,self.router_key,self.router_model
         model=self.model_candidates[min(self.model_index,len(self.model_candidates)-1)]
         if self.force_fallback_credential and self.fallback_key:
             return self.fallback_base,self.fallback_key,model
@@ -110,6 +116,11 @@ class Client:
             self.model_index+=1
             return True
         return False
+
+    @staticmethod
+    def _budget_exhausted(response):
+        value=(response.text or '').lower()
+        return response.status_code==429 and 'budget' in value and ('exhaust' in value or 'limit' in value)
     def chat(self,system,data,max_tokens=9000,temperature=0.18,use_cache=True):
         messages=[{'role':'system','content':system},{'role':'user','content':json.dumps(data,ensure_ascii=False)}]
         base,key,model=self._endpoint()
@@ -167,6 +178,19 @@ class Client:
                 except requests.RequestException:
                     raise EditorialError('Fallback credential network failure') from None
 
+            if (self._model_unavailable(r) or self._budget_exhausted(r)) and self.router_key and not self.use_router:
+                print('Arabic Alibaba route unavailable; switching to OpenRouter fallback',flush=True)
+                self.use_router=True
+                base,key,model=self._endpoint()
+                payload['model']=model
+                payload.pop('enable_thinking',None)
+                self.calls+=1
+                try:
+                    r=requests.post(base+'/chat/completions',
+                      headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
+                except requests.RequestException:
+                    raise EditorialError('OpenRouter fallback network failure') from None
+
             if r.status_code in (429,500,502,503,504) and attempt==0:
                 time.sleep(2); continue
             if r.status_code!=200:
@@ -177,6 +201,7 @@ class Client:
                     detail='non-JSON error response'
                 if self.key: detail=detail.replace(self.key,'[redacted]')
                 if self.fallback_key: detail=detail.replace(self.fallback_key,'[redacted]')
+                if self.router_key: detail=detail.replace(self.router_key,'[redacted]')
                 detail=detail.replace(self.base,'[endpoint]').replace(self.fallback_base,'[endpoint]')
                 detail=re.sub(r'https?://\S+','[url]',detail)[:350]
                 if r.status_code==400 and attempt==0 and any(k in detail.lower() for k in ('response_format','enable_thinking')):
