@@ -1,4 +1,4 @@
-"""Pure-information Arabic command briefing renderer.
+"""Pure-information Arabic policy briefing renderer.
 
 No illustrative images, generated artwork, maps or decorative visual renders are
 used. The design is typography-first, evidence-first and optimized for crisp
@@ -117,47 +117,47 @@ class Canvas:
         self.image.save(path,format='PNG',compress_level=2,dpi=(144,144))
 
 def masthead(c,brief,page):
-    c.d.rectangle((0,0,W,220),fill=COMMAND)
     end=datetime.fromisoformat(brief['window_end']).astimezone(UAE)
     morning=bool(brief.get('morning'))
-    c.text('موجز القيادة الأمني والعسكري',(2140,34,1540,70),58,True,'#FFFFFF')
-    c.text('أغريغيت، تقدير تنفيذي مبني على مصادر منسوبة',(2140,112,1540,45),28,False,'#D8DFDA')
+    c.text('أغريغيت | الموجز الجيوسياسي والأمني',(2180,34,1500,58),48,True,INK)
+    c.text('دليل موجز لصانع القرار، وقائع منسوبة وتحليل تقديري منفصل',(2180,101,1500,38),24,False,MUTED)
     dt=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year}، {end.strftime('%H:%M')} بتوقيت الإمارات"
-    c.text(dt,(80,48,1480,54),32,True,'#FFFFFF','left')
+    c.text(dt,(80,42,1500,44),28,True,INK,'left')
     cycle='إحاطة صباحية موسعة، تغطية ليلية 12 ساعة' if morning else 'إحاطة دورية، نافذة 6 ساعات'
-    c.text(cycle,(80,116,1480,40),25,True,'#D8DFDA','left')
-    c.d.rectangle((0,210,W,220),fill=SAND)
+    c.text(cycle,(80,100,1500,34),22,False,MUTED,'left')
+    c.line(70,165,W-70,165,'#8E8A82',2)
+
 
 def stats(c,brief):
-    events=brief.get('events',[]); health=brief.get('health',[])
+    events=brief.get('events',[])
     period='12 ساعة' if brief.get('morning') else '6 ساعات'
     coverage=brief.get('coverage') or {}
     vals=[
-      ('الفترة',period,STEEL),('مدخلات',brief.get('input_count',0),STEEL),
-      ('مصادر نشطة',sum(h.get('status') in ('active','social_only') for h in health),OLIVE),
-      ('مصادر غير عربية',coverage.get('non_arabic_event_sources',0),PURPLE),
-      ('مناطق',f"{len({e.get('region') for e in events if e.get('region')})} من {len(REGIONS)}",BLUE),
-      ('مرتفعة',sum(e.get('severity')=='high' for e in events),ALERT),
-      ('متوسطة',sum(e.get('severity')=='medium' for e in events),AMBER),
-      ('أحداث',len(events),COMMAND)
+      ('نافذة التغطية',period,STEEL),
+      ('أحداث مؤهلة',len(events),COMMAND),
+      ('مصادر مستخدمة',coverage.get('event_source_count',0),OLIVE),
+      ('مناطق مغطاة',f"{len({e.get('region') for e in events if e.get('region')})}/{len(REGIONS)}",BLUE),
     ]
-    margin=55; gap=14; y=240; h=145; cw=(W-2*margin-gap*7)//8
+    margin=55; gap=18; y=190; h=108; cw=(W-2*margin-gap*3)//4
     for i,(label,val,color) in enumerate(vals):
         x=margin+i*(cw+gap)
-        c.rounded((x,y,cw,h),PAPER,'#C8D0CC',12,2)
-        c.d.rectangle((x,y,x+10,y+h),fill=color)
-        c.text(label,(x+24,y+18,cw-48,38),27,True,color,'center')
-        c.text(str(val),(x+24,y+66,cw-48,58),43,True,INK,'center')
+        c.rounded((x,y,cw,h),PAPER,BORDER,10,1)
+        c.d.rectangle((x+cw-7,y+8,x+cw-2,y+h-8),fill=color)
+        c.text(label,(x+24,y+18,cw-48,30),20,False,MUTED,'center')
+        c.text(str(val),(x+24,y+51,cw-48,42),30,True,INK,'center')
+
 
 def panel(c,box,title,color=COMMAND,subtitle=None):
     x,y,w,h=map(int,box)
-    c.rounded(box,PAPER,BORDER,12,2)
-    header=86 if not subtitle else 112
-    c.d.rectangle((x,y,x+w,y+header),fill=color)
-    c.text(title,(x+24,y+14,w-48,52),38,True,'#FFFFFF')
+    c.rounded(box,PAPER,BORDER,10,1)
+    c.text(title,(x+22,y+14,w-44,44),31,True,color)
+    c.line(x+18,y+66,x+w-18,y+66,color,2)
+    header=82
     if subtitle:
-        c.text(subtitle,(x+24,y+67,w-48,28),20,False,'#E6ECE8')
-    return x+24,y+header+20,w-48,h-header-38
+        c.text(subtitle,(x+22,y+76,w-44,32),18,False,MUTED)
+        header=118
+    return x+24,y+header,w-48,h-header-24
+
 
 def severity(e):
     return SEV.get(e.get('severity','low'),SEV['low'])
