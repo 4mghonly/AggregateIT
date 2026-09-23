@@ -4,9 +4,9 @@ import fcntl
 import json
 import os
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from .core import ROOT, State, edition_window, live_window, write_json
+from .core import ROOT, State, UAE, edition_window, live_window, write_json
 from .collect import audit, collect
 from .editor import Client, synthesize, build_analysis
 from .delivery import webhook_info, send
@@ -20,12 +20,15 @@ def main():
     modes.add_argument('--preflight',action='store_true')
     parser.add_argument('--probe-model',action='store_true'); parser.add_argument('--probe-discord',action='store_true')
     parser.add_argument('--long',action='store_true'); parser.add_argument('--send',action='store_true')
+    parser.add_argument('--manual-now',action='store_true',help='Manual live assessment using the rolling six hours ending now; requires --send')
     parser.add_argument('--end',help='ISO timestamp for a replay; requires timezone')
     parser.add_argument('--output',type=Path,default=ROOT/'runtime'/'output')
     args=parser.parse_args()
     if args.sample and args.send: parser.error('Synthetic samples cannot be delivered')
     if args.end and args.send: parser.error('Historical replay cannot be delivered')
     if args.preflight and args.send: parser.error('--preflight never publishes; use --probe-discord to test routing')
+    if args.manual_now and not args.send: parser.error('--manual-now requires --send')
+    if args.manual_now and (args.sample or args.audit or args.preflight or args.end): parser.error('--manual-now is only for a current manual live edition')
     state_dir=Path(os.getenv('ARABIC_STATE_DIR',str(ROOT/'runtime'/'state')))
     state_dir.mkdir(parents=True,exist_ok=True)
     with (state_dir/'run.lock').open('w') as lock:
@@ -46,13 +49,20 @@ def main():
                 brief['analysis']={}
 
             else:
-                now=datetime.fromisoformat(args.end) if args.end else None
-                if now and now.tzinfo is None: parser.error('--end must include a timezone')
-                start,end=edition_window(now) if now else live_window(); edition=end.isoformat()
-                morning=end.hour==6
-                # The 06:00 UAE edition is the start-of-day product and carries
-                # a wider overnight collection window for a heavier synthesis.
-                collection_start=end-timedelta(hours=12) if end.hour==6 else start
+                if args.manual_now:
+                    end=datetime.now(timezone.utc).astimezone(UAE).replace(microsecond=0)
+                    start=end-timedelta(hours=6)
+                    edition='manual-'+end.isoformat()
+                    morning=False
+                    collection_start=start
+                else:
+                    now=datetime.fromisoformat(args.end) if args.end else None
+                    if now and now.tzinfo is None: parser.error('--end must include a timezone')
+                    start,end=edition_window(now) if now else live_window(); edition=end.isoformat()
+                    morning=end.hour==6
+                    # The 06:00 UAE edition is the start-of-day product and carries
+                    # a wider overnight collection window for a heavier synthesis.
+                    collection_start=end-timedelta(hours=12) if end.hour==6 else start
                 if args.send:
                     webhook_info(); Client(state)
                     prior=state.delivery(edition)
@@ -92,7 +102,7 @@ def main():
             write_json(args.output/'render_report.json',{'visually_shortened_blocks':clipped,'full_text':'sources-ar.txt','dimensions':[3840,2160]})
             refs=args.output/'sources-ar.txt'; references(brief,refs)
             if args.send:
-                message_id=send(state,brief['window_end'],paths)
+                message_id=send(state,edition if args.manual_now else brief['window_end'],paths)
                 if brief['events']:
                     state.put('previous_events',[{'title_ar':e['title_ar'],'summary_ar':e['summary_ar'],'source_ids':e['source_ids']} for e in brief['events']])
                 print('Arabic edition delivered; message ID:',message_id)
