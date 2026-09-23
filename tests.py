@@ -57,7 +57,7 @@ def fake_post2(body):
 mv = tv.fetch_movers(post_fn=fake_post2)
 check("movers merged", set(mv) == {"AAA", "BBB"}, sorted(mv))
 
-print("[T9] Qwen schema validation")
+print("[T9] LLM schema validation")
 valid = {"event": "Fed holds", "event_type": "macro", "facts": ["held"], "assessment": "pause",
          "what_changed": "New event - no prior coverage",
          "importance": "High", "confidence": 80, "sentiment": "neutral", "entities": ["Fed"],
@@ -85,7 +85,7 @@ check("analyzed terminal", not st.url_active("http://a"))
 print("[T11] System health visibility")
 main.HEALTH.update({"rss_ok": 90, "rss_empty": 0, "rss_fail": 5, "reddit_ok": 0, "reddit_empty": 0, "reddit_fail": 32,
                     "github_ok": 5, "github_empty": 0, "github_fail": 0,
-                    "qwen_ok": 3, "qwen_fail": 0, "qwen_invalid": 0, "discord_ok": 3, "discord_fail": 0, "discord_skipped": 0,
+                    "llm_ok": 3, "llm_fail": 0, "llm_invalid": 0, "discord_ok": 3, "discord_fail": 0, "discord_skipped": 0,
                     "tv_movers_loaded": 10, "tv_universe_loaded": 100})
 h = main.build_health({"run": "x", "new": 1, "matched": 3}, {"fresh_init": False})
 check("degraded = YELLOW", h["overall"] == "YELLOW")
@@ -533,34 +533,44 @@ items57, hours57, note57 = briefing.load_window(FakeStore(), 24)
 check("falls back to 72h", hours57 == 72, f"hours={hours57}")
 check("empty store yields diagnostic note", "No events stored" in note57, note57)
 
-print("[T58] LLM provider flexibility (enable_thinking gating)")
+print("[T58] LLM provider/model are runtime-configured")
 import llm
-llm.API_KEY = "k"
-llm.BASE_URL = "https://openrouter.ai/api/v1"
-check("openrouter not dashscope", not llm._is_dashscope(), llm.BASE_URL)
-llm.BASE_URL = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
-check("dashscope detected", llm._is_dashscope(), llm.BASE_URL)
-# simulate preflight payload for a non-dashscope provider
-sent = {}
+llm.API_KEY = "primary-key"
+llm.BASE_URL = "https://primary.example/v1"
+llm.MODEL = "primary-model"
+llm.FALLBACK_API_KEY = "fallback-key"
+llm.FALLBACK_BASE_URL = "https://fallback.example/v1"
+llm.FALLBACK_MODEL = "fallback-model"
+llm.AUTH_HEADER = "Authorization"
+llm.AUTH_SCHEME = "Bearer"
+llm.CHAT_PATH = "/chat/completions"
+llm.FALLBACK_AUTH_HEADER = "api-key"
+llm.FALLBACK_AUTH_SCHEME = ""
+llm.FALLBACK_CHAT_PATH = "/chat/completions"
+llm.EXTRA_HEADERS = {}
+llm.FALLBACK_EXTRA_HEADERS = {}
+llm.REQUEST_OPTIONS = {}
+llm.FALLBACK_REQUEST_OPTIONS = {}
+llm._CONFIG_ERROR = ""
+llm._force_fallback = False
+sent = []
 class FakeResp:
-    status_code = 200; text = "ok"
-    def json(self): return {"choices": [{"message": {"content": "ok"}}]}
+    def __init__(self,status,text="ok"):
+        self.status_code=status; self.text=text
+    def json(self): return {"choices":[{"message":{"content":"ok"}}],"model":"runtime-model"}
+    def raise_for_status(self): return None
 def fake_post(url, headers=None, json=None, timeout=None):
-    sent.update(json or {}); return FakeResp()
+    sent.append((url,dict(headers or {}),dict(json or {})))
+    if url.startswith("https://primary.example"): return FakeResp(403,"quota exhausted")
+    return FakeResp(200,"ok")
 _orig = llm.requests.post
 llm.requests.post = fake_post
-llm.BASE_URL = "https://openrouter.ai/api/v1"
-llm.preflight()
+ok58, detail58 = llm.preflight()
 llm.requests.post = _orig
-check("preflight omits enable_thinking off-dashscope",
-      "enable_thinking" not in sent, sent.get("enable_thinking", "ABSENT"))
-sent.clear()
-llm.requests.post = fake_post
-llm.BASE_URL = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
-llm.preflight()
-llm.requests.post = _orig
-check("preflight sends enable_thinking on dashscope",
-      sent.get("enable_thinking") is False, sent.get("enable_thinking"))
+check("runtime fallback route accepted", ok58 and detail58 == "fallback-ok", (ok58,detail58))
+check("primary model came from runtime config", sent[0][2].get("model") == "primary-model", sent)
+check("fallback model came from runtime config", sent[-1][2].get("model") == "fallback-model", sent)
+check("fallback auth style is runtime-configurable", sent[-1][1].get("api-key") == "fallback-key", sent[-1][1])
 
 print("[T59] Gazette event loader preserves canonical fields")
 class EventStore59:
@@ -669,14 +679,14 @@ check("Mastodon identities audited", "check_mastodon" in audit_src69 and '"MASTO
 print("[T70] Main import is network-lazy")
 main_src70 = open(os.path.join(os.path.dirname(os.path.abspath(main.__file__)), "main.py"), encoding="utf-8").read()
 prefix70 = main_src70.split("async def main():",1)[0]
-check("no import-time Qwen preflight", "llm.preflight()" not in prefix70)
+check("no import-time LLM preflight", "llm.preflight()" not in prefix70)
 check("no import-time market self-heal call", "\nensure_market_data()\n" not in prefix70)
 
 print("[T71] Quiet sources are not transport failures")
 main.HEALTH.update({"rss_ok": 5, "rss_empty": 4, "rss_fail": 0,
                     "reddit_ok": 0, "reddit_empty": 5, "reddit_fail": 0,
                     "github_ok": 0, "github_empty": 5, "github_fail": 0,
-                    "qwen_ok": 1, "qwen_fail": 0, "qwen_invalid": 0,
+                    "llm_ok": 1, "llm_fail": 0, "llm_invalid": 0,
                     "discord_ok": 0, "discord_fail": 0, "discord_skipped": 1,
                     "tv_movers_loaded": 1, "tv_universe_loaded": 1})
 h71=main.build_health({"run":"quiet","new":0,"matched":0},{"fresh_init":False})
@@ -708,7 +718,7 @@ check("engine does not duplicate social Reddit with direct RSS", "fetch_reddit(s
 main.HEALTH.update({"rss_ok":1,"rss_empty":0,"rss_fail":0,
                     "reddit_ok":0,"reddit_empty":1,"reddit_fail":0,
                     "github_ok":1,"github_empty":0,"github_fail":0,
-                    "qwen_ok":1,"qwen_fail":0,"qwen_invalid":0,
+                    "llm_ok":1,"llm_fail":0,"llm_invalid":0,
                     "discord_ok":0,"discord_fail":0,"discord_skipped":1,
                     "tv_movers_loaded":1,"tv_universe_loaded":1})
 h74=main.build_health({"run":"reddit-empty","new":0,"matched":0},{"fresh_init":False})
