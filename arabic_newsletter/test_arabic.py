@@ -173,7 +173,7 @@ class EditorialTests(unittest.TestCase):
                 self.assertEqual(client._endpoint()[:3],('https://fallback.example/v1','fallback-key','fallback-model'))
             state.close()
 
-    def test_invalid_primary_json_switches_to_fallback_route(self):
+    def test_invalid_primary_json_stays_on_primary_for_compact_repair(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(d)
             env={
@@ -186,15 +186,29 @@ class EditorialTests(unittest.TestCase):
             }
             bad=Mock(status_code=200)
             bad.json.return_value={'choices':[{'finish_reason':'stop','message':{'content':'not-json'}}],'usage':{}}
-            good=Mock(status_code=200)
-            good.json.return_value={'choices':[{'finish_reason':'stop','message':{'content':'{"translation":"مرحبا"}'}}],'usage':{},'model':'fallback-model'}
             with patch.dict(os.environ,env,clear=True):
                 client=Client(state)
-                with patch('arabic_newsletter.editor.requests.post',side_effect=[bad,bad,good]) as post:
-                    result=client.chat('Return JSON only.',{'text':'hello'},80,use_cache=False)
-                    self.assertEqual(result.get('translation'),'مرحبا')
-                    self.assertEqual(post.call_count,3)
-                    self.assertTrue(client.force_fallback_credential)
+                with patch('arabic_newsletter.editor.requests.post',side_effect=[bad,bad]) as post:
+                    with self.assertRaisesRegex(EditorialError,'Invalid or truncated'):
+                        client.chat('Return JSON only.',{'text':'hello'},80,use_cache=False)
+                    self.assertEqual(post.call_count,2)
+                    self.assertFalse(client.force_fallback_credential)
+            state.close()
+
+    def test_text_probe_accepts_plain_arabic_without_json(self):
+        with tempfile.TemporaryDirectory() as d:
+            state=State(d)
+            env={
+                'ARABIC_LLM_API_KEY':'primary-key',
+                'ARABIC_LLM_BASE_URL':'https://primary.example/v1',
+                'ARABIC_LLM_MODEL':'primary-model'
+            }
+            response=Mock(status_code=200)
+            response.json.return_value={'choices':[{'message':{'content':'يظل التنسيق الأمني الإقليمي قيد المراجعة.'}}]}
+            with patch.dict(os.environ,env,clear=True):
+                client=Client(state)
+                with patch('arabic_newsletter.editor.requests.post',return_value=response):
+                    self.assertTrue(is_arabic(client.probe_text('translate this')))
             state.close()
 
     def test_message_json_accepts_fences_and_text_blocks(self):
