@@ -107,6 +107,25 @@ class EditorialTests(unittest.TestCase):
         self.assertEqual(Client._endpoint_url('https://openrouter.ai/api/v1/chat/completions','/chat/completions'),'https://openrouter.ai/api/v1/chat/completions')
         self.assertEqual(Client._endpoint_url('https://openrouter.ai/api/v1','/chat/completions'),'https://openrouter.ai/api/v1/chat/completions')
 
+    def test_empty_auth_scheme_defaults_to_bearer(self):
+        with tempfile.TemporaryDirectory() as d:
+            state=State(d)
+            env={
+                'ARABIC_LLM_API_KEY':'primary-key',
+                'ARABIC_LLM_BASE_URL':'https://primary.example/v1',
+                'ARABIC_LLM_MODEL':'primary-model',
+                'ARABIC_LLM_AUTH_SCHEME':'',
+                'ARABIC_LLM_FALLBACK_API_KEY':'fallback-key',
+                'ARABIC_LLM_FALLBACK_BASE_URL':'https://fallback.example/v1',
+                'ARABIC_LLM_FALLBACK_MODEL':'fallback-model',
+                'ARABIC_LLM_FALLBACK_AUTH_SCHEME':''
+            }
+            with patch.dict(os.environ,env,clear=True):
+                client=Client(state)
+                self.assertEqual(client._headers('primary-key',False)['Authorization'],'Bearer primary-key')
+                self.assertEqual(client._headers('fallback-key',True)['Authorization'],'Bearer fallback-key')
+            state.close()
+
     def test_primary_and_fallback_routes_are_independent(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(d)
