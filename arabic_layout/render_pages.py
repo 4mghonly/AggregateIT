@@ -21,7 +21,7 @@ def layout_plan(brief):
     # that ordering instead of re-sorting by region and accidentally promoting noise.
     leads=non_uae[:3]
     lead_keys={_event_key(e) for e in leads}
-    secondary=[e for e in non_uae if _event_key(e) not in lead_keys][:6]
+    secondary=[e for e in non_uae if _event_key(e) not in lead_keys][:3]
     return leads,secondary,uae
 
 def _source_line(e,limit=3):
