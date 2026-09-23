@@ -126,6 +126,21 @@ class EditorialTests(unittest.TestCase):
                 self.assertEqual(client._headers('fallback-key',True)['Authorization'],'Bearer fallback-key')
             state.close()
 
+    def test_live_llm_latency_budget_is_bounded(self):
+        with tempfile.TemporaryDirectory() as d:
+            state=State(d)
+            env={
+                'ARABIC_LLM_API_KEY':'primary-key',
+                'ARABIC_LLM_BASE_URL':'https://primary.example/v1',
+                'ARABIC_LLM_MODEL':'primary-model'
+            }
+            with patch.dict(os.environ,env,clear=True):
+                client=Client(state,max_calls=6,read_timeout=90,wall_budget_s=600)
+                self.assertEqual(client.max_calls,6)
+                self.assertEqual(client.read_timeout,90)
+                self.assertIsNotNone(client.deadline)
+            state.close()
+
     def test_primary_and_fallback_routes_are_independent(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(d)
