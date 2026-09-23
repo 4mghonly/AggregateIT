@@ -166,7 +166,17 @@ jobs:
 
       - name: Render and deliver reviewed manual Arabic briefing
         if: steps.mode.outputs.manual == 'true'
-        run: python -m arabic_newsletter.run --manual-file arabic_newsletter/manual_briefing.json --send
+        run: |
+          python - <<'PY'
+          import base64,gzip
+          from pathlib import Path
+          src=Path("arabic_newsletter/manual_briefing.b64")
+          dst=Path("arabic_newsletter/runtime/manual_briefing.json")
+          dst.parent.mkdir(parents=True,exist_ok=True)
+          dst.write_bytes(gzip.decompress(base64.b64decode(src.read_text(encoding="ascii").strip())))
+          print("reviewed manual briefing materialized",dst)
+          PY
+          python -m arabic_newsletter.run --manual-file arabic_newsletter/runtime/manual_briefing.json --send
 
       - name: Alert Arabic channel when a live briefing fails
         if: failure() && (steps.mode.outputs.live == 'true' || steps.mode.outputs.manual == 'true')
