@@ -54,11 +54,15 @@ def _headers(key,fallback=False):
     out.update(FALLBACK_EXTRA_HEADERS if fallback else EXTRA_HEADERS)
     if header: out[header]=(("%s %s"%(scheme,key)).strip() if scheme else key)
     return out
+def _endpoint_url(base,path):
+    base=(base or "").rstrip("/")
+    path="/"+(path or "").lstrip("/")
+    return base if base.endswith(path) else base+path
 def _request(base,key,model,messages,temperature,max_tokens,timeout,fallback=False):
     body={"model":model,"messages":messages,"temperature":temperature,"max_tokens":max_tokens}
     body.update(FALLBACK_REQUEST_OPTIONS if fallback else REQUEST_OPTIONS)
     path=FALLBACK_CHAT_PATH if fallback else CHAT_PATH
-    return requests.post(base+path,headers=_headers(key,fallback),json=body,timeout=timeout)
+    return requests.post(_endpoint_url(base,path),headers=_headers(key,fallback),json=body,timeout=timeout)
 def _content_text(message):
     if not isinstance(message,dict): raise ValueError("LLM message must be an object")
     content=message.get("content")
