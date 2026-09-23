@@ -153,6 +153,40 @@ class Client:
         path='/'+(path or '').lstrip('/')
         return base if base.endswith(path) else base+path
 
+    def probe_text(self,instruction):
+        """Connectivity/language probe that does not depend on structured JSON decoding."""
+        attempts=[]
+        routes=[]
+        if self.key and self.base and self.primary_models:
+            routes.append((self.base,self.key,self.primary_models[0],False))
+        if self.fallback_key and self.fallback_base and self.fallback_models:
+            routes.append((self.fallback_base,self.fallback_key,self.fallback_models[0],True))
+        for base,key,model,fallback in routes:
+            payload={'model':model,'messages':[{'role':'user','content':instruction}],
+                     'temperature':0,'max_tokens':180}
+            try:
+                r=self._send(base,key,payload,fallback)
+            except (requests.RequestException,EditorialError) as exc:
+                attempts.append(('fallback' if fallback else 'primary')+' '+type(exc).__name__)
+                continue
+            if r.status_code!=200:
+                attempts.append(('fallback' if fallback else 'primary')+f' HTTP {r.status_code}')
+                continue
+            try:
+                content=r.json()['choices'][0]['message']['content']
+                if isinstance(content,list):
+                    content=''.join(
+                        item if isinstance(item,str) else str(item.get('text') or item.get('content') or '')
+                        for item in content if isinstance(item,(str,dict))
+                    )
+                elif isinstance(content,dict):
+                    content=json.dumps(content,ensure_ascii=False)
+                if isinstance(content,str) and content.strip():
+                    return content.strip()
+            except (ValueError,KeyError,IndexError,TypeError):
+                attempts.append(('fallback' if fallback else 'primary')+' invalid-response')
+        raise EditorialError('LLM text probe failed: '+'; '.join(attempts))
+
     def _send(self,base,key,payload,fallback):
         body=dict(payload)
         body.update(self.fallback_request_options if fallback else self.request_options)
@@ -279,11 +313,8 @@ class Client:
                     decode_retry=False
                     print('Arabic LLM returned invalid JSON; trying configured alternate model:',self._models()[self.model_index],flush=True)
                     continue
-                if self._switch_fallback():
-                    decode_retry=False
-                    transient_retry=False
-                    print('Arabic LLM returned invalid JSON; switching to configured fallback route',flush=True)
-                    continue
+                # Let the caller invoke its compact structured-output repair path
+                # on the same authenticated route before considering credential failover.
                 raise EditorialError('Invalid or truncated model JSON after retry') from None
             self.state.put('last_model_used',response.get('model') or model)
             if use_cache: self.state.put(cache_key,result)
