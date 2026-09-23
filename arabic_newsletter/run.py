@@ -17,7 +17,7 @@ def main():
     parser=argparse.ArgumentParser()
     modes=parser.add_mutually_exclusive_group()
     modes.add_argument('--sample',action='store_true'); modes.add_argument('--audit',action='store_true')
-    modes.add_argument('--preflight',action='store_true')
+    modes.add_argument('--preflight',action='store_true'); modes.add_argument('--health-only',action='store_true')
     parser.add_argument('--probe-model',action='store_true'); parser.add_argument('--probe-discord',action='store_true')
     parser.add_argument('--long',action='store_true'); parser.add_argument('--send',action='store_true')
     parser.add_argument('--manual-now',action='store_true',help='Manual live assessment using the rolling six hours ending now; requires --send')
@@ -28,7 +28,7 @@ def main():
     if args.end and args.send: parser.error('Historical replay cannot be delivered')
     if args.preflight and args.send: parser.error('--preflight never publishes; use --probe-discord to test routing')
     if args.manual_now and not args.send: parser.error('--manual-now requires --send')
-    if args.manual_now and (args.sample or args.audit or args.preflight or args.end): parser.error('--manual-now is only for a current manual live edition')
+    if args.manual_now and (args.sample or args.audit or args.preflight or args.health_only or args.end): parser.error('--manual-now is only for a current manual live edition')
     state_dir=Path(os.getenv('ARABIC_STATE_DIR',str(ROOT/'runtime'/'state')))
     state_dir.mkdir(parents=True,exist_ok=True)
     with (state_dir/'run.lock').open('w') as lock:
@@ -50,6 +50,36 @@ def main():
                 if args.probe_discord: webhook_info()
                 print('Arabic configuration preflight passed' if args.probe_model else 'Arabic configuration present; API authentication not tested'); return
             if args.audit: audit(args.output); return
+            if args.health_only:
+                end=datetime.now(timezone.utc).astimezone(UAE).replace(microsecond=0)
+                start=end-timedelta(hours=6)
+                audit_registry=ROOT/'runtime'/'audit'/'discovered_sources.json'
+                registry=json.loads(audit_registry.read_text()) if audit_registry.exists() else None
+                articles,health=collect(start,end,registry=registry)
+                args.output.mkdir(parents=True,exist_ok=True)
+                write_json(args.output/'collection_health.json',health)
+                write_json(args.output/'source_evidence.json',articles)
+                healthy_by_region={}
+                for region in REGIONS:
+                    healthy_by_region[region]=[
+                        h for h in health
+                        if h.get('region')==region
+                        and h.get('status') in ('active','social_only')
+                        and int(h.get('items') or 0)>0
+                    ]
+                summary={
+                  'window_start':start.isoformat(),'window_end':end.isoformat(),
+                  'healthy_regions':sorted(r for r,v in healthy_by_region.items() if v),
+                  'unhealthy_regions':sorted(r for r,v in healthy_by_region.items() if not v),
+                  'active_extractors_by_region':{r:len(v) for r,v in healthy_by_region.items()},
+                  'substitutes_used':sum(bool(h.get('substitute')) for h in health),
+                  'articles_in_window':len(articles),
+                }
+                write_json(args.output/'source_health_summary.json',summary)
+                if summary['unhealthy_regions']:
+                    raise RuntimeError('Regional source-health gate failed after same-region substitution: '+','.join(summary['unhealthy_regions']))
+                print('Arabic source-health gate passed for all regions; articles in window:',len(articles))
+                return
             if args.sample:
                 brief=fixture(args.long)
                 brief['morning']=False
