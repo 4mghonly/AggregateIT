@@ -98,21 +98,32 @@ def _log_usage(model,inp,outp,cached=False):
 def preflight():
     global _force_fallback
     if _CONFIG_ERROR: return False,_CONFIG_ERROR
-    if not _route_complete() and not _route_complete(True): return False,"No complete LLM route configured"
-    messages=[{"role":"user","content":"ping"}]; last=None
-    if _route_complete():
+    primary_ready=_route_complete()
+    fallback_ready=_route_complete(True)
+    if not primary_ready and not fallback_ready: return False,"No complete LLM route configured"
+    messages=[{"role":"user","content":"ping"}]
+    results=[]
+    if primary_ready:
         try:
             r=_request(BASE_URL,API_KEY,MODEL,messages,0,1,20,False)
             if r.status_code==200: return True,"primary-ok"
-            last="primary HTTP %d %s"%(r.status_code,(r.text or "")[:120])
-        except Exception as exc: last="primary %s"%str(exc)[:120]
-    if _route_complete(True):
+            results.append("primary HTTP %d"%r.status_code)
+        except Exception as exc:
+            results.append("primary network/error %s"%type(exc).__name__)
+    else:
+        results.append("primary not configured")
+    if fallback_ready:
         try:
             r=_request(FALLBACK_BASE_URL,FALLBACK_API_KEY,FALLBACK_MODEL,messages,0,1,20,True)
-            if r.status_code==200: _force_fallback=True; return True,"fallback-ok"
-            last="fallback HTTP %d %s"%(r.status_code,(r.text or "")[:120])
-        except Exception as exc: last="fallback %s"%str(exc)[:120]
-    return False,last or "No configured LLM route returned HTTP 200"
+            if r.status_code==200:
+                _force_fallback=True
+                return True,"fallback-ok"
+            results.append("fallback HTTP %d"%r.status_code)
+        except Exception as exc:
+            results.append("fallback network/error %s"%type(exc).__name__)
+    else:
+        results.append("fallback not configured")
+    return False,"; ".join(results)
 def _decode_or_raise(r):
     if r.status_code in (408,409,425,429,500,502,503,504): raise LLMTransient("HTTP %d"%r.status_code)
     if 400<=r.status_code<500: raise LLMPermanent("HTTP %d %s"%(r.status_code,(r.text or "")[:200]))
