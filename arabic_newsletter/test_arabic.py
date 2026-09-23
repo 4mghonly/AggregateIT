@@ -271,7 +271,7 @@ class RenderTests(unittest.TestCase):
         self.assertTrue(lead_keys.isdisjoint(uae_keys))
         self.assertTrue(secondary_keys.isdisjoint(uae_keys))
         self.assertLessEqual(len(leads),3)
-        self.assertLessEqual(len(secondary),6)
+        self.assertLessEqual(len(secondary),3)
         self.assertLessEqual(len(uae),4)
 
     def test_page2_uses_only_active_region_cards_and_preserves_full_monitoring_list(self):
