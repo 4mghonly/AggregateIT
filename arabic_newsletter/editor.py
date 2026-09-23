@@ -201,7 +201,13 @@ class Client:
                     payload.pop('response_format',None); disabled.append('response_format')
                     self.state.put(features_key,list(set(disabled)))
                     continue
+                if r.status_code in (408,409,425,429,500,502,503,504) and not transient_retry:
+                    transient_retry=True
+                    print(f'Arabic LLM transient HTTP {r.status_code}; retrying active route once',flush=True)
+                    time.sleep(2)
+                    continue
                 if self._advance_model():
+                    transient_retry=False
                     print('Arabic model route rejected request; trying configured alternate model:',self._models()[self.model_index],flush=True)
                     continue
                 if not fallback:
@@ -211,13 +217,13 @@ class Client:
                         f' HTTP {r.status_code}'
                         f' model_not_found={("model" in low and ("not found" in low or "unknown" in low))}'
                         f' auth={("auth" in low or "api key" in low)}'
-                        f' rate={("rate" in low or "limit" in low)}'
+                        f' rate={(r.status_code==429 or "rate" in low or "limit" in low)}'
                         f' response_format={"response_format" in low}',
                         flush=True
                     )
-                if self._switch_fallback(): continue
-                if r.status_code in (408,409,425,429,500,502,503,504) and not transient_retry:
-                    transient_retry=True; time.sleep(2); continue
+                if self._switch_fallback():
+                    transient_retry=False
+                    continue
                 raise EditorialError(f'Model HTTP {r.status_code}: {detail}')
 
             try:
