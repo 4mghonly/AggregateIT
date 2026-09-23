@@ -1,7 +1,8 @@
 """Provider-agnostic LLM gateway for AggregateIT.
 Provider/model selection comes from environment variables mapped from GitHub
-Secrets (credentials) and Variables (non-secret routing/config). The API is
-OpenAI-compatible, but no provider, endpoint, or model is hard-coded.
+Actions Secrets. Primary and fallback routes are independent: either complete
+route can operate alone. The API is OpenAI-compatible, but no provider,
+endpoint, or model is hard-coded.
 """
 import os, json, time, hashlib, requests
 from datetime import datetime, timezone
@@ -17,19 +18,19 @@ API_KEY=_env("LLM_API_KEY")
 BASE_URL=_env("LLM_BASE_URL").rstrip("/")
 MODEL=_env("LLM_MODEL")
 FALLBACK_API_KEY=_env("LLM_FALLBACK_API_KEY")
-FALLBACK_BASE_URL=(_env("LLM_FALLBACK_BASE_URL") or BASE_URL).rstrip("/")
-FALLBACK_MODEL=_env("LLM_FALLBACK_MODEL") or MODEL
+FALLBACK_BASE_URL=_env("LLM_FALLBACK_BASE_URL").rstrip("/")
+FALLBACK_MODEL=_env("LLM_FALLBACK_MODEL")
 AUTH_HEADER=_env("LLM_AUTH_HEADER","Authorization")
 AUTH_SCHEME=_env("LLM_AUTH_SCHEME","Bearer")
 CHAT_PATH="/"+_env("LLM_CHAT_PATH","chat/completions").lstrip("/")
-FALLBACK_AUTH_HEADER=_env("LLM_FALLBACK_AUTH_HEADER") or AUTH_HEADER
-FALLBACK_AUTH_SCHEME=_env("LLM_FALLBACK_AUTH_SCHEME") if "LLM_FALLBACK_AUTH_SCHEME" in os.environ else AUTH_SCHEME
-FALLBACK_CHAT_PATH="/"+(_env("LLM_FALLBACK_CHAT_PATH") or CHAT_PATH).lstrip("/")
+FALLBACK_AUTH_HEADER=_env("LLM_FALLBACK_AUTH_HEADER","Authorization")
+FALLBACK_AUTH_SCHEME=_env("LLM_FALLBACK_AUTH_SCHEME","Bearer")
+FALLBACK_CHAT_PATH="/"+_env("LLM_FALLBACK_CHAT_PATH","chat/completions").lstrip("/")
 try:
     EXTRA_HEADERS=_json_env("LLM_EXTRA_HEADERS_JSON")
     REQUEST_OPTIONS=_json_env("LLM_REQUEST_OPTIONS_JSON")
-    FALLBACK_EXTRA_HEADERS=_json_env("LLM_FALLBACK_EXTRA_HEADERS_JSON") or EXTRA_HEADERS
-    FALLBACK_REQUEST_OPTIONS=_json_env("LLM_FALLBACK_REQUEST_OPTIONS_JSON") or REQUEST_OPTIONS
+    FALLBACK_EXTRA_HEADERS=_json_env("LLM_FALLBACK_EXTRA_HEADERS_JSON")
+    FALLBACK_REQUEST_OPTIONS=_json_env("LLM_FALLBACK_REQUEST_OPTIONS_JSON")
     _CONFIG_ERROR=""
 except Exception as exc:
     EXTRA_HEADERS={}; REQUEST_OPTIONS={}; FALLBACK_EXTRA_HEADERS={}; FALLBACK_REQUEST_OPTIONS={}
