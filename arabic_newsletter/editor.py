@@ -204,6 +204,17 @@ class Client:
                 if self._advance_model():
                     print('Arabic model route rejected request; trying configured alternate model:',self._models()[self.model_index],flush=True)
                     continue
+                if not fallback:
+                    low=detail.lower()
+                    print(
+                        'Arabic primary route rejected request:'
+                        f' HTTP {r.status_code}'
+                        f' model_not_found={("model" in low and ("not found" in low or "unknown" in low))}'
+                        f' auth={("auth" in low or "api key" in low)}'
+                        f' rate={("rate" in low or "limit" in low)}'
+                        f' response_format={"response_format" in low}',
+                        flush=True
+                    )
                 if self._switch_fallback(): continue
                 if r.status_code in (408,409,425,429,500,502,503,504) and not transient_retry:
                     transient_retry=True; time.sleep(2); continue
