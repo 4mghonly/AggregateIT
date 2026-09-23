@@ -75,6 +75,12 @@ class Client:
         self.fallback_key=os.getenv('ARABIC_LLM_FALLBACK_API_KEY') or os.getenv('QWEN_FALLBACK_API_KEY','')
         self.fallback_base=(os.getenv('ARABIC_LLM_FALLBACK_BASE_URL') or os.getenv('QWEN_FALLBACK_BASE_URL') or self.base).rstrip('/')
         self.fallback_model=(os.getenv('ARABIC_LLM_FALLBACK_MODEL') or os.getenv('QWEN_FALLBACK_MODEL') or self.model or '').strip()
+        extra=[m.strip() for m in os.getenv('ARABIC_LLM_FALLBACK_MODELS','').split(',') if m.strip()]
+        ordered=[self.model,self.fallback_model]+extra
+        self.model_candidates=[]
+        for model in ordered:
+            if model and model not in self.model_candidates: self.model_candidates.append(model)
+        self.model_index=0
         self.force_fallback=False
         self.force_fallback_credential=False
         if not self.key and not self.fallback_key: raise EditorialError('Missing Arabic/Qwen LLM credentials')
@@ -87,13 +93,23 @@ class Client:
         return response.status_code in (402,403) and any(k in value for k in ('quota','fund','billing','balance','credit'))
 
     def _endpoint(self):
+        model=self.model_candidates[min(self.model_index,len(self.model_candidates)-1)]
         if self.force_fallback_credential and self.fallback_key:
-            return self.fallback_base,self.fallback_key,self.fallback_model
-        if self.force_fallback and self.key:
-            return self.base,self.key,self.fallback_model
+            return self.fallback_base,self.fallback_key,model
         if self.key:
-            return self.base,self.key,self.model
-        return self.fallback_base,self.fallback_key,self.fallback_model
+            return self.base,self.key,model
+        return self.fallback_base,self.fallback_key,model
+
+    @staticmethod
+    def _model_unavailable(response):
+        value=(response.text or '').lower()
+        return response.status_code in (402,403) and any(k in value for k in ('quota','fund','billing','balance','credit','restriction','access denied'))
+
+    def _advance_model(self):
+        if self.model_index+1 < len(self.model_candidates):
+            self.model_index+=1
+            return True
+        return False
     def chat(self,system,data,max_tokens=9000,temperature=0.18,use_cache=True):
         messages=[{'role':'system','content':system},{'role':'user','content':json.dumps(data,ensure_ascii=False)}]
         base,key,model=self._endpoint()
@@ -107,7 +123,7 @@ class Client:
         for field in self.state.get(features_key) or []: payload.pop(field,None)
 
         for attempt in range(2):
-            if self.calls>=8: raise EditorialError('Eight-request per-run model budget exhausted')
+            if self.calls>=12: raise EditorialError('Twelve-request per-run model budget exhausted')
             self.calls+=1
             base,key,model=self._endpoint()
             payload['model']=model
@@ -121,28 +137,30 @@ class Client:
                 if attempt==0: time.sleep(2); continue
                 raise EditorialError('Model network failure') from None
 
-            if self._quota_exhausted(r) and not self.force_fallback and self.fallback_model and self.fallback_model!=self.model:
-                print('Arabic primary model quota exhausted; trying fallback model on the same credential',flush=True)
-                self.force_fallback=True
+            while self._model_unavailable(r) and self._advance_model():
                 base,key,model=self._endpoint()
+                print('Arabic model unavailable; trying configured fallback:',model,flush=True)
                 payload['model']=model
                 host=urlsplit(base).hostname or ''
                 if host.endswith(('aliyuncs.com','dashscope.com')): payload['enable_thinking']=False
                 else: payload.pop('enable_thinking',None)
+                self.calls+=1
                 try:
                     r=requests.post(base+'/chat/completions',
                       headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
                 except requests.RequestException:
                     raise EditorialError('Fallback model network failure') from None
 
-            if self._quota_exhausted(r) and self.fallback_key and not self.force_fallback_credential:
-                print('Arabic model quota exhausted; switching to configured fallback credential',flush=True)
+            if self._model_unavailable(r) and self.fallback_key and not self.force_fallback_credential:
+                print('Arabic models unavailable on primary credential; switching to configured fallback credential',flush=True)
                 self.force_fallback_credential=True
+                self.model_index=0
                 base,key,model=self._endpoint()
                 payload['model']=model
                 host=urlsplit(base).hostname or ''
                 if host.endswith(('aliyuncs.com','dashscope.com')): payload['enable_thinking']=False
                 else: payload.pop('enable_thinking',None)
+                self.calls+=1
                 try:
                     r=requests.post(base+'/chat/completions',
                       headers={'Authorization':'Bearer '+key},json=payload,timeout=(10,120))
@@ -188,6 +206,7 @@ class Client:
                     time.sleep(1)
                     continue
                 raise EditorialError('Invalid or truncated model JSON after retry') from None
+            self.state.put('last_model_used',model)
             if use_cache: self.state.put(cache_key,result)
             return result
         raise EditorialError('Model retry budget exhausted')
