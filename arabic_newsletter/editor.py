@@ -162,7 +162,27 @@ class Client:
             remaining=self.deadline-time.monotonic()
             if remaining<=0: raise EditorialError('LLM wall-clock budget exhausted')
             read_timeout=max(5,min(read_timeout,remaining))
-        return requests.post(self._endpoint_url(base,path),headers=self._headers(key,fallback),json=body,timeout=(10,read_timeout))
+        request_deadline=time.monotonic()+read_timeout
+        r=requests.post(self._endpoint_url(base,path),headers=self._headers(key,fallback),json=body,
+                        timeout=(10,read_timeout),stream=True)
+        # requests' read timeout is an idle timeout, not a total response deadline.
+        # A free provider can drip chunks for many minutes, so cap total wall time.
+        if isinstance(r,requests.Response):
+            chunks=[]; size=0
+            for chunk in r.iter_content(65536):
+                now=time.monotonic()
+                if now>=request_deadline or (self.deadline is not None and now>=self.deadline):
+                    r.close()
+                    raise requests.Timeout('LLM response exceeded wall-clock budget')
+                if not chunk: continue
+                size+=len(chunk)
+                if size>6_000_000:
+                    r.close()
+                    raise EditorialError('LLM response exceeded size budget')
+                chunks.append(chunk)
+            r._content=b''.join(chunks)
+            r._content_consumed=True
+        return r
 
     def chat(self,system,data,max_tokens=9000,temperature=0.18,use_cache=True):
         messages=[{'role':'system','content':system},{'role':'user','content':json.dumps(data,ensure_ascii=False)}]
@@ -186,10 +206,13 @@ class Client:
             try:
                 r=self._send(base,key,payload,fallback)
             except requests.RequestException:
+                if not transient_retry:
+                    transient_retry=True
+                    print('Arabic LLM network/latency timeout; retrying active route once',flush=True)
+                    time.sleep(2)
+                    continue
                 if self._advance_model(): continue
                 if self._switch_fallback(): continue
-                if not transient_retry:
-                    transient_retry=True; time.sleep(2); continue
                 raise EditorialError('LLM network failure') from None
 
             if r.status_code!=200:
