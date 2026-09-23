@@ -46,7 +46,7 @@ def main():
             if args.sample:
                 brief=fixture(args.long)
                 brief['morning']=False
-                brief['analysis']={}
+                brief['analysis']=brief.get('analysis') or {}
 
             else:
                 if args.manual_now:
