@@ -59,6 +59,7 @@ jobs:
           QWEN_FALLBACK_API_KEY: ${{ secrets.QWEN_FALLBACK_API_KEY }}
           QWEN_FALLBACK_BASE_URL: ${{ secrets.QWEN_FALLBACK_BASE_URL }}
           QWEN_MODEL: qwen3.8-omni-flash
+          QWEN_FALLBACK_MODEL: qwen3.8-flash
           QWEN_MAX_CALLS: "10"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOCIAL_PROXY_URL: ${{ secrets.SOCIAL_PROXY_URL }}
