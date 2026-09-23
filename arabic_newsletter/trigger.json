@@ -1,4 +1,4 @@
 {
-  "triggered_at": "2026-09-23T20:08:00+04:00",
-  "reason": "manual live briefing retry after model fallback configuration"
+  "triggered_at": "2026-09-23T21:00:00+04:00",
+  "reason": "source-health-only diagnostic before manual real briefing"
 }
