@@ -1,4 +1,4 @@
 {
-  "triggered_at": "2026-09-23T23:43:00+04:00",
-  "reason": "retry live Arabic briefing with updated LLM model and sanitized diagnostics"
+  "triggered_at": "2026-09-23T23:45:00+04:00",
+  "reason": "retry live Arabic briefing after transient retry ordering fix"
 }
