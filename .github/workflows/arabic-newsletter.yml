@@ -36,12 +36,12 @@ jobs:
     timeout-minutes: 35
     env:
       ARABIC_STATE_DIR: arabic_newsletter/runtime/state
-      ARABIC_LLM_API_KEY: ${{ secrets.ARABIC_LLM_API_KEY || secrets.LLM_API_KEY }}
-      ARABIC_LLM_BASE_URL: ${{ secrets.ARABIC_LLM_BASE_URL || secrets.LLM_BASE_URL }}
-      ARABIC_LLM_MODEL: ${{ secrets.ARABIC_LLM_MODEL || secrets.LLM_MODEL }}
-      ARABIC_LLM_FALLBACK_API_KEY: ${{ secrets.ARABIC_LLM_FALLBACK_API_KEY || secrets.LLM_FALLBACK_API_KEY }}
-      ARABIC_LLM_FALLBACK_BASE_URL: ${{ secrets.ARABIC_LLM_FALLBACK_BASE_URL || secrets.LLM_FALLBACK_BASE_URL }}
-      ARABIC_LLM_FALLBACK_MODEL: ${{ secrets.ARABIC_LLM_FALLBACK_MODEL || secrets.LLM_FALLBACK_MODEL }}
+      ARABIC_LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      ARABIC_LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+      ARABIC_LLM_MODEL: ${{ secrets.LLM_MODEL }}
+      ARABIC_LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
+      ARABIC_LLM_FALLBACK_BASE_URL: ${{ secrets.LLM_FALLBACK_BASE_URL }}
+      ARABIC_LLM_FALLBACK_MODEL: ${{ secrets.LLM_FALLBACK_MODEL }}
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
     steps:
       - uses: actions/checkout@v5
