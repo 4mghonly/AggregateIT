@@ -7,7 +7,7 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from .core import ROOT, REGIONS, State, UAE, edition_window, live_window, write_json
-from .collect import audit, collect
+from .collect import audit, collect, health_summary
 from .editor import Client, synthesize, build_analysis, is_arabic
 from .delivery import webhook_info, send
 from .render import render, references
@@ -83,26 +83,14 @@ def main():
                 args.output.mkdir(parents=True,exist_ok=True)
                 write_json(args.output/'collection_health.json',health)
                 write_json(args.output/'source_evidence.json',articles)
-                healthy_by_region={}
-                for region in REGIONS:
-                    healthy_by_region[region]=[
-                        h for h in health
-                        if h.get('region')==region
-                        and h.get('status') in ('active','social_only')
-                        and int(h.get('items') or 0)>0
-                    ]
-                health_summary={
-                  'healthy_regions':sorted(r for r,v in healthy_by_region.items() if v),
-                  'unhealthy_regions':sorted(r for r,v in healthy_by_region.items() if not v),
-                  'active_extractors_by_region':{r:len(v) for r,v in healthy_by_region.items()},
-                  'substitutes_used':sum(bool(h.get('substitute')) for h in health),
-                  'articles_in_window':len(articles),
-                }
-                write_json(args.output/'source_health_summary.json',health_summary)
+                source_health=health_summary(health)
+                write_json(args.output/'source_health_summary.json',source_health)
                 if not any(r['status'] in ('active','social_only') for r in health):
                     raise RuntimeError('All source collection failed; publication blocked')
-                if health_summary['unhealthy_regions']:
-                    raise RuntimeError('Regional source-health gate failed after same-region substitution: '+','.join(health_summary['unhealthy_regions']))
+                if source_health['unresolved_regions']:
+                    raise RuntimeError('Regional source-health gate failed after same-region substitution: '+','.join(source_health['unresolved_regions']))
+                if args.send and not articles:
+                    raise RuntimeError('Live extraction yielded no dated relevant articles; publication blocked')
                 try:
                     events,rejected=synthesize(articles,state)
                 finally:
@@ -117,13 +105,13 @@ def main():
                   'event_source_languages':dict(Counter(s.get('language','unknown') for s in event_sources.values())),
                   'event_source_count':len(event_sources),
                   'non_arabic_event_sources':sum(s.get('language')!='ar' for s in event_sources.values()),
-                  'healthy_regions':health_summary['healthy_regions'],
-                  'active_extractors_by_region':health_summary['active_extractors_by_region'],
-                  'substitutes_used':health_summary['substitutes_used'],
+                  'healthy_regions':sorted(r for r,v in source_health['regions'].items() if v['healthy_extractors']),
+                  'active_extractors_by_region':{r:v['healthy_extractors'] for r,v in source_health['regions'].items()},
+                  'substitutes_used':sum(v['substitutes_used'] for v in source_health['regions'].values()),
                 }
                 brief=dict(sample=False,window_start=collection_start.isoformat(),window_end=end.isoformat(),events=events,
                   input_count=len(articles),health=health,rejected=rejected,analysis=analysis,morning=morning,
-                  coverage=coverage,empty_cycle=not bool(events),previous_events=state.get('previous_events') or [])
+                  coverage=coverage,source_health=source_health,empty_cycle=not bool(events),previous_events=state.get('previous_events') or [])
                 if args.send and not events:
                     print('No qualified events; delivering an explicit no-material-change status briefing',flush=True)
             paths,clipped=render(brief,args.output)
