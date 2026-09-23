@@ -62,18 +62,27 @@ class Canvas:
         self.clipped=0
 
     def font(self,size,bold=False):
+        # SIRAJ NOIR is the preferred production face for the Arabic briefing.
+        # The explicit env path lets CI point at an ephemeral build without
+        # committing or distributing font binaries.
+        siraj_env=os.getenv('SIRAJ_NOIR_FONT','').strip()
+        bundled=Path(__file__).resolve().parent/'siraj_noir'/'build'/'SirajNoir-Display.ttf'
         custom=os.getenv('ARABIC_FONT_DIR')
         candidates=[]
+        if siraj_env:
+            candidates.append(Path(siraj_env))
+        candidates.append(bundled)
         if custom:
             root=Path(custom)
             candidates.append(root/('NotoSansArabic-Bold.ttf' if bold else 'NotoSansArabic-Regular.ttf'))
-        # Prefer Noto Sans Arabic for dark-screen readability and Arabic shaping.
-        # DejaVu remains a compatibility fallback only.
+        # Noto remains the safe fallback until the original Siraj SVG outlines
+        # are present and the font has been built successfully.
         candidates += [
             Path('/usr/share/fonts/truetype/noto')/('NotoSansArabic-Bold.ttf' if bold else 'NotoSansArabic-Regular.ttf'),
             Path('/usr/share/fonts/truetype/dejavu')/('DejaVuSans-Bold.ttf' if bold else 'DejaVuSans.ttf')]
         for p in candidates:
-            if p.exists(): return ImageFont.truetype(str(p),size,layout_engine=ImageFont.Layout.RAQM)
+            if p.exists():
+                return ImageFont.truetype(str(p),size,layout_engine=ImageFont.Layout.RAQM)
         raise RuntimeError('Arabic font not found')
 
     def rounded(self,box,fill=PAPER,outline=BORDER,radius=14,width=2):
