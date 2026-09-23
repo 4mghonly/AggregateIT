@@ -8,8 +8,7 @@ components have been removed from this branch.
 
 ## Approved scope
 
-- Modern Standard Arabic from original-language evidence; three 3840×2160 PNG slides in the approved clean analytical-dashboard format
-  in the approved Gazette palette and panel geometry, with native RTL shaping.
+- Modern Standard Arabic from original-language evidence; **two 3840×2160 PNG pages** in a restrained policy-brief format with native RTL shaping. The design deliberately uses fewer panels, larger story summaries and different functions on each page instead of repeating the same event in multiple boxes.
 - Every six hours: **00:00 / 06:00 / 12:00 / 18:00 Asia/Dubai**. Each edition covers
   its previous six-hour publication window. Publication can be delayed by runner queues.
 - GCC (AE/SA/QA/KW/BH), **Oman** as a dedicated country view, Iran, Turkey, Iraq,
@@ -33,6 +32,8 @@ python -m arabic_newsletter.run --sample --long
 python -m arabic_newsletter.run --audit
 python -m arabic_newsletter.run --preflight --probe-model --probe-discord
 python -m arabic_newsletter.run --send
+# explicit manual assessment ending now (Arabic branch workflow only)
+python -m arabic_newsletter.run --send --manual-now
 ```
 
 Linux fonts: `fonts-dejavu-core`; Pillow must have RAQM enabled. Rendering fails
@@ -94,7 +95,7 @@ Each event needs literal supporting evidence, known article IDs, Arabic prose,
 supported numeric values and an editorial consistency review. All published
 claims remain attributed: a model review is not independent verification.
 
-Slides use measured text boxes and visible ellipses for oversized content.
+Pages use measured text boxes and visible ellipses for oversized content.
 `sources-ar.txt` carries all complete summaries, analysis and links; no content is
 silently lost solely to the slide layout. The chart measures selected coverage,
 not real-world incident prevalence or quantified geopolitical risk.
@@ -127,4 +128,4 @@ successful collection, model translation and confirmed delivery to the new chann
 
 ## Locked visual format
 
-The Arabic briefing uses the approved three-slide, image-free command-brief design. It is typography-first, uses no generated imagery or vector maps, preserves the regional dashboard on page 2, and reserves page 3 for expanded evidence-bound analysis. Do not reintroduce decorative rendering that competes with legibility.
+The Arabic briefing uses a **two-page, image-free policy-maker design** inspired by a simple printed intelligence brief. Page 1 contains only expanded UAE coverage and three substantial lead stories. Page 2 contains only secondary stories that did not appear on page 1, plus an executive assessment, developing storylines, concrete watch indicators and a compact regional coverage strip. Do not repeat the same story in multiple news boxes. Do not reintroduce decorative rendering that competes with legibility.
