@@ -571,6 +571,8 @@ check("runtime fallback route accepted", ok58 and detail58 == "fallback-ok", (ok
 check("primary model came from runtime config", sent[0][2].get("model") == "primary-model", sent)
 check("fallback model came from runtime config", sent[-1][2].get("model") == "fallback-model", sent)
 check("fallback auth style is runtime-configurable", sent[-1][1].get("api-key") == "fallback-key", sent[-1][1])
+check("full chat endpoint is not duplicated", llm._endpoint_url("https://openrouter.ai/api/v1/chat/completions","/chat/completions") == "https://openrouter.ai/api/v1/chat/completions")
+check("base URL receives chat path once", llm._endpoint_url("https://openrouter.ai/api/v1","/chat/completions") == "https://openrouter.ai/api/v1/chat/completions")
 
 # Either route must be able to operate independently.
 llm.API_KEY = "primary-only-key"
