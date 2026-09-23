@@ -2749,5 +2749,19 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s102",
+    "name": "Yemen Monitor",
+    "region": "yemen",
+    "country": "YE",
+    "language": "ar",
+    "website": "https://www.yemenmonitor.com",
+    "feed": "https://www.yemenmonitor.com/feed/",
+    "affiliation": "independent",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
   }
 ]
