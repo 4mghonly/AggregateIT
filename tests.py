@@ -668,7 +668,7 @@ with tempfile.TemporaryDirectory() as td67:
 print("[T68] Engine workflow runs once with bounded token budget")
 wf68 = open(os.path.join(os.path.dirname(os.path.abspath(main.__file__)), ".github", "workflows", "engine.yml")).read()
 check("one engine execution", wf68.count("python main.py") == 1, wf68.count("python main.py"))
-check("ten-call hard cap", 'QWEN_MAX_CALLS: "10"' in wf68)
+check("ten-call hard cap", 'LLM_MAX_CALLS: "10"' in wf68)
 check("manual run defaults dry", "default: true" in wf68 and "DRY_RUN:" in wf68)
 
 print("[T69] Source audit covers native social adapters")
