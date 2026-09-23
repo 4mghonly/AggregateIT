@@ -572,6 +572,41 @@ check("primary model came from runtime config", sent[0][2].get("model") == "prim
 check("fallback model came from runtime config", sent[-1][2].get("model") == "fallback-model", sent)
 check("fallback auth style is runtime-configurable", sent[-1][1].get("api-key") == "fallback-key", sent[-1][1])
 
+# Either route must be able to operate independently.
+llm.API_KEY = "primary-only-key"
+llm.BASE_URL = "https://primary-only.example/v1"
+llm.MODEL = "primary-only-model"
+llm.FALLBACK_API_KEY = ""
+llm.FALLBACK_BASE_URL = ""
+llm.FALLBACK_MODEL = ""
+llm._force_fallback = False
+sent58_primary = []
+def fake_primary_only(url, headers=None, json=None, timeout=None):
+    sent58_primary.append(url)
+    return FakeResp(200,"ok")
+llm.requests.post = fake_primary_only
+ok58p, detail58p = llm.preflight()
+llm.requests.post = _orig
+check("primary route works with fallback absent", ok58p and detail58p == "primary-ok" and len(sent58_primary) == 1, (ok58p,detail58p,sent58_primary))
+check("fallback route is incomplete when its own trio is absent", not llm._route_complete(True))
+
+llm.API_KEY = ""
+llm.BASE_URL = ""
+llm.MODEL = ""
+llm.FALLBACK_API_KEY = "fallback-only-key"
+llm.FALLBACK_BASE_URL = "https://fallback-only.example/v1"
+llm.FALLBACK_MODEL = "fallback-only-model"
+llm._force_fallback = False
+sent58_fallback = []
+def fake_fallback_only(url, headers=None, json=None, timeout=None):
+    sent58_fallback.append(url)
+    return FakeResp(200,"ok")
+llm.requests.post = fake_fallback_only
+ok58f, detail58f = llm.preflight()
+llm.requests.post = _orig
+check("fallback route works with primary absent", ok58f and detail58f == "fallback-ok" and len(sent58_fallback) == 1, (ok58f,detail58f,sent58_fallback))
+check("primary route is incomplete when its own trio is absent", not llm._route_complete())
+
 print("[T59] Gazette event loader preserves canonical fields")
 class EventStore59:
     def recent_all_events(self, hours=24, limit=100):
