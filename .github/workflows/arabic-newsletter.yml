@@ -36,15 +36,12 @@ jobs:
     timeout-minutes: 35
     env:
       ARABIC_STATE_DIR: arabic_newsletter/runtime/state
-      ARABIC_LLM_API_KEY: ${{ secrets.ARABIC_LLM_API_KEY || secrets.QWEN_API_KEY }}
-      ARABIC_LLM_BASE_URL: ${{ secrets.ARABIC_LLM_BASE_URL || secrets.QWEN_BASE_URL }}
-      ARABIC_LLM_MODEL: qwen3.8-omni-flash
-      ARABIC_LLM_FALLBACK_API_KEY: ${{ secrets.ARABIC_LLM_FALLBACK_API_KEY || secrets.QWEN_FALLBACK_API_KEY }}
-      ARABIC_LLM_FALLBACK_BASE_URL: ${{ secrets.ARABIC_LLM_FALLBACK_BASE_URL || secrets.QWEN_FALLBACK_BASE_URL }}
-      ARABIC_LLM_FALLBACK_MODEL: qwen3.8-flash
-      ARABIC_LLM_FALLBACK_MODELS: qwen3.8-27b,qwen-max,qwen-turbo,qwen-flash,deepseek-v4.1-flash,qwen3.7-plus
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-      ARABIC_OPENROUTER_MODEL: deepseek/deepseek-v4.1-flash
+      ARABIC_LLM_API_KEY: ${{ secrets.ARABIC_LLM_API_KEY || secrets.LLM_API_KEY }}
+      ARABIC_LLM_BASE_URL: ${{ secrets.ARABIC_LLM_BASE_URL || secrets.LLM_BASE_URL }}
+      ARABIC_LLM_MODEL: ${{ secrets.ARABIC_LLM_MODEL || secrets.LLM_MODEL }}
+      ARABIC_LLM_FALLBACK_API_KEY: ${{ secrets.ARABIC_LLM_FALLBACK_API_KEY || secrets.LLM_FALLBACK_API_KEY }}
+      ARABIC_LLM_FALLBACK_BASE_URL: ${{ secrets.ARABIC_LLM_FALLBACK_BASE_URL || secrets.LLM_FALLBACK_BASE_URL }}
+      ARABIC_LLM_FALLBACK_MODEL: ${{ secrets.ARABIC_LLM_FALLBACK_MODEL || secrets.LLM_FALLBACK_MODEL }}
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
     steps:
       - uses: actions/checkout@v5
