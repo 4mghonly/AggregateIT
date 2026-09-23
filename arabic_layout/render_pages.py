@@ -5,8 +5,8 @@ from arabic_newsletter.core import UAE, REGIONS
 from .render_engine import *
 
 def _footer(c,page):
-    c.text('المعلومات منسوبة إلى مصادرها، والتحليل تقديري وليس تحققاً مستقلاً',(1040,2108,1760,34),21,True,MUTED,'center',min_size=19,line_ratio=1.15)
-    c.text(f'الصفحة {page} من 3',(55,2108,300,34),21,True,MUTED,'left',min_size=19,line_ratio=1.15)
+    c.text('المعلومات منسوبة إلى مصادرها، والتحليل تقديري وليس تحققاً مستقلاً',(1040,2108,1760,34),22,True,MUTED,'center',min_size=20,line_ratio=1.14)
+    c.text(f'الصفحة {page} من 3',(55,2108,300,34),22,True,MUTED,'left',min_size=20,line_ratio=1.14)
 
 def _event_key(e):
     return e.get('fingerprint') or sanitize_text(e.get('title_ar',''))
@@ -42,18 +42,18 @@ def _story_card(c,box,e,index,lead=False):
     c.rounded(box,PANEL_ALT,BORDER,10,1)
     c.d.rectangle((x+w-8,y+8,x+w-2,y+h-8),fill=col)
     c.text(f'أولوية {index}' if lead else REGIONS.get(e.get('region'),'تطور إضافي'),
-           (x+24,y+14,w-48,40),24,True,col,min_size=21,line_ratio=1.15)
+           (x+24,y+14,w-48,40),26,True,col,min_size=23,line_ratio=1.14)
     c.text(compact(e.get('title_ar',''),155 if lead else 135),
-           (x+24,y+56,w-48,102),42 if lead else 36,True,INK,min_size=29,line_ratio=1.20)
+           (x+24,y+56,w-48,102),45 if lead else 38,True,INK,min_size=31,line_ratio=1.18)
     summary_limit=620 if lead else 420
     c.text(compact(e.get('summary_ar',''),summary_limit),
            (x+24,y+168,w-48,h-300 if lead else h-232),
-           33 if lead else 29,False,INK,min_size=25,line_ratio=1.30)
-    c.text(compact(_source_line(e),145),(x+24,y+h-112,w-48,38),21,True,MUTED,min_size=19,line_ratio=1.16)
+           35 if lead else 31,False,INK,min_size=27,line_ratio=1.27)
+    c.text(compact(_source_line(e),145),(x+24,y+h-112,w-48,38),22,True,MUTED,min_size=20,line_ratio=1.14)
     if lead:
         why=sanitize_text(e.get('assessment_ar',''))
         if why:
-            c.text('لماذا يهم: '+compact(why,185),(x+24,y+h-70,w-48,50),24,True,col,min_size=20,line_ratio=1.20)
+            c.text('لماذا يهم: '+compact(why,185),(x+24,y+h-70,w-48,50),26,True,col,min_size=22,line_ratio=1.18)
 
 def _cycle_delta(brief):
     previous=brief.get('previous_events') or []
@@ -76,7 +76,7 @@ def _uae_panel(c,box,brief,events):
                   'قيادة، دبلوماسية، سلامة عامة، طيران، حدود وبنية استراتيجية')
     if not events:
         c.text('لا يوجد تحديث إماراتي مؤهل في النافذة الحالية. يستمر الرصد للمصادر الرسمية والمحلية دون ملء المساحة بمحتوى روتيني.',
-               (x,y,w,160),33,True,MUTED,min_size=27,line_ratio=1.25)
+               (x,y,w,160),35,True,MUTED,min_size=29,line_ratio=1.22)
         yy=y+190
     else:
         usable_h=h-170
@@ -84,17 +84,17 @@ def _uae_panel(c,box,brief,events):
         yy=y
         for i,e in enumerate(events):
             col=REGION_COLORS.get('gcc',OLIVE)
-            c.text(compact(e.get('title_ar',''),90),(x,yy,w,74),33,True,col,min_size=27,line_ratio=1.20)
-            c.text(compact(e.get('summary_ar',''),235),(x,yy+80,w,step-130),28,False,INK,min_size=23,line_ratio=1.28)
-            c.text(compact(_source_line(e,2),96),(x,yy+step-42,w,32),19,True,MUTED,min_size=17,line_ratio=1.16)
+            c.text(compact(e.get('title_ar',''),90),(x,yy,w,74),35,True,col,min_size=29,line_ratio=1.18)
+            c.text(compact(e.get('summary_ar',''),235),(x,yy+80,w,step-130),30,False,INK,min_size=25,line_ratio=1.25)
+            c.text(compact(_source_line(e,2),96),(x,yy+step-42,w,32),20,True,MUTED,min_size=18,line_ratio=1.14)
             if i<len(events)-1: c.line(x,yy+step-5,x+w,yy+step-5,BORDER,1)
             yy+=step
     # Preserve the requested "changes since last briefing" signal without
     # repeating the same headlines in another card.
     note_y=y+h-126
     c.line(x,note_y-12,x+w,note_y-12,SAND,2)
-    c.text('منذ الإحاطة السابقة',(x,note_y,w,32),22,True,SAND,min_size=20,line_ratio=1.15)
-    c.text(_cycle_delta(brief),(x,note_y+36,w,70),21,True,MUTED,min_size=18,line_ratio=1.20)
+    c.text('منذ الإحاطة السابقة',(x,note_y,w,32),24,True,SAND,min_size=22,line_ratio=1.14)
+    c.text(_cycle_delta(brief),(x,note_y+36,w,70),23,True,MUTED,min_size=20,line_ratio=1.18)
 
 def _analysis_panel(c,box,brief):
     a=brief.get('analysis') or {}
@@ -108,7 +108,7 @@ def _analysis_panel(c,box,brief):
     if not text:
         vals=[sanitize_text(e.get('assessment_ar','')) for e in brief.get('events',[]) if e.get('assessment_ar')]
         text=' '.join(vals[:5])
-    c.text(text or 'لا تتوافر مادة تحليلية كافية في هذه الدورة.',(x,y,w,h),34,False,INK,min_size=26,line_ratio=1.32)
+    c.text(text or 'لا تتوافر مادة تحليلية كافية في هذه الدورة.',(x,y,w,h),36,False,INK,min_size=28,line_ratio=1.29)
 
 def _developing_items(brief):
     a=brief.get('analysis') or {}
@@ -133,7 +133,7 @@ def _developing_items(brief):
 def _developing_panel(c,box,brief):
     x,y,w,h=panel(c,box,'قصص قيد التطور',SAND,
                   'مسارات لم تُحسم بعد؛ صياغة مختلفة عن عناوين الأخبار')
-    list_block(c,_developing_items(brief),(x,y,w,h),SAND,27,5)
+    list_block(c,_developing_items(brief),(x,y,w,h),SAND,29,5)
 
 def _watch_panel(c,box,brief):
     a=brief.get('analysis') or {}
@@ -144,7 +144,7 @@ def _watch_panel(c,box,brief):
         items=[sanitize_text(e.get('watch_ar','')) for e in brief.get('events',[]) if e.get('watch_ar')]
     x,y,w,h=panel(c,box,'ما يجب مراقبته',BLUE,
                   'مؤشرات قابلة للملاحظة في الدورة المقبلة، لا توقعات قطعية')
-    list_block(c,items,(x,y,w,h),BLUE,27,6)
+    list_block(c,items,(x,y,w,h),BLUE,29,6)
 
 def page2_region_plan(events):
     first={}
@@ -169,8 +169,8 @@ def _coverage_panel(c,box,events):
         active_now=region in active
         color=REGION_COLORS.get(region,STEEL)
         c.rounded((xx,yy,cw,ch),PANEL_ALT,color if active_now else BORDER,8,1)
-        c.text(REGIONS[region],(xx+8,yy+5,cw-16,32),20,True,color if active_now else MUTED,'center',min_size=17,line_ratio=1.12)
-        c.text('مادة مؤهلة' if active_now else 'مراقبة',(xx+8,yy+38,cw-16,26),17,True,color if active_now else MUTED,'center',min_size=15,line_ratio=1.12)
+        c.text(REGIONS[region],(xx+8,yy+5,cw-16,32),21,True,color if active_now else MUTED,'center',min_size=18,line_ratio=1.10)
+        c.text('مادة مؤهلة' if active_now else 'مراقبة',(xx+8,yy+38,cw-16,26),18,True,color if active_now else MUTED,'center',min_size=16,line_ratio=1.10)
 
 def page1(brief,path):
     c=Canvas(); masthead(c,brief,1); stats(c,brief)
@@ -183,7 +183,7 @@ def page1(brief,path):
     x,y,w,h=panel(c,(1250,330,2535,1745),'أبرز ما يهم اليوم',ALERT,
                   'ثلاثة تطورات مختارة، كل قصة تظهر مرة واحدة فقط')
     if not leads:
-        c.text('لا توجد تطورات رئيسية مؤهلة بعد التحقق التحريري في النافذة الحالية.',(x,y,w,h),34,True,MUTED,'center')
+        c.text('لا توجد تطورات رئيسية مؤهلة بعد التحقق التحريري في النافذة الحالية.',(x,y,w,h),36,True,MUTED,'center')
     else:
         gap=18
         rh=(h-gap*(len(leads)-1))//len(leads)
@@ -200,7 +200,7 @@ def page2(brief,path):
     x,y,w,h=panel(c,(55,330,2265,1250),'تطورات إضافية تستحق الانتباه',BLUE,
                   'أحداث ثانوية مختارة، من دون إعادة أي قصة من الصفحة الأولى')
     if not secondary:
-        c.text('لا توجد تطورات إضافية مؤهلة في هذه الدورة.',(x,y,w,h),30,True,MUTED,'center')
+        c.text('لا توجد تطورات إضافية مؤهلة في هذه الدورة.',(x,y,w,h),32,True,MUTED,'center')
     else:
         gap=12
         rh=(h-gap*(len(secondary)-1))//len(secondary)
@@ -252,8 +252,8 @@ def _page3_stats(c,brief,events):
         x=margin+i*(cw+gap)
         c.rounded((x,y,cw,h),PAPER,BORDER,10,1)
         c.d.rectangle((x+cw-7,y+8,x+cw-2,y+h-8),fill=color)
-        c.text(label,(x+24,y+13,cw-48,34),23,True,MUTED,'center',min_size=21,line_ratio=1.15)
-        c.text(str(val),(x+24,y+50,cw-48,48),35,True,INK,'center',min_size=31,line_ratio=1.15)
+        c.text(label,(x+24,y+13,cw-48,34),25,True,MUTED,'center',min_size=22,line_ratio=1.14)
+        c.text(str(val),(x+24,y+50,cw-48,48),37,True,INK,'center',min_size=33,line_ratio=1.14)
 
 def _category_rows(c,box,title,subtitle,color,rows):
     x,y,w,h=panel(c,box,title,color,subtitle)
@@ -263,8 +263,8 @@ def _category_rows(c,box,title,subtitle,color,rows):
     step=max(1,h//len(rows))
     for i,(head,body) in enumerate(rows):
         yy=y+i*step
-        c.text(head,(x,yy,w,40),27,True,color,min_size=23,line_ratio=1.16)
-        c.text(compact(body,190),(x,yy+44,w,step-56),24,False,INK,min_size=21,line_ratio=1.27)
+        c.text(head,(x,yy,w,40),29,True,color,min_size=25,line_ratio=1.14)
+        c.text(compact(body,190),(x,yy+44,w,step-56),26,False,INK,min_size=23,line_ratio=1.24)
         if i<len(rows)-1: c.line(x,yy+step-5,x+w,yy+step-5,BORDER,1)
 
 def _geographic_rows(events):
@@ -353,9 +353,9 @@ def page3(brief,path):
     # Slim executive continuity strip: continuing stories stay visible when they
     # remain the most consequential, even if they appeared in the prior edition.
     c.rounded((55,1958,W-110,118),PANEL_ALT,BORDER,9,1)
-    c.text('الخلاصة التنفيذية',(W-560,1974,470,40),25,True,STEEL,min_size=22,line_ratio=1.15)
+    c.text('الخلاصة التنفيذية',(W-560,1974,470,40),27,True,STEEL,min_size=24,line_ratio=1.14)
     c.text('استمرار القصة نفسها لا يقلل أهميتها إذا بقيت الأعلى تأثيراً.  •  التمييز مطلوب بين الضجيج الإعلامي والمؤشرات القابلة للرصد.  •  أولوية المتابعة: الجغرافيا، الفاعلون المسلحون، والنقاط البحرية الحساسة.',
-           (160,1972,W-800,52),21,True,INK,min_size=18,line_ratio=1.18)
+           (160,1972,W-800,52),23,True,INK,min_size=20,line_ratio=1.16)
     _footer(c,3); c.save(path); return c.clipped
 
 
