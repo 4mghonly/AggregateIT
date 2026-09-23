@@ -1,4 +1,4 @@
-"""Two-page Arabic policy briefing; low-clutter, evidence-first and image-free."""
+"""Three-page Arabic policy briefing; low-clutter, evidence-first and image-free."""
 from datetime import datetime
 from pathlib import Path
 from arabic_newsletter.core import UAE, REGIONS
@@ -6,7 +6,7 @@ from .render_engine import *
 
 def _footer(c,page):
     c.text('المعلومات منسوبة إلى مصادرها، والتحليل تقديري وليس تحققاً مستقلاً',(1110,2115,1620,28),18,True,MUTED,'center')
-    c.text(f'الصفحة {page} من 2',(55,2112,260,30),18,True,MUTED,'left')
+    c.text(f'الصفحة {page} من 3',(55,2112,260,30),18,True,MUTED,'left')
 
 def _event_key(e):
     return e.get('fingerprint') or sanitize_text(e.get('title_ar',''))
@@ -39,7 +39,7 @@ def _source_line(e,limit=3):
 def _story_card(c,box,e,index,lead=False):
     x,y,w,h=map(int,box)
     _label,col,pale=severity(e)
-    c.rounded(box,'#FCFAF5',BORDER,10,1)
+    c.rounded(box,PANEL_ALT,BORDER,10,1)
     c.d.rectangle((x+w-8,y+8,x+w-2,y+h-8),fill=col)
     c.text(f'أولوية {index}' if lead else REGIONS.get(e.get('region'),'تطور إضافي'),
            (x+24,y+18,w-48,34),20,True,col)
@@ -168,7 +168,7 @@ def _coverage_panel(c,box,events):
         row=i//cols; col=i%cols; xx=x+col*(cw+gap); yy=y+row*(ch+gap)
         active_now=region in active
         color=REGION_COLORS.get(region,STEEL)
-        c.rounded((xx,yy,cw,ch),'#F8F6F0',color if active_now else BORDER,8,1)
+        c.rounded((xx,yy,cw,ch),PANEL_ALT,color if active_now else BORDER,8,1)
         c.text(REGIONS[region],(xx+8,yy+8,cw-16,26),17,True,color if active_now else MUTED,'center',min_size=14)
         c.text('مادة مؤهلة' if active_now else 'مراقبة',(xx+8,yy+38,cw-16,22),14,False,color if active_now else MUTED,'center',min_size=12)
 
@@ -216,10 +216,153 @@ def page2(brief,path):
 
     _footer(c,2); c.save(path); return c.clipped
 
+def _continuity_events(brief):
+    """Current events first, then prior-edition events to keep page 3 populated."""
+    out=[]; seen=set()
+    for e in list(brief.get('events') or [])+list(brief.get('previous_events') or []):
+        if not isinstance(e,dict): continue
+        key=_event_key(e)
+        if not key or key in seen: continue
+        seen.add(key); out.append(e)
+    return out
+
+def _event_text(e):
+    return sanitize_text(' '.join(str(e.get(k,'')) for k in ('title_ar','summary_ar','assessment_ar','watch_ar')))
+
+def _first_matching(events,predicate):
+    for e in events:
+        if predicate(e): return e
+    return None
+
+def _brief_line(e,limit=220):
+    if not e: return 'تستمر المتابعة من خلال المصادر الإقليمية النشطة مع إبقاء القصة الأعلى أولوية قيد الرصد.'
+    text=sanitize_text(e.get('summary_ar') or e.get('title_ar') or '')
+    return compact(text,limit)
+
+def _page3_stats(c,brief,events):
+    militant_terms=('الحوث','حماس','الجهاد الإسلامي','حزب الله','الشباب','داعش','القاعدة','طالبان','فصائل','ميليش')
+    maritime_terms=('البحر الأحمر','باب المندب','هرمز','الخليج','خليج عدن','الملاحة','بحري','ساحل','ميناء','المتوسط')
+    militant=sum(any(t in _event_text(e) for t in militant_terms) for e in events)
+    maritime=sum(any(t in _event_text(e) for t in maritime_terms) for e in events)
+    conflicts=sum(e.get('topic') in ('military','security','humanitarian_conflict') for e in events)
+    vals=[('أقاليم رئيسية',len(REGIONS),BLUE),('جماعات مسلحة',max(1,militant),OLIVE),
+          ('نزاعات',max(1,conflicts),ALERT),('توترات بحرية',max(1,maritime),SAND)]
+    margin=55; gap=18; y=190; h=108; cw=(W-2*margin-gap*3)//4
+    for i,(label,val,color) in enumerate(vals):
+        x=margin+i*(cw+gap)
+        c.rounded((x,y,cw,h),PAPER,BORDER,10,1)
+        c.d.rectangle((x+cw-7,y+8,x+cw-2,y+h-8),fill=color)
+        c.text(label,(x+24,y+18,cw-48,30),20,False,MUTED,'center')
+        c.text(str(val),(x+24,y+51,cw-48,42),30,True,INK,'center')
+
+def _category_rows(c,box,title,subtitle,color,rows):
+    x,y,w,h=panel(c,box,title,color,subtitle)
+    rows=[(sanitize_text(a),sanitize_text(b)) for a,b in rows if sanitize_text(a) or sanitize_text(b)]
+    if not rows:
+        rows=[('متابعة مستمرة','تستمر المتابعة من خلال أفضل المصادر الإقليمية المتاحة.')]
+    step=max(1,h//len(rows))
+    for i,(head,body) in enumerate(rows):
+        yy=y+i*step
+        c.text(head,(x,yy,w,34),22,True,color,min_size=18)
+        c.text(compact(body,230),(x,yy+38,w,step-50),20,False,INK,min_size=17,line_ratio=1.35)
+        if i<len(rows)-1: c.line(x,yy+step-5,x+w,yy+step-5,BORDER,1)
+
+def _geographic_rows(events):
+    groups=[
+      ('الخليج والجزيرة العربية',{'gcc','oman','yemen'}),
+      ('المشرق وإيران',{'iran','iraq','levant','palestine_israel','jordan','turkey'}),
+      ('شمال وشرق أفريقيا',{'egypt','sudan','sahel','north_africa','horn','somalia'}),
+      ('جنوب ووسط آسيا',{'pakistan','afghanistan'}),
+    ]
+    return [(label,_brief_line(_first_matching(events,lambda e,regs=regs:e.get('region') in regs))) for label,regs in groups]
+
+def _militant_rows(events):
+    specs=[
+      ('الحوثيون',('الحوث','أنصار الله')),
+      ('حماس والفصائل في غزة',('حماس','الجهاد الإسلامي','الفصائل في غزة')),
+      ('الفصائل المسلحة على المحور العراقي السوري',('فصائل','ميليش','الحشد','كتائب','عصائب')),
+      ('حركة الشباب',('حركة الشباب','الشباب','الصومال')),
+    ]
+    rows=[]; used=set()
+    for label,terms in specs:
+        e=_first_matching(events,lambda ev,terms=terms:any(t in _event_text(ev) for t in terms))
+        if e:
+            used.add(_event_key(e)); rows.append((label,_brief_line(e)))
+    # Always fill the panel with the strongest remaining armed/conflict stories.
+    for e in events:
+        if len(rows)>=4: break
+        if _event_key(e) in used: continue
+        if e.get('topic') in ('military','security','humanitarian_conflict'):
+            rows.append((REGIONS.get(e.get('region'),'فاعل مسلح'),_brief_line(e))); used.add(_event_key(e))
+    return rows[:4]
+
+def _conflict_rows(events):
+    preferred=[
+      ('غزة',{'palestine_israel'}),
+      ('السودان',{'sudan'}),
+      ('اليمن / البحر الأحمر',{'yemen'}),
+      ('الحدود العراقية السورية',{'iraq','levant'}),
+    ]
+    rows=[]; used=set()
+    for label,regs in preferred:
+        e=_first_matching(events,lambda ev,regs=regs:ev.get('region') in regs and ev.get('topic') in ('military','security','humanitarian_conflict','political_stability'))
+        if e:
+            used.add(_event_key(e)); rows.append((label,_brief_line(e)))
+    for e in events:
+        if len(rows)>=4: break
+        if _event_key(e) in used: continue
+        if e.get('topic') in ('military','security','humanitarian_conflict'):
+            rows.append((REGIONS.get(e.get('region'),'نزاع إقليمي'),_brief_line(e))); used.add(_event_key(e))
+    return rows[:4]
+
+def _maritime_rows(events):
+    specs=[
+      ('البحر الأحمر وباب المندب',('البحر الأحمر','باب المندب')),
+      ('مضيق هرمز والخليج',('هرمز','الخليج')),
+      ('خليج عدن والسواحل الصومالية',('خليج عدن','السواحل الصومالية','الصومال')),
+      ('شرق المتوسط',('المتوسط','لبنان','غزة')),
+    ]
+    rows=[]; used=set()
+    for label,terms in specs:
+        e=_first_matching(events,lambda ev,terms=terms:any(t in _event_text(ev) for t in terms))
+        if e:
+            rows.append((label,_brief_line(e))); used.add(_event_key(e))
+    # If the current/prior cycle contains fewer explicit maritime stories,
+    # retain the strongest related regional story instead of leaving empty space.
+    for e in events:
+        if len(rows)>=4: break
+        if _event_key(e) in used: continue
+        if e.get('region') in ('yemen','gcc','oman','somalia','horn','levant','palestine_israel'):
+            rows.append((REGIONS.get(e.get('region'),'مسار بحري'),_brief_line(e))); used.add(_event_key(e))
+    return rows[:4]
+
+def page3(brief,path):
+    c=Canvas(); masthead(c,brief,3)
+    events=_continuity_events(brief)
+    _page3_stats(c,brief,events)
+
+    _category_rows(c,(55,330,1840,790),'الجماعات المسلحة',
+                   'الجهات غير الحكومية الأكثر تأثيراً في الدورة الحالية',OLIVE,_militant_rows(events))
+    _category_rows(c,(1915,330,1870,790),'الأقاليم الجغرافية',
+                   'أين يتركز الثقل الإقليمي الآن',BLUE,_geographic_rows(events))
+    _category_rows(c,(55,1145,1840,790),'التوترات البحرية',
+                   'الممرات والمجالات البحرية التي تستحق الانتباه',SAND,_maritime_rows(events))
+    _category_rows(c,(1915,1145,1870,790),'النزاعات',
+                   'أبرز ساحات الصراع والمتغيرات المرتبطة بها',ALERT,_conflict_rows(events))
+
+    # Slim executive continuity strip: continuing stories stay visible when they
+    # remain the most consequential, even if they appeared in the prior edition.
+    c.rounded((55,1958,W-110,118),PANEL_ALT,BORDER,9,1)
+    c.text('الخلاصة التنفيذية',(W-520,1978,430,34),21,True,STEEL)
+    c.text('استمرار القصة نفسها لا يقلل أهميتها إذا بقيت الأعلى تأثيراً.  •  التمييز المطلوب بين الضجيج الإعلامي والمؤشرات القابلة للرصد.  •  أولوية المتابعة: الجغرافيا، الفاعلون المسلحون، والنقاط البحرية الحساسة.',
+           (160,1976,W-760,42),18,False,INK,min_size=16)
+    _footer(c,3); c.save(path); return c.clipped
+
+
 def render(brief,output):
     output=Path(output); output.mkdir(parents=True,exist_ok=True)
-    paths=[output/'arabic-p1.png',output/'arabic-p2.png']
-    clipped=page1(brief,paths[0])+page2(brief,paths[1])
+    paths=[output/'arabic-p1.png',output/'arabic-p2.png',output/'arabic-p3.png']
+    clipped=page1(brief,paths[0])+page2(brief,paths[1])+page3(brief,paths[2])
     return paths,clipped
 
 def references(brief,path):
