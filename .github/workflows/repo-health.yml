@@ -59,6 +59,11 @@ jobs:
           assert len(syms)==len(set(syms)), 'duplicate ticker symbol'
           assert Path('README.md').exists()
           assert not Path('README. md').exists()
+          scheduler=Path('.github/workflows/arabic-scheduler.yml').read_text(encoding='utf-8')
+          assert '0,15 2,8,14,20 * * 0-6' in scheduler, 'Arabic UAE six-hour schedule changed'
+          assert '.github/arabic-watchdog-trigger' in scheduler, 'Arabic external watchdog trigger missing'
+          slide=Path('.github/workflows/slide.yml').read_text(encoding='utf-8')
+          assert '30 11 * * *' in slide, 'Gazette 15:30 UAE schedule changed'
           PY
       - name: Check conflict markers and obvious committed secrets
         run: |
