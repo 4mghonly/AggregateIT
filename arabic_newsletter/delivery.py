@@ -54,78 +54,66 @@ def send(state,edition,paths):
     if oversized:
         raise DeliveryError('Arabic slide exceeds Discord per-file safety limit: '+','.join(oversized))
 
-    parts_key='delivery_parts:'+edition
-    confirmed=state.get(parts_key) or {}
-    if not prior:
-        state.reserve(edition)
-
-    message_ids=[]
+    # Deliver the complete three-slide deck as ONE Discord message.
+    # Discord supports multiple attachments in one webhook message; the safety
+    # ceiling remains per file rather than aggregate.
+    state.reserve(edition)
     expected=(os.getenv('DISCORD_ARABIC_EXPECTED_CHANNEL_ID') or '').strip()
-    for index,p in enumerate(paths,1):
-        saved=confirmed.get(str(index))
-        if saved:
-            message_ids.append(str(saved))
+    response=None
+    last_error=None
+
+    for attempt in range(3):
+        try:
+            with ExitStack() as stack:
+                files={
+                  f'files[{i}]':(p.name,stack.enter_context(p.open('rb')),'image/png')
+                  for i,p in enumerate(paths)
+                }
+                payload={
+                  'content':f'النشرة الجيوسياسية والأمنية | {edition} | بتوقيت الإمارات',
+                  'allowed_mentions':{'parse':[]}
+                }
+                response=requests.post(
+                  url,
+                  data={'payload_json':json.dumps(payload,ensure_ascii=False)},
+                  files=files,
+                  timeout=(10,90)
+                )
+        except requests.RequestException as exc:
+            # A network exception after upload begins is ambiguous. Do not retry
+            # automatically and risk duplicate publication.
+            state.mark(edition,'uncertain')
+            raise DeliveryError('Discord response uncertain after deck upload; duplicate retry blocked') from None
+
+        if response.status_code==429:
+            try: delay=min(max(float(response.json().get('retry_after',2)),1),30)
+            except (ValueError,TypeError): delay=2
+            last_error='http_429'
+            time.sleep(delay)
             continue
-
-        response=None
-        last_error=None
-        for attempt in range(3):
-            try:
-                with p.open('rb') as fh:
-                    files={'file':(p.name,fh,'image/png')}
-                    payload={
-                      'content':f'النشرة الجيوسياسية والأمنية | {edition} | الشريحة {index}/{len(paths)} | بتوقيت الإمارات',
-                      'allowed_mentions':{'parse':[]}
-                    }
-                    response=requests.post(
-                      url,
-                      data={'payload_json':json.dumps(payload,ensure_ascii=False)},
-                      files=files,
-                      timeout=(10,75)
-                    )
-            except requests.RequestException as exc:
-                last_error='network_'+type(exc).__name__
-                time.sleep(min(2**attempt,8))
-                continue
-
-            if response.status_code==429:
-                try: delay=min(max(float(response.json().get('retry_after',2)),1),30)
-                except (ValueError,TypeError): delay=2
-                last_error='http_429'
-                time.sleep(delay)
-                continue
-            if response.status_code>=500:
-                last_error=f'http_{response.status_code}'
-                time.sleep(min(2**attempt,8))
-                continue
-            if response.status_code!=200:
-                state.mark(edition,'failed')
-                raise DeliveryError(f'Discord HTTP {response.status_code} on slide {index}')
-
-            try:
-                body=response.json()
-                message_id=str(body['id'])
-                channel_id=str(body.get('channel_id') or 'unknown')
-            except (ValueError,KeyError,TypeError):
-                last_error='missing_receipt'
-                time.sleep(min(2**attempt,8))
-                continue
-            if expected and channel_id!=expected:
-                state.mark(edition,'failed')
-                raise DeliveryError(f'Arabic Discord receipt channel mismatch: {channel_id} != {expected}')
-
-            confirmed[str(index)]=message_id
-            state.put(parts_key,confirmed)
-            message_ids.append(message_id)
-            print(f'Arabic Discord slide {index}/{len(paths)} confirmed: message_id={message_id}',flush=True)
-            break
-        else:
-            # Delivery-first policy: allow the workflow-level retry to resume from
-            # already-confirmed parts rather than permanently blocking the edition.
+        if response.status_code>=500:
+            last_error=f'http_{response.status_code}'
+            time.sleep(min(2**attempt,8))
+            continue
+        if response.status_code!=200:
             state.mark(edition,'failed')
-            raise DeliveryError(f'Discord slide {index} delivery failed after retries: {last_error or "unknown"}')
+            raise DeliveryError(f'Discord HTTP {response.status_code} during deck upload')
 
-    receipt=json.dumps(message_ids,separators=(',',':'))
-    state.mark(edition,'sent',receipt)
-    print('Arabic Discord delivery confirmed for all slides:',receipt,flush=True)
-    return receipt
+        try:
+            body=response.json()
+            message_id=str(body['id'])
+            channel_id=str(body.get('channel_id') or 'unknown')
+        except (ValueError,KeyError,TypeError):
+            state.mark(edition,'uncertain')
+            raise DeliveryError('Discord deck receipt missing message ID') from None
+
+        if expected and channel_id!=expected:
+            state.mark(edition,'failed')
+            raise DeliveryError(f'Arabic Discord receipt channel mismatch: {channel_id} != {expected}')
+
+        state.mark(edition,'sent',message_id)
+        print(f'Arabic Discord deck confirmed in one message: message_id={message_id} channel_id={channel_id}',flush=True)
+        return message_id
+
+    state.mark(edition,'failed')
+    raise DeliveryError(f'Discord deck upload failed after retries: {last_error or "unknown"}')
