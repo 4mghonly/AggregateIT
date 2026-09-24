@@ -1,29 +1,26 @@
-name: Arabic Briefing Production Scheduler
+name: Arabic Briefing Production
 
 on:
   schedule:
-    # Primary +15m recovery on EVERY day, including Saturday and Sunday.
-    # UTC 02/08/14/20 = UAE 06/12/18/00. The :15 wake-up retries only if
-    # the corresponding edition is not already recorded as delivered.
-    - cron: "0,15 2,8,14,20 * * 0-6"
+    # 06:00 / 12:00 / 18:00 / 00:00 UAE (UTC+4)
+    - cron: "0 2,8,14,20 * * *"
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/arabic-scheduler.yml
-      - .github/arabic-watchdog-trigger
+    inputs:
+      manual_now:
+        description: "Use the rolling six hours ending now"
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
 
 concurrency:
-  group: arabic-briefing-production
+  group: arabic-production
   cancel-in-progress: false
 
 jobs:
-  arabic-production:
-    # This launcher is ONLY for the Arabic slides. It never runs the main Gazette.
-    if: "${{ github.event_name != 'push' || startsWith(github.event.head_commit.message, 'Arabic scheduler') || startsWith(github.event.head_commit.message, 'Arabic watchdog:') }}"
+  briefing:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -55,119 +52,113 @@ jobs:
       ARABIC_ANALYSIS_READ_TIMEOUT_S: "45"
       ARABIC_ANALYSIS_BUDGET_S: "120"
       ARABIC_MAX_UNRESOLVED_REGIONS: ${{ vars.ARABIC_MAX_UNRESOLVED_REGIONS || '5' }}
+      ARABIC_DISCORD_MAX_FILE_BYTES: "19000000"
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
       DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID }}
+
     steps:
-      - name: Check out isolated Arabic engine
+      - name: Check out authoritative production code
         uses: actions/checkout@v5
         with:
-          ref: Arabic-production
+          ref: main
           persist-credentials: false
 
-      - name: Restore production Arabic state
-        uses: actions/cache/restore@v5
-        with:
-          path: arabic_newsletter/runtime/state
-          key: arabic-prod-state-v1-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: arabic-prod-state-v1-
-
-      - name: Check whether this edition still needs delivery
-        id: due
-        run: |
-          python - <<'PY'
-          import os
-          from datetime import datetime, timezone
-          from pathlib import Path
-          from arabic_newsletter.core import State, scheduled_window
-
-          state_dir=Path(os.getenv("ARABIC_STATE_DIR","arabic_newsletter/runtime/state"))
-          state=State(state_dir)
-          try:
-              _start,end=scheduled_window(datetime.now(timezone.utc))
-              edition=end.isoformat()
-              prior=state.delivery(edition)
-              needs=not (prior and prior[0]=="sent")
-              with open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8") as fh:
-                  fh.write(f"edition={edition}\n")
-                  fh.write(f"needs_delivery={'true' if needs else 'false'}\n")
-              print("Arabic edition:",edition,"needs_delivery=",needs)
-          finally:
-              state.close()
-          PY
-
       - uses: actions/setup-python@v6
-        if: steps.due.outputs.needs_delivery == 'true'
         with:
-          python-version: '3.12'
+          python-version: "3.12"
           cache: pip
           cache-dependency-path: arabic_newsletter/requirements.txt
 
-      - name: Install Arabic runtime
-        if: steps.due.outputs.needs_delivery == 'true'
+      - name: Install runtime
         run: |
           python -m pip install -r arabic_newsletter/requirements.txt
           sudo apt-get update -qq
           sudo apt-get install -y fonts-dejavu-core fonts-noto-core libraqm0
 
-      - name: Production runtime smoke gate
-        if: steps.due.outputs.needs_delivery == 'true'
+      - name: Restore continuity state
+        uses: actions/cache/restore@v5
+        with:
+          path: arabic_newsletter/runtime/state
+          key: arabic-state-v2-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: arabic-state-v2-
+
+      - name: Runtime contract gate
         run: |
           python -m compileall -q arabic_newsletter arabic_layout
           python - <<'PY'
+          import json
+          from pathlib import Path
           from PIL import features
-          from arabic_newsletter.core import State, scheduled_window
-          from arabic_newsletter.editor import Client
-          from arabic_newsletter.delivery import webhook_url
           from arabic_layout.render_engine import Canvas
           assert features.check_feature("raqm"), "Pillow RAQM unavailable"
-          Canvas().font(32, False)
-          Canvas().font(32, True)
-          print("Arabic production smoke gate passed")
+          Canvas().font(34,False); Canvas().font(34,True)
+          for p in ("arabic_newsletter/sources.json","arabic_newsletter/glossary.json"):
+              json.loads(Path(p).read_text(encoding="utf-8"))
+          print("Arabic runtime contract passed")
           PY
-          echo "Production Arabic revision: $(git rev-parse HEAD)"
 
-      - name: Validate model and dedicated Discord route
-        if: steps.due.outputs.needs_delivery == 'true'
+      - name: Confirm dedicated Discord route
         run: python -m arabic_newsletter.run --preflight --probe-discord
 
-      - name: Collect, translate, analyze, render and deliver Arabic briefing
-        if: steps.due.outputs.needs_delivery == 'true'
-        run: python -m arabic_newsletter.run --send
+      - name: Generate and deliver briefing
+        id: deliver
+        env:
+          MANUAL_NOW: ${{ github.event_name == 'workflow_dispatch' && inputs.manual_now || false }}
+        run: |
+          set +e
+          CMD="python -m arabic_newsletter.run --send"
+          if [ "$MANUAL_NOW" = "true" ]; then CMD="$CMD --manual-now"; fi
+          echo "Arabic production attempt 1"
+          $CMD
+          RC=$?
+          if [ "$RC" -ne 0 ]; then
+            echo "::warning::Arabic production attempt 1 failed; retrying once after 30 seconds."
+            sleep 30
+            echo "Arabic production attempt 2"
+            $CMD
+            RC=$?
+          fi
+          exit "$RC"
 
-      - name: Confirm recovery wake-up was safely suppressed
-        if: steps.due.outputs.needs_delivery == 'false'
-        run: echo "Arabic edition ${{ steps.due.outputs.edition }} already delivered; recovery wake-up suppressed."
+      - name: Persist continuity state
+        if: always()
+        uses: actions/cache/save@v5
+        with:
+          path: arabic_newsletter/runtime/state
+          key: arabic-state-v2-${{ github.run_id }}-${{ github.run_attempt }}
 
-      - name: Alert Arabic channel on production failure
+      - name: Upload complete run evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: arabic-briefing-${{ github.run_id }}
+          path: arabic_newsletter/runtime/output/
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Alert Arabic channel with failure stage
         if: failure()
         continue-on-error: true
         env:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           python - <<'PY'
-          import os
-          from urllib.parse import urlsplit, urlunsplit
+          import json,os
+          from pathlib import Path
+          from urllib.parse import urlsplit,urlunsplit
           import requests
+          status={}
+          p=Path("arabic_newsletter/runtime/output/run_status.json")
+          if p.exists():
+              try: status=json.loads(p.read_text(encoding="utf-8"))
+              except Exception: status={}
+          stage=status.get("stage","unknown")
+          detail=str(status.get("detail") or "")[:500]
           raw=os.getenv("DISCORD_WEBHOOK_ARABIC","").strip()
           if raw:
-              p=urlsplit(raw)
-              url=urlunsplit((p.scheme,p.netloc,p.path,"wait=true",""))
-              requests.post(url,json={"content":"⚠️ تعذر إصدار النشرة العربية المجدولة. سجل التشغيل: "+os.getenv("RUN_URL","")},timeout=(10,20))
+              u=urlsplit(raw); url=urlunsplit((u.scheme,u.netloc,u.path,"wait=true",""))
+              msg=f"⚠️ تعذر إصدار النشرة العربية | المرحلة: {stage}"
+              if detail: msg+=" | "+detail
+              msg+=" | "+os.getenv("RUN_URL","")
+              requests.post(url,json={"content":msg,"allowed_mentions":{"parse":[]}},timeout=(10,25))
           PY
-
-      - name: Preserve production Arabic state
-        if: always() && steps.due.outputs.needs_delivery == 'true'
-        uses: actions/cache/save@v5
-        with:
-          path: arabic_newsletter/runtime/state
-          key: arabic-prod-state-v1-${{ github.run_id }}-${{ github.run_attempt }}
-
-      - name: Upload Arabic production evidence
-        if: always() && steps.due.outputs.needs_delivery == 'true'
-        uses: actions/upload-artifact@v6
-        with:
-          name: arabic-production-${{ github.run_id }}
-          path: |
-            arabic_newsletter/runtime/output/
-          retention-days: 7
-          if-no-files-found: warn
