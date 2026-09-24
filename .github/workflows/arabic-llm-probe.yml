@@ -48,10 +48,21 @@ jobs:
           import json
           from datetime import datetime, timezone
           from pathlib import Path
-          from arabic_live_v2 import probe_llms
+          from arabic_live_v2 import probe_llms, llm_analysis_with_failover
           import os
           from urllib.parse import urlsplit
           results=probe_llms()
+          failover_smoke={}
+          try:
+              _analysis,_health,_selected=llm_analysis_with_failover([{
+                "region":"iraq",
+                "title_ar":"تحديث أمني تجريبي في العراق",
+                "summary_ar":"أفاد مصدر عربي بمتابعة تطور أمني تجريبي في العراق.",
+                "sources":[{"source":"اختبار"}]
+              }])
+              failover_smoke={"ok":True,"selected_route":_selected,"routes":_health}
+          except Exception as exc:
+              failover_smoke={"ok":False,"error":str(exc)[:500]}
           def shape(prefix):
               base=(os.getenv(prefix+"BASE_URL") or "").strip()
               p=urlsplit(base) if base else None
