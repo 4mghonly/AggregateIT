@@ -24,11 +24,18 @@ def fallback_from_arabic_sources(articles):
     rows=[a for a in articles if a.get('language')=='ar' and is_arabic((a.get('title') or '')+' '+(a.get('text') or ''))]
     events=[]
     for i,a in enumerate(rows[:10]):
-        text=(a.get('text') or a.get('title') or '').strip()
+        title=clean(a.get('title') or 'تحديث أمني من مصدر عربي')[:100]
+        body=clean(a.get('text') or '')
+        source_name=clean(a.get('source') or 'المصدر')
+        # Fallback headline is the publisher's own Arabic headline. Sentence one
+        # explicitly attributes and restates that exact claim; context follows.
+        first=f'بحسب {source_name}، {title}.'
+        context=body[:420]
+        summary=(first+(' '+context if context and context not in title else ''))[:700]
         events.append({
           'region':a.get('region','gcc'),'topic':'security',
-          'title_ar':(a.get('title') or 'تحديث أمني من مصدر عربي')[:220],
-          'summary_ar':text[:700] or 'ورد تحديث أمني في المصدر المشار إليه.',
+          'title_ar':title,
+          'summary_ar':summary,
           'assessment_ar':'تغطية مباشرة من المصدر؛ تعذر استكمال التحليل الآلي في هذه الدورة، لذا لم تُضف استنتاجات غير مدعومة.',
           'watch_ar':'متابعة التحديثات الرسمية والتأكيدات المستقلة خلال الساعات المقبلة.',
           'severity':'medium','status_ar':'تغطية مصدرية مباشرة',
