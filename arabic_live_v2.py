@@ -32,6 +32,7 @@ from arabic_newsletter.core import UAE, REGIONS, clean
 from arabic_newsletter.render import render
 from arabic_newsletter.delivery import send
 from arabic_newsletter.core import State
+from arabic_newsletter.brief_schema import build_brief as build_canonical_brief, deterministic_analysis as schema_deterministic_analysis, dumps as dump_brief, validate_brief
 
 ROOT=Path(__file__).resolve().parent
 OUT=ROOT/"arabic_newsletter"/"runtime"/"v2"
@@ -350,7 +351,7 @@ def deterministic_analysis(events):
       "watch_ar":["بيانات رسمية جديدة، تغيرات في الوضع الميداني، أو قيود موثقة على الحدود والمجال الجوي والممرات البحرية."]
     }
 
-def build_brief(items,health):
+def _legacy_build_brief(items,health):
     chosen=select(items)
     events=[make_event(x,i) for i,x in enumerate(chosen)]
     now=datetime.now(timezone.utc).astimezone(UAE).replace(microsecond=0)
@@ -380,22 +381,61 @@ def main():
     print("V2 stage=collect_start",flush=True)
     items,health=collect(24)
     print(f"V2 stage=collect_complete items={len(items)}",flush=True)
-    brief=build_brief(items,health)
-    if items:
+    raw_events=[make_event(x,i) for i,x in enumerate(select(items))]
+    brief=build_canonical_brief(
+        raw_events,
+        health,
+        len(items),
+        window_hours=24,
+        analysis=schema_deterministic_analysis(raw_events),
+        llm_health={"status":"not_attempted","routes":[]},
+    )
+
+    if brief["events"]:
         print("V2 stage=llm_analysis_start",flush=True)
-        analysis,llm_health,llm_route=llm_analysis_with_failover(brief["events"])
-        brief["analysis"]=analysis
-        brief["llm_health"]={"status":"ok","selected_route":llm_route,"routes":llm_health}
-        print("V2 stage=llm_analysis_complete route="+llm_route,flush=True)
+        try:
+            analysis,llm_routes,llm_route=llm_analysis_with_failover(brief["events"])
+            brief=build_canonical_brief(
+                brief["events"],
+                health,
+                len(items),
+                window_hours=24,
+                analysis=analysis,
+                llm_health={"status":"ok","selected_route":llm_route,"routes":llm_routes},
+            )
+            print("V2 stage=llm_analysis_complete route="+llm_route,flush=True)
+        except Exception as exc:
+            # Both routes have already been exhausted inside
+            # llm_analysis_with_failover. Preserve a valid deterministic product
+            # rather than allowing model formatting/provider faults to kill it.
+            print(f"V2 stage=llm_degraded reason={type(exc).__name__}: {exc}",flush=True)
+            brief=build_canonical_brief(
+                brief["events"],
+                health,
+                len(items),
+                window_hours=24,
+                analysis=schema_deterministic_analysis(brief["events"]),
+                llm_health={"status":"degraded_both_routes_failed","routes":[],"error":str(exc)[:500]},
+            )
     else:
-        brief["llm_health"]={"status":"skipped_empty_collection","routes":[]}
-        brief["analysis"]={
-          "situation_ar":"لم تُجمع مواد عربية مؤهلة ضمن نافذة الرصد الحالية. يُنشر هذا الإصدار حفاظاً على استمرارية المنتج مع الإشارة بوضوح إلى تراجع التغطية المصدرية.",
-          "implications_ar":"لا ينبغي استنتاج غياب التطورات من غياب المواد المؤهلة؛ يستمر الرصد في الدورة التالية.",
-          "developing_ar":["استعادة تدفق المصادر العربية المؤهلة والتحقق من عودة التغطية الإقليمية."],
-          "watch_ar":["عودة خلاصات المصادر للعمل وظهور مواد مؤهلة جديدة ضمن النطاق."]
-        }
-    (OUT/"briefing.json").write_text(json.dumps(brief,ensure_ascii=False,indent=2),encoding="utf-8")
+        brief=build_canonical_brief(
+            [],
+            health,
+            len(items),
+            window_hours=24,
+            analysis={
+              "situation_ar":"لم تُجمع مواد عربية مؤهلة ضمن نافذة الرصد الحالية. يُنشر هذا الإصدار حفاظاً على استمرارية المنتج مع الإشارة بوضوح إلى تراجع التغطية المصدرية.",
+              "implications_ar":"لا ينبغي استنتاج غياب التطورات من غياب المواد المؤهلة؛ يستمر الرصد في الدورة التالية.",
+              "developing_ar":["استعادة تدفق المصادر العربية المؤهلة والتحقق من عودة التغطية الإقليمية."],
+              "watch_ar":["عودة خلاصات المصادر للعمل وظهور مواد مؤهلة جديدة ضمن النطاق."]
+            },
+            llm_health={"status":"skipped_empty_collection","routes":[]},
+        )
+
+    errors=validate_brief(brief)
+    if errors:
+        raise RuntimeError("V3 canonical JSON validation failed: "+",".join(errors))
+    (OUT/"briefing.json").write_text(dump_brief(brief),encoding="utf-8")
     print("V2 stage=render_start",flush=True)
     paths,_=render(brief,OUT)
     print("V2 stage=render_complete "+str([(p.name,p.stat().st_size) for p in paths]),flush=True)
