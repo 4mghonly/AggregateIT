@@ -1,0 +1,56 @@
+name: Arabic Transport Smoke Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/arabic-smoke-trigger
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
+      DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID }}
+      ARABIC_DISCORD_MAX_FILE_BYTES: "19000000"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install minimal Arabic render dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pillow requests arabic-reshaper python-bidi
+
+      - name: Render and POST synthetic Arabic slides
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          from arabic_newsletter.core import State
+          from arabic_newsletter.sample import fixture
+          from arabic_newsletter.render import render
+          from arabic_newsletter.delivery import send
+
+          out=Path("arabic_newsletter/runtime/smoke")
+          out.mkdir(parents=True,exist_ok=True)
+          print("SMOKE stage=render_start",flush=True)
+          brief=fixture(long=True)
+          paths,_=render(brief,out)
+          print("SMOKE stage=render_complete",[(p.name,p.stat().st_size) for p in paths],flush=True)
+
+          state=State(out/"state")
+          try:
+              print("SMOKE stage=discord_post_start",flush=True)
+              receipt=send(state,"SMOKE-"+os.getenv("GITHUB_RUN_ID","manual"),paths)
+              print("SMOKE stage=discord_post_complete receipt="+str(receipt),flush=True)
+          finally:
+              state.close()
+          PY
