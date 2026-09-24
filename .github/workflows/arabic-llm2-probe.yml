@@ -1,0 +1,79 @@
+name: Arabic LLM2 Probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/arabic-llm2-probe-trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      ARABIC_LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
+      ARABIC_LLM_FALLBACK_BASE_URL: ${{ secrets.LLM_FALLBACK_BASE_URL }}
+      ARABIC_LLM_FALLBACK_MODEL: ${{ secrets.LLM_FALLBACK_MODEL }}
+      ARABIC_LLM_FALLBACK_AUTH_HEADER: ${{ vars.LLM_FALLBACK_AUTH_HEADER }}
+      ARABIC_LLM_FALLBACK_AUTH_SCHEME: ${{ vars.LLM_FALLBACK_AUTH_SCHEME }}
+      ARABIC_LLM_FALLBACK_CHAT_PATH: ${{ vars.LLM_FALLBACK_CHAT_PATH }}
+      ARABIC_LLM_FALLBACK_REQUEST_OPTIONS_JSON: ${{ vars.LLM_FALLBACK_REQUEST_OPTIONS_JSON }}
+      ARABIC_LLM_FALLBACK_EXTRA_HEADERS_JSON: ${{ vars.LLM_FALLBACK_EXTRA_HEADERS_JSON }}
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install minimal probe runtime
+        run: python -m pip install requests feedparser pillow beautifulsoup4
+
+      - name: Probe fallback only
+        run: |
+          python - <<'PY'
+          import json, os
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from arabic_live_v2 import _route, _route_call
+
+          result={
+            "checked_at":datetime.now(timezone.utc).isoformat(),
+            "route":"fallback"
+          }
+          route=_route("ARABIC_LLM_FALLBACK_")
+          if not route:
+              result.update({"configured":False,"ok":False,"error":"missing_configuration"})
+          else:
+              result.update({"configured":True,"model":route["model"]})
+              try:
+                  obj=_route_call(
+                      route,
+                      'Return JSON only with keys ok and arabic. Set ok=true and arabic to "جاهز".',
+                      {"probe":"fallback-connectivity"},
+                      max_tokens=120
+                  )
+                  result.update({
+                    "ok":bool(obj.get("ok")) and bool(obj.get("arabic")),
+                    "error":None
+                  })
+              except Exception as exc:
+                  result.update({"ok":False,"error":str(exc)[:200]})
+
+          Path("arabic_newsletter/LLM2_STATUS.json").write_text(
+              json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+          print(json.dumps(result,ensure_ascii=False))
+          PY
+
+      - name: Persist sanitized LLM2 status
+        run: |
+          git config user.name "aggregateit-bot"
+          git config user.email "aggregateit-bot@users.noreply.github.com"
+          git add arabic_newsletter/LLM2_STATUS.json
+          git commit -m "Arabic LLM2 probe: update fallback health" || true
+          git push origin HEAD:main
