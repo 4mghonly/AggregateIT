@@ -49,6 +49,11 @@ jobs:
 
           rows=json.loads(Path("arabic_newsletter/sources.json").read_text(encoding="utf-8"))
           assert isinstance(rows,list) and rows
+          from arabic_newsletter.core import REGIONS
+          active=[r for r in rows if r.get("enabled") and r.get("verification_status")=="active"]
+          counts={region:sum(1 for r in active if r.get("region")==region) for region in REGIONS}
+          assert all(n>=2 for n in counts.values()), counts
+          assert all((r.get("feed") or "").startswith("http") or r.get("adapter")=="html_headlines" for r in active), "active source missing supported adapter"
           assert callable(v2.collect)
           assert callable(v2.make_event)
 
