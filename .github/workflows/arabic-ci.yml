@@ -6,6 +6,7 @@ on:
     paths:
       - arabic_live_v2.py
       - arabic_newsletter/sources.json
+      - arabic_newsletter/brief_schema.py
       - arabic_newsletter/render.py
       - arabic_newsletter/delivery.py
       - arabic_layout/**
@@ -49,8 +50,24 @@ jobs:
           rows=json.loads(Path("arabic_newsletter/sources.json").read_text(encoding="utf-8"))
           assert isinstance(rows,list) and rows
           assert callable(v2.collect)
-          assert callable(v2.build_brief)
           assert callable(v2.make_event)
+
+          from arabic_newsletter.brief_schema import build_brief, validate_brief, dumps
+          event={
+            "region":"iraq","topic":"security",
+            "title_ar":"اختبار بنية النشرة",
+            "summary_ar":"بحسب مصدر الاختبار، اختبار بنية النشرة.",
+            "severity":"medium","status_ar":"تقرير منسوب",
+            "fingerprint":"ci-v3",
+            "sources":[{
+              "id":"ci-source","source_id":"ci-source","source":"مصدر اختبار",
+              "url":"https://example.com/ci","published":0,"affiliation":"synthetic",
+              "kind":"news","country":"IQ","language":"ar","region":"iraq"
+            }]
+          }
+          canonical=build_brief([event],[],1)
+          assert not validate_brief(canonical), validate_brief(canonical)
+          assert '"schema_version": "arabic-brief-v3"' in dumps(canonical)
 
           sample=fixture(long=True)
           out=Path("arabic_newsletter/runtime/v2-ci")
