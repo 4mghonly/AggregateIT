@@ -24,6 +24,9 @@ def webhook_info():
     try: info=r.json()
     except ValueError: raise DeliveryError('Arabic Discord webhook probe returned invalid JSON') from None
     channel=str(info.get('channel_id') or 'unknown')
+    expected=(os.getenv('DISCORD_ARABIC_EXPECTED_CHANNEL_ID') or '').strip()
+    if expected and channel!=expected:
+        raise DeliveryError(f'Arabic Discord webhook points to channel {channel}, expected {expected}')
     webhook_id=str(info.get('id') or 'unknown')
     name=str(info.get('name') or 'unnamed').replace('\n',' ')[:80]
     print(f'Arabic Discord route confirmed: channel_id={channel} webhook_id={webhook_id} name={name}',flush=True)
@@ -63,6 +66,10 @@ def send(state,edition,paths):
             body=r.json(); message_id=str(body['id']); channel_id=str(body.get('channel_id') or 'unknown')
         except (ValueError,KeyError,TypeError):
             state.mark(edition,'uncertain'); raise DeliveryError('Discord message ID missing') from None
+        expected=(os.getenv('DISCORD_ARABIC_EXPECTED_CHANNEL_ID') or '').strip()
+        if expected and channel_id!=expected:
+            state.mark(edition,'uncertain')
+            raise DeliveryError(f'Arabic Discord receipt channel mismatch: {channel_id} != {expected}')
         state.mark(edition,'sent',message_id)
         print(f'Arabic Discord delivery confirmed: message_id={message_id} channel_id={channel_id}',flush=True)
         return message_id
