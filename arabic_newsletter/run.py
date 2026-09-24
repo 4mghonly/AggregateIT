@@ -164,7 +164,8 @@ def main():
                     # a wider overnight collection window for a heavier synthesis.
                     collection_start=end-timedelta(hours=12) if end.hour==6 else start
                 if args.send:
-                    webhook_info(); Client(state)
+                    # Do not preflight-block production on LLM or Discord GET probes.
+                    # Collection can fall back without an LLM, and send() validates the webhook through the actual POST receipt.
                     prior=state.delivery(edition)
                     if prior and prior[0]=='sent': print('Edition already delivered'); return
                     if prior and prior[0] in ('sending','uncertain'):
