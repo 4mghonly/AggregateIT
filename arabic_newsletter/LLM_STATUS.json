@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-09-24T03:44:32.771973+00:00",
+  "checked_at": "2026-09-24T03:50:54.969790+00:00",
   "all_ok": false,
   "routes": [
     {
@@ -17,6 +17,18 @@
       "error": "http_401"
     }
   ],
+  "failover_smoke": {
+    "ok": true,
+    "selected_route": "primary",
+    "routes": [
+      {
+        "route": "primary",
+        "configured": true,
+        "ok": true,
+        "model": "openrouter/free"
+      }
+    ]
+  },
   "shape": {
     "primary": {
       "key_present": true,
