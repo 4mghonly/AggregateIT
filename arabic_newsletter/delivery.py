@@ -41,8 +41,11 @@ def send(state,edition,paths):
     prior=state.delivery(edition)
     if prior:
         if prior[0]=='sent': return prior[1]
-        if prior[0]=='failed': state.clear_delivery(edition)
-        else: raise DeliveryError('Edition already reserved; reconcile Discord delivery before retrying')
+        if prior[0]=='failed':
+            state.clear_delivery(edition)
+            prior=None
+        else:
+            raise DeliveryError('Edition already reserved; reconcile Discord delivery before retrying')
     # Discord documents a 20 MB free upload limit per file as of Aug 2026.
     # Keep a 1 MB safety margin and upload each slide independently so a valid
     # 4K deck is never rejected by an obsolete aggregate-size cap.
