@@ -1,5 +1,3 @@
-Live Gazette delivery with UAE timestamps requested: 2026-09-17T21:05:00Z
-manual_restore_send=2026-09-20T03:06:00+04:00
-reliability_receipt_test=2026-09-20T12:00:00+04:00
-isolated_main_verification=2026-09-21T01:00:00+04:00
-live_sample_request=2026-09-23T19:29:00Z
+sample-gazette
+triggered_at=2026-09-24T07:45:00+04:00
+reason=user-requested-english-gazette-assessment
