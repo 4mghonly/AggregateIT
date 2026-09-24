@@ -163,11 +163,13 @@ def stats(c,brief):
     events=brief.get('events',[])
     period='12 ساعة' if brief.get('morning') else '6 ساعات'
     coverage=brief.get('coverage') or {}
+    source_regions=(brief.get('source_health') or {}).get('regions') or {}
+    monitored=sum(bool((source_regions.get(r) or {}).get('healthy_extractors')) for r in REGIONS)
     vals=[
       ('نافذة التغطية',period,STEEL),
       ('أحداث مؤهلة',len(events),COMMAND),
       ('مصادر مستخدمة',coverage.get('event_source_count',0),OLIVE),
-      ('مناطق مغطاة',f"{len({e.get('region') for e in events if e.get('region')})}/{len(REGIONS)}",BLUE),
+      ('مناطق مراقبة',f"{monitored}/{len(REGIONS)}",BLUE if monitored==len(REGIONS) else ALERT),
     ]
     margin=55; gap=18; y=190; h=108; cw=(W-2*margin-gap*3)//4
     for i,(label,val,color) in enumerate(vals):
