@@ -60,20 +60,13 @@ def main():
                 args.output.mkdir(parents=True,exist_ok=True)
                 write_json(args.output/'collection_health.json',health)
                 write_json(args.output/'source_evidence.json',articles)
-                healthy_by_region={}
-                for region in REGIONS:
-                    healthy_by_region[region]=[
-                        h for h in health
-                        if h.get('region')==region
-                        and h.get('status') in ('active','social_only')
-                        and int(h.get('items') or 0)>0
-                    ]
+                live_health=health_summary(health)
                 summary={
                   'window_start':start.isoformat(),'window_end':end.isoformat(),
-                  'healthy_regions':sorted(r for r,v in healthy_by_region.items() if v),
-                  'unhealthy_regions':sorted(r for r,v in healthy_by_region.items() if not v),
-                  'active_extractors_by_region':{r:len(v) for r,v in healthy_by_region.items()},
-                  'substitutes_used':sum(bool(h.get('substitute')) for h in health),
+                  'healthy_regions':sorted(r for r,v in live_health['regions'].items() if v['healthy_extractors']),
+                  'unhealthy_regions':list(live_health['unresolved_regions']),
+                  'active_extractors_by_region':{r:v['healthy_extractors'] for r,v in live_health['regions'].items()},
+                  'substitutes_used':sum(v['substitutes_used'] for v in live_health['regions'].values()),
                   'articles_in_window':len(articles),
                 }
                 write_json(args.output/'source_health_summary.json',summary)
@@ -147,8 +140,18 @@ def main():
                 write_json(args.output/'source_health_summary.json',source_health)
                 if not any(r['status'] in ('active','social_only') for r in health):
                     raise RuntimeError('All source collection failed; publication blocked')
-                if source_health['unresolved_regions']:
-                    raise RuntimeError('Regional source-health gate failed after same-region substitution: '+','.join(source_health['unresolved_regions']))
+                unresolved=list(source_health['unresolved_regions'])
+                max_unresolved=max(0,int(os.getenv('ARABIC_MAX_UNRESOLVED_REGIONS','2') or 2))
+                if len(unresolved)>max_unresolved:
+                    raise RuntimeError(
+                        f'Regional source-health gate failed: {len(unresolved)} unresolved regions '
+                        f'(maximum {max_unresolved}): '+','.join(unresolved)
+                    )
+                if unresolved:
+                    print(
+                        'Arabic coverage degraded but publishable; unresolved regions: '+','.join(unresolved),
+                        flush=True
+                    )
                 if args.send and not articles:
                     raise RuntimeError('Live extraction yielded no dated relevant articles; publication blocked')
                 try:
@@ -186,6 +189,8 @@ def main():
                   'healthy_regions':sorted(r for r,v in source_health['regions'].items() if v['healthy_extractors']),
                   'active_extractors_by_region':{r:v['healthy_extractors'] for r,v in source_health['regions'].items()},
                   'substitutes_used':sum(v['substitutes_used'] for v in source_health['regions'].values()),
+                  'unresolved_regions':list(source_health['unresolved_regions']),
+                  'coverage_degraded':bool(source_health['unresolved_regions']),
                 }
                 brief=dict(sample=False,window_start=collection_start.isoformat(),window_end=end.isoformat(),events=events,
                   input_count=len(articles),health=health,rejected=rejected,analysis=analysis,morning=morning,
