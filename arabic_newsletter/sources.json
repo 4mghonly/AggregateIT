@@ -2841,5 +2841,19 @@
     "verification_status": "pending_reaudit",
     "social_policy": "discover_from_publisher_website",
     "social": []
+  },
+  {
+    "id": "s108",
+    "name": "Masrawy Egypt",
+    "region": "egypt",
+    "country": "EG",
+    "language": "ar",
+    "website": "https://www.masrawy.com",
+    "feed": "https://www.masrawy.com/rss/feed/35/%D9%85%D8%B5%D8%B1",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
   }
 ]
