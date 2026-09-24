@@ -25,9 +25,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: arabic-newsletter-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && 'manual' || 'push' }}
-  # Supersede stale validation pushes, but never cancel explicit live/manual runs.
-  cancel-in-progress: ${{ github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'Arabic live:') && !startsWith(github.event.head_commit.message, 'Arabic manual-live:') }}
+  # Live/manual delivery never shares a cancellation group with validation pushes.
+  group: arabic-newsletter-${{ github.ref }}-${{ (github.event_name == 'workflow_dispatch' && inputs.deliver) && 'live' || (github.event_name == 'workflow_dispatch' && inputs.preview) && 'preview' || startsWith(github.event.head_commit.message, 'Arabic live:') && 'live' || startsWith(github.event.head_commit.message, 'Arabic manual-live:') && 'manual' || startsWith(github.event.head_commit.message, 'Arabic preview:') && 'preview' || 'validation' }}
+  cancel-in-progress: ${{ !((github.event_name == 'workflow_dispatch' && inputs.deliver) || startsWith(github.event.head_commit.message, 'Arabic live:') || startsWith(github.event.head_commit.message, 'Arabic manual-live:')) }}
 
 jobs:
   arabic:
@@ -42,6 +42,26 @@ jobs:
       ARABIC_LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
       ARABIC_LLM_FALLBACK_BASE_URL: ${{ secrets.LLM_FALLBACK_BASE_URL }}
       ARABIC_LLM_FALLBACK_MODEL: ${{ secrets.LLM_FALLBACK_MODEL }}
+      ARABIC_LLM_FALLBACK_MODELS: ${{ vars.LLM_FALLBACK_MODELS }}
+      ARABIC_LLM_AUTH_HEADER: ${{ vars.LLM_AUTH_HEADER }}
+      ARABIC_LLM_AUTH_SCHEME: ${{ vars.LLM_AUTH_SCHEME }}
+      ARABIC_LLM_CHAT_PATH: ${{ vars.LLM_CHAT_PATH }}
+      ARABIC_LLM_REQUEST_OPTIONS_JSON: ${{ vars.LLM_REQUEST_OPTIONS_JSON }}
+      ARABIC_LLM_EXTRA_HEADERS_JSON: ${{ vars.LLM_EXTRA_HEADERS_JSON }}
+      ARABIC_LLM_FALLBACK_AUTH_HEADER: ${{ vars.LLM_FALLBACK_AUTH_HEADER }}
+      ARABIC_LLM_FALLBACK_AUTH_SCHEME: ${{ vars.LLM_FALLBACK_AUTH_SCHEME }}
+      ARABIC_LLM_FALLBACK_CHAT_PATH: ${{ vars.LLM_FALLBACK_CHAT_PATH }}
+      ARABIC_LLM_FALLBACK_REQUEST_OPTIONS_JSON: ${{ vars.LLM_FALLBACK_REQUEST_OPTIONS_JSON }}
+      ARABIC_LLM_FALLBACK_EXTRA_HEADERS_JSON: ${{ vars.LLM_FALLBACK_EXTRA_HEADERS_JSON }}
+      ARABIC_SOURCES_PER_REGION: "4"
+      ARABIC_SOURCE_CONNECT_TIMEOUT_S: "8"
+      ARABIC_SOURCE_READ_TIMEOUT_S: "12"
+      ARABIC_SYNTH_MAX_CALLS: "5"
+      ARABIC_SYNTH_READ_TIMEOUT_S: "60"
+      ARABIC_SYNTH_BUDGET_S: "360"
+      ARABIC_ANALYSIS_MAX_CALLS: "2"
+      ARABIC_ANALYSIS_READ_TIMEOUT_S: "45"
+      ARABIC_ANALYSIS_BUDGET_S: "120"
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
       DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID }}
       ARABIC_MAX_UNRESOLVED_REGIONS: ${{ vars.ARABIC_MAX_UNRESOLVED_REGIONS || '2' }}
@@ -91,17 +111,11 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y fonts-dejavu-core fonts-noto-core libraqm0
 
-      - name: Build Siraj Noir when original glyph sources are present
+      - name: Confirm approved Arabic production font
         run: |
-          if [ -d arabic_layout/siraj_noir/glyphs ]; then
-            echo "Siraj Noir source glyphs detected; building locally for this run."
-            sudo apt-get install -y fontforge
-            fontforge -script arabic_layout/siraj_noir/build_siraj_noir.py
-            test -s arabic_layout/siraj_noir/build/SirajNoir-Display.ttf
-            echo "SIRAJ_NOIR_FONT=$GITHUB_WORKSPACE/arabic_layout/siraj_noir/build/SirajNoir-Display.ttf" >> "$GITHUB_ENV"
-          else
-            echo "Siraj Noir glyph SVGs are not present; Noto Arabic remains the explicit fallback."
-          fi
+          test -s /usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf
+          test -s /usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf
+          echo "Approved font: Noto Sans Arabic"
 
       - name: Compile and validate Arabic configuration
         run: |
@@ -140,6 +154,7 @@ jobs:
           restore-keys: arabic-state-v1-
 
       - name: Test Arabic pipeline
+        if: steps.mode.outputs.live != 'true' && steps.mode.outputs.manual != 'true'
         run: python -m unittest arabic_newsletter.test_arabic -v
 
       - name: Render long Arabic sample
