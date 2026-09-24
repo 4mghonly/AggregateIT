@@ -44,9 +44,9 @@ def main():
         else:
             row["retired_reason"]="source_audit_"+str(result.get("reason") or "incompatible")
 
-    missing=[r for r,n in active_by_region.items() if n<1]
+    missing=[r for r,n in active_by_region.items() if n<2]
     if missing:
-        raise SystemExit("Refusing registry rebuild; uncovered target regions: "+",".join(missing))
+        raise SystemExit("Refusing registry rebuild; target regions below two compatible sources: "+",".join(missing))
 
     SOURCES.write_text(json.dumps(rows,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({
