@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-09-24T03:42:44.958995+00:00",
+  "all_ok": false,
+  "routes": [
+    {
+      "route": "primary",
+      "configured": true,
+      "ok": true,
+      "model": "openrouter/free",
+      "error": null
+    },
+    {
+      "route": "fallback",
+      "configured": true,
+      "ok": false,
+      "model": "glm-5.3",
+      "error": "http_401"
+    }
+  ]
+}
