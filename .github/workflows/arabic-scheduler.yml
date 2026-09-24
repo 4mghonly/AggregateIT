@@ -48,3 +48,26 @@ jobs:
           path: arabic_newsletter/runtime/v2/
           retention-days: 7
           if-no-files-found: warn
+
+      - name: Alert on V2 failure
+        if: failure()
+        continue-on-error: true
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          raw=(os.getenv("DISCORD_WEBHOOK_ARABIC") or "").strip()
+          if not raw:
+              raise SystemExit(0)
+          url=raw+("&wait=true" if "?" in raw else "?wait=true")
+          body=json.dumps({
+            "content":"⚠️ Arabic V2 production failure | "+os.getenv("RUN_URL",""),
+            "allowed_mentions":{"parse":[]}
+          }).encode("utf-8")
+          req=urllib.request.Request(url,data=body,headers={"Content-Type":"application/json"},method="POST")
+          try:
+              urllib.request.urlopen(req,timeout=20).read()
+          except Exception:
+              pass
+          PY
