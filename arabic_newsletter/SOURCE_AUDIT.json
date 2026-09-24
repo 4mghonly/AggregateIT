@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-09-24T04:19:08.831126+00:00",
-  "total": 108,
-  "compatible": 49,
+  "checked_at": "2026-09-24T04:20:48.731140+00:00",
+  "total": 109,
+  "compatible": 52,
   "regions": {
     "global": {
       "compatible": 10,
@@ -526,8 +526,8 @@
       ]
     },
     "afghanistan": {
-      "compatible": 1,
-      "configured": 4,
+      "compatible": 3,
+      "configured": 5,
       "sources": [
         {
           "id": "s053",
@@ -556,8 +556,14 @@
         {
           "id": "s091",
           "name": "Khaama Press",
-          "ok": false,
-          "reason": "http_202"
+          "ok": true,
+          "reason": "ok"
+        },
+        {
+          "id": "s109",
+          "name": "Bakhtar News Agency",
+          "ok": true,
+          "reason": "ok"
         }
       ]
     },
@@ -592,7 +598,7 @@
       ]
     },
     "horn": {
-      "compatible": 2,
+      "compatible": 3,
       "configured": 5,
       "sources": [
         {
@@ -616,14 +622,14 @@
         {
           "id": "s062",
           "name": "Shabait",
-          "ok": false,
-          "reason": "http_202"
+          "ok": true,
+          "reason": "ok"
         },
         {
           "id": "s092",
           "name": "The Reporter Ethiopia",
           "ok": false,
-          "reason": "http_202"
+          "reason": "http_304"
         },
         {
           "id": "s093",
@@ -1145,7 +1151,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.irna.ir",
-      "arabic_chars": 403
+      "arabic_chars": 419
     },
     {
       "id": "s020",
@@ -1187,7 +1193,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.mehrnews.com",
-      "arabic_chars": 343
+      "arabic_chars": 346
     },
     {
       "id": "s022",
@@ -2007,15 +2013,16 @@
       "verification_status_before": "active",
       "website_ok": true,
       "feed_configured": true,
-      "feed_ok": false,
-      "feed_http": 202,
-      "entries": 0,
-      "recent_72h": 0,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 10,
+      "recent_72h": 10,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
-      "feed_final_host": "shabait.com"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "shabait.com",
+      "arabic_chars": 0
     },
     {
       "id": "s063",
@@ -2267,7 +2274,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 50,
-      "recent_72h": 50,
+      "recent_72h": 41,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -2577,15 +2584,16 @@
       "verification_status_before": "pending_reaudit",
       "website_ok": true,
       "feed_configured": true,
-      "feed_ok": false,
-      "feed_http": 202,
-      "entries": 0,
-      "recent_72h": 0,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 100,
+      "recent_72h": 47,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
-      "feed_final_host": "www.khaama.com"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "www.khaama.com",
+      "arabic_chars": 0
     },
     {
       "id": "s092",
@@ -2598,13 +2606,13 @@
       "website_ok": true,
       "feed_configured": true,
       "feed_ok": false,
-      "feed_http": 202,
+      "feed_http": 304,
       "entries": 0,
       "recent_72h": 0,
       "bozo": false,
       "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
+      "reason": "http_304",
+      "website_http": 200,
       "feed_final_host": "www.thereporterethiopia.com"
     },
     {
@@ -2928,6 +2936,27 @@
       "website_http": 200,
       "feed_final_host": "www.masrawy.com",
       "arabic_chars": 459
+    },
+    {
+      "id": "s109",
+      "name": "Bakhtar News Agency",
+      "region": "afghanistan",
+      "country": "AF",
+      "language": "fa",
+      "enabled_before": true,
+      "verification_status_before": "pending_reaudit",
+      "website_ok": true,
+      "feed_configured": true,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 8,
+      "recent_72h": 0,
+      "bozo": false,
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "www.bakhtarnews.af",
+      "arabic_chars": 397
     }
   ]
 }
