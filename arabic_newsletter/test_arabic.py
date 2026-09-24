@@ -335,22 +335,19 @@ class DeliveryTests(unittest.TestCase):
         with patch.dict(os.environ,{'DISCORD_WEBHOOK_ARABIC':'','DISCORD_WEBHOOK':'https://discord.com/api/webhooks/123/token'}):
             with self.assertRaises(DeliveryError): webhook_url()
 
-    def test_branch_is_arabic_only(self):
+    def test_main_is_authoritative_arabic_production(self):
         root=Path(__file__).resolve().parents[1]
-        workflow_dir=root/'.github'/'workflows'
-        workflows={p.name for p in workflow_dir.glob('*.yml')}
-        self.assertEqual(workflows,{'arabic-newsletter.yml'})
-        workflow=(workflow_dir/'arabic-newsletter.yml').read_text(encoding='utf-8')
+        workflow=(root/'.github'/'workflows'/'arabic-scheduler.yml').read_text(encoding='utf-8')
+        self.assertIn('ref: main',workflow)
+        self.assertNotIn('Arabic-production',workflow)
         self.assertIn('DISCORD_WEBHOOK_ARABIC',workflow)
-        self.assertNotIn('secrets.DISCORD_WEBHOOK }}',workflow)
-        for rel in ('main.py','market.py','slide.py','daily.py','weekly.py','briefing.py','tv.py','config'):
-            self.assertFalse((root/rel).exists(),rel)
+        self.assertIn('0 2,8,14,20 * * *',workflow)
     def test_success_then_duplicate_suppression(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(Path(d)/'state'); path=Path(d)/'slide.png'; path.write_bytes(b'png')
             response=Mock(status_code=200); response.json.return_value={'id':'123'}
             with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post',return_value=response) as post:
-                self.assertEqual(send(state,'edition',[path]),'123'); self.assertEqual(send(state,'edition',[path]),'123')
+                self.assertEqual(send(state,'edition',[path]),'["123"]'); self.assertEqual(send(state,'edition',[path]),'["123"]')
                 self.assertEqual(post.call_count,1)
             state.close()
     def test_confirmed_failed_delivery_can_retry(self):
@@ -360,17 +357,17 @@ class DeliveryTests(unittest.TestCase):
             success=Mock(status_code=200); success.json.return_value={'id':'456','channel_id':'789'}
             with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post',side_effect=[failed,success]) as post:
                 with self.assertRaises(DeliveryError): send(state,'edition',[path])
-                self.assertEqual(send(state,'edition',[path]),'456')
+                self.assertEqual(send(state,'edition',[path]),'["456"]')
                 self.assertEqual(post.call_count,2)
             state.close()
 
-    def test_timeout_is_uncertain_and_not_retried(self):
+    def test_timeout_retries_then_records_failed_for_resumable_workflow_retry(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(Path(d)/'state'); path=Path(d)/'slide.png'; path.write_bytes(b'png')
-            with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post',side_effect=requests.Timeout) as post:
+            with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post',side_effect=requests.Timeout) as post,patch('arabic_newsletter.delivery.time.sleep'):
                 with self.assertRaises(DeliveryError): send(state,'edition',[path])
-                with self.assertRaises(DeliveryError): send(state,'edition',[path])
-                self.assertEqual(post.call_count,1); self.assertEqual(state.delivery('edition')[0],'uncertain')
+                self.assertEqual(post.call_count,3)
+                self.assertEqual(state.delivery('edition')[0],'failed')
             state.close()
 
     def test_only_png_slides_can_reach_arabic_webhook(self):
