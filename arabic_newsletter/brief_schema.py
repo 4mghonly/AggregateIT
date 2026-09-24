@@ -110,12 +110,14 @@ def build_brief(events,health,input_count,window_hours=24,analysis=None,llm_heal
     normalized=[e for e in normalized if e["title_ar"] and e["summary_ar"] and e["sources"]]
     now=datetime.now(timezone.utc).astimezone(UAE).replace(microsecond=0)
     start=now-timedelta(hours=window_hours)
-    regions={
-      r:{
-        "healthy_extractors":1 if any(e["region"]==r for e in normalized) else 0,
-        "substitutes_used":0
-      } for r in REGIONS
-    }
+    health_rows=health if isinstance(health,list) else []
+    regions={}
+    for r in REGIONS:
+        healthy=sum(
+          1 for row in health_rows
+          if isinstance(row,dict) and row.get("region")==r and row.get("status")=="ok"
+        )
+        regions[r]={"healthy_extractors":healthy,"substitutes_used":0}
     unresolved=[r for r,v in regions.items() if not v["healthy_extractors"]]
     source_ids={s["id"] for e in normalized for s in e["sources"] if s["id"]}
     return {
@@ -125,7 +127,7 @@ def build_brief(events,health,input_count,window_hours=24,analysis=None,llm_heal
       "window_end":now.isoformat(),
       "events":normalized,
       "input_count":int(input_count or 0),
-      "health":health if isinstance(health,list) else [],
+      "health":health_rows,
       "rejected":[],
       "analysis":normalize_analysis(analysis,normalized),
       "llm_health":llm_health if isinstance(llm_health,dict) else {"status":"not_attempted","routes":[]},
