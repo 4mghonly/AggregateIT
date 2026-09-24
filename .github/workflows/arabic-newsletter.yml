@@ -25,9 +25,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: arabic-newsletter-${{ github.ref }}
-  # A development push must never cancel an in-flight production briefing.
-  cancel-in-progress: false
+  group: arabic-newsletter-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && 'manual' || 'push' }}
+  # Supersede stale validation pushes, but never cancel explicit live/manual runs.
+  cancel-in-progress: ${{ github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'Arabic live:') && !startsWith(github.event.head_commit.message, 'Arabic manual-live:') }}
 
 jobs:
   arabic:
