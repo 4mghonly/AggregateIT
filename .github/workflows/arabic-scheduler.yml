@@ -17,7 +17,7 @@ on:
         default: true
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: arabic-production
@@ -167,6 +167,40 @@ jobs:
           path: arabic_newsletter/runtime/output/
           retention-days: 14
           if-no-files-found: warn
+
+      - name: Persist sanitized failure diagnostic
+        if: failure()
+        continue-on-error: true
+        env:
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          RUN_SHA: ${{ github.sha }}
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          out=Path("arabic_newsletter/runtime/output")
+          status={}
+          p=out/"run_status.json"
+          if p.exists():
+              try: status=json.loads(p.read_text(encoding="utf-8"))
+              except Exception as exc: status={"stage":"diagnostic_read","status":"failed","detail":type(exc).__name__}
+          diagnostic={
+            "run_id":os.getenv("RUN_ID"),
+            "run_attempt":os.getenv("RUN_ATTEMPT"),
+            "sha":os.getenv("RUN_SHA"),
+            "stage":status.get("stage","pre-python-or-unknown"),
+            "status":status.get("status","failed"),
+            "detail":str(status.get("detail") or "")[:800],
+            "output_files":sorted(x.name for x in out.glob("*")) if out.exists() else []
+          }
+          Path("arabic_newsletter/LAST_FAILURE.json").write_text(json.dumps(diagnostic,ensure_ascii=False,indent=2),encoding="utf-8")
+          PY
+          git config user.name "aggregateit-bot"
+          git config user.email "aggregateit-bot@users.noreply.github.com"
+          git add arabic_newsletter/LAST_FAILURE.json
+          git commit -m "Arabic diagnostic: persist latest failure" || true
+          git push origin HEAD:main || true
 
       - name: Alert Arabic channel with failure stage
         if: failure()
