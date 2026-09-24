@@ -4,6 +4,10 @@ on:
   schedule:
     # 06:00 / 12:00 / 18:00 / 00:00 UAE (UTC+4)
     - cron: "0 2,8,14,20 * * *"
+  push:
+    branches: [main]
+    paths:
+      - .github/arabic-watchdog-trigger
   workflow_dispatch:
     inputs:
       manual_now:
