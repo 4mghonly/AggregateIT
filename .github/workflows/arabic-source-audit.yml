@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install audit runtime
-        run: python -m pip install requests feedparser
+        run: python -m pip install requests feedparser beautifulsoup4
       - name: Audit all configured sources
         run: python arabic_source_audit.py
       - name: Persist sanitized audit report
