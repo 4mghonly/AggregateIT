@@ -49,11 +49,30 @@ jobs:
           from datetime import datetime, timezone
           from pathlib import Path
           from arabic_live_v2 import probe_llms
+          import os
+          from urllib.parse import urlsplit
           results=probe_llms()
+          def shape(prefix):
+              base=(os.getenv(prefix+"BASE_URL") or "").strip()
+              p=urlsplit(base) if base else None
+              host=(p.hostname or "").lower() if p else ""
+              path=(p.path or "") if p else ""
+              return {
+                "key_present":bool((os.getenv(prefix+"API_KEY") or "").strip()),
+                "model_present":bool((os.getenv(prefix+"MODEL") or "").strip()),
+                "host_openrouter":host=="openrouter.ai",
+                "host_alibaba":host.endswith("aliyuncs.com"),
+                "path_compatible_mode":"/compatible-mode/v1" in path,
+                "path_native_api":"/api/v1" in path,
+                "auth_header":(os.getenv(prefix+"AUTH_HEADER") or "Authorization").strip(),
+                "auth_scheme":(os.getenv(prefix+"AUTH_SCHEME") or "Bearer").strip(),
+                "chat_path":"/"+(os.getenv(prefix+"CHAT_PATH") or "chat/completions").strip().lstrip("/")
+              }
           payload={
             "checked_at":datetime.now(timezone.utc).isoformat(),
             "all_ok":all(r.get("ok") for r in results),
-            "routes":results
+            "routes":results,
+            "shape":{"primary":shape("ARABIC_LLM_"),"fallback":shape("ARABIC_LLM_FALLBACK_")}
           }
           Path("arabic_newsletter/LLM_STATUS.json").write_text(
             json.dumps(payload,ensure_ascii=False,indent=2),encoding="utf-8"
