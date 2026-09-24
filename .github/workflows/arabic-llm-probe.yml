@@ -72,6 +72,7 @@ jobs:
             "checked_at":datetime.now(timezone.utc).isoformat(),
             "all_ok":all(r.get("ok") for r in results),
             "routes":results,
+            "failover_smoke":failover_smoke,
             "shape":{"primary":shape("ARABIC_LLM_"),"fallback":shape("ARABIC_LLM_FALLBACK_")}
           }
           Path("arabic_newsletter/LLM_STATUS.json").write_text(
