@@ -1,6 +1,7 @@
 """Bounded collection and publisher-linked social discovery. Never invent feed success."""
 import calendar
 import json
+import os
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -20,7 +21,9 @@ class FetchError(RuntimeError): pass
 def fetch(url):
     if urlsplit(url).scheme not in ('https','http'): raise FetchError('unsupported_scheme')
     try:
-        with requests.get(url, headers=HEADERS, timeout=(20,20), stream=True) as r:
+        connect_timeout=max(3,min(15,int(os.getenv('ARABIC_SOURCE_CONNECT_TIMEOUT_S','8') or 8)))
+        read_timeout=max(5,min(20,int(os.getenv('ARABIC_SOURCE_READ_TIMEOUT_S','12') or 12)))
+        with requests.get(url, headers=HEADERS, timeout=(connect_timeout,read_timeout), stream=True) as r:
             if r.status_code != 200: raise FetchError(f'http_{r.status_code}')
             chunks=[]; size=0
             for chunk in r.iter_content(65536):
@@ -204,19 +207,46 @@ def collect_source(source, discover=False):
     return items,result
 
 def production_sources(sources,end,non_arab_retry=18,arab_retry=6):
-    """Keep healthy sources live and rotate failed-audit sources back through collection."""
+    """Bound production collection by region while preserving language/source diversity."""
     always=[s for s in sources if s.get('enabled',True) or s.get('verification_status')=='active']
     retry=[s for s in sources if s not in always and str(s.get('retired_reason','')).startswith('failed_source_audit_')]
     cycle=int(end.timestamp()//21600)
+    per_region=max(2,min(8,int(os.getenv('ARABIC_SOURCES_PER_REGION','4') or 4)))
+
     def rotate(rows,count,salt):
         if not rows or count<=0: return []
         rows=sorted(rows,key=lambda x:x.get('id',''))
         start=(cycle*salt) % len(rows)
         ordered=rows[start:]+rows[:start]
         return ordered[:min(count,len(ordered))]
+
+    chosen=[]
+    for region in REGIONS:
+        rows=[s for s in always if s.get('region')==region]
+        rows.sort(key=lambda s:(
+            0 if s.get('verification_status')=='active' else 1,
+            0 if s.get('enabled',True) else 1,
+            str(s.get('language','')),
+            str(s.get('id',''))
+        ))
+        # First pass favours distinct languages, then fills remaining slots.
+        selected=[]; languages=set()
+        for s in rows:
+            lang=s.get('language','unknown')
+            if lang not in languages:
+                selected.append(s); languages.add(lang)
+            if len(selected)>=per_region: break
+        if len(selected)<per_region:
+            for s in rows:
+                if s not in selected:
+                    selected.append(s)
+                if len(selected)>=per_region: break
+        chosen.extend(selected)
+
     non_arab=[s for s in retry if s.get('language')!='ar']
     arab=[s for s in retry if s.get('language')=='ar']
-    chosen=always+rotate(non_arab,non_arab_retry,7)+rotate(arab,arab_retry,5)
+    # Recovery candidates stay deliberately small; same-region repair below handles gaps.
+    chosen+=rotate(non_arab,min(non_arab_retry,8),7)+rotate(arab,min(arab_retry,4),5)
     return list({s['id']:s for s in chosen}.values())
 
 def _run_source_batch(sources,discover=False):
@@ -346,7 +376,7 @@ def collect(start,end,discover=False,registry=None,repair_unhealthy=True):
                 s.get('enabled') is False,
                 s.get('language')=='ar',
                 s.get('id','')))
-            substitutes.extend(candidates[:6])
+            substitutes.extend(candidates[:3])
         if substitutes:
             substitute_ids={s['id'] for s in substitutes}
             extra_items,extra_health=_collect_batch(substitutes,True,substitute_ids)
