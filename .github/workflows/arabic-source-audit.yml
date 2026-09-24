@@ -45,3 +45,14 @@ jobs:
           print("target-region compatible source counts:",counts)
           assert not weak, "target regions below two compatible sources: "+str(weak)
           PY
+
+      - name: Rebuild production registry from audit
+        run: python arabic_rebuild_sources.py
+
+      - name: Persist rebuilt production registry
+        run: |
+          git config user.name "aggregateit-bot"
+          git config user.email "aggregateit-bot@users.noreply.github.com"
+          git add arabic_newsletter/sources.json
+          git commit -m "Arabic sources: sync production registry to audit" || true
+          git push origin HEAD:main
