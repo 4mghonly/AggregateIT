@@ -106,19 +106,23 @@ def load_sources():
     usable=[]
     for row in rows:
         if not row.get("enabled"): continue
-        if row.get("verification_status")!="active": continue
-        if row.get("language")!="ar": continue
+        if row.get("verification_status") not in ("active","pending_reaudit"): continue
         feed=(row.get("feed") or "").strip()
         if not feed.startswith("http"): continue
         usable.append(row)
-    # Stable bounded source set; global Arabic outlets first, then regional.
-    usable.sort(key=lambda r:(r.get("region")!="global",r.get("region",""),r.get("id","")))
-    return usable[:36]
+    # Monitor every target region and every configured source language. The
+    # publication layer may still require Arabic text, but source health must
+    # reflect the actual extractor fleet rather than an Arabic-only subset.
+    usable.sort(key=lambda r:(r.get("region")=="global",r.get("region",""),r.get("id","")))
+    return usable
 
 def fetch_source(src):
     try:
         r=requests.get(src["feed"],timeout=(5,10),headers={"User-Agent":"AggregateIT-Arabic-V2/1.0"})
-        if r.status_code!=200: return [],{"source":src["name"],"status":f"http_{r.status_code}"}
+        base_health={"id":src.get("id"),"source":src.get("name"),"region":src.get("region"),
+                     "country":src.get("country"),"language":src.get("language")}
+        if r.status_code!=200:
+            return [],{**base_health,"status":f"http_{r.status_code}"}
         parsed=feedparser.parse(r.content)
         out=[]
         for entry in parsed.entries[:24]:
@@ -139,9 +143,12 @@ def fetch_source(src):
               "region":region,
               "published":published_ts(entry),
             })
-        return out,{"source":src["name"],"status":"ok","items":len(out)}
+        return out,{**base_health,"status":"ok","items":len(out),
+                    "parsed_entries":len(parsed.entries or [])}
     except Exception as exc:
-        return [],{"source":src["name"],"status":"error_"+type(exc).__name__}
+        return [],{"id":src.get("id"),"source":src.get("name"),"region":src.get("region"),
+                   "country":src.get("country"),"language":src.get("language"),
+                   "status":"error_"+type(exc).__name__}
 
 def collect(hours=24):
     cutoff=(datetime.now(timezone.utc)-timedelta(hours=hours)).timestamp()
