@@ -1,6 +1,7 @@
 """Audit every Arabic briefing source for live compatibility."""
 from __future__ import annotations
 
+import concurrent.futures
 import email.utils
 import json
 import re
@@ -82,7 +83,24 @@ def probe(row):
 
 def main():
     rows=json.loads(SOURCES.read_text(encoding="utf-8"))
-    results=[probe(r) for r in rows]
+    results=[]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
+        futures={pool.submit(probe,row):row for row in rows}
+        for fut in concurrent.futures.as_completed(futures):
+            row=futures[fut]
+            try:
+                results.append(fut.result())
+            except Exception as exc:
+                results.append({
+                  "id":row.get("id"),"name":row.get("name"),"region":row.get("region"),
+                  "country":row.get("country"),"language":row.get("language"),
+                  "enabled_before":bool(row.get("enabled")),
+                  "verification_status_before":row.get("verification_status"),
+                  "website_ok":False,"feed_configured":bool((row.get("feed") or "").startswith("http")),
+                  "feed_ok":False,"feed_http":None,"entries":0,"recent_72h":0,"bozo":False,
+                  "production_compatible":False,"reason":"audit_exception_"+type(exc).__name__
+                })
+    results.sort(key=lambda r:str(r.get("id") or ""))
     regions={}
     for r in results:
         region=r.get("region") or "unknown"
