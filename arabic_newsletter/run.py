@@ -7,7 +7,7 @@ import time
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from .core import ROOT, REGIONS, State, UAE, edition_window, live_window, write_json
+from .core import ROOT, REGIONS, State, UAE, clean, edition_window, live_window, write_json
 from .collect import audit, collect, health_summary
 from .editor import Client, synthesize, build_analysis, is_arabic
 from .delivery import webhook_info, send
