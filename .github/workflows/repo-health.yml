@@ -60,13 +60,13 @@ jobs:
           assert Path('README.md').exists()
           assert not Path('README. md').exists()
           scheduler=Path('.github/workflows/arabic-scheduler.yml').read_text(encoding='utf-8')
-          assert '0,15 2,8,14,20 * * 0-6' in scheduler, 'Arabic UAE six-hour schedule changed'
+          assert '0 2,8,14,20 * * *' in scheduler, 'Arabic UAE six-hour schedule changed'
           assert '.github/arabic-watchdog-trigger' in scheduler, 'Arabic external watchdog trigger missing'
-          assert 'ref: Arabic-production' in scheduler, 'Arabic production must use promoted branch'
+          assert 'ref: main' in scheduler, 'Arabic production must execute from main'
           assert 'timeout-minutes: 45' in scheduler, 'Arabic production runtime envelope changed'
           assert 'python -m unittest arabic_newsletter.test_arabic -v' not in scheduler, 'full Arabic CI suite must not run in production scheduler'
-          promote=Path('.github/workflows/arabic-promote.yml').read_text(encoding='utf-8')
-          assert 'Arabic-production' in promote and 'workflow_dispatch' in promote, 'Arabic promotion gate missing'
+          assert 'Arabic-production' not in scheduler, 'cross-branch Arabic production reintroduced'
+          assert 'ARABIC_DISCORD_MAX_FILE_BYTES: "19000000"' in scheduler, 'Discord upload safety contract changed'
           slide=Path('.github/workflows/slide.yml').read_text(encoding='utf-8')
           assert '30 11 * * *' in slide, 'Gazette 15:30 UAE schedule changed'
           PY
