@@ -43,35 +43,86 @@ def send(state,edition,paths):
         if prior[0]=='sent': return prior[1]
         if prior[0]=='failed': state.clear_delivery(edition)
         else: raise DeliveryError('Edition already reserved; reconcile Discord delivery before retrying')
-    if sum(p.stat().st_size for p in paths)>8_000_000: raise DeliveryError('Attachments exceed conservative 8 MB limit')
-    state.reserve(edition)
-    for attempt in range(2):
-        try:
-            with ExitStack() as stack:
-                files={f'files[{i}]':(p.name,stack.enter_context(p.open('rb')),'image/png') for i,p in enumerate(paths)}
-                r=requests.post(url,data={'payload_json':json.dumps({'content':'النشرة الجيوسياسية والعسكرية والأمنية | '+edition+' | بتوقيت الإمارات','allowed_mentions':{'parse':[]}},ensure_ascii=False)},files=files,timeout=(10,60))
-        except requests.RequestException:
-            state.mark(edition,'uncertain')
-            raise DeliveryError('Discord response uncertain; automatic duplicate retry blocked') from None
-        if r.status_code==429 and attempt==0:
-            try: delay=min(max(float(r.json().get('retry_after',2)),1),30)
-            except (ValueError,TypeError): delay=2
-            time.sleep(delay); continue
-        if r.status_code==429:
-            state.mark(edition,'failed'); raise DeliveryError('Discord rate limit persisted after retry')
-        if r.status_code!=200:
-            state.mark(edition,'uncertain' if r.status_code>=500 else 'failed')
-            raise DeliveryError(f'Discord HTTP {r.status_code}; delivery not confirmed')
-        try:
-            body=r.json(); message_id=str(body['id']); channel_id=str(body.get('channel_id') or 'unknown')
-        except (ValueError,KeyError,TypeError):
-            state.mark(edition,'uncertain'); raise DeliveryError('Discord message ID missing') from None
-        expected=(os.getenv('DISCORD_ARABIC_EXPECTED_CHANNEL_ID') or '').strip()
-        if expected and channel_id!=expected:
-            state.mark(edition,'uncertain')
-            raise DeliveryError(f'Arabic Discord receipt channel mismatch: {channel_id} != {expected}')
-        state.mark(edition,'sent',message_id)
-        print(f'Arabic Discord delivery confirmed: message_id={message_id} channel_id={channel_id}',flush=True)
-        return message_id
-    state.mark(edition,'failed')
-    raise DeliveryError('Discord delivery retry budget exhausted')
+    # Discord documents a 20 MB free upload limit per file as of Aug 2026.
+    # Keep a 1 MB safety margin and upload each slide independently so a valid
+    # 4K deck is never rejected by an obsolete aggregate-size cap.
+    max_file_bytes=int(os.getenv('ARABIC_DISCORD_MAX_FILE_BYTES','19000000') or 19000000)
+    oversized=[p.name for p in paths if p.stat().st_size>max_file_bytes]
+    if oversized:
+        raise DeliveryError('Arabic slide exceeds Discord per-file safety limit: '+','.join(oversized))
+
+    parts_key='delivery_parts:'+edition
+    confirmed=state.get(parts_key) or {}
+    if not prior:
+        state.reserve(edition)
+
+    message_ids=[]
+    expected=(os.getenv('DISCORD_ARABIC_EXPECTED_CHANNEL_ID') or '').strip()
+    for index,p in enumerate(paths,1):
+        saved=confirmed.get(str(index))
+        if saved:
+            message_ids.append(str(saved))
+            continue
+
+        response=None
+        last_error=None
+        for attempt in range(3):
+            try:
+                with p.open('rb') as fh:
+                    files={'file':(p.name,fh,'image/png')}
+                    payload={
+                      'content':f'النشرة الجيوسياسية والأمنية | {edition} | الشريحة {index}/{len(paths)} | بتوقيت الإمارات',
+                      'allowed_mentions':{'parse':[]}
+                    }
+                    response=requests.post(
+                      url,
+                      data={'payload_json':json.dumps(payload,ensure_ascii=False)},
+                      files=files,
+                      timeout=(10,75)
+                    )
+            except requests.RequestException as exc:
+                last_error='network_'+type(exc).__name__
+                time.sleep(min(2**attempt,8))
+                continue
+
+            if response.status_code==429:
+                try: delay=min(max(float(response.json().get('retry_after',2)),1),30)
+                except (ValueError,TypeError): delay=2
+                last_error='http_429'
+                time.sleep(delay)
+                continue
+            if response.status_code>=500:
+                last_error=f'http_{response.status_code}'
+                time.sleep(min(2**attempt,8))
+                continue
+            if response.status_code!=200:
+                state.mark(edition,'failed')
+                raise DeliveryError(f'Discord HTTP {response.status_code} on slide {index}')
+
+            try:
+                body=response.json()
+                message_id=str(body['id'])
+                channel_id=str(body.get('channel_id') or 'unknown')
+            except (ValueError,KeyError,TypeError):
+                last_error='missing_receipt'
+                time.sleep(min(2**attempt,8))
+                continue
+            if expected and channel_id!=expected:
+                state.mark(edition,'failed')
+                raise DeliveryError(f'Arabic Discord receipt channel mismatch: {channel_id} != {expected}')
+
+            confirmed[str(index)]=message_id
+            state.put(parts_key,confirmed)
+            message_ids.append(message_id)
+            print(f'Arabic Discord slide {index}/{len(paths)} confirmed: message_id={message_id}',flush=True)
+            break
+        else:
+            # Delivery-first policy: allow the workflow-level retry to resume from
+            # already-confirmed parts rather than permanently blocking the edition.
+            state.mark(edition,'failed')
+            raise DeliveryError(f'Discord slide {index} delivery failed after retries: {last_error or "unknown"}')
+
+    receipt=json.dumps(message_ids,separators=(',',':'))
+    state.mark(edition,'sent',receipt)
+    print('Arabic Discord delivery confirmed for all slides:',receipt,flush=True)
+    return receipt
