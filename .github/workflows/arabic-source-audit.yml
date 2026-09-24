@@ -1,6 +1,8 @@
 name: Arabic Source Audit
 
 on:
+  schedule:
+    - cron: "15 1 * * *"
   push:
     branches: [main]
     paths:
@@ -30,3 +32,16 @@ jobs:
           git add arabic_newsletter/SOURCE_AUDIT.json
           git commit -m "Arabic sources: update compatibility audit" || true
           git push origin HEAD:main
+
+      - name: Validate target-region source floor
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from arabic_newsletter.core import REGIONS
+          audit=json.loads(Path("arabic_newsletter/SOURCE_AUDIT.json").read_text(encoding="utf-8"))
+          counts={r:int((audit.get("regions",{}).get(r) or {}).get("compatible",0)) for r in REGIONS}
+          weak={r:n for r,n in counts.items() if n<2}
+          print("target-region compatible source counts:",counts)
+          assert not weak, "target regions below two compatible sources: "+str(weak)
+          PY
