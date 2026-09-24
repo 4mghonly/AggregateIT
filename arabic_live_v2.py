@@ -202,6 +202,128 @@ def make_event(x,index):
       }],
     }
 
+
+def _json_env(name):
+    raw=(os.getenv(name) or "").strip()
+    if not raw:
+        return {}
+    value=json.loads(raw)
+    return value if isinstance(value,dict) else {}
+
+def _route(prefix):
+    key=(os.getenv(prefix+"API_KEY") or "").strip()
+    base=(os.getenv(prefix+"BASE_URL") or "").strip().rstrip("/")
+    model=(os.getenv(prefix+"MODEL") or "").strip()
+    if not (key and base and model):
+        return None
+    header=(os.getenv(prefix+"AUTH_HEADER") or "Authorization").strip()
+    scheme=(os.getenv(prefix+"AUTH_SCHEME") or "Bearer").strip()
+    chat="/"+(os.getenv(prefix+"CHAT_PATH") or "chat/completions").strip().lstrip("/")
+    headers={"Content-Type":"application/json"}
+    headers.update(_json_env(prefix+"EXTRA_HEADERS_JSON"))
+    if header:
+        headers[header]=(f"{scheme} {key}".strip() if scheme else key)
+    return {"key":key,"base":base,"model":model,"chat":chat,"headers":headers,
+            "options":_json_env(prefix+"REQUEST_OPTIONS_JSON")}
+
+def _route_call(route,system,user,max_tokens=1800):
+    url=route["base"] if route["base"].endswith(route["chat"]) else route["base"]+route["chat"]
+    payload={"model":route["model"],
+             "messages":[{"role":"system","content":system},{"role":"user","content":json.dumps(user,ensure_ascii=False)}],
+             "temperature":0.1,"max_tokens":max_tokens,
+             "response_format":{"type":"json_object"}}
+    payload.update(route["options"])
+    for attempt in range(2):
+        try:
+            r=requests.post(url,headers=route["headers"],json=payload,timeout=(8,45))
+        except requests.RequestException as exc:
+            if attempt==0:
+                continue
+            raise RuntimeError("network_"+type(exc).__name__) from None
+        if r.status_code==400 and "response_format" in r.text.lower() and "response_format" in payload:
+            payload.pop("response_format",None)
+            continue
+        if r.status_code in (408,409,425,429,500,502,503,504) and attempt==0:
+            continue
+        if r.status_code!=200:
+            raise RuntimeError(f"http_{r.status_code}")
+        try:
+            body=r.json()
+            content=body["choices"][0]["message"]["content"]
+            if isinstance(content,list):
+                content="".join(item if isinstance(item,str) else str(item.get("text") or item.get("content") or "")
+                                for item in content if isinstance(item,(str,dict)))
+            if isinstance(content,dict):
+                return content
+            text=str(content or "").strip()
+            fence=chr(96)*3
+            if text.startswith(fence):
+                text=re.sub(r"^"+re.escape(fence)+r"(?:json)?\s*|\s*"+re.escape(fence)+r"$","",text,flags=re.I)
+            obj=json.loads(text)
+            if not isinstance(obj,dict):
+                raise ValueError("json_object_required")
+            return obj
+        except Exception as exc:
+            raise RuntimeError("invalid_json_"+type(exc).__name__) from None
+    raise RuntimeError("route_failed")
+
+LLM_SYSTEM="""أنت محرر تحليل جيوسياسي وأمني باللغة العربية. البيانات المقدمة هي الوقائع الوحيدة المسموح باستخدامها.
+لا تغيّر العناوين، ولا تضف معلومات أو أرقاماً أو جهات أو مواقع أو نوايا غير موجودة في الوقائع.
+ميّز التحليل عن الحقيقة باستخدام صيغ حذرة. لا تقدم توصية سياسية ولا تنبؤاً جازماً.
+أعد JSON فقط بهذه المفاتيح:
+{"situation_ar":"...","implications_ar":"...","developing_ar":["..."],"watch_ar":["..."]}"""
+
+def _analysis_prompt(events):
+    return {"events":[{
+      "region":e.get("region"),"title_ar":e.get("title_ar"),"summary_ar":e.get("summary_ar"),
+      "sources":[s.get("source") for s in e.get("sources",[])][:3]
+    } for e in events[:10]]}
+
+def _normalize_analysis(obj):
+    situation=clean(obj.get("situation_ar","")) if isinstance(obj,dict) else ""
+    implications=clean(obj.get("implications_ar","")) if isinstance(obj,dict) else ""
+    developing=obj.get("developing_ar") if isinstance(obj,dict) else None
+    watch=obj.get("watch_ar") if isinstance(obj,dict) else None
+    if not situation or not implications or not isinstance(developing,list) or not isinstance(watch,list):
+        raise RuntimeError("analysis_fields")
+    developing=[clean(x) for x in developing if clean(x)][:5]
+    watch=[clean(x) for x in watch if clean(x)][:6]
+    if not developing or not watch:
+        raise RuntimeError("analysis_lists")
+    return {"situation_ar":situation[:1200],"implications_ar":implications[:1200],
+            "developing_ar":[x[:420] for x in developing],"watch_ar":[x[:420] for x in watch]}
+
+def llm_analysis_with_failover(events):
+    health=[]
+    for name,route in [("primary",_route("ARABIC_LLM_")),("fallback",_route("ARABIC_LLM_FALLBACK_"))]:
+        if not route:
+            health.append({"route":name,"configured":False,"ok":False,"error":"missing_configuration"})
+            continue
+        try:
+            analysis=_normalize_analysis(_route_call(route,LLM_SYSTEM,_analysis_prompt(events)))
+            health.append({"route":name,"configured":True,"ok":True,"model":route["model"]})
+            return analysis,health,name
+        except Exception as exc:
+            health.append({"route":name,"configured":True,"ok":False,"model":route["model"],"error":str(exc)[:160]})
+            print(f"V2 LLM {name} failed: {type(exc).__name__}: {exc}",flush=True)
+    raise RuntimeError("Both Arabic LLM routes failed: "+json.dumps(health,ensure_ascii=False))
+
+def probe_llms():
+    results=[]
+    system='Return JSON only with keys ok and arabic. Set ok=true and arabic to "جاهز".'
+    for name,route in [("primary",_route("ARABIC_LLM_")),("fallback",_route("ARABIC_LLM_FALLBACK_"))]:
+        if not route:
+            results.append({"route":name,"configured":False,"ok":False,"error":"missing_configuration"})
+            continue
+        try:
+            obj=_route_call(route,system,{"probe":"connectivity"},max_tokens=120)
+            ok=bool(obj.get("ok")) and bool(obj.get("arabic"))
+            results.append({"route":name,"configured":True,"ok":ok,"model":route["model"],
+                            "error":None if ok else "unexpected_response"})
+        except Exception as exc:
+            results.append({"route":name,"configured":True,"ok":False,"model":route["model"],"error":str(exc)[:160]})
+    return results
+
 def deterministic_analysis(events):
     counts=Counter(REGIONS.get(e["region"],e["region"]) for e in events)
     leading="، ".join(name for name,_ in counts.most_common(4))
