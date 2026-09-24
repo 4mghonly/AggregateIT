@@ -1,0 +1,32 @@
+name: Arabic Source Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/arabic-source-audit-trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install audit runtime
+        run: python -m pip install requests feedparser
+      - name: Audit all configured sources
+        run: python arabic_source_audit.py
+      - name: Persist sanitized audit report
+        run: |
+          git config user.name "aggregateit-bot"
+          git config user.email "aggregateit-bot@users.noreply.github.com"
+          git add arabic_newsletter/SOURCE_AUDIT.json
+          git commit -m "Arabic sources: update compatibility audit" || true
+          git push origin HEAD:main
