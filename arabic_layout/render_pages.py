@@ -155,10 +155,12 @@ def page2_region_plan(events):
     quiet=[r for r in REGIONS if r not in first]
     return active,quiet,first
 
-def _coverage_panel(c,box,events):
+def _coverage_panel(c,box,brief):
+    events=brief.get('events') or []
     active,quiet,_=page2_region_plan(events)
+    source_regions=(brief.get('source_health') or {}).get('regions') or {}
     x,y,w,h=panel(c,box,'التغطية الإقليمية',STEEL,
-                  'المؤشر يعني وجود مادة مؤهلة في الدورة، وليس قياساً لمستوى الخطر')
+                  'مادة مؤهلة = قصة منشورة، مراقبة نشطة = مصادر حية بلا قصة مؤهلة، فجوة مصدرية = تغطية ناقصة')
     ordered=active+quiet
     cols=6; gap=12
     rows=(len(ordered)+cols-1)//cols
@@ -167,10 +169,17 @@ def _coverage_panel(c,box,events):
     for i,region in enumerate(ordered):
         row=i//cols; col=i%cols; xx=x+col*(cw+gap); yy=y+row*(ch+gap)
         active_now=region in active
+        healthy=bool((source_regions.get(region) or {}).get('healthy_extractors'))
         color=REGION_COLORS.get(region,STEEL)
-        c.rounded((xx,yy,cw,ch),PANEL_ALT,color if active_now else BORDER,8,1)
-        c.text(REGIONS[region],(xx+8,yy+5,cw-16,32),21,True,color if active_now else MUTED,'center',min_size=18,line_ratio=1.10)
-        c.text('مادة مؤهلة' if active_now else 'مراقبة',(xx+8,yy+38,cw-16,26),18,True,color if active_now else MUTED,'center',min_size=16,line_ratio=1.10)
+        if not healthy:
+            outline=ALERT; label_color=ALERT; status='فجوة مصدرية'
+        elif active_now:
+            outline=color; label_color=color; status='مادة مؤهلة'
+        else:
+            outline=BORDER; label_color=MUTED; status='مراقبة نشطة'
+        c.rounded((xx,yy,cw,ch),PANEL_ALT,outline,8,1)
+        c.text(REGIONS[region],(xx+8,yy+5,cw-16,32),21,True,label_color,'center',min_size=18,line_ratio=1.10)
+        c.text(status,(xx+8,yy+38,cw-16,26),18,True,label_color,'center',min_size=16,line_ratio=1.10)
 
 def page1(brief,path):
     c=Canvas(); masthead(c,brief,1); stats(c,brief)
@@ -206,7 +215,7 @@ def page2(brief,path):
         rh=(h-gap*(len(secondary)-1))//len(secondary)
         for i,e in enumerate(secondary,1):
             _story_card(c,(x,y+(i-1)*(rh+gap),w,rh),e,i,False)
-    _coverage_panel(c,(55,1605,2265,470),brief.get('events',[]))
+    _coverage_panel(c,(55,1605,2265,470),brief)
 
     # Right: three different policy-maker functions, not three versions of the
     # same event recap.
@@ -217,13 +226,17 @@ def page2(brief,path):
     _footer(c,2); c.save(path); return c.clipped
 
 def _continuity_events(brief):
-    """Current events first, then prior-edition events to keep page 3 populated."""
+    """Current events first, then clearly tagged prior-edition continuity items."""
     out=[]; seen=set()
-    for e in list(brief.get('events') or [])+list(brief.get('previous_events') or []):
-        if not isinstance(e,dict): continue
-        key=_event_key(e)
-        if not key or key in seen: continue
-        seen.add(key); out.append(e)
+    for is_prior,rows in ((False,brief.get('events') or []),(True,brief.get('previous_events') or [])):
+        for e in rows:
+            if not isinstance(e,dict): continue
+            key=_event_key(e)
+            if not key or key in seen: continue
+            seen.add(key)
+            item=dict(e)
+            if is_prior: item['_continuity_prior']=True
+            out.append(item)
     return out
 
 def _event_text(e):
@@ -237,6 +250,8 @@ def _first_matching(events,predicate):
 def _brief_line(e,limit=220):
     if not e: return 'تستمر المتابعة من خلال المصادر الإقليمية النشطة مع إبقاء القصة الأعلى أولوية قيد الرصد.'
     text=sanitize_text(e.get('summary_ar') or e.get('title_ar') or '')
+    if e.get('_continuity_prior'):
+        text='من الإحاطة السابقة، متابعة مستمرة: '+text
     return compact(text,limit)
 
 def _page3_stats(c,brief,events):
@@ -245,8 +260,8 @@ def _page3_stats(c,brief,events):
     militant=sum(any(t in _event_text(e) for t in militant_terms) for e in events)
     maritime=sum(any(t in _event_text(e) for t in maritime_terms) for e in events)
     conflicts=sum(e.get('topic') in ('military','security','humanitarian_conflict') for e in events)
-    vals=[('أقاليم رئيسية',len(REGIONS),BLUE),('جماعات مسلحة',max(1,militant),OLIVE),
-          ('نزاعات',max(1,conflicts),ALERT),('توترات بحرية',max(1,maritime),SAND)]
+    vals=[('أقاليم رئيسية',len(REGIONS),BLUE),('جماعات مسلحة',militant,OLIVE),
+          ('نزاعات',conflicts,ALERT),('توترات بحرية',maritime,SAND)]
     margin=55; gap=18; y=190; h=108; cw=(W-2*margin-gap*3)//4
     for i,(label,val,color) in enumerate(vals):
         x=margin+i*(cw+gap)
