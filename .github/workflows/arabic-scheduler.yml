@@ -107,7 +107,7 @@ jobs:
       - name: Generate and deliver briefing
         id: deliver
         env:
-          MANUAL_NOW: ${{ github.event_name == 'workflow_dispatch' && inputs.manual_now || false }}
+          MANUAL_NOW: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.manual_now) || false }}
         run: |
           set +e
           CMD="python -m arabic_newsletter.run --send"
