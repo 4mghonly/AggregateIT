@@ -142,7 +142,8 @@ def main():
 
             else:
                 if args.manual_now:
-                    end=datetime.now(timezone.utc).astimezone(UAE).replace(microsecond=0)
+                    fixed_end=(os.getenv('ARABIC_MANUAL_END') or '').strip()
+                    end=(datetime.fromisoformat(fixed_end) if fixed_end else datetime.now(timezone.utc)).astimezone(UAE).replace(microsecond=0)
                     start=end-timedelta(hours=6)
                     edition=end.isoformat()
                     morning=False
