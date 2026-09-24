@@ -23,10 +23,11 @@ import sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 import feedparser
 import requests
+from bs4 import BeautifulSoup
 
 from arabic_newsletter.core import UAE, REGIONS, clean
 from arabic_newsletter.render import render
@@ -108,7 +109,8 @@ def load_sources():
         if not row.get("enabled"): continue
         if row.get("verification_status") not in ("active","pending_reaudit"): continue
         feed=(row.get("feed") or "").strip()
-        if not feed.startswith("http"): continue
+        adapter=(row.get("adapter") or "").strip()
+        if not feed.startswith("http") and adapter!="html_headlines": continue
         usable.append(row)
     # Monitor every target region and every configured source language. The
     # publication layer may still require Arabic text, but source health must
@@ -118,9 +120,41 @@ def load_sources():
 
 def fetch_source(src):
     try:
-        r=requests.get(src["feed"],timeout=(5,10),headers={"User-Agent":"AggregateIT-Arabic-V2/1.0"})
         base_health={"id":src.get("id"),"source":src.get("name"),"region":src.get("region"),
                      "country":src.get("country"),"language":src.get("language")}
+        if (src.get("adapter") or "").strip()=="html_headlines":
+            target=(src.get("website") or "").strip()
+            r=requests.get(target,timeout=(5,12),headers={"User-Agent":"AggregateIT-Arabic-V3/1.0"})
+            if r.status_code!=200:
+                return [],{**base_health,"status":f"html_http_{r.status_code}"}
+            soup=BeautifulSoup(r.text,"html.parser")
+            out=[]; seen=set(); parsed_count=0
+            for a in soup.find_all("a",href=True):
+                title=strip_html(a.get_text(" ",strip=True))
+                if len(title)<20 or len(title)>220 or title in seen:
+                    continue
+                href=str(a.get("href") or "")
+                if href.startswith(("#","javascript:","mailto:")):
+                    continue
+                parsed_count+=1
+                seen.add(title)
+                text=title
+                if not is_arabic(text) or not relevant(text):
+                    continue
+                region=region_for(text,src.get("region"))
+                if not region:
+                    continue
+                out.append({
+                  "title":title[:100],"summary":title,
+                  "url":urljoin(target,href),"source":src["name"],
+                  "source_id":src["id"],"country":src.get("country"),
+                  "region":region,"published":datetime.now(timezone.utc).timestamp()
+                })
+                if len(out)>=24:
+                    break
+            return out,{**base_health,"status":"ok","items":len(out),"parsed_entries":parsed_count}
+
+        r=requests.get(src["feed"],timeout=(5,10),headers={"User-Agent":"AggregateIT-Arabic-V3/1.0"})
         if r.status_code!=200:
             return [],{**base_health,"status":f"http_{r.status_code}"}
         parsed=feedparser.parse(r.content)
