@@ -1,3 +1,3 @@
-probe-live-2
-triggered_at=2026-09-24T08:05:00+04:00
-reason=verify-fallback-auth-shape
+probe-live-3
+triggered_at=2026-09-24T08:12:00+04:00
+reason=verify-production-shaped-llm-failover
