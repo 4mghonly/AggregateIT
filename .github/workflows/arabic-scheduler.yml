@@ -11,6 +11,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/arabic-scheduler.yml
+      - .github/arabic-watchdog-trigger
 
 permissions:
   contents: read
@@ -22,7 +23,7 @@ concurrency:
 jobs:
   arabic-production:
     # This launcher is ONLY for the Arabic slides. It never runs the main Gazette.
-    if: "${{ github.event_name != 'push' || startsWith(github.event.head_commit.message, 'Arabic scheduler') }}"
+    if: "${{ github.event_name != 'push' || startsWith(github.event.head_commit.message, 'Arabic scheduler') || startsWith(github.event.head_commit.message, 'Arabic watchdog:') }}"
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -45,6 +46,7 @@ jobs:
       ARABIC_LLM_FALLBACK_REQUEST_OPTIONS_JSON: ${{ vars.LLM_FALLBACK_REQUEST_OPTIONS_JSON }}
       ARABIC_LLM_FALLBACK_EXTRA_HEADERS_JSON: ${{ vars.LLM_FALLBACK_EXTRA_HEADERS_JSON }}
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
+      DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID }}
     steps:
       - name: Check out isolated Arabic engine
         uses: actions/checkout@v5
