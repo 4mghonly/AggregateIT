@@ -259,7 +259,23 @@ def _route_call(route,system,user,max_tokens=1800):
             fence=chr(96)*3
             if text.startswith(fence):
                 text=re.sub(r"^"+re.escape(fence)+r"(?:json)?\s*|\s*"+re.escape(fence)+r"$","",text,flags=re.I)
-            obj=json.loads(text)
+            try:
+                obj=json.loads(text)
+            except ValueError:
+                # Some OpenAI-compatible providers wrap the JSON object in
+                # explanatory prose even when instructed to return JSON only.
+                decoder=json.JSONDecoder()
+                obj=None
+                for match in re.finditer(r"\\{",text):
+                    try:
+                        candidate,_=decoder.raw_decode(text[match.start():])
+                        if isinstance(candidate,dict):
+                            obj=candidate
+                            break
+                    except ValueError:
+                        continue
+                if obj is None:
+                    raise
             if not isinstance(obj,dict):
                 raise ValueError("json_object_required")
             return obj
