@@ -12,7 +12,7 @@ from PIL import Image
 from .core import State, canonical, clean, edition_window, live_window, scheduled_window, preliminary_relevant, uae_secondary_relevant, REGIONS
 from .collect import entry_time, social_links, article_path_candidate, source_relevant, production_sources
 from .editor import Client, validate_events, numbers, quote_supported, synthesize, EditorialError, is_arabic, _message_json, _event_envelope, _review_envelope, _bounded_articles
-from .delivery import send, webhook_url, DeliveryError
+from .delivery import send, webhook_url, webhook_info, DeliveryError
 from .render import render
 from arabic_layout.render_pages import page2_region_plan, layout_plan
 from .sample import fixture
@@ -313,6 +313,17 @@ class EditorialTests(unittest.TestCase):
         self.article['kind']='social'; events,_=self.validate(); self.assertEqual(events[0]['status_ar'],'تصريح منسوب')
 
 class DeliveryTests(unittest.TestCase):
+    def test_expected_channel_guard(self):
+        response=Mock(status_code=200)
+        response.json.return_value={'id':'123','channel_id':'wrong','name':'Agentic Bot'}
+        env={
+            'DISCORD_WEBHOOK_ARABIC':'https://discord.com/api/webhooks/123/fake',
+            'DISCORD_ARABIC_EXPECTED_CHANNEL_ID':'expected'
+        }
+        with patch.dict(os.environ,env,clear=True), patch('arabic_newsletter.delivery.requests.get',return_value=response):
+            with self.assertRaisesRegex(DeliveryError,'expected'):
+                webhook_info()
+
     def test_no_old_webhook_fallback(self):
         with patch.dict(os.environ,{'DISCORD_WEBHOOK_ARABIC':'','DISCORD_WEBHOOK':'https://discord.com/api/webhooks/123/token'}):
             with self.assertRaises(DeliveryError): webhook_url()
