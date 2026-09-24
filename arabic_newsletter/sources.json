@@ -3792,5 +3792,20 @@
       "reason": "html_http_403"
     },
     "retired_reason": "source_audit_html_http_403"
+  },
+  {
+    "id": "s113",
+    "name": "Daily Tribune Bahrain",
+    "region": "gcc",
+    "country": "BH",
+    "language": "en",
+    "website": "https://www.newsofbahrain.com/bahrain/www.newsofbahrain.com",
+    "feed": "",
+    "adapter": "html_headlines",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
   }
 ]
