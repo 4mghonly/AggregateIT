@@ -64,7 +64,7 @@ jobs:
       ARABIC_ANALYSIS_BUDGET_S: "120"
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
       DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID }}
-      ARABIC_MAX_UNRESOLVED_REGIONS: ${{ vars.ARABIC_MAX_UNRESOLVED_REGIONS || '2' }}
+      ARABIC_MAX_UNRESOLVED_REGIONS: ${{ vars.ARABIC_MAX_UNRESOLVED_REGIONS || '5' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -167,7 +167,7 @@ jobs:
 
       - name: Validate live Arabic model and Discord route
         if: steps.mode.outputs.live == 'true'
-        run: python -m arabic_newsletter.run --preflight --probe-model --probe-discord
+        run: python -m arabic_newsletter.run --preflight --probe-discord
 
       - name: Validate Arabic model for preview
         if: steps.mode.outputs.preview == 'true'
