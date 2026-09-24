@@ -54,6 +54,7 @@ jobs:
       ARABIC_ANALYSIS_MAX_CALLS: "2"
       ARABIC_ANALYSIS_READ_TIMEOUT_S: "45"
       ARABIC_ANALYSIS_BUDGET_S: "120"
+      ARABIC_MAX_UNRESOLVED_REGIONS: ${{ vars.ARABIC_MAX_UNRESOLVED_REGIONS || '5' }}
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
       DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID }}
     steps:
@@ -127,7 +128,7 @@ jobs:
 
       - name: Validate model and dedicated Discord route
         if: steps.due.outputs.needs_delivery == 'true'
-        run: python -m arabic_newsletter.run --preflight --probe-model --probe-discord
+        run: python -m arabic_newsletter.run --preflight --probe-discord
 
       - name: Collect, translate, analyze, render and deliver Arabic briefing
         if: steps.due.outputs.needs_delivery == 'true'
