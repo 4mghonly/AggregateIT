@@ -106,16 +106,24 @@ jobs:
             from arabic_newsletter.delivery import send
             root=Path("arabic_newsletter/runtime/output")
             root.mkdir(parents=True,exist_ok=True)
+            def status(stage,state="running",detail=""):
+                (root/"run_status.json").write_text(json.dumps({"stage":stage,"status":state,"detail":detail},ensure_ascii=False),encoding="utf-8")
+            import json
             brief=fixture(long=True)
+            status("sample_render")
             print("DIAG stage=render_start",flush=True)
             paths,_=render(brief,root)
-            print("DIAG stage=render_complete files="+",".join(f"{p.name}:{p.stat().st_size}" for p in paths),flush=True)
+            sizes=",".join(f"{p.name}:{p.stat().st_size}" for p in paths)
+            status("sample_render","ok",sizes)
+            print("DIAG stage=render_complete files="+sizes,flush=True)
             references(brief,root/"sources-ar.txt")
             state=State(Path(os.getenv("ARABIC_STATE_DIR","arabic_newsletter/runtime/state")))
             try:
                 edition="SAMPLE-"+os.getenv("GITHUB_RUN_ID","manual")
+                status("sample_discord_post")
                 print("DIAG stage=discord_post_start edition="+edition,flush=True)
                 receipt=send(state,edition,paths)
+                status("sample_complete","sent",str(receipt))
                 print("DIAG stage=discord_post_complete receipt="+str(receipt),flush=True)
             finally:
                 state.close()
