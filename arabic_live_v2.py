@@ -365,7 +365,14 @@ def main():
     items,health=collect(24)
     print(f"V2 stage=collect_complete items={len(items)}",flush=True)
     brief=build_brief(items,health)
-    if not items:
+    if items:
+        print("V2 stage=llm_analysis_start",flush=True)
+        analysis,llm_health,llm_route=llm_analysis_with_failover(brief["events"])
+        brief["analysis"]=analysis
+        brief["llm_health"]={"status":"ok","selected_route":llm_route,"routes":llm_health}
+        print("V2 stage=llm_analysis_complete route="+llm_route,flush=True)
+    else:
+        brief["llm_health"]={"status":"skipped_empty_collection","routes":[]}
         brief["analysis"]={
           "situation_ar":"لم تُجمع مواد عربية مؤهلة ضمن نافذة الرصد الحالية. يُنشر هذا الإصدار حفاظاً على استمرارية المنتج مع الإشارة بوضوح إلى تراجع التغطية المصدرية.",
           "implications_ar":"لا ينبغي استنتاج غياب التطورات من غياب المواد المؤهلة؛ يستمر الرصد في الدورة التالية.",
