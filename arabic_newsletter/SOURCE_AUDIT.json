@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-09-24T04:27:15.808962+00:00",
-  "total": 112,
-  "compatible": 52,
+  "checked_at": "2026-09-24T04:28:31.721952+00:00",
+  "total": 113,
+  "compatible": 56,
   "regions": {
     "global": {
       "compatible": 10,
@@ -70,8 +70,8 @@
       ]
     },
     "gcc": {
-      "compatible": 4,
-      "configured": 5,
+      "compatible": 5,
+      "configured": 6,
       "sources": [
         {
           "id": "s011",
@@ -156,6 +156,12 @@
           "name": "Al Ayam Bahrain",
           "ok": false,
           "reason": "html_http_403"
+        },
+        {
+          "id": "s113",
+          "name": "Daily Tribune Bahrain",
+          "ok": true,
+          "reason": "ok"
         }
       ]
     },
@@ -544,7 +550,7 @@
       ]
     },
     "afghanistan": {
-      "compatible": 2,
+      "compatible": 3,
       "configured": 5,
       "sources": [
         {
@@ -574,8 +580,8 @@
         {
           "id": "s091",
           "name": "Khaama Press",
-          "ok": false,
-          "reason": "http_202"
+          "ok": true,
+          "reason": "ok"
         },
         {
           "id": "s109",
@@ -616,7 +622,7 @@
       ]
     },
     "horn": {
-      "compatible": 2,
+      "compatible": 4,
       "configured": 5,
       "sources": [
         {
@@ -640,14 +646,14 @@
         {
           "id": "s062",
           "name": "Shabait",
-          "ok": false,
-          "reason": "http_202"
+          "ok": true,
+          "reason": "ok"
         },
         {
           "id": "s092",
           "name": "The Reporter Ethiopia",
-          "ok": false,
-          "reason": "http_202"
+          "ok": true,
+          "reason": "ok"
         },
         {
           "id": "s093",
@@ -846,7 +852,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.aljazeera.net",
-      "arabic_chars": 439
+      "arabic_chars": 437
     },
     {
       "id": "s004",
@@ -1169,7 +1175,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.irna.ir",
-      "arabic_chars": 407
+      "arabic_chars": 400
     },
     {
       "id": "s020",
@@ -2031,15 +2037,16 @@
       "verification_status_before": "failed",
       "website_ok": true,
       "feed_configured": true,
-      "feed_ok": false,
-      "feed_http": 202,
-      "entries": 0,
-      "recent_72h": 0,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 10,
+      "recent_72h": 10,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
-      "feed_final_host": "shabait.com"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "shabait.com",
+      "arabic_chars": 0
     },
     {
       "id": "s063",
@@ -2192,13 +2199,13 @@
       "feed_configured": true,
       "feed_ok": true,
       "feed_http": 200,
-      "entries": 84,
+      "entries": 86,
       "recent_72h": 0,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
       "website_http": 200,
-      "arabic_chars": 1185
+      "arabic_chars": 1042
     },
     {
       "id": "s071",
@@ -2601,15 +2608,16 @@
       "verification_status_before": "failed",
       "website_ok": true,
       "feed_configured": true,
-      "feed_ok": false,
-      "feed_http": 202,
-      "entries": 0,
-      "recent_72h": 0,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 100,
+      "recent_72h": 47,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
-      "feed_final_host": "www.khaama.com"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "www.khaama.com",
+      "arabic_chars": 0
     },
     {
       "id": "s092",
@@ -2621,15 +2629,16 @@
       "verification_status_before": "failed",
       "website_ok": true,
       "feed_configured": true,
-      "feed_ok": false,
-      "feed_http": 202,
-      "entries": 0,
-      "recent_72h": 0,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 10,
+      "recent_72h": 6,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
-      "feed_final_host": "www.thereporterethiopia.com"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "www.thereporterethiopia.com",
+      "arabic_chars": 0
     },
     {
       "id": "s093",
@@ -2981,7 +2990,7 @@
       "country": "SA",
       "language": "ar",
       "enabled_before": true,
-      "verification_status_before": "pending_reaudit",
+      "verification_status_before": "active",
       "website_ok": true,
       "feed_configured": true,
       "feed_ok": true,
@@ -3002,7 +3011,7 @@
       "country": "QA",
       "language": "en",
       "enabled_before": true,
-      "verification_status_before": "pending_reaudit",
+      "verification_status_before": "active",
       "website_ok": true,
       "feed_configured": true,
       "feed_ok": true,
@@ -3022,8 +3031,8 @@
       "region": "gcc",
       "country": "BH",
       "language": "ar",
-      "enabled_before": true,
-      "verification_status_before": "pending_reaudit",
+      "enabled_before": false,
+      "verification_status_before": "failed",
       "website_ok": true,
       "feed_configured": false,
       "feed_ok": false,
@@ -3034,6 +3043,26 @@
       "production_compatible": false,
       "reason": "html_http_403",
       "website_http": 403
+    },
+    {
+      "id": "s113",
+      "name": "Daily Tribune Bahrain",
+      "region": "gcc",
+      "country": "BH",
+      "language": "en",
+      "enabled_before": true,
+      "verification_status_before": "pending_reaudit",
+      "website_ok": true,
+      "feed_configured": true,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 30,
+      "recent_72h": 0,
+      "bozo": false,
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "arabic_chars": 0
     }
   ]
 }
