@@ -1,183 +1,50 @@
-name: Arabic Briefing Production
+name: Arabic Briefing V2 Production
 
 on:
   schedule:
-    # 06:00 / 12:00 / 18:00 / 00:00 UAE (UTC+4)
     - cron: "0 2,8,14,20 * * *"
   push:
     branches: [main]
     paths:
-      - .github/arabic-watchdog-trigger
+      - .github/arabic-v2-trigger
   workflow_dispatch:
-    inputs:
-      manual_now:
-        description: "Use the rolling six hours ending now"
-        required: false
-        type: boolean
-        default: true
 
 permissions:
   contents: read
 
 concurrency:
-  group: arabic-production
+  group: arabic-v2-production
   cancel-in-progress: false
 
 jobs:
-  briefing:
+  publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     env:
-      ARABIC_STATE_DIR: /tmp/aggregateit-arabic-state
-      ARABIC_LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-      ARABIC_LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
-      ARABIC_LLM_MODEL: ${{ secrets.LLM_MODEL }}
-      ARABIC_LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
-      ARABIC_LLM_FALLBACK_BASE_URL: ${{ secrets.LLM_FALLBACK_BASE_URL }}
-      ARABIC_LLM_FALLBACK_MODEL: ${{ secrets.LLM_FALLBACK_MODEL }}
-      ARABIC_LLM_FALLBACK_MODELS: ${{ vars.LLM_FALLBACK_MODELS }}
-      ARABIC_LLM_AUTH_HEADER: ${{ vars.LLM_AUTH_HEADER }}
-      ARABIC_LLM_AUTH_SCHEME: ${{ vars.LLM_AUTH_SCHEME }}
-      ARABIC_LLM_CHAT_PATH: ${{ vars.LLM_CHAT_PATH }}
-      ARABIC_LLM_REQUEST_OPTIONS_JSON: ${{ vars.LLM_REQUEST_OPTIONS_JSON }}
-      ARABIC_LLM_EXTRA_HEADERS_JSON: ${{ vars.LLM_EXTRA_HEADERS_JSON }}
-      ARABIC_LLM_FALLBACK_AUTH_HEADER: ${{ vars.LLM_FALLBACK_AUTH_HEADER }}
-      ARABIC_LLM_FALLBACK_AUTH_SCHEME: ${{ vars.LLM_FALLBACK_AUTH_SCHEME }}
-      ARABIC_LLM_FALLBACK_CHAT_PATH: ${{ vars.LLM_FALLBACK_CHAT_PATH }}
-      ARABIC_LLM_FALLBACK_REQUEST_OPTIONS_JSON: ${{ vars.LLM_FALLBACK_REQUEST_OPTIONS_JSON }}
-      ARABIC_LLM_FALLBACK_EXTRA_HEADERS_JSON: ${{ vars.LLM_FALLBACK_EXTRA_HEADERS_JSON }}
-      ARABIC_SOURCES_PER_REGION: "4"
-      ARABIC_SOURCE_CONNECT_TIMEOUT_S: "8"
-      ARABIC_SOURCE_READ_TIMEOUT_S: "12"
-      ARABIC_SYNTH_MAX_CALLS: "5"
-      ARABIC_SYNTH_READ_TIMEOUT_S: "60"
-      ARABIC_SYNTH_BUDGET_S: "360"
-      ARABIC_ANALYSIS_MAX_CALLS: "2"
-      ARABIC_ANALYSIS_READ_TIMEOUT_S: "45"
-      ARABIC_ANALYSIS_BUDGET_S: "120"
-      ARABIC_MAX_UNRESOLVED_REGIONS: ${{ vars.ARABIC_MAX_UNRESOLVED_REGIONS || '5' }}
-      ARABIC_DISCORD_MAX_FILE_BYTES: "19000000"
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
       DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID }}
-
+      ARABIC_DISCORD_MAX_FILE_BYTES: "19000000"
     steps:
-      - name: Check out authoritative production code
-        uses: actions/checkout@v5
-        with:
-          ref: main
-          persist-credentials: false
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: arabic_newsletter/requirements.txt
 
-      - name: Install runtime
+      - name: Install minimal V2 runtime
         run: |
-          for i in 1 2 3; do
-            python -m pip install -r arabic_newsletter/requirements.txt && break
-            [ "$i" = "3" ] && exit 1
-            sleep $((i*5))
-          done
-          sudo apt-get update -qq || true
-          sudo apt-get install -y fonts-dejavu-core fonts-noto-core libraqm0 ||             echo "::warning::Noto/RAQM apt install failed; renderer will use available packaged/system support."
+          python -m pip install --upgrade pip
+          python -m pip install pillow requests feedparser beautifulsoup4
 
+      - name: Run Arabic V2 live briefing
+        run: python arabic_live_v2.py
 
-      - name: Generate and deliver briefing
-        id: deliver
-        env:
-          SAMPLE_MODE: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Arabic sample:') }}
-          MANUAL_NOW: ${{ (github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'Arabic sample:')) || (github.event_name == 'workflow_dispatch' && inputs.manual_now) || false }}
-        run: |
-          if [ "$SAMPLE_MODE" = "true" ]; then
-            python - <<'PY'
-            import os
-            from pathlib import Path
-            from arabic_newsletter.core import State
-            from arabic_newsletter.sample import fixture
-            from arabic_newsletter.render import render, references
-            from arabic_newsletter.delivery import send
-            root=Path("arabic_newsletter/runtime/output")
-            root.mkdir(parents=True,exist_ok=True)
-            def status(stage,state="running",detail=""):
-                (root/"run_status.json").write_text(json.dumps({"stage":stage,"status":state,"detail":detail},ensure_ascii=False),encoding="utf-8")
-            import json
-            brief=fixture(long=True)
-            status("sample_render")
-            print("DIAG stage=render_start",flush=True)
-            paths,_=render(brief,root)
-            sizes=",".join(f"{p.name}:{p.stat().st_size}" for p in paths)
-            status("sample_render","ok",sizes)
-            print("DIAG stage=render_complete files="+sizes,flush=True)
-            references(brief,root/"sources-ar.txt")
-            state=State(Path(os.getenv("ARABIC_STATE_DIR","arabic_newsletter/runtime/state")))
-            try:
-                edition="SAMPLE-"+os.getenv("GITHUB_RUN_ID","manual")
-                status("sample_discord_post")
-                print("DIAG stage=discord_post_start edition="+edition,flush=True)
-                receipt=send(state,edition,paths)
-                status("sample_complete","sent",str(receipt))
-                print("DIAG stage=discord_post_complete receipt="+str(receipt),flush=True)
-            finally:
-                state.close()
-            print("Synthetic Arabic sample delivered")
-            PY
-            exit $?
-          fi
-          set +e
-          CMD="python -m arabic_newsletter.run --send"
-          if [ "$MANUAL_NOW" = "true" ]; then
-            export ARABIC_MANUAL_END="$(date --iso-8601=seconds)"
-            CMD="$CMD --manual-now"
-            echo "Pinned manual Arabic edition end: $ARABIC_MANUAL_END"
-          fi
-          echo "Arabic production attempt 1"
-          $CMD
-          RC=$?
-          if [ "$RC" -ne 0 ]; then
-            echo "::warning::Arabic production attempt 1 failed; retrying once after 30 seconds."
-            sleep 30
-            echo "Arabic production attempt 2"
-            $CMD
-            RC=$?
-          fi
-          exit "$RC"
-
-
-      - name: Upload complete run evidence
+      - name: Upload V2 evidence
         if: always()
         continue-on-error: true
         uses: actions/upload-artifact@v6
         with:
-          name: arabic-briefing-${{ github.run_id }}
-          path: arabic_newsletter/runtime/output/
-          retention-days: 14
+          name: arabic-v2-${{ github.run_id }}
+          path: arabic_newsletter/runtime/v2/
+          retention-days: 7
           if-no-files-found: warn
-
-      - name: Alert Arabic channel with failure stage
-        if: failure()
-        continue-on-error: true
-        env:
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          python - <<'PY'
-          import json,os
-          from pathlib import Path
-          from urllib.parse import urlsplit,urlunsplit
-          import requests
-          status={}
-          p=Path("arabic_newsletter/runtime/output/run_status.json")
-          if p.exists():
-              try: status=json.loads(p.read_text(encoding="utf-8"))
-              except Exception: status={}
-          stage=status.get("stage","unknown")
-          detail=str(status.get("detail") or "")[:500]
-          raw=os.getenv("DISCORD_WEBHOOK_ARABIC","").strip()
-          if raw:
-              u=urlsplit(raw); url=urlunsplit((u.scheme,u.netloc,u.path,"wait=true",""))
-              msg=f"⚠️ تعذر إصدار النشرة العربية | المرحلة: {stage}"
-              if detail: msg+=" | "+detail
-              msg+=" | "+os.getenv("RUN_URL","")
-              requests.post(url,json={"content":msg,"allowed_mentions":{"parse":[]}},timeout=(10,25))
-          PY
