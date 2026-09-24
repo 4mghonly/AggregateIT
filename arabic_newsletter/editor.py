@@ -510,7 +510,12 @@ def synthesize(articles,state):
     bounded=_bounded_articles(articles)
     previous=_previous_event_context(state)
     glossary=json.loads((ROOT/'glossary.json').read_text())
-    client=Client(state,max_calls=6,read_timeout=90,wall_budget_s=600)
+    client=Client(
+        state,
+        max_calls=max(2,min(8,int(os.getenv('ARABIC_SYNTH_MAX_CALLS','5') or 5))),
+        read_timeout=max(30,min(90,int(os.getenv('ARABIC_SYNTH_READ_TIMEOUT_S','60') or 60))),
+        wall_budget_s=max(120,min(600,int(os.getenv('ARABIC_SYNTH_BUDGET_S','360') or 360)))
+    )
     request={'regions':REGIONS,'topics':sorted(TOPICS),'glossary':glossary,
              'previous_events':previous,'articles':bounded}
     try:
@@ -595,7 +600,12 @@ def build_analysis(events,state,morning=False,strict=False):
     if not events:
         return {'situation_ar':'لا تتوافر أحداث مؤهلة لبناء تقدير تحليلي في هذه الدورة.',
                 'implications_ar':'','developing_ar':[],'watch_ar':[]}
-    client=Client(state,max_calls=3,read_timeout=60,wall_budget_s=180)
+    client=Client(
+        state,
+        max_calls=max(1,min(4,int(os.getenv('ARABIC_ANALYSIS_MAX_CALLS','2') or 2))),
+        read_timeout=max(20,min(60,int(os.getenv('ARABIC_ANALYSIS_READ_TIMEOUT_S','45') or 45))),
+        wall_budget_s=max(60,min(240,int(os.getenv('ARABIC_ANALYSIS_BUDGET_S','120') or 120)))
+    )
     supplied=[]
     for e in events[:18]:
         supplied.append({
