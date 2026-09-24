@@ -12,7 +12,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -35,7 +35,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -92,7 +92,7 @@
         "collection_status": "active"
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -115,7 +115,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -138,7 +138,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -186,7 +186,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -243,7 +243,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -283,7 +283,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -331,7 +331,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -397,7 +397,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -420,7 +420,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -444,7 +444,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -502,7 +502,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -526,7 +526,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -550,7 +550,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -574,7 +574,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -631,7 +631,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -654,7 +654,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_http_403",
     "compatibility": {
@@ -678,7 +678,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -701,7 +701,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -741,7 +741,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -789,7 +789,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -838,7 +838,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -886,7 +886,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -942,7 +942,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_http_404",
     "compatibility": {
@@ -991,7 +991,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1014,7 +1014,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -1071,7 +1071,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_zero_entries",
     "compatibility": {
@@ -1120,7 +1120,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1143,7 +1143,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -1192,7 +1192,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -1249,7 +1249,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -1298,7 +1298,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1321,7 +1321,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_http_403",
     "compatibility": {
@@ -1345,7 +1345,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1393,7 +1393,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1457,7 +1457,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1497,7 +1497,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1537,7 +1537,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1560,7 +1560,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1583,7 +1583,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1631,7 +1631,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -1655,7 +1655,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -1679,7 +1679,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -1712,7 +1712,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1735,7 +1735,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1775,7 +1775,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -1824,7 +1824,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1872,7 +1872,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -1937,7 +1937,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -1960,7 +1960,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_zero_entries",
     "compatibility": {
@@ -1984,7 +1984,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -2008,7 +2008,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_http_403",
     "compatibility": {
@@ -2057,7 +2057,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_http_410",
     "compatibility": {
@@ -2114,7 +2114,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2162,7 +2162,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2185,7 +2185,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_zero_entries",
     "compatibility": {
@@ -2234,7 +2234,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2257,7 +2257,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_http_403",
     "compatibility": {
@@ -2355,7 +2355,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -2379,7 +2379,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2427,7 +2427,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2476,7 +2476,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -2550,7 +2550,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -2574,7 +2574,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_http_403",
     "compatibility": {
@@ -2623,7 +2623,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2647,7 +2647,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "retired_reason": "source_audit_no_feed",
     "compatibility": {
@@ -2696,7 +2696,7 @@
         "approved": false
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2753,7 +2753,7 @@
         "collection_status": "active"
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2775,14 +2775,14 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "feed": "",
     "adapter": "html_headlines",
     "compatibility": {
       "adapter": "html_headlines",
       "http": 200,
-      "entries": 86,
+      "entries": 84,
       "recent_72h": 0,
       "reason": "ok"
     }
@@ -2826,7 +2826,7 @@
         "collection_status": "active"
       }
     ],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -2849,7 +2849,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -2873,7 +2873,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "feed": "https://www.omanobserver.om/rssFeed/home-page",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2896,7 +2896,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_no_feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -2919,7 +2919,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "feed": "https://kuwaittimes.com/rssFeed/14",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2942,7 +2942,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_no_feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -2965,7 +2965,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "feed": "https://www.dailysabah.com/rss/politics/diplomacy",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -2987,7 +2987,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3011,7 +3011,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_no_feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3034,7 +3034,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_no_feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3057,7 +3057,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "feed": "https://yemenat.net/feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3081,7 +3081,7 @@
     "social": [],
     "feed": "",
     "adapter": "html_headlines",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "html_headlines",
@@ -3103,7 +3103,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3127,7 +3127,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_no_feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3150,7 +3150,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_no_feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3173,7 +3173,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_no_feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3195,7 +3195,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3219,7 +3219,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "feed": "https://tribune.com.pk/feed/pakistan",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3242,7 +3242,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_no_feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3264,7 +3264,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3288,7 +3288,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "feed": "https://www.khaama.com/feed/",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3312,15 +3312,15 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "feed": "https://www.thereporterethiopia.com/feed/",
-    "retired_reason": "source_audit_http_304",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "retired_reason": "source_audit_http_202",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
-      "http": 304,
+      "http": 202,
       "entries": 0,
       "recent_72h": 0,
-      "reason": "http_304"
+      "reason": "http_202"
     }
   },
   {
@@ -3336,7 +3336,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "feed": "https://www.ethiopia-insight.com/feed/",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3358,7 +3358,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3382,7 +3382,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "feed": "https://palinfo.com/feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3405,7 +3405,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "feed": "https://www.jpost.com/rss/rssfeedsisraelnews.aspx",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3429,7 +3429,7 @@
     "social": [],
     "feed": "https://www.972mag.com/feed/",
     "retired_reason": "source_audit_http_403",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3452,7 +3452,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_no_feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3476,7 +3476,7 @@
     "social": [],
     "retired_reason": "source_audit_zero_entries",
     "feed": "https://jordantimes.com/rss",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3499,7 +3499,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_no_feed",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "none",
@@ -3523,7 +3523,7 @@
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "retired_reason": "source_audit_http_403",
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3546,7 +3546,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3570,7 +3570,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3593,7 +3593,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3617,7 +3617,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3641,7 +3641,7 @@
     "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3666,7 +3666,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "html_headlines",
@@ -3689,7 +3689,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3712,7 +3712,7 @@
     "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "verified_at": "2026-09-24T04:23:48.573411+00:00",
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
     "compatibility": {
       "adapter": "rss",
@@ -3732,9 +3732,18 @@
     "feed": "https://www.alwatan.com.sa/rssFeed/2",
     "affiliation": "publisher",
     "enabled": true,
-    "verification_status": "pending_reaudit",
+    "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
+    "verification_environment": "GitHub Actions full source compatibility audit",
+    "compatibility": {
+      "adapter": "rss",
+      "http": 200,
+      "entries": 50,
+      "recent_72h": 23,
+      "reason": "ok"
+    }
   },
   {
     "id": "s111",
@@ -3746,9 +3755,18 @@
     "feed": "https://www.gulf-times.com/rssFeed/8",
     "affiliation": "publisher",
     "enabled": true,
-    "verification_status": "pending_reaudit",
+    "verification_status": "active",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
+    "verification_environment": "GitHub Actions full source compatibility audit",
+    "compatibility": {
+      "adapter": "rss",
+      "http": 200,
+      "entries": 50,
+      "recent_72h": 50,
+      "reason": "ok"
+    }
   },
   {
     "id": "s112",
@@ -3760,9 +3778,19 @@
     "feed": "",
     "adapter": "html_headlines",
     "affiliation": "publisher",
-    "enabled": true,
-    "verification_status": "pending_reaudit",
+    "enabled": false,
+    "verification_status": "failed",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "verified_at": "2026-09-24T04:27:15.808962+00:00",
+    "verification_environment": "GitHub Actions full source compatibility audit",
+    "compatibility": {
+      "adapter": "html_headlines",
+      "http": 403,
+      "entries": 0,
+      "recent_72h": 0,
+      "reason": "html_http_403"
+    },
+    "retired_reason": "source_audit_html_http_403"
   }
 ]
