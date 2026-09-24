@@ -1,13 +1,13 @@
 {
-  "checked_at": "2026-09-24T03:42:44.958995+00:00",
+  "checked_at": "2026-09-24T03:44:32.771973+00:00",
   "all_ok": false,
   "routes": [
     {
       "route": "primary",
       "configured": true,
-      "ok": true,
+      "ok": false,
       "model": "openrouter/free",
-      "error": null
+      "error": "unexpected_response"
     },
     {
       "route": "fallback",
@@ -16,5 +16,29 @@
       "model": "glm-5.3",
       "error": "http_401"
     }
-  ]
+  ],
+  "shape": {
+    "primary": {
+      "key_present": true,
+      "model_present": true,
+      "host_openrouter": true,
+      "host_alibaba": false,
+      "path_compatible_mode": false,
+      "path_native_api": true,
+      "auth_header": "Authorization",
+      "auth_scheme": "Bearer",
+      "chat_path": "/chat/completions"
+    },
+    "fallback": {
+      "key_present": true,
+      "model_present": true,
+      "host_openrouter": false,
+      "host_alibaba": true,
+      "path_compatible_mode": true,
+      "path_native_api": false,
+      "auth_header": "Authorization",
+      "auth_scheme": "Bearer",
+      "chat_path": "/chat/completions"
+    }
+  }
 }
