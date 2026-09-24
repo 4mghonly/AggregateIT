@@ -10,6 +10,7 @@ from pathlib import Path
 
 import feedparser
 import requests
+from bs4 import BeautifulSoup
 
 ROOT=Path(__file__).resolve().parent
 SOURCES=ROOT/"arabic_newsletter"/"sources.json"
@@ -50,6 +51,39 @@ def probe(row):
             result["website_http"]=r.status_code
         except Exception as exc:
             result["website_error"]=type(exc).__name__
+    adapter=(row.get("adapter") or "").strip()
+    if adapter=="html_headlines":
+        target=(row.get("website") or "").strip()
+        if not target.startswith("http"):
+            result["reason"]="html_missing_website"
+            return result
+        try:
+            r=requests.get(target,headers=headers,timeout=(5,15),allow_redirects=True)
+            result["feed_http"]=r.status_code
+            if r.status_code!=200:
+                result["reason"]=f"html_http_{r.status_code}"
+                return result
+            soup=BeautifulSoup(r.text,"html.parser")
+            seen=set(); entries=[]
+            for a in soup.find_all("a",href=True):
+                text=" ".join(a.get_text(" ",strip=True).split())
+                if len(text)<20 or len(text)>220 or text in seen:
+                    continue
+                href=str(a.get("href") or "")
+                if href.startswith(("#","javascript:","mailto:")):
+                    continue
+                seen.add(text); entries.append(text)
+            result["entries"]=len(entries)
+            result["feed_configured"]=True
+            result["feed_ok"]=len(entries)>=5
+            result["production_compatible"]=len(entries)>=5
+            result["reason"]="ok" if len(entries)>=5 else "html_insufficient_headlines"
+            result["arabic_chars"]=sum(1 for text in entries[:20] for ch in text if "\u0600"<=ch<="\u06ff")
+            return result
+        except Exception as exc:
+            result["reason"]="html_exception_"+type(exc).__name__
+            return result
+
     feed=(row.get("feed") or "").strip()
     if not feed.startswith("http"):
         result["reason"]="no_feed"
