@@ -17,7 +17,7 @@ on:
         default: true
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: arabic-production
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      ARABIC_STATE_DIR: arabic_newsletter/runtime/state
+      ARABIC_STATE_DIR: /tmp/aggregateit-arabic-state
       ARABIC_LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       ARABIC_LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
       ARABIC_LLM_MODEL: ${{ secrets.LLM_MODEL }}
@@ -83,12 +83,6 @@ jobs:
           sudo apt-get update -qq || true
           sudo apt-get install -y fonts-dejavu-core fonts-noto-core libraqm0 ||             echo "::warning::Noto/RAQM apt install failed; renderer will use available packaged/system support."
 
-      - name: Restore continuity state
-        uses: actions/cache/restore@v5
-        with:
-          path: arabic_newsletter/runtime/state
-          key: arabic-state-v2-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: arabic-state-v2-
 
       - name: Generate and deliver briefing
         id: deliver
@@ -150,13 +144,6 @@ jobs:
           fi
           exit "$RC"
 
-      - name: Persist continuity state
-        if: always()
-        continue-on-error: true
-        uses: actions/cache/save@v5
-        with:
-          path: arabic_newsletter/runtime/state
-          key: arabic-state-v2-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload complete run evidence
         if: always()
@@ -167,40 +154,6 @@ jobs:
           path: arabic_newsletter/runtime/output/
           retention-days: 14
           if-no-files-found: warn
-
-      - name: Persist sanitized failure diagnostic
-        if: failure()
-        continue-on-error: true
-        env:
-          RUN_ID: ${{ github.run_id }}
-          RUN_ATTEMPT: ${{ github.run_attempt }}
-          RUN_SHA: ${{ github.sha }}
-        run: |
-          python - <<'PY'
-          import json,os
-          from pathlib import Path
-          out=Path("arabic_newsletter/runtime/output")
-          status={}
-          p=out/"run_status.json"
-          if p.exists():
-              try: status=json.loads(p.read_text(encoding="utf-8"))
-              except Exception as exc: status={"stage":"diagnostic_read","status":"failed","detail":type(exc).__name__}
-          diagnostic={
-            "run_id":os.getenv("RUN_ID"),
-            "run_attempt":os.getenv("RUN_ATTEMPT"),
-            "sha":os.getenv("RUN_SHA"),
-            "stage":status.get("stage","pre-python-or-unknown"),
-            "status":status.get("status","failed"),
-            "detail":str(status.get("detail") or "")[:800],
-            "output_files":sorted(x.name for x in out.glob("*")) if out.exists() else []
-          }
-          Path("arabic_newsletter/LAST_FAILURE.json").write_text(json.dumps(diagnostic,ensure_ascii=False,indent=2),encoding="utf-8")
-          PY
-          git config user.name "aggregateit-bot"
-          git config user.email "aggregateit-bot@users.noreply.github.com"
-          git add arabic_newsletter/LAST_FAILURE.json
-          git commit -m "Arabic diagnostic: persist latest failure" || true
-          git push origin HEAD:main || true
 
       - name: Alert Arabic channel with failure stage
         if: failure()
