@@ -3721,5 +3721,48 @@
       "recent_72h": 0,
       "reason": "ok"
     }
+  },
+  {
+    "id": "s110",
+    "name": "Al Watan Saudi Politics",
+    "region": "gcc",
+    "country": "SA",
+    "language": "ar",
+    "website": "https://www.alwatan.com.sa",
+    "feed": "https://www.alwatan.com.sa/rssFeed/2",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s111",
+    "name": "Gulf Times Qatar",
+    "region": "gcc",
+    "country": "QA",
+    "language": "en",
+    "website": "https://www.gulf-times.com",
+    "feed": "https://www.gulf-times.com/rssFeed/8",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s112",
+    "name": "Al Ayam Bahrain",
+    "region": "gcc",
+    "country": "BH",
+    "language": "ar",
+    "website": "https://www.alayam.com/Archive/News",
+    "feed": "",
+    "adapter": "html_headlines",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
   }
 ]
