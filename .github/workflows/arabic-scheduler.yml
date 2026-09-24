@@ -101,9 +101,6 @@ jobs:
           print("Arabic runtime contract passed")
           PY
 
-      - name: Confirm dedicated Discord route
-        run: python -m arabic_newsletter.run --preflight --probe-discord
-
       - name: Generate and deliver briefing
         id: deliver
         env:
