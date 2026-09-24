@@ -891,10 +891,10 @@
     "country": "IQ",
     "language": "ar",
     "website": "https://www.alsumaria.tv",
-    "feed": "",
+    "feed": "https://www.alsumaria.tv/Rss/iraq-latest-news/ar",
     "affiliation": "broadcaster",
     "enabled": true,
-    "verification_status": "active",
+    "verification_status": "pending_reaudit",
     "social_policy": "discover_from_publisher_website",
     "social": [
       {
@@ -2469,7 +2469,8 @@
     "enabled": true,
     "verification_status": "pending_reaudit",
     "social_policy": "discover_from_publisher_website",
-    "social": []
+    "social": [],
+    "feed": "https://yemenat.net/feed"
   },
   {
     "id": "s082",
@@ -2602,11 +2603,12 @@
     "language": "en",
     "website": "https://www.khaama.com",
     "affiliation": "independent",
-    "enabled": false,
-    "verification_status": "failed",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "retired_reason": "failed_source_audit_2026-09-19_final_preview"
+    "retired_reason": "failed_source_audit_2026-09-19_final_preview",
+    "feed": "https://www.khaama.com/feed/"
   },
   {
     "id": "s092",
@@ -2715,11 +2717,12 @@
     "language": "en",
     "website": "https://jordantimes.com",
     "affiliation": "commercial",
-    "enabled": false,
-    "verification_status": "failed",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
     "social_policy": "discover_from_publisher_website",
     "social": [],
-    "retired_reason": "failed_source_audit_2026-09-19_preview"
+    "retired_reason": "failed_source_audit_2026-09-19_preview",
+    "feed": "https://jordantimes.com/rss"
   },
   {
     "id": "s100",
@@ -2761,6 +2764,62 @@
     "affiliation": "independent",
     "enabled": true,
     "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s103",
+    "name": "The Arabian Stories",
+    "region": "oman",
+    "country": "OM",
+    "language": "en",
+    "website": "https://thearabianstories.com",
+    "feed": "https://thearabianstories.com/feed",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s104",
+    "name": "Al Masry Al Youm",
+    "region": "egypt",
+    "country": "EG",
+    "language": "ar",
+    "website": "https://www.almasryalyoum.com",
+    "feed": "https://www.almasryalyoum.com/rss/RssFeeds",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s105",
+    "name": "JO24",
+    "region": "jordan",
+    "country": "JO",
+    "language": "ar",
+    "website": "https://jo24.net",
+    "feed": "https://jo24.net/feed",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s106",
+    "name": "Yemen Voice",
+    "region": "yemen",
+    "country": "YE",
+    "language": "ar",
+    "website": "https://ye-voice.com",
+    "feed": "https://ye-voice.com/rss.php?cat=5",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
     "social_policy": "discover_from_publisher_website",
     "social": []
   }
