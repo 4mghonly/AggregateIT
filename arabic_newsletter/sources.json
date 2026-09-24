@@ -2855,5 +2855,19 @@
     "verification_status": "pending_reaudit",
     "social_policy": "discover_from_publisher_website",
     "social": []
+  },
+  {
+    "id": "s109",
+    "name": "Bakhtar News Agency",
+    "region": "afghanistan",
+    "country": "AF",
+    "language": "fa",
+    "website": "https://www.bakhtarnews.af/dr",
+    "feed": "https://www.bakhtarnews.af/dr/rss/category/afghanistan-fa",
+    "affiliation": "official",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
   }
 ]
