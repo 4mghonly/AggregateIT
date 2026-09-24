@@ -1,0 +1,2767 @@
+[
+  {
+    "id": "s001",
+    "name": "BBC World",
+    "region": "global",
+    "country": "GB",
+    "language": "en",
+    "website": "https://www.bbc.com/news",
+    "feed": "https://feeds.bbci.co.uk/news/world/rss.xml",
+    "affiliation": "public_broadcaster",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:16.780933+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s002",
+    "name": "BBC Middle East",
+    "region": "global",
+    "country": "GB",
+    "language": "en",
+    "website": "https://www.bbc.com/news",
+    "feed": "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml",
+    "affiliation": "public_broadcaster",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:16.781500+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s003",
+    "name": "Al Jazeera",
+    "region": "global",
+    "country": "QA",
+    "language": "ar",
+    "website": "https://www.aljazeera.net",
+    "feed": "https://www.aljazeera.net/aljazeerarss/ar/all.xml",
+    "affiliation": "state_funded",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://facebook.com/aljazeerachannel",
+        "verified_via": "https://www.aljazeera.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/AJArabic",
+        "verified_via": "https://www.aljazeera.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@aljazeera",
+        "verified_via": "https://www.aljazeera.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "telegram",
+        "url": "https://t.me/AjaNews",
+        "verified_via": "https://www.aljazeera.net",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": true,
+        "collection_status": "active"
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:16.784082+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s004",
+    "name": "France 24",
+    "region": "global",
+    "country": "FR",
+    "language": "ar",
+    "website": "https://www.france24.com/ar/",
+    "feed": "https://www.france24.com/ar/rss",
+    "affiliation": "public_broadcaster",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:16.784920+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s005",
+    "name": "DW World",
+    "region": "global",
+    "country": "DE",
+    "language": "en",
+    "website": "https://www.dw.com",
+    "feed": "https://rss.dw.com/rdf/rss-en-world",
+    "affiliation": "public_broadcaster",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:16.785819+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s006",
+    "name": "Guardian World",
+    "region": "global",
+    "country": "GB",
+    "language": "en",
+    "website": "https://www.theguardian.com/world",
+    "feed": "https://www.theguardian.com/world/rss",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "bluesky",
+        "url": "https://bsky.app/profile/us.theguardian.com",
+        "verified_via": "https://www.theguardian.com/world",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/theguardian",
+        "verified_via": "https://www.theguardian.com/world",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/TheGuardian",
+        "verified_via": "https://www.theguardian.com/world",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:16.786650+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s007",
+    "name": "Middle East Eye",
+    "region": "global",
+    "country": "GB",
+    "language": "en",
+    "website": "https://www.middleeasteye.net",
+    "feed": "https://www.middleeasteye.net/rss",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCR0fZh5SBxxMNYdg0VzRFkg",
+        "verified_via": "https://www.middleeasteye.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": true,
+        "collection_status": "active"
+      },
+      {
+        "platform": "x",
+        "url": "https://x.com/MiddleEastEye",
+        "verified_via": "https://www.middleeasteye.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/MiddleEastEye",
+        "verified_via": "https://www.middleeasteye.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/MiddleEastEye",
+        "verified_via": "https://www.middleeasteye.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:16.787587+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s008",
+    "name": "Defense News",
+    "region": "global",
+    "country": "US",
+    "language": "en",
+    "website": "https://www.defensenews.com",
+    "feed": "https://www.defensenews.com/arc/outboundfeeds/rss/category/global/",
+    "affiliation": "specialist",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/DefenseNews",
+        "verified_via": "https://www.defensenews.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/defense_news",
+        "verified_via": "https://www.defensenews.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:16.788647+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s009",
+    "name": "Breaking Defense",
+    "region": "global",
+    "country": "US",
+    "language": "en",
+    "website": "https://breakingdefense.com",
+    "feed": "https://breakingdefense.com/feed/",
+    "affiliation": "specialist",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "x",
+        "url": "https://twitter.com/BreakingDefense",
+        "verified_via": "https://breakingdefense.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://facebook.com/BreakingDefense",
+        "verified_via": "https://breakingdefense.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://youtube.com/@breakingdefense6100",
+        "verified_via": "https://breakingdefense.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:17.568668+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s010",
+    "name": "Bellingcat",
+    "region": "global",
+    "country": "NL",
+    "language": "en",
+    "website": "https://www.bellingcat.com",
+    "feed": "https://www.bellingcat.com/feed/",
+    "affiliation": "investigative",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCFl-GzKYeCW3iWjnQDuxzAA",
+        "verified_via": "https://www.bellingcat.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": true,
+        "collection_status": "active"
+      },
+      {
+        "platform": "bluesky",
+        "url": "https://bsky.app/profile/bellingcat.com",
+        "verified_via": "https://www.bellingcat.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/bellingcat",
+        "verified_via": "https://www.bellingcat.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "telegram",
+        "url": "https://t.me/bellingcat",
+        "verified_via": "https://www.bellingcat.com",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": true,
+        "collection_status": "active"
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@bellingcatofficial",
+        "verified_via": "https://www.bellingcat.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:17.611205+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s011",
+    "name": "WAM",
+    "region": "gcc",
+    "country": "AE",
+    "language": "ar",
+    "website": "https://www.wam.ae/ar",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:17.765581+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s012",
+    "name": "SPA",
+    "region": "gcc",
+    "country": "SA",
+    "language": "ar",
+    "website": "https://www.spa.gov.sa",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:17.780582+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s013",
+    "name": "QNA",
+    "region": "gcc",
+    "country": "QA",
+    "language": "ar",
+    "website": "https://www.qna.org.qa",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": true,
+    "verification_status": "social_only",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "telegram",
+        "url": "https://t.me/QatarNewsAgency",
+        "verified_via": "https://www.qna.org.qa",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": true,
+        "collection_status": "active"
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/QatarNewsAgency",
+        "verified_via": "https://www.qna.org.qa",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/QatarNewsAgency",
+        "verified_via": "https://www.qna.org.qa",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@qatarnewsagency3270",
+        "verified_via": "https://www.qna.org.qa",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:17.864434+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s014",
+    "name": "KUNA",
+    "region": "gcc",
+    "country": "KW",
+    "language": "ar",
+    "website": "https://www.kuna.net.kw",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:17.924936+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s015",
+    "name": "BNA",
+    "region": "gcc",
+    "country": "BH",
+    "language": "ar",
+    "website": "https://www.bna.bh",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:17.966873+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s016",
+    "name": "ONA",
+    "region": "oman",
+    "country": "OM",
+    "language": "ar",
+    "website": "https://omannews.gov.om",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:18.039086+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s017",
+    "name": "The National",
+    "region": "gcc",
+    "country": "AE",
+    "language": "en",
+    "website": "https://www.thenationalnews.com",
+    "feed": "https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "x",
+        "url": "https://x.com/TheNationalNews",
+        "verified_via": "https://www.thenationalnews.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/TheNationalNews",
+        "verified_via": "https://www.thenationalnews.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/TheNationalNewspaper",
+        "verified_via": "https://www.thenationalnews.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "bluesky",
+        "url": "https://bsky.app/profile/thenationalnews.com",
+        "verified_via": "https://www.thenationalnews.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:18.441141+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s018",
+    "name": "Al Arabiya",
+    "region": "gcc",
+    "country": "SA",
+    "language": "ar",
+    "website": "https://www.alarabiya.net",
+    "feed": "https://www.alarabiya.net/feed/rss2/ar.xml",
+    "affiliation": "broadcaster",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:18.799553+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s019",
+    "name": "IRNA",
+    "region": "iran",
+    "country": "IR",
+    "language": "fa",
+    "website": "https://www.irna.ir",
+    "feed": "https://www.irna.ir/rss",
+    "affiliation": "official",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:19.151661+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s020",
+    "name": "ISNA",
+    "region": "iran",
+    "country": "IR",
+    "language": "fa",
+    "website": "https://www.isna.ir",
+    "feed": "https://www.isna.ir/rss",
+    "affiliation": "affiliation_review",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:19.281643+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s021",
+    "name": "Mehr",
+    "region": "iran",
+    "country": "IR",
+    "language": "fa",
+    "website": "https://www.mehrnews.com",
+    "feed": "https://www.mehrnews.com/rss",
+    "affiliation": "affiliation_review",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "telegram",
+        "url": "https://t.me/mehrnews",
+        "verified_via": "https://www.mehrnews.com",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/mehrnews_ir",
+        "verified_via": "https://www.mehrnews.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:19.375318+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s022",
+    "name": "Iran International",
+    "region": "iran",
+    "country": "GB",
+    "language": "fa",
+    "website": "https://www.iranintl.com",
+    "feed": "",
+    "affiliation": "diaspora",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/iranintl",
+        "verified_via": "https://www.iranintl.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://x.com/iranintl",
+        "verified_via": "https://www.iranintl.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/iranintl",
+        "verified_via": "https://www.iranintl.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:19.384440+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s023",
+    "name": "Anadolu",
+    "region": "turkey",
+    "country": "TR",
+    "language": "tr",
+    "website": "https://www.aa.com.tr/tr",
+    "feed": "https://www.aa.com.tr/tr/rss/default?cat=guncel",
+    "affiliation": "state_agency",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "x",
+        "url": "https://twitter.com/anadoluajansi",
+        "verified_via": "https://www.aa.com.tr/tr",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/anadoluajansi",
+        "verified_via": "https://www.aa.com.tr/tr",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/anadoluajansi",
+        "verified_via": "https://www.aa.com.tr/tr",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:19.473002+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s024",
+    "name": "TRT Haber",
+    "region": "turkey",
+    "country": "TR",
+    "language": "tr",
+    "website": "https://www.trthaber.com",
+    "feed": "https://www.trthaber.com/sondakika.rss",
+    "affiliation": "public_broadcaster",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/trthaber",
+        "verified_via": "https://www.trthaber.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/trthaber",
+        "verified_via": "https://www.trthaber.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/trthaber",
+        "verified_via": "https://www.trthaber.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:20.038538+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s025",
+    "name": "Bianet",
+    "region": "turkey",
+    "country": "TR",
+    "language": "tr",
+    "website": "https://bianet.org",
+    "feed": "https://bianet.org/feed",
+    "affiliation": "publisher",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/bagimsiziletisimagi",
+        "verified_via": "https://bianet.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/bianet_org",
+        "verified_via": "https://bianet.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "bluesky",
+        "url": "https://bsky.app/profile/bianet.org",
+        "verified_via": "https://bianet.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/bianetorg",
+        "verified_via": "https://bianet.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:20.428696+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s026",
+    "name": "Shafaq",
+    "region": "iraq",
+    "country": "IQ",
+    "language": "ar",
+    "website": "https://shafaq.com/ar",
+    "feed": "https://shafaq.com/ar?rss=1",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/shafaqnewsarabic",
+        "verified_via": "https://shafaq.com/ar",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/shafaqfoundation",
+        "verified_via": "https://shafaq.com/ar",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://x.com/shafaqnewsarb",
+        "verified_via": "https://shafaq.com/ar",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:20.656938+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s027",
+    "name": "Iraqi News Agency",
+    "region": "iraq",
+    "country": "IQ",
+    "language": "ar",
+    "website": "https://ina.iq",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:20.996232+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s028",
+    "name": "Rudaw",
+    "region": "iraq",
+    "country": "IQ",
+    "language": "en",
+    "website": "https://www.rudaw.net/english",
+    "feed": "https://www.rudaw.net/english/rss.xml",
+    "affiliation": "broadcaster",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/RudawEnglish",
+        "verified_via": "https://www.rudaw.net/english",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/RudawEnglish",
+        "verified_via": "https://www.rudaw.net/english",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCgpfoWnAUbz-z0A7XRhYtNw",
+        "verified_via": "https://www.rudaw.net/english",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "telegram",
+        "url": "https://t.me/rudawdigital",
+        "verified_via": "https://www.rudaw.net/english",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:21.010101+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s029",
+    "name": "Alsumaria",
+    "region": "iraq",
+    "country": "IQ",
+    "language": "ar",
+    "website": "https://www.alsumaria.tv",
+    "feed": "",
+    "affiliation": "broadcaster",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCWhdSvXarykqCL4fqS3rm1Q?sub_confirmation=1",
+        "verified_via": "https://www.alsumaria.tv",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/alsumariatv",
+        "verified_via": "https://www.alsumaria.tv",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/alsumariatv",
+        "verified_via": "https://www.alsumaria.tv",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:21.123433+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s030",
+    "name": "Al Masdar Online",
+    "region": "yemen",
+    "country": "YE",
+    "language": "ar",
+    "website": "https://almasdaronline.com",
+    "feed": "",
+    "affiliation": "publisher",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:21.162031+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s031",
+    "name": "Belqees",
+    "region": "yemen",
+    "country": "YE",
+    "language": "ar",
+    "website": "https://belqees.net",
+    "feed": "",
+    "affiliation": "broadcaster",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/belqees.tv",
+        "verified_via": "https://belqees.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/BelqeesTV",
+        "verified_via": "https://belqees.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@BelqeesTV",
+        "verified_via": "https://belqees.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:21.265062+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s032",
+    "name": "Yemen Shabab",
+    "region": "yemen",
+    "country": "YE",
+    "language": "ar",
+    "website": "https://yemenshabab.net",
+    "feed": "",
+    "affiliation": "broadcaster",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/tvyemenshabab3",
+        "verified_via": "https://yemenshabab.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/YemenShababNet",
+        "verified_via": "https://yemenshabab.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/TvYemenShabab",
+        "verified_via": "https://yemenshabab.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/yemenshabab",
+        "verified_via": "https://yemenshabab.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:21.336373+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s033",
+    "name": "Dabanga",
+    "region": "sudan",
+    "country": "SD",
+    "language": "ar",
+    "website": "https://www.dabangasudan.org/ar",
+    "feed": "https://www.dabangasudan.org/ar/feed",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/DabangaRadio",
+        "verified_via": "https://www.dabangasudan.org/ar",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/Radiodabanga",
+        "verified_via": "https://www.dabangasudan.org/ar",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/darfurradio",
+        "verified_via": "https://www.dabangasudan.org/ar",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:21.697380+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s034",
+    "name": "Sudan Tribune",
+    "region": "sudan",
+    "country": "SD",
+    "language": "en",
+    "website": "https://sudantribune.com",
+    "feed": "https://sudantribune.com/feed/",
+    "affiliation": "publisher",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:22.831166+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s035",
+    "name": "Sudan War Monitor",
+    "region": "sudan",
+    "country": "SD",
+    "language": "en",
+    "website": "https://sudanwarmonitor.com",
+    "feed": "https://sudanwarmonitor.com/feed",
+    "affiliation": "specialist",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:22.882528+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s036",
+    "name": "Studio Tamani",
+    "region": "sahel",
+    "country": "ML",
+    "language": "fr",
+    "website": "https://www.studiotamani.org",
+    "feed": "https://www.studiotamani.org/feed",
+    "affiliation": "local_radio",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/StudioTamani",
+        "verified_via": "https://www.studiotamani.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/StudioTamani",
+        "verified_via": "https://www.studiotamani.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/studiotamani",
+        "verified_via": "https://www.studiotamani.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:23.140761+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s037",
+    "name": "Sidwaya",
+    "region": "sahel",
+    "country": "BF",
+    "language": "fr",
+    "website": "https://www.sidwaya.info",
+    "feed": "https://www.sidwaya.info/feed/",
+    "affiliation": "state_publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/ESidwaya",
+        "verified_via": "https://www.sidwaya.info",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/ESidwaya",
+        "verified_via": "https://www.sidwaya.info",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCpxhee6vtEJVM3aD_LO9tiQ?view_as=subscriber",
+        "verified_via": "https://www.sidwaya.info",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCpxhee6vtEJVM3aD_LO9tiQ?view_as=subscriberhttps%3A%2F%2Fwww.youtube.com%2Fchannel%2FUCpxhee6vtEJVM3aD_LO9tiQ%3Fview_as%3Dsubscriber",
+        "verified_via": "https://www.sidwaya.info",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/Les-Editions-Sidwaya-158134857606355",
+        "verified_via": "https://www.sidwaya.info",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:23.484148+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s038",
+    "name": "Le Sahel",
+    "region": "sahel",
+    "country": "NE",
+    "language": "fr",
+    "website": "https://www.lesahel.org",
+    "feed": "https://www.lesahel.org/feed/",
+    "affiliation": "state_publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/onepniger",
+        "verified_via": "https://www.lesahel.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/NigerOnep",
+        "verified_via": "https://www.lesahel.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:23.553689+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s039",
+    "name": "Alakhbar",
+    "region": "sahel",
+    "country": "MR",
+    "language": "ar",
+    "website": "https://alakhbar.info",
+    "feed": "https://www.alakhbar.info/latest/rss/",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/alakhbar.info",
+        "verified_via": "https://alakhbar.info",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/alaakhbarinfo",
+        "verified_via": "https://alakhbar.info",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:23.694635+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s040",
+    "name": "Alwihda Info",
+    "region": "sahel",
+    "country": "TD",
+    "language": "fr",
+    "website": "https://www.alwihdainfo.com",
+    "feed": "https://www.alwihdainfo.com/rss/",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:23.725070+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s041",
+    "name": "APS Senegal",
+    "region": "sahel",
+    "country": "SN",
+    "language": "fr",
+    "website": "https://aps.sn",
+    "feed": "https://aps.sn/feed/",
+    "affiliation": "official",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:24.042505+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s042",
+    "name": "APS Algeria",
+    "region": "north_africa",
+    "country": "DZ",
+    "language": "ar",
+    "website": "https://www.aps.dz",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "x",
+        "url": "https://x.com/APS_Algerie",
+        "verified_via": "https://www.aps.dz",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/algeriepresseservice.ar",
+        "verified_via": "https://www.aps.dz",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@APSDZALGERIEPRESSESERVICE",
+        "verified_via": "https://www.aps.dz",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:24.259097+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s043",
+    "name": "TAP",
+    "region": "north_africa",
+    "country": "TN",
+    "language": "ar",
+    "website": "https://www.tap.info.tn/ar",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:24.353772+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s044",
+    "name": "MAP",
+    "region": "north_africa",
+    "country": "MA",
+    "language": "ar",
+    "website": "https://www.mapnews.ma/ar",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:24.605908+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s045",
+    "name": "Hespress",
+    "region": "north_africa",
+    "country": "MA",
+    "language": "ar",
+    "website": "https://www.hespress.com",
+    "feed": "https://www.hespress.com/feed",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/Hespress",
+        "verified_via": "https://www.hespress.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:24.980873+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s046",
+    "name": "Mada Masr",
+    "region": "egypt",
+    "country": "EG",
+    "language": "ar",
+    "website": "https://www.madamasr.com/ar",
+    "feed": "https://www.madamasr.com/ar/feed/",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:25.019502+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s047",
+    "name": "Ahram Online",
+    "region": "egypt",
+    "country": "EG",
+    "language": "en",
+    "website": "https://english.ahram.org.eg",
+    "feed": "",
+    "affiliation": "state_publisher",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "x",
+        "url": "https://twitter.com/ahramonline",
+        "verified_via": "https://english.ahram.org.eg",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/ahramonline",
+        "verified_via": "https://english.ahram.org.eg",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:25.034976+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s048",
+    "name": "Libya Al Ahrar",
+    "region": "north_africa",
+    "country": "LY",
+    "language": "ar",
+    "website": "https://libyaalahrar.tv",
+    "feed": "https://libyaalahrar.tv/feed/",
+    "affiliation": "broadcaster",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://facebook.com/LibyaAlAhrarTV",
+        "verified_via": "https://libyaalahrar.tv",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://x.com/LibyaAlAhrarAR",
+        "verified_via": "https://libyaalahrar.tv",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCVSdMOzC-V1baALMe5HaKiQ",
+        "verified_via": "https://libyaalahrar.tv",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:25.313033+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s049",
+    "name": "Al Wasat",
+    "region": "north_africa",
+    "country": "LY",
+    "language": "ar",
+    "website": "https://alwasat.ly",
+    "feed": "",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@WasatTV",
+        "verified_via": "https://alwasat.ly",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/alwasatnewsly",
+        "verified_via": "https://alwasat.ly",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/alwasatnewsly",
+        "verified_via": "https://alwasat.ly",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:25.462887+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s050",
+    "name": "Dawn",
+    "region": "pakistan",
+    "country": "PK",
+    "language": "en",
+    "website": "https://www.dawn.com",
+    "feed": "https://www.dawn.com/feeds/home",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/c/DawnNewsEnglish",
+        "verified_via": "https://www.dawn.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UC_xWTNsx7zA2uI0ydQikViA?sub_confirmation=1",
+        "verified_via": "https://www.dawn.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/dawn_com",
+        "verified_via": "https://www.dawn.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/dawndotcom",
+        "verified_via": "https://www.dawn.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCkMdI0K-74jAjOmh5J5H97Q",
+        "verified_via": "https://www.dawn.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:25.542940+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s051",
+    "name": "Geo News",
+    "region": "pakistan",
+    "country": "PK",
+    "language": "ur",
+    "website": "https://urdu.geo.tv",
+    "feed": "https://urdu.geo.tv/rss/1",
+    "affiliation": "broadcaster",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:25.565755+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s052",
+    "name": "ISPR",
+    "region": "pakistan",
+    "country": "PK",
+    "language": "en",
+    "website": "https://ispr.gov.pk",
+    "feed": "",
+    "affiliation": "official_military",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:25.920352+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s053",
+    "name": "TOLOnews",
+    "region": "afghanistan",
+    "country": "AF",
+    "language": "fa",
+    "website": "https://tolonews.com/fa",
+    "feed": "https://tolonews.com/feed",
+    "affiliation": "broadcaster",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:26.040365+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s054",
+    "name": "Pajhwok",
+    "region": "afghanistan",
+    "country": "AF",
+    "language": "en",
+    "website": "https://pajhwok.com",
+    "feed": "https://pajhwok.com/feed/",
+    "affiliation": "publisher",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/pajhwoknews",
+        "verified_via": "https://pajhwok.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/pajhwok",
+        "verified_via": "https://pajhwok.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/c/pajhwokafghannews",
+        "verified_via": "https://pajhwok.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:26.206009+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s055",
+    "name": "Amu TV",
+    "region": "afghanistan",
+    "country": "AF",
+    "language": "fa",
+    "website": "https://amu.tv/fa",
+    "feed": "https://amu.tv/fa/feed/",
+    "affiliation": "broadcaster",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/playlist?list=PLPA5dcK8mxTC58IljmydZIltXnrWMoAoe",
+        "verified_via": "https://amu.tv/fa",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/AmuTelevision",
+        "verified_via": "https://amu.tv/fa",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/AmuTelevision",
+        "verified_via": "https://amu.tv/fa",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCSvJ4Tkd-RqFry7stR1Jjmw",
+        "verified_via": "https://amu.tv/fa",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:26.327235+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s056",
+    "name": "Radio Ergo",
+    "region": "somalia",
+    "country": "SO",
+    "language": "so",
+    "website": "https://radioergo.org",
+    "feed": "https://radioergo.org/feed/",
+    "affiliation": "local_radio",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "x",
+        "url": "https://twitter.com/RadioErgo",
+        "verified_via": "https://radioergo.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/radioergo",
+        "verified_via": "https://radioergo.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/radioergo",
+        "verified_via": "https://radioergo.org",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:26.424899+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s057",
+    "name": "SONNA",
+    "region": "somalia",
+    "country": "SO",
+    "language": "ar",
+    "website": "https://sonna.so/ar",
+    "feed": "https://sonna.so/ar/feed/",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:26.520239+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s058",
+    "name": "Goobjoog",
+    "region": "somalia",
+    "country": "SO",
+    "language": "so",
+    "website": "https://goobjoog.com",
+    "feed": "https://goobjoog.com/feed/",
+    "affiliation": "broadcaster",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UCKbzgTa3o3rSh4KiD5BX6Hg",
+        "verified_via": "https://goobjoog.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/goobjoognews",
+        "verified_via": "https://goobjoog.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://x.com/GoobjoogNews",
+        "verified_via": "https://goobjoog.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:26.742036+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s059",
+    "name": "Addis Standard",
+    "region": "horn",
+    "country": "ET",
+    "language": "en",
+    "website": "https://addisstandard.com",
+    "feed": "https://addisstandard.com/feed/",
+    "affiliation": "publisher",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:27.265037+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s060",
+    "name": "ENA",
+    "region": "horn",
+    "country": "ET",
+    "language": "en",
+    "website": "https://www.ena.et/web/eng",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": true,
+    "verification_status": "social_only",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/ethiopianewsagency",
+        "verified_via": "https://www.ena.et/web/eng",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "telegram",
+        "url": "https://t.me/EthiopianNewsA",
+        "verified_via": "https://www.ena.et/web/eng",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": true,
+        "collection_status": "active"
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/c/EthiopianNewsAgency",
+        "verified_via": "https://www.ena.et/web/eng",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/poaenglish",
+        "verified_via": "https://www.ena.et/web/eng",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "telegram",
+        "url": "https://t.me/poaenglish",
+        "verified_via": "https://www.ena.et/web/eng",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/@poaenglish",
+        "verified_via": "https://www.ena.et/web/eng",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/poaarabic",
+        "verified_via": "https://www.ena.et/web/eng",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "telegram",
+        "url": "https://t.me/poaarabic",
+        "verified_via": "https://www.ena.et/web/eng",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://youtube.com/@poaarabic",
+        "verified_via": "https://www.ena.et/web/eng",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:27.456992+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s061",
+    "name": "ADI",
+    "region": "horn",
+    "country": "DJ",
+    "language": "fr",
+    "website": "https://www.adi.dj",
+    "feed": "https://www.adi.dj/rss",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:27.545357+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s062",
+    "name": "Shabait",
+    "region": "horn",
+    "country": "ER",
+    "language": "en",
+    "website": "https://shabait.com",
+    "feed": "https://shabait.com/feed/",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/moieritrea",
+        "verified_via": "https://shabait.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/@hawelti",
+        "verified_via": "https://shabait.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://youtube.com/channel/EriTVEritreaOfficial",
+        "verified_via": "https://shabait.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:27.714486+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s063",
+    "name": "WAFA",
+    "region": "palestine_israel",
+    "country": "PS",
+    "language": "ar",
+    "website": "https://www.wafa.ps",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/wafagency",
+        "verified_via": "https://www.wafa.ps",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/wafa_ps",
+        "verified_via": "https://www.wafa.ps",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/c/WafaAgency",
+        "verified_via": "https://www.wafa.ps",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:28.121498+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s064",
+    "name": "Maan",
+    "region": "palestine_israel",
+    "country": "PS",
+    "language": "ar",
+    "website": "https://www.maannews.net",
+    "feed": "",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "social_only",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/MaanNetwork",
+        "verified_via": "https://www.maannews.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/MaanNews",
+        "verified_via": "https://www.maannews.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/maannews5",
+        "verified_via": "https://www.maannews.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "telegram",
+        "url": "https://t.me/maannews",
+        "verified_via": "https://www.maannews.net",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "collection_status": "active",
+        "approved": true
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/UNIPALGTC",
+        "verified_via": "https://www.maannews.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://youtube.com/channel/UCbX2cxJ48y4DdaExUAW63bQ?si=ZFNMquyh_fa4gIvU",
+        "verified_via": "https://www.maannews.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:28.957287+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s065",
+    "name": "Times of Israel",
+    "region": "palestine_israel",
+    "country": "IL",
+    "language": "en",
+    "website": "https://www.timesofisrael.com",
+    "feed": "https://www.timesofisrael.com/feed/",
+    "affiliation": "publisher",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:29.566995+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s066",
+    "name": "LOrient Today",
+    "region": "levant",
+    "country": "LB",
+    "language": "en",
+    "website": "https://today.lorientlejour.com",
+    "feed": "https://today.lorientlejour.com/rss",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/lorienttoday",
+        "verified_via": "https://today.lorientlejour.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/lorienttoday",
+        "verified_via": "https://today.lorientlejour.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/user/lorientlejourTube",
+        "verified_via": "https://today.lorientlejour.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:29.688803+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s067",
+    "name": "NNA",
+    "region": "levant",
+    "country": "LB",
+    "language": "ar",
+    "website": "https://www.nna-leb.gov.lb/ar",
+    "feed": "",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:30.150593+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s068",
+    "name": "Enab Baladi",
+    "region": "levant",
+    "country": "SY",
+    "language": "ar",
+    "website": "https://www.enabbaladi.net",
+    "feed": "https://www.enabbaladi.net/feed/",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/enab.baladi",
+        "verified_via": "https://www.enabbaladi.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://twitter.com/enabbaladi",
+        "verified_via": "https://www.enabbaladi.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://youtube.com/@EnabBaladiNewspaper",
+        "verified_via": "https://www.enabbaladi.net",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:30.313290+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s069",
+    "name": "SANA",
+    "region": "levant",
+    "country": "SY",
+    "language": "ar",
+    "website": "https://sana.sy",
+    "feed": "https://sana.sy/feed/",
+    "affiliation": "official",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/sana.gov",
+        "verified_via": "https://sana.sy",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "x",
+        "url": "https://x.com/Sana__gov",
+        "verified_via": "https://sana.sy",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/syrianarabnewsagency-sana",
+        "verified_via": "https://sana.sy",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "telegram",
+        "url": "https://t.me/sana_gov",
+        "verified_via": "https://sana.sy",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": true,
+        "collection_status": "active"
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:30.624754+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s070",
+    "name": "Petra",
+    "region": "jordan",
+    "country": "JO",
+    "language": "en",
+    "website": "https://www.petra.gov.jo/en/",
+    "affiliation": "official",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "verified_at": "2026-09-18T08:46:30.686511+00:00",
+    "verification_environment": "GitHub Actions run 35326029801",
+    "retired_reason": "failed_source_audit_2026-09-19_final_preview"
+  },
+  {
+    "id": "s071",
+    "name": "Al Mamlaka",
+    "region": "jordan",
+    "country": "JO",
+    "language": "ar",
+    "website": "https://www.almamlakatv.com",
+    "feed": "",
+    "affiliation": "broadcaster",
+    "enabled": true,
+    "verification_status": "social_only",
+    "social_policy": "discover_from_publisher_website",
+    "social": [
+      {
+        "platform": "x",
+        "url": "https://twitter.com/almamlakatv",
+        "verified_via": "https://www.almamlakatv.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/AlMamlakaTV",
+        "verified_via": "https://www.almamlakatv.com",
+        "status": "publisher_linked",
+        "collection": "discovery_only",
+        "approved": false
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/channel/UC0jiFAzTgl17k7awGbuoYew?view_as=subscriber",
+        "verified_via": "https://www.almamlakatv.com",
+        "status": "publisher_linked",
+        "collection": "supported",
+        "approved": true,
+        "collection_status": "active"
+      }
+    ],
+    "verified_at": "2026-09-18T08:46:30.708442+00:00",
+    "verification_environment": "GitHub Actions run 35326029801"
+  },
+  {
+    "id": "s072",
+    "name": "Gulf News",
+    "region": "gcc",
+    "country": "AE",
+    "language": "en",
+    "website": "https://gulfnews.com/uae",
+    "affiliation": "commercial",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s073",
+    "name": "Oman Observer",
+    "region": "oman",
+    "country": "OM",
+    "language": "en",
+    "website": "https://www.omanobserver.om",
+    "affiliation": "public_media",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "feed": "https://www.omanobserver.om/rssFeed/home-page"
+  },
+  {
+    "id": "s074",
+    "name": "Arab News Saudi",
+    "region": "gcc",
+    "country": "SA",
+    "language": "en",
+    "website": "https://www.arabnews.com/saudiarabia",
+    "affiliation": "commercial",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s075",
+    "name": "Kuwait Times",
+    "region": "gcc",
+    "country": "KW",
+    "language": "en",
+    "website": "https://kuwaittimes.com",
+    "affiliation": "commercial",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "feed": "https://kuwaittimes.com/rssFeed/14"
+  },
+  {
+    "id": "s076",
+    "name": "Gulf Daily News",
+    "region": "gcc",
+    "country": "BH",
+    "language": "en",
+    "website": "https://www.gdnonline.com",
+    "affiliation": "commercial",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s077",
+    "name": "Daily Sabah Diplomacy",
+    "region": "turkey",
+    "country": "TR",
+    "language": "en",
+    "website": "https://www.dailysabah.com/politics/diplomacy",
+    "affiliation": "commercial",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "feed": "https://www.dailysabah.com/rss/politics/diplomacy"
+  },
+  {
+    "id": "s078",
+    "name": "Iraqi News",
+    "region": "iraq",
+    "country": "IQ",
+    "language": "en",
+    "website": "https://www.iraqinews.com",
+    "affiliation": "independent",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s079",
+    "name": "Kurdistan24",
+    "region": "iraq",
+    "country": "IQ",
+    "language": "en",
+    "website": "https://www.kurdistan24.net/en",
+    "affiliation": "commercial",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s080",
+    "name": "SABA Yemen",
+    "region": "yemen",
+    "country": "YE",
+    "language": "en",
+    "website": "https://sabanews.info/en",
+    "affiliation": "state_media",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s081",
+    "name": "Yemenat",
+    "region": "yemen",
+    "country": "YE",
+    "language": "ar",
+    "website": "https://yemenat.net",
+    "affiliation": "independent",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s082",
+    "name": "South24",
+    "region": "yemen",
+    "country": "YE",
+    "language": "ar",
+    "website": "https://south24.net",
+    "affiliation": "independent",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s083",
+    "name": "Ayin Network",
+    "region": "sudan",
+    "country": "SD",
+    "language": "ar",
+    "website": "https://3ayin.com",
+    "affiliation": "independent",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s084",
+    "name": "TSA Algerie",
+    "region": "north_africa",
+    "country": "DZ",
+    "language": "fr",
+    "website": "https://www.tsa-algerie.dz",
+    "affiliation": "independent",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s085",
+    "name": "Mosaique FM",
+    "region": "north_africa",
+    "country": "TN",
+    "language": "ar",
+    "website": "https://www.mosaiquefm.net/ar/actualite-tunisie",
+    "affiliation": "commercial",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s086",
+    "name": "Morocco World News",
+    "region": "north_africa",
+    "country": "MA",
+    "language": "en",
+    "website": "https://www.moroccoworldnews.com/morocco/",
+    "affiliation": "independent",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s087",
+    "name": "Egypt Independent",
+    "region": "egypt",
+    "country": "EG",
+    "language": "en",
+    "website": "https://www.egyptindependent.com",
+    "affiliation": "independent",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s088",
+    "name": "Express Tribune Pakistan",
+    "region": "pakistan",
+    "country": "PK",
+    "language": "en",
+    "website": "https://tribune.com.pk/pakistan",
+    "affiliation": "commercial",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "feed": "https://tribune.com.pk/feed/pakistan"
+  },
+  {
+    "id": "s089",
+    "name": "Radio Pakistan",
+    "region": "pakistan",
+    "country": "PK",
+    "language": "en",
+    "website": "https://www.radio.gov.pk",
+    "affiliation": "public_broadcaster",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s090",
+    "name": "Ariana News",
+    "region": "afghanistan",
+    "country": "AF",
+    "language": "en",
+    "website": "https://www.ariananews.af",
+    "affiliation": "commercial",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s091",
+    "name": "Khaama Press",
+    "region": "afghanistan",
+    "country": "AF",
+    "language": "en",
+    "website": "https://www.khaama.com",
+    "affiliation": "independent",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_final_preview"
+  },
+  {
+    "id": "s092",
+    "name": "The Reporter Ethiopia",
+    "region": "horn",
+    "country": "ET",
+    "language": "en",
+    "website": "https://www.thereporterethiopia.com",
+    "affiliation": "independent",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "feed": "https://www.thereporterethiopia.com/feed/",
+    "retired_reason": "failed_source_audit_2026-09-19_final_preview"
+  },
+  {
+    "id": "s093",
+    "name": "Ethiopia Insight",
+    "region": "horn",
+    "country": "ET",
+    "language": "en",
+    "website": "https://www.ethiopia-insight.com",
+    "affiliation": "independent",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "feed": "https://www.ethiopia-insight.com/feed/"
+  },
+  {
+    "id": "s094",
+    "name": "Hiiraan Online",
+    "region": "somalia",
+    "country": "SO",
+    "language": "en",
+    "website": "https://www.hiiraan.com",
+    "affiliation": "independent",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s095",
+    "name": "Palestinian Information Center",
+    "region": "palestine_israel",
+    "country": "PS",
+    "language": "ar",
+    "website": "https://palinfo.com",
+    "affiliation": "advocacy_media",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "feed": "https://palinfo.com/feed"
+  },
+  {
+    "id": "s096",
+    "name": "Jerusalem Post Israel",
+    "region": "palestine_israel",
+    "country": "IL",
+    "language": "en",
+    "website": "https://www.jpost.com/israel-news",
+    "affiliation": "commercial",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "feed": "https://www.jpost.com/rss/rssfeedsisraelnews.aspx"
+  },
+  {
+    "id": "s097",
+    "name": "+972 Magazine",
+    "region": "palestine_israel",
+    "country": "IL",
+    "language": "en",
+    "website": "https://www.972mag.com",
+    "affiliation": "independent",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "feed": "https://www.972mag.com/feed/",
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s098",
+    "name": "Roya News Jordan",
+    "region": "jordan",
+    "country": "JO",
+    "language": "en",
+    "website": "https://en.royanews.tv/news",
+    "affiliation": "commercial",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s099",
+    "name": "Jordan Times",
+    "region": "jordan",
+    "country": "JO",
+    "language": "en",
+    "website": "https://jordantimes.com",
+    "affiliation": "commercial",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s100",
+    "name": "Naharnet Lebanon",
+    "region": "levant",
+    "country": "LB",
+    "language": "en",
+    "website": "https://www.naharnet.com",
+    "affiliation": "independent",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19_preview"
+  },
+  {
+    "id": "s101",
+    "name": "Ammon News Jordan",
+    "region": "jordan",
+    "country": "JO",
+    "language": "en",
+    "website": "https://en.ammonnews.net",
+    "feed": "https://en.ammonnews.net/rss.php?id=2&type=news",
+    "affiliation": "independent",
+    "enabled": false,
+    "verification_status": "failed",
+    "social_policy": "discover_from_publisher_website",
+    "social": [],
+    "retired_reason": "failed_source_audit_2026-09-19"
+  },
+  {
+    "id": "s102",
+    "name": "Yemen Monitor",
+    "region": "yemen",
+    "country": "YE",
+    "language": "ar",
+    "website": "https://www.yemenmonitor.com",
+    "feed": "https://www.yemenmonitor.com/feed/",
+    "affiliation": "independent",
+    "enabled": true,
+    "verification_status": "active",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  }
+]
