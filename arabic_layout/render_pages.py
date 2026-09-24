@@ -43,13 +43,15 @@ def _story_card(c,box,e,index,lead=False):
     c.d.rectangle((x+w-8,y+8,x+w-2,y+h-8),fill=col)
     c.text(f'أولوية {index}' if lead else REGIONS.get(e.get('region'),'تطور إضافي'),
            (x+24,y+14,w-48,40),26,True,col,min_size=23,line_ratio=1.14)
-    c.text(compact(e.get('title_ar',''),155 if lead else 135),
-           (x+24,y+56,w-48,102),45 if lead else 38,True,INK,min_size=31,line_ratio=1.18)
+    c.text(compact(e.get('title_ar',''),110 if lead else 100),
+           (x+24,y+56,w-48,94),43 if lead else 37,True,INK,min_size=31,line_ratio=1.18)
+    # Provenance belongs directly beneath the headline so the visible product
+    # binds headline -> source -> factual summary in that order.
+    c.text(compact(_source_line(e),145),(x+24,y+154,w-48,34),21,True,MUTED,min_size=19,line_ratio=1.12)
     summary_limit=620 if lead else 420
     c.text(compact(e.get('summary_ar',''),summary_limit),
-           (x+24,y+168,w-48,h-300 if lead else h-232),
+           (x+24,y+198,w-48,h-324 if lead else h-246),
            35 if lead else 31,False,INK,min_size=27,line_ratio=1.27)
-    c.text(compact(_source_line(e),145),(x+24,y+h-112,w-48,38),22,True,MUTED,min_size=20,line_ratio=1.14)
     if lead:
         why=sanitize_text(e.get('assessment_ar',''))
         if why:
@@ -84,9 +86,9 @@ def _uae_panel(c,box,brief,events):
         yy=y
         for i,e in enumerate(events):
             col=REGION_COLORS.get('gcc',OLIVE)
-            c.text(compact(e.get('title_ar',''),90),(x,yy,w,74),35,True,col,min_size=29,line_ratio=1.18)
-            c.text(compact(e.get('summary_ar',''),235),(x,yy+80,w,step-130),30,False,INK,min_size=25,line_ratio=1.25)
-            c.text(compact(_source_line(e,2),96),(x,yy+step-42,w,32),20,True,MUTED,min_size=18,line_ratio=1.14)
+            c.text(compact(e.get('title_ar',''),82),(x,yy,w,68),34,True,col,min_size=29,line_ratio=1.18)
+            c.text(compact(_source_line(e,2),96),(x,yy+72,w,28),19,True,MUTED,min_size=18,line_ratio=1.12)
+            c.text(compact(e.get('summary_ar',''),235),(x,yy+108,w,step-148),30,False,INK,min_size=25,line_ratio=1.25)
             if i<len(events)-1: c.line(x,yy+step-5,x+w,yy+step-5,BORDER,1)
             yy+=step
     # Preserve the requested "changes since last briefing" signal without
