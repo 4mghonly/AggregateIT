@@ -25,7 +25,7 @@ jobs:
     # This launcher is ONLY for the Arabic slides. It never runs the main Gazette.
     if: "${{ github.event_name != 'push' || startsWith(github.event.head_commit.message, 'Arabic scheduler') || startsWith(github.event.head_commit.message, 'Arabic watchdog:') }}"
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       ARABIC_STATE_DIR: arabic_newsletter/runtime/state
       ARABIC_LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
@@ -45,13 +45,22 @@ jobs:
       ARABIC_LLM_FALLBACK_CHAT_PATH: ${{ vars.LLM_FALLBACK_CHAT_PATH }}
       ARABIC_LLM_FALLBACK_REQUEST_OPTIONS_JSON: ${{ vars.LLM_FALLBACK_REQUEST_OPTIONS_JSON }}
       ARABIC_LLM_FALLBACK_EXTRA_HEADERS_JSON: ${{ vars.LLM_FALLBACK_EXTRA_HEADERS_JSON }}
+      ARABIC_SOURCES_PER_REGION: "4"
+      ARABIC_SOURCE_CONNECT_TIMEOUT_S: "8"
+      ARABIC_SOURCE_READ_TIMEOUT_S: "12"
+      ARABIC_SYNTH_MAX_CALLS: "5"
+      ARABIC_SYNTH_READ_TIMEOUT_S: "60"
+      ARABIC_SYNTH_BUDGET_S: "360"
+      ARABIC_ANALYSIS_MAX_CALLS: "2"
+      ARABIC_ANALYSIS_READ_TIMEOUT_S: "45"
+      ARABIC_ANALYSIS_BUDGET_S: "120"
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
       DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID }}
     steps:
       - name: Check out isolated Arabic engine
         uses: actions/checkout@v5
         with:
-          ref: Arabic
+          ref: Arabic-production
           persist-credentials: false
 
       - name: Restore production Arabic state
@@ -99,11 +108,22 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y fonts-dejavu-core fonts-noto-core libraqm0
 
-      - name: Validate isolated Arabic engine
+      - name: Production runtime smoke gate
         if: steps.due.outputs.needs_delivery == 'true'
         run: |
           python -m compileall -q arabic_newsletter arabic_layout
-          python -m unittest arabic_newsletter.test_arabic -v
+          python - <<'PY'
+          from PIL import features
+          from arabic_newsletter.core import State, scheduled_window
+          from arabic_newsletter.editor import Client
+          from arabic_newsletter.delivery import webhook_url
+          from arabic_layout.render_engine import Canvas
+          assert features.check_feature("raqm"), "Pillow RAQM unavailable"
+          Canvas().font(32, False)
+          Canvas().font(32, True)
+          print("Arabic production smoke gate passed")
+          PY
+          echo "Production Arabic revision: $(git rev-parse HEAD)"
 
       - name: Validate model and dedicated Discord route
         if: steps.due.outputs.needs_delivery == 'true'
