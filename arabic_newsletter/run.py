@@ -176,6 +176,11 @@ def main():
                 mark_stage(args.output,'collect')
                 phase=time.monotonic(); print('Arabic phase start: collect',flush=True)
                 articles,health=collect(collection_start,end,registry=registry)
+                if args.send and not articles:
+                    expanded_start=end-timedelta(hours=24)
+                    print('Arabic live window empty; expanding collection to 24 hours',flush=True)
+                    articles,health=collect(expanded_start,end,registry=registry)
+                    collection_start=expanded_start
                 print(f'Arabic phase complete: collect elapsed_s={time.monotonic()-phase:.1f}',flush=True)
                 mark_stage(args.output,'collect','ok')
                 args.output.mkdir(parents=True,exist_ok=True)
