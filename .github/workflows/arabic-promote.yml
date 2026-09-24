@@ -30,9 +30,13 @@ jobs:
 
       - name: Verify candidate belongs to Arabic branch
         run: |
-          git fetch origin Arabic Arabic-production --no-tags
+          git fetch origin \
+            refs/heads/Arabic:refs/remotes/origin/Arabic \
+            refs/heads/Arabic-production:refs/remotes/origin/Arabic-production \
+            --no-tags
           git cat-file -e "${CANDIDATE_SHA}^{commit}"
           git merge-base --is-ancestor "$CANDIDATE_SHA" origin/Arabic
+          git merge-base --is-ancestor origin/Arabic-production "$CANDIDATE_SHA"
           echo "Candidate is contained in Arabic branch: $CANDIDATE_SHA"
 
       - uses: actions/setup-python@v6
