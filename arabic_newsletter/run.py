@@ -14,6 +14,40 @@ from .delivery import webhook_info, send
 from .render import render, references
 from .sample import fixture
 
+def mark_stage(output, stage, status='running', detail=None):
+    output.mkdir(parents=True,exist_ok=True)
+    write_json(output/'run_status.json',{
+      'stage':stage,'status':status,'detail':detail,'at':datetime.now(timezone.utc).isoformat()
+    })
+
+def fallback_from_arabic_sources(articles):
+    rows=[a for a in articles if a.get('language')=='ar' and is_arabic((a.get('title') or '')+' '+(a.get('text') or ''))]
+    events=[]
+    for i,a in enumerate(rows[:10]):
+        text=(a.get('text') or a.get('title') or '').strip()
+        events.append({
+          'region':a.get('region','gcc'),'topic':'security',
+          'title_ar':(a.get('title') or 'تحديث أمني من مصدر عربي')[:220],
+          'summary_ar':text[:700] or 'ورد تحديث أمني في المصدر المشار إليه.',
+          'assessment_ar':'تغطية مباشرة من المصدر؛ تعذر استكمال التحليل الآلي في هذه الدورة، لذا لم تُضف استنتاجات غير مدعومة.',
+          'watch_ar':'متابعة التحديثات الرسمية والتأكيدات المستقلة خلال الساعات المقبلة.',
+          'severity':'medium','status_ar':'تغطية مصدرية مباشرة',
+          'fingerprint':'fallback-'+str(i)+'-'+str(a.get('id','')),
+          'source_ids':[a.get('id')],
+          'sources':[{
+            'id':a.get('id'),'source':a.get('source'),'url':a.get('url'),
+            'published':a.get('published'),'affiliation':a.get('affiliation'),
+            'kind':a.get('kind','news'),'country':a.get('country'),'language':'ar'
+          }]
+        })
+    analysis={
+      'situation_ar':'هذه نسخة احتياطية قائمة فقط على المواد العربية التي جُمعت بنجاح. تعذر استكمال التحليل الآلي المتقدم في هذه الدورة.',
+      'implications_ar':'يجب التعامل مع البنود أدناه كتغطية مصدرية مباشرة لا كتقدير تحليلي نهائي.',
+      'developing_ar':['متابعة التأكيدات الرسمية والتحديثات من مصادر مستقلة.'],
+      'watch_ar':['استعادة مسار التحليل الآلي في الدورة التالية مع الحفاظ على الاستمرارية التشغيلية.']
+    }
+    return events,analysis
+
 def main():
     parser=argparse.ArgumentParser()
     modes=parser.add_mutually_exclusive_group()
@@ -130,9 +164,11 @@ def main():
                     # Confirmed failed HTTP deliveries are safe to retry; send() clears them.
                 audit_registry=ROOT/'runtime'/'audit'/'discovered_sources.json'
                 registry=json.loads(audit_registry.read_text()) if audit_registry.exists() else None
+                mark_stage(args.output,'collect')
                 phase=time.monotonic(); print('Arabic phase start: collect',flush=True)
                 articles,health=collect(collection_start,end,registry=registry)
                 print(f'Arabic phase complete: collect elapsed_s={time.monotonic()-phase:.1f}',flush=True)
+                mark_stage(args.output,'collect','ok')
                 args.output.mkdir(parents=True,exist_ok=True)
                 write_json(args.output/'collection_health.json',health)
                 write_json(args.output/'source_evidence.json',articles)
@@ -155,17 +191,29 @@ def main():
                     )
                 if args.send and not articles:
                     raise RuntimeError('Live extraction yielded no dated relevant articles; publication blocked')
+                mark_stage(args.output,'synthesize')
                 try:
                     phase=time.monotonic(); print('Arabic phase start: synthesize',flush=True)
                     events,rejected=synthesize(articles,state)
                     print(f'Arabic phase complete: synthesize elapsed_s={time.monotonic()-phase:.1f}',flush=True)
+                    mark_stage(args.output,'synthesize','ok')
+                    phase=time.monotonic(); print('Arabic phase start: analysis',flush=True)
+                    mark_stage(args.output,'analysis')
+                    analysis=build_analysis(events,state,morning=morning)
+                    print(f'Arabic phase complete: analysis elapsed_s={time.monotonic()-phase:.1f}',flush=True)
+                    mark_stage(args.output,'analysis','ok')
+                except Exception as exc:
+                    events,analysis=fallback_from_arabic_sources(articles)
+                    rejected=[]
+                    if not events:
+                        mark_stage(args.output,'fallback','failed',type(exc).__name__+': '+str(exc))
+                        raise
+                    mark_stage(args.output,'fallback','degraded',type(exc).__name__+': '+str(exc))
+                    print('Arabic LLM/editor degraded; using Arabic-source fallback:',type(exc).__name__,flush=True)
                 finally:
                     write_json(args.output/'editorial_draft.json',state.get('last_editorial_draft') or {})
                     write_json(args.output/'editorial_review_raw.json',state.get('last_editorial_review_raw') or {})
                     write_json(args.output/'editorial_review.json',state.get('last_editorial_review') or [])
-                phase=time.monotonic(); print('Arabic phase start: analysis',flush=True)
-                analysis=build_analysis(events,state,morning=morning)
-                print(f'Arabic phase complete: analysis elapsed_s={time.monotonic()-phase:.1f}',flush=True)
                 translated=[
                   ' '.join(str(e.get(k,'')) for k in ('title_ar','summary_ar','assessment_ar','watch_ar'))
                   for e in events
@@ -202,19 +250,23 @@ def main():
             forbidden=('\ufffd','\u25a1','\u25a0','\ufeff','\u202a','\u202b','\u202c','\u202d','\u202e','\u2066','\u2067','\u2068','\u2069')
             if any(mark in encoded for mark in forbidden):
                 raise RuntimeError('Encoding hygiene gate failed before rendering')
+            mark_stage(args.output,'render')
             phase=time.monotonic(); print('Arabic phase start: render',flush=True)
             paths,clipped=render(brief,args.output)
             print(f'Arabic phase complete: render elapsed_s={time.monotonic()-phase:.1f}',flush=True)
+            mark_stage(args.output,'render','ok')
             write_json(args.output/'briefing.json',brief)
             write_json(args.output/'render_report.json',{'visually_shortened_blocks':clipped,'full_text':'sources-ar.txt','dimensions':[3840,2160],'pages':len(paths)})
             refs=args.output/'sources-ar.txt'; references(brief,refs)
             if args.send:
+                mark_stage(args.output,'discord_send')
                 phase=time.monotonic(); print('Arabic phase start: discord_send',flush=True)
                 message_id=send(state,edition,paths)
                 print(f'Arabic phase complete: discord_send elapsed_s={time.monotonic()-phase:.1f}',flush=True)
                 if brief['events']:
                     keep=('region','topic','title_ar','summary_ar','assessment_ar','watch_ar','severity','fingerprint','source_ids')
                     state.put('previous_events',[{k:e.get(k) for k in keep} for e in brief['events']])
+                mark_stage(args.output,'complete','sent',message_id)
                 print('Arabic edition delivered; message ID:',message_id)
             else: print('Arabic slides rendered; no delivery requested')
         finally: state.close()
