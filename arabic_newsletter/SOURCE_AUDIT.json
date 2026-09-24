@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-09-24T04:14:39.773418+00:00",
-  "total": 106,
-  "compatible": 45,
+  "checked_at": "2026-09-24T04:17:42.810565+00:00",
+  "total": 107,
+  "compatible": 50,
   "regions": {
     "global": {
       "compatible": 10,
@@ -268,8 +268,8 @@
       ]
     },
     "yemen": {
-      "compatible": 1,
-      "configured": 3,
+      "compatible": 2,
+      "configured": 4,
       "sources": [
         {
           "id": "s030",
@@ -304,8 +304,8 @@
         {
           "id": "s082",
           "name": "South24",
-          "ok": false,
-          "reason": "no_feed"
+          "ok": true,
+          "reason": "ok"
         },
         {
           "id": "s102",
@@ -317,7 +317,7 @@
           "id": "s106",
           "name": "Yemen Voice",
           "ok": false,
-          "reason": "zero_entries"
+          "reason": "http_403"
         }
       ]
     },
@@ -520,7 +520,7 @@
       ]
     },
     "afghanistan": {
-      "compatible": 1,
+      "compatible": 2,
       "configured": 4,
       "sources": [
         {
@@ -550,8 +550,8 @@
         {
           "id": "s091",
           "name": "Khaama Press",
-          "ok": false,
-          "reason": "http_202"
+          "ok": true,
+          "reason": "ok"
         }
       ]
     },
@@ -586,7 +586,7 @@
       ]
     },
     "horn": {
-      "compatible": 2,
+      "compatible": 3,
       "configured": 5,
       "sources": [
         {
@@ -610,14 +610,14 @@
         {
           "id": "s062",
           "name": "Shabait",
-          "ok": false,
-          "reason": "http_202"
+          "ok": true,
+          "reason": "ok"
         },
         {
           "id": "s092",
           "name": "The Reporter Ethiopia",
           "ok": false,
-          "reason": "http_202"
+          "reason": "http_304"
         },
         {
           "id": "s093",
@@ -706,14 +706,14 @@
       ]
     },
     "jordan": {
-      "compatible": 0,
-      "configured": 3,
+      "compatible": 2,
+      "configured": 5,
       "sources": [
         {
           "id": "s070",
           "name": "Petra",
-          "ok": false,
-          "reason": "no_feed"
+          "ok": true,
+          "reason": "ok"
         },
         {
           "id": "s071",
@@ -744,6 +744,12 @@
           "name": "JO24",
           "ok": false,
           "reason": "http_403"
+        },
+        {
+          "id": "s107",
+          "name": "Al Ghad Jordan",
+          "ok": true,
+          "reason": "ok"
         }
       ]
     }
@@ -1127,13 +1133,13 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 30,
-      "recent_72h": 29,
+      "recent_72h": 30,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.irna.ir",
-      "arabic_chars": 432
+      "arabic_chars": 416
     },
     {
       "id": "s020",
@@ -1277,7 +1283,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "shafaq.com",
-      "arabic_chars": 396
+      "arabic_chars": 415
     },
     {
       "id": "s027",
@@ -1415,7 +1421,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.dabangasudan.org",
-      "arabic_chars": 364
+      "arabic_chars": 368
     },
     {
       "id": "s034",
@@ -1731,7 +1737,7 @@
       "language": "ar",
       "enabled_before": true,
       "verification_status_before": "active",
-      "website_ok": false,
+      "website_ok": true,
       "feed_configured": false,
       "feed_ok": false,
       "feed_http": null,
@@ -1740,7 +1746,7 @@
       "bozo": false,
       "production_compatible": false,
       "reason": "no_feed",
-      "website_error": "ReadTimeout"
+      "website_http": 200
     },
     {
       "id": "s050",
@@ -1995,15 +2001,16 @@
       "verification_status_before": "active",
       "website_ok": true,
       "feed_configured": true,
-      "feed_ok": false,
-      "feed_http": 202,
-      "entries": 0,
-      "recent_72h": 0,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 10,
+      "recent_72h": 10,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
-      "feed_final_host": "shabait.com"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "shabait.com",
+      "arabic_chars": 0
     },
     {
       "id": "s063",
@@ -2142,26 +2149,27 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "sana.sy",
-      "arabic_chars": 428
+      "arabic_chars": 438
     },
     {
       "id": "s070",
       "name": "Petra",
       "region": "jordan",
       "country": "JO",
-      "language": "en",
-      "enabled_before": false,
-      "verification_status_before": "failed",
-      "website_ok": false,
-      "feed_configured": false,
-      "feed_ok": false,
-      "feed_http": null,
-      "entries": 0,
+      "language": "ar",
+      "enabled_before": true,
+      "verification_status_before": "pending_reaudit",
+      "website_ok": true,
+      "feed_configured": true,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 86,
       "recent_72h": 0,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "no_feed",
-      "website_error": "ReadTimeout"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "arabic_chars": 1042
     },
     {
       "id": "s071",
@@ -2254,7 +2262,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 50,
-      "recent_72h": 41,
+      "recent_72h": 50,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -2386,18 +2394,19 @@
       "region": "yemen",
       "country": "YE",
       "language": "ar",
-      "enabled_before": false,
-      "verification_status_before": "failed",
+      "enabled_before": true,
+      "verification_status_before": "pending_reaudit",
       "website_ok": true,
-      "feed_configured": false,
-      "feed_ok": false,
-      "feed_http": null,
-      "entries": 0,
+      "feed_configured": true,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 32,
       "recent_72h": 0,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "no_feed",
-      "website_http": 200
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "arabic_chars": 1042
     },
     {
       "id": "s083",
@@ -2563,15 +2572,16 @@
       "verification_status_before": "pending_reaudit",
       "website_ok": true,
       "feed_configured": true,
-      "feed_ok": false,
-      "feed_http": 202,
-      "entries": 0,
-      "recent_72h": 0,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 100,
+      "recent_72h": 47,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
-      "feed_final_host": "www.khaama.com"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "www.khaama.com",
+      "arabic_chars": 0
     },
     {
       "id": "s092",
@@ -2584,13 +2594,13 @@
       "website_ok": true,
       "feed_configured": true,
       "feed_ok": false,
-      "feed_http": 202,
+      "feed_http": 304,
       "entries": 0,
       "recent_72h": 0,
       "bozo": false,
       "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
+      "reason": "http_304",
+      "website_http": 200,
       "feed_final_host": "www.thereporterethiopia.com"
     },
     {
@@ -2865,14 +2875,34 @@
       "website_ok": true,
       "feed_configured": true,
       "feed_ok": false,
-      "feed_http": 200,
+      "feed_http": 403,
       "entries": 0,
       "recent_72h": 0,
       "bozo": false,
       "production_compatible": false,
-      "reason": "zero_entries",
-      "website_http": 200,
+      "reason": "http_403",
+      "website_http": 403,
       "feed_final_host": "ye-voice.com"
+    },
+    {
+      "id": "s107",
+      "name": "Al Ghad Jordan",
+      "region": "jordan",
+      "country": "JO",
+      "language": "ar",
+      "enabled_before": true,
+      "verification_status_before": "pending_reaudit",
+      "website_ok": true,
+      "feed_configured": true,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 63,
+      "recent_72h": 0,
+      "bozo": false,
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "arabic_chars": 845
     }
   ]
 }
