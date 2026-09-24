@@ -267,6 +267,13 @@ class EditorialTests(unittest.TestCase):
                 self.assertEqual(len(state.get('last_editorial_review')),2)
             state.close()
 
+    def test_headline_summary_alignment_gate(self):
+        good=dict(self.event)
+        self.assertTrue(headline_summary_aligned(good['title_ar'],good['summary_ar'],good['region']))
+        bad=dict(good)
+        bad['title_ar']='إيران تعلن إغلاق مضيق هرمز'
+        self.assertFalse(headline_summary_aligned(bad['title_ar'],good['summary_ar'],good['region']))
+
     def test_attributed_not_verified(self):
         events,rejected=self.validate(); self.assertEqual(len(events),1); self.assertFalse(rejected)
         self.assertEqual(events[0]['status_ar'],'تقرير منسوب')
