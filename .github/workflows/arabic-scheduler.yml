@@ -103,17 +103,20 @@ jobs:
             from arabic_newsletter.core import State
             from arabic_newsletter.sample import fixture
             from arabic_newsletter.render import render, references
-            from arabic_newsletter.delivery import webhook_info, send
+            from arabic_newsletter.delivery import send
             root=Path("arabic_newsletter/runtime/output")
             root.mkdir(parents=True,exist_ok=True)
             brief=fixture(long=True)
+            print("DIAG stage=render_start",flush=True)
             paths,_=render(brief,root)
+            print("DIAG stage=render_complete files="+",".join(f"{p.name}:{p.stat().st_size}" for p in paths),flush=True)
             references(brief,root/"sources-ar.txt")
-            webhook_info()
             state=State(Path(os.getenv("ARABIC_STATE_DIR","arabic_newsletter/runtime/state")))
             try:
                 edition="SAMPLE-"+os.getenv("GITHUB_RUN_ID","manual")
-                send(state,edition,paths)
+                print("DIAG stage=discord_post_start edition="+edition,flush=True)
+                receipt=send(state,edition,paths)
+                print("DIAG stage=discord_post_complete receipt="+str(receipt),flush=True)
             finally:
                 state.close()
             print("Synthetic Arabic sample delivered")
