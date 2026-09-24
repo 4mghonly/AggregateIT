@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-09-24T04:23:48.573411+00:00",
-  "total": 109,
-  "compatible": 50,
+  "checked_at": "2026-09-24T04:27:15.808962+00:00",
+  "total": 112,
+  "compatible": 52,
   "regions": {
     "global": {
       "compatible": 10,
@@ -70,8 +70,8 @@
       ]
     },
     "gcc": {
-      "compatible": 2,
-      "configured": 3,
+      "compatible": 4,
+      "configured": 5,
       "sources": [
         {
           "id": "s011",
@@ -138,6 +138,24 @@
           "name": "Gulf Daily News",
           "ok": false,
           "reason": "no_feed"
+        },
+        {
+          "id": "s110",
+          "name": "Al Watan Saudi Politics",
+          "ok": true,
+          "reason": "ok"
+        },
+        {
+          "id": "s111",
+          "name": "Gulf Times Qatar",
+          "ok": true,
+          "reason": "ok"
+        },
+        {
+          "id": "s112",
+          "name": "Al Ayam Bahrain",
+          "ok": false,
+          "reason": "html_http_403"
         }
       ]
     },
@@ -629,7 +647,7 @@
           "id": "s092",
           "name": "The Reporter Ethiopia",
           "ok": false,
-          "reason": "http_304"
+          "reason": "http_202"
         },
         {
           "id": "s093",
@@ -1151,7 +1169,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.irna.ir",
-      "arabic_chars": 419
+      "arabic_chars": 407
     },
     {
       "id": "s020",
@@ -1172,7 +1190,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.isna.ir",
-      "arabic_chars": 402
+      "arabic_chars": 443
     },
     {
       "id": "s021",
@@ -1193,7 +1211,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.mehrnews.com",
-      "arabic_chars": 346
+      "arabic_chars": 333
     },
     {
       "id": "s022",
@@ -2009,8 +2027,8 @@
       "region": "horn",
       "country": "ER",
       "language": "en",
-      "enabled_before": true,
-      "verification_status_before": "active",
+      "enabled_before": false,
+      "verification_status_before": "failed",
       "website_ok": true,
       "feed_configured": true,
       "feed_ok": false,
@@ -2174,13 +2192,13 @@
       "feed_configured": true,
       "feed_ok": true,
       "feed_http": 200,
-      "entries": 86,
+      "entries": 84,
       "recent_72h": 0,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
       "website_http": 200,
-      "arabic_chars": 1042
+      "arabic_chars": 1185
     },
     {
       "id": "s071",
@@ -2579,8 +2597,8 @@
       "region": "afghanistan",
       "country": "AF",
       "language": "en",
-      "enabled_before": true,
-      "verification_status_before": "active",
+      "enabled_before": false,
+      "verification_status_before": "failed",
       "website_ok": true,
       "feed_configured": true,
       "feed_ok": false,
@@ -2604,13 +2622,13 @@
       "website_ok": true,
       "feed_configured": true,
       "feed_ok": false,
-      "feed_http": 304,
+      "feed_http": 202,
       "entries": 0,
       "recent_72h": 0,
       "bozo": false,
       "production_compatible": false,
-      "reason": "http_304",
-      "website_http": 200,
+      "reason": "http_202",
+      "website_http": 202,
       "feed_final_host": "www.thereporterethiopia.com"
     },
     {
@@ -2955,6 +2973,67 @@
       "website_http": 200,
       "feed_final_host": "www.bakhtarnews.af",
       "arabic_chars": 397
+    },
+    {
+      "id": "s110",
+      "name": "Al Watan Saudi Politics",
+      "region": "gcc",
+      "country": "SA",
+      "language": "ar",
+      "enabled_before": true,
+      "verification_status_before": "pending_reaudit",
+      "website_ok": true,
+      "feed_configured": true,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 50,
+      "recent_72h": 23,
+      "bozo": false,
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "www.alwatan.com.sa",
+      "arabic_chars": 346
+    },
+    {
+      "id": "s111",
+      "name": "Gulf Times Qatar",
+      "region": "gcc",
+      "country": "QA",
+      "language": "en",
+      "enabled_before": true,
+      "verification_status_before": "pending_reaudit",
+      "website_ok": true,
+      "feed_configured": true,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 50,
+      "recent_72h": 50,
+      "bozo": false,
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "www.gulf-times.com",
+      "arabic_chars": 0
+    },
+    {
+      "id": "s112",
+      "name": "Al Ayam Bahrain",
+      "region": "gcc",
+      "country": "BH",
+      "language": "ar",
+      "enabled_before": true,
+      "verification_status_before": "pending_reaudit",
+      "website_ok": true,
+      "feed_configured": false,
+      "feed_ok": false,
+      "feed_http": 403,
+      "entries": 0,
+      "recent_72h": 0,
+      "bozo": false,
+      "production_compatible": false,
+      "reason": "html_http_403",
+      "website_http": 403
     }
   ]
 }
