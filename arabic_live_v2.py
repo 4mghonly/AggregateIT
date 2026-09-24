@@ -1,7 +1,7 @@
 """AggregateIT Arabic Live V2 — reliability-first live briefing engine.
 
 Design:
-- no SQLite
+- no persistent SQLite across runs
 - no cache
 - no cross-run state
 - no preflight probes
@@ -241,10 +241,15 @@ def main():
     OUT.mkdir(parents=True,exist_ok=True)
     print("V2 stage=collect_start",flush=True)
     items,health=collect(24)
-    if not items:
-        raise RuntimeError("V2 collected zero relevant Arabic RSS items in 24 hours")
     print(f"V2 stage=collect_complete items={len(items)}",flush=True)
     brief=build_brief(items,health)
+    if not items:
+        brief["analysis"]={
+          "situation_ar":"لم تُجمع مواد عربية مؤهلة ضمن نافذة الرصد الحالية. يُنشر هذا الإصدار حفاظاً على استمرارية المنتج مع الإشارة بوضوح إلى تراجع التغطية المصدرية.",
+          "implications_ar":"لا ينبغي استنتاج غياب التطورات من غياب المواد المؤهلة؛ يستمر الرصد في الدورة التالية.",
+          "developing_ar":["استعادة تدفق المصادر العربية المؤهلة والتحقق من عودة التغطية الإقليمية."],
+          "watch_ar":["عودة خلاصات المصادر للعمل وظهور مواد مؤهلة جديدة ضمن النطاق."]
+        }
     (OUT/"briefing.json").write_text(json.dumps(brief,ensure_ascii=False,indent=2),encoding="utf-8")
     print("V2 stage=render_start",flush=True)
     paths,_=render(brief,OUT)
