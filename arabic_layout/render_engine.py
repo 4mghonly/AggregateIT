@@ -154,22 +154,24 @@ def masthead(c,brief,page):
     c.text(subtitles.get(page,'دليل موجز لصانع القرار'),(2180,98,1500,44),30,True,MUTED,min_size=26,line_ratio=1.16)
     dt=f"{AR_WEEKDAYS[end.weekday()]} {end.day} {AR_MONTHS[end.month]} {end.year}، {end.strftime('%H:%M')} بتوقيت الإمارات"
     c.text(dt,(80,34,1500,48),33,True,INK,'left',min_size=29,line_ratio=1.16)
-    cycle='إحاطة صباحية موسعة، تغطية ليلية 12 ساعة' if morning else 'إحاطة دورية، نافذة 6 ساعات'
+    hours=int(brief.get('window_hours') or (12 if morning else 6))
+    cycle=('إحاطة صباحية موسعة، تغطية ليلية '+str(hours)+' ساعة') if morning else ('إحاطة دورية، نافذة '+str(hours)+' ساعات')
     c.text(cycle,(80,96,1500,40),27,True,MUTED,'left',min_size=24,line_ratio=1.16)
     c.line(70,164,W-70,164,BORDER,2)
 
 
 def stats(c,brief):
     events=brief.get('events',[])
-    period='12 ساعة' if brief.get('morning') else '6 ساعات'
+    hours=int(brief.get('window_hours') or (12 if brief.get('morning') else 6))
+    period=str(hours)+' ساعة'
     coverage=brief.get('coverage') or {}
     source_regions=(brief.get('source_health') or {}).get('regions') or {}
-    monitored=sum(bool((source_regions.get(r) or {}).get('healthy_extractors')) for r in REGIONS)
+    active_regions=len({e.get('region') for e in events if e.get('region') in REGIONS})
     vals=[
       ('نافذة التغطية',period,STEEL),
       ('أحداث مؤهلة',len(events),COMMAND),
       ('مصادر مستخدمة',coverage.get('event_source_count',0),OLIVE),
-      ('مناطق مراقبة',f"{monitored}/{len(REGIONS)}",BLUE if monitored==len(REGIONS) else ALERT),
+      ('أقاليم بمادة',f"{active_regions}/{len(REGIONS)}",BLUE if active_regions>=min(len(REGIONS),10) else ALERT),
     ]
     margin=55; gap=18; y=190; h=108; cw=(W-2*margin-gap*3)//4
     for i,(label,val,color) in enumerate(vals):

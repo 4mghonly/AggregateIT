@@ -105,7 +105,7 @@ def normalize_analysis(value,events):
       "watch_ar":watch,
     }
 
-def build_brief(events,health,input_count,window_hours=24,analysis=None,llm_health=None,previous_events=None):
+def build_brief(events,health,input_count,window_hours=24,analysis=None,llm_health=None,previous_events=None,morning=None):
     normalized=[normalize_event(e,i) for i,e in enumerate(events or [])]
     normalized=[e for e in normalized if e["title_ar"] and e["summary_ar"] and e["sources"]]
     now=datetime.now(timezone.utc).astimezone(UAE).replace(microsecond=0)
@@ -113,13 +113,14 @@ def build_brief(events,health,input_count,window_hours=24,analysis=None,llm_heal
     health_rows=health if isinstance(health,list) else []
     regions={}
     for r in REGIONS:
-        healthy=sum(
-          1 for row in health_rows
-          if isinstance(row,dict) and row.get("region")==r and row.get("status")=="ok"
-        )
-        regions[r]={"healthy_extractors":healthy,"substitutes_used":0}
+        rows=[row for row in health_rows if isinstance(row,dict) and row.get("region")==r]
+        online=sum(1 for row in rows if row.get("status")=="ok" and int(row.get("parsed_entries") or 0)>0)
+        productive=sum(1 for row in rows if row.get("status")=="ok" and int(row.get("items") or 0)>0)
+        regions[r]={"healthy_extractors":online,"productive_extractors":productive,"substitutes_used":0}
     unresolved=[r for r,v in regions.items() if not v["healthy_extractors"]]
-    source_ids={s["id"] for e in normalized for s in e["sources"] if s["id"]}
+    source_rows=[s for e in normalized for s in e["sources"] if s.get("id")]
+    source_ids={s["id"] for s in source_rows}
+    language_counts=Counter(s.get("language") or "unknown" for s in source_rows)
     return {
       "schema_version":SCHEMA_VERSION,
       "sample":False,
@@ -127,17 +128,19 @@ def build_brief(events,health,input_count,window_hours=24,analysis=None,llm_heal
       "window_end":now.isoformat(),
       "events":normalized,
       "input_count":int(input_count or 0),
+      "window_hours":int(window_hours or 0),
       "health":health_rows,
       "rejected":[],
       "analysis":normalize_analysis(analysis,normalized),
       "llm_health":llm_health if isinstance(llm_health,dict) else {"status":"not_attempted","routes":[]},
-      "morning":now.hour<9,
+      "morning":(now.hour<9 if morning is None else bool(morning)),
       "coverage":{
         "event_source_count":len(source_ids),
-        "event_source_languages":{"ar":len(source_ids)},
-        "non_arabic_event_sources":0,
+        "event_source_languages":dict(language_counts),
+        "non_arabic_event_sources":sum(lang!="ar" for lang in language_counts for _ in range(language_counts[lang])),
         "healthy_regions":[r for r,v in regions.items() if v["healthy_extractors"]],
         "active_extractors_by_region":{r:v["healthy_extractors"] for r,v in regions.items()},
+        "productive_extractors_by_region":{r:v["productive_extractors"] for r,v in regions.items()},
         "substitutes_used":0,
         "unresolved_regions":unresolved,
         "coverage_degraded":bool(unresolved),
