@@ -12,6 +12,17 @@ on:
       - arabic_layout/**
       - .github/workflows/arabic-ci.yml
       - .github/workflows/arabic-scheduler.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - arabic_live_v2.py
+      - arabic_newsletter/sources.json
+      - arabic_newsletter/brief_schema.py
+      - arabic_newsletter/render.py
+      - arabic_newsletter/delivery.py
+      - arabic_layout/**
+      - .github/workflows/arabic-ci.yml
+      - .github/workflows/arabic-scheduler.yml
   workflow_dispatch:
 
 permissions:
