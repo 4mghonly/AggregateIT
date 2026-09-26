@@ -199,9 +199,10 @@ def severity(e):
 
 def is_uae(e):
     text=(e.get('title_ar','')+' '+e.get('summary_ar',''))
-    return e.get('region')=='gcc' and (
-        any(s.get('country')=='AE' for s in e.get('sources',[]))
-        or any(k in text for k in ('الإمارات','أبوظبي','ابوظبي','دبي','الشارقة')))
+    terms=('الإمارات','الامارات','أبوظبي','ابوظبي','دبي','الشارقة','عجمان','الفجيرة',
+           'رأس الخيمة','راس الخيمة','أم القيوين','ام القيوين',
+           'محمد بن زايد','محمد بن راشد','منصور بن زايد','خالد بن محمد')
+    return e.get('region')=='gcc' and any(k in text for k in terms)
 
 def rank_events(events,exclude_uae=False):
     pool=[e for e in events if not(exclude_uae and is_uae(e))]
