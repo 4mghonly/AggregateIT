@@ -77,6 +77,11 @@ jobs:
           assert v2.region_for("الحرب الأخرى على الإرهاب: 11 سبتمبر وتفكك الديمقراطية الأميركية","jordan") is None
           assert v2._dedupe_key("الحرب الأخرى على الإرهاب (2/1)")==v2._dedupe_key("الحرب الأخرى على الإرهاب (2/2)")
           assert not v2._source_is_arabic({"language":"fa","title":"ایران","summary":"تهران"})
+          assert not v2.is_uae_item({"region":"gcc","country":"AE","title":"Sudan peace talks","summary":"War in Sudan"})
+          assert v2.is_uae_item({"region":"gcc","country":"GB","title":"UAE foreign minister holds talks","summary":"Abu Dhabi diplomacy"})
+          assert not v2.relevant("Prosperity during the climate transition in Oman","en","OM")
+          clipped=v2.clip_words("عنوان طويل للغاية يحتاج إلى اقتطاع واضح عند نهاية كلمة كاملة",34)
+          assert len(clipped)<=34 and clipped.endswith("…") and not clipped.endswith("ة…")
           # Selection must not be fixed-dictionary-order truncation and must reserve UAE visibility.
           synthetic=[]
           now=v2.datetime.now(v2.timezone.utc).timestamp()
