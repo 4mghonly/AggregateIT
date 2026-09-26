@@ -1,3 +1,3 @@
-live-validation-after-coverage-fix
-triggered_at=2026-09-26T20:13:00+04:00
-reason=validate-uae-multilingual-selection-render-delivery
+live-validation-after-editorial-gates
+triggered_at=2026-09-26T20:22:00+04:00
+reason=validate-dedupe-geography-uae-filter-translation-ranking
