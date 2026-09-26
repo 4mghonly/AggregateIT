@@ -416,20 +416,21 @@
     "website": "https://www.wam.ae/ar",
     "feed": "",
     "affiliation": "official",
-    "enabled": false,
-    "verification_status": "failed",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "verified_at": "2026-09-26T06:59:43.893302+00:00",
     "verification_environment": "GitHub Actions full source compatibility audit",
-    "retired_reason": "source_audit_no_feed",
+    "retired_reason": null,
     "compatibility": {
       "adapter": "none",
       "http": null,
       "entries": 0,
       "recent_72h": 0,
       "reason": "no_feed"
-    }
+    },
+    "adapter": "html_headlines"
   },
   {
     "id": "s012",
@@ -2845,8 +2846,8 @@
     "language": "en",
     "website": "https://gulfnews.com/uae",
     "affiliation": "commercial",
-    "enabled": false,
-    "verification_status": "failed",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
     "social_policy": "discover_from_publisher_website",
     "social": [],
     "verified_at": "2026-09-26T06:59:43.893302+00:00",
@@ -2858,7 +2859,9 @@
       "recent_72h": 0,
       "reason": "no_feed"
     },
-    "retired_reason": "source_audit_no_feed"
+    "retired_reason": null,
+    "feed": "",
+    "adapter": "html_headlines"
   },
   {
     "id": "s073",
@@ -3816,5 +3819,35 @@
       "recent_72h": 0,
       "reason": "ok"
     }
+  },
+  {
+    "id": "s114",
+    "name": "Khaleej Times UAE",
+    "region": "gcc",
+    "country": "AE",
+    "language": "en",
+    "website": "https://www.khaleejtimes.com/uae",
+    "feed": "",
+    "adapter": "html_headlines",
+    "affiliation": "publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
+  },
+  {
+    "id": "s115",
+    "name": "Emirates 24|7 UAE",
+    "region": "gcc",
+    "country": "AE",
+    "language": "en",
+    "website": "https://www.emirates247.com/uae",
+    "feed": "",
+    "adapter": "html_headlines",
+    "affiliation": "state-linked publisher",
+    "enabled": true,
+    "verification_status": "pending_reaudit",
+    "social_policy": "discover_from_publisher_website",
+    "social": []
   }
 ]

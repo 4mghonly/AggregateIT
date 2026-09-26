@@ -21,7 +21,7 @@ def layout_plan(brief):
     # that ordering instead of re-sorting by region and accidentally promoting noise.
     leads=non_uae[:3]
     lead_keys={_event_key(e) for e in leads}
-    secondary=[e for e in non_uae if _event_key(e) not in lead_keys][:3]
+    secondary=[e for e in non_uae if _event_key(e) not in lead_keys][:10]
     return leads,secondary,uae
 
 def _source_line(e,limit=3):
@@ -56,6 +56,16 @@ def _story_card(c,box,e,index,lead=False):
         why=sanitize_text(e.get('assessment_ar',''))
         if why:
             c.text('لماذا يهم: '+compact(why,185),(x+24,y+h-70,w-48,50),26,True,col,min_size=22,line_ratio=1.18)
+
+def _compact_story_card(c,box,e):
+    x,y,w,h=map(int,box)
+    _label,col,_pale=severity(e)
+    c.rounded(box,PANEL_ALT,BORDER,9,1)
+    c.d.rectangle((x+w-7,y+7,x+w-2,y+h-7),fill=col)
+    c.text(REGIONS.get(e.get('region'),'تطور إضافي'),(x+18,y+10,w-36,28),20,True,col,min_size=18,line_ratio=1.10)
+    c.text(compact(e.get('title_ar',''),94),(x+18,y+42,w-36,62),29,True,INK,min_size=25,line_ratio=1.15)
+    c.text(compact(_source_line(e,1),78),(x+18,y+106,w-36,24),17,True,MUTED,min_size=16,line_ratio=1.08)
+    c.text(compact(e.get('summary_ar',''),235),(x+18,y+136,w-36,h-148),23,False,INK,min_size=20,line_ratio=1.20)
 
 def _cycle_delta(brief):
     previous=brief.get('previous_events') or []
@@ -209,14 +219,18 @@ def page2(brief,path):
 
     # Left: secondary news that did NOT appear on page 1.
     x,y,w,h=panel(c,(55,330,2265,1250),'تطورات إضافية تستحق الانتباه',BLUE,
-                  'أحداث ثانوية مختارة، من دون إعادة أي قصة من الصفحة الأولى')
+                  'حتى عشرة تطورات إضافية مرتبة بالأهمية، من دون إعادة أي قصة من الصفحة الأولى')
     if not secondary:
         c.text('لا توجد تطورات إضافية مؤهلة في هذه الدورة.',(x,y,w,h),32,True,MUTED,'center')
     else:
+        cols=2 if len(secondary)>3 else 1
+        rows=(len(secondary)+cols-1)//cols
         gap=12
-        rh=(h-gap*(len(secondary)-1))//len(secondary)
-        for i,e in enumerate(secondary,1):
-            _story_card(c,(x,y+(i-1)*(rh+gap),w,rh),e,i,False)
+        cw=(w-gap*(cols-1))//cols
+        rh=(h-gap*(rows-1))//rows
+        for i,e in enumerate(secondary):
+            row=i//cols; col=i%cols
+            _compact_story_card(c,(x+col*(cw+gap),y+row*(rh+gap),cw,rh),e)
     _coverage_panel(c,(55,1605,2265,470),brief)
 
     # Right: three different policy-maker functions, not three versions of the

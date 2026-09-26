@@ -2,7 +2,10 @@ name: Arabic Briefing V2 Production
 
 on:
   schedule:
-    - cron: "0 2,8,14,20 * * *"
+    - cron: "0 2 * * *"
+    - cron: "0 8 * * *"
+    - cron: "0 14 * * *"
+    - cron: "0 20 * * *"
   push:
     branches: [main]
     paths:
@@ -40,6 +43,7 @@ jobs:
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
       DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID }}
       ARABIC_DISCORD_MAX_FILE_BYTES: "19000000"
+      ARABIC_SCHEDULE_EXPR: ${{ github.event.schedule }}
     steps:
       - uses: actions/checkout@v5
 

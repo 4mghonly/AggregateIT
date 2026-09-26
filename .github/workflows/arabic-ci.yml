@@ -67,6 +67,25 @@ jobs:
           assert all((r.get("feed") or "").startswith("http") or r.get("adapter")=="html_headlines" for r in active), "active source missing supported adapter"
           assert callable(v2.collect)
           assert callable(v2.make_event)
+          # Geography must use token/phrase boundaries: مصر must never match مصرع.
+          assert v2.region_for("مصرع 17 شخصاً في حادث عسكري بالكونغو","global") is None
+          assert v2.region_for("القاهرة تبحث ترتيبات أمنية جديدة","global")=="egypt"
+          # Multilingual sources must survive collection relevance gates for translation.
+          assert v2.relevant("UAE foreign minister discusses regional security","en","AE")
+          assert v2.relevant("attaque militaire à la frontière","fr","ML")
+          # Selection must not be fixed-dictionary-order truncation and must reserve UAE visibility.
+          synthetic=[]
+          now=v2.datetime.now(v2.timezone.utc).timestamp()
+          for i,region in enumerate(v2.REGIONS):
+              synthetic.append({"title":f"military security update {region}","summary":"missile border security",
+                "url":f"https://example.com/{region}","source":"x","source_id":f"s{i}","country":"IQ",
+                "language":"en","affiliation":"publisher","region":region,"published":now-i})
+          synthetic.append({"title":"UAE airspace security update","summary":"UAE airspace security",
+            "url":"https://example.com/uae","source":"uae","source_id":"uae","country":"AE",
+            "language":"en","affiliation":"official","region":"gcc","published":now})
+          picked=v2.select(synthetic,limit=13,morning=False)
+          assert any(v2.is_uae_item(x) for x in picked)
+          assert len({x["region"] for x in picked})>=10
 
           from arabic_newsletter.brief_schema import build_brief, validate_brief, dumps
           event={
