@@ -152,8 +152,8 @@ def region_for(text:str,source_region:str)->str|None:
 def relevant(text:str,language:str="en",country:str|None=None)->bool:
     folded=clean(text).casefold()
     security=any(k.casefold() in folded for k in SECURITY) or any(k in folded for k in SECURITY_EXTRA)
-    routine=any(k in folded for k in ROUTINE_TERMS)
-    strategic=any(k in folded for k in STRATEGIC_TERMS)
+    routine=any(_phrase_hit(folded,k) for k in ROUTINE_TERMS)
+    strategic=any(_phrase_hit(folded,k) for k in STRATEGIC_TERMS)
     if routine and not strategic:
         return False
     if country=="AE" and (uae_secondary_relevant(folded) or
@@ -280,11 +280,11 @@ def impact_score(item)->float:
     text=clean((item.get("title") or "")+" "+(item.get("summary") or "")).casefold()
     age=max(0.0,(datetime.now(timezone.utc).timestamp()-float(item.get("published") or 0))/3600.0)
     score=max(0.0,4.0-age/4.0)
-    score+=min(8.0,2.0*sum(k in text for k in HIGH_IMPACT_TERMS))
-    score+=2.5 if any(k in text for k in STRATEGIC_TERMS) else 0.0
+    score+=min(8.0,2.0*sum(_phrase_hit(text,k) for k in HIGH_IMPACT_TERMS))
+    score+=2.5 if any(_phrase_hit(text,k) for k in STRATEGIC_TERMS) else 0.0
     score+=1.25 if str(item.get("affiliation","")).lower() in ("official","state","government") else 0.0
     score+=0.6 if is_uae_item(item) else 0.0
-    if any(k in text for k in ROUTINE_TERMS) and not any(k in text for k in STRATEGIC_TERMS):
+    if any(_phrase_hit(text,k) for k in ROUTINE_TERMS) and not any(_phrase_hit(text,k) for k in STRATEGIC_TERMS):
         score-=4.0
     return score
 
