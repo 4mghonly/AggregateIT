@@ -73,6 +73,10 @@ jobs:
           # Multilingual sources must survive collection relevance gates for translation.
           assert v2.relevant("UAE foreign minister discusses regional security","en","AE")
           assert v2.relevant("attaque militaire à la frontière","fr","ML")
+          assert not v2.relevant("Dubai Police warn of traffic on Al Khail Road","en","AE")
+          assert v2.region_for("الحرب الأخرى على الإرهاب: 11 سبتمبر وتفكك الديمقراطية الأميركية","jordan") is None
+          assert v2._dedupe_key("الحرب الأخرى على الإرهاب (2/1)")==v2._dedupe_key("الحرب الأخرى على الإرهاب (2/2)")
+          assert not v2._source_is_arabic({"language":"fa","title":"ایران","summary":"تهران"})
           # Selection must not be fixed-dictionary-order truncation and must reserve UAE visibility.
           synthetic=[]
           now=v2.datetime.now(v2.timezone.utc).timestamp()
@@ -86,6 +90,8 @@ jobs:
           picked=v2.select(synthetic,limit=13,morning=False)
           assert any(v2.is_uae_item(x) for x in picked)
           assert len({x["region"] for x in picked})>=10
+          from collections import Counter
+          assert max(Counter(x["source_id"] for x in picked).values())<=2
 
           from arabic_newsletter.brief_schema import build_brief, validate_brief, dumps
           event={
