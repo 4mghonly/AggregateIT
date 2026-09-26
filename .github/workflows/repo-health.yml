@@ -60,7 +60,7 @@ jobs:
           assert Path('README.md').exists()
           assert not Path('README. md').exists()
           scheduler=Path('.github/workflows/arabic-scheduler.yml').read_text(encoding='utf-8')
-          assert '0 2,8,14,20 * * *' in scheduler, 'Arabic UAE six-hour schedule changed'
+          assert all(cron in scheduler for cron in ('0 2 * * *','0 8 * * *','0 14 * * *','0 20 * * *')), 'Arabic UAE six-hour schedule changed'
           assert '.github/arabic-v2-trigger' in scheduler, 'Arabic V2 trigger missing'
           assert 'timeout-minutes: 20' in scheduler, 'Arabic V2 runtime envelope changed'
           assert 'python arabic_live_v2.py' in scheduler, 'Arabic V2 engine missing from production scheduler'
