@@ -79,13 +79,22 @@ UAE_EXTRA=(
  "الرئيس","ولي العهد","وزير","مجلس الوزراء","الحكومة","شرطة","الدفاع المدني","طوارئ","مطار","طيران","مجال جوي",
  "ميناء","حدود","قضاء","محكمة","مساعدات","الأمم المتحدة","الامم المتحدة","بنية تحتية",
 )
+UAE_SUBJECT_TERMS=(
+ "uae","united arab emirates","emirates","abu dhabi","dubai","sharjah","ajman","fujairah","ras al khaimah","umm al quwain",
+ "mohamed bin zayed","mohammed bin rashid","mansour bin zayed","khaled bin mohamed","mbz",
+ "الإمارات","الامارات","أبوظبي","ابوظبي","دبي","الشارقة","عجمان","الفجيرة","رأس الخيمة","راس الخيمة","أم القيوين","ام القيوين",
+ "محمد بن زايد","محمد بن راشد","منصور بن زايد","خالد بن محمد",
+)
+UAE_LEADER_TERMS=("mohamed bin zayed","mohammed bin rashid","mansour bin zayed","khaled bin mohamed","mbz",
+                  "محمد بن زايد","محمد بن راشد","منصور بن زايد","خالد بن محمد")
 EXCLUDE_WORDS=(
  "رياضة","كرة القدم","مباراة","بورصة","أسهم","سهم","بيتكوين","عملات مشفرة","ترفيه","مهرجان","مطعم","فندق",
  "sport","football","match","stocks","stock market","bitcoin","crypto","restaurant","hotel","festival","entertainment",
 )
 ROUTINE_TERMS=(
- "traffic","promotion","lottery","residency violator","ordinary crime","weather warning","heavy rain","flood","flooding",
- "مرور","ازدحام","مخالفي الإقامة","مخالفي الاقامة","طقس","أمطار","امطار","فيضان","فيضانات","جريمة عادية",
+ "traffic","promotion","lottery","residency violator","ordinary crime","weather warning","weather","heavy rain","flood","flooding",
+ "climate","prosperity","summer heat","temperature","wellness","tourism",
+ "مرور","ازدحام","مخالفي الإقامة","مخالفي الاقامة","طقس","أمطار","امطار","فيضان","فيضانات","مناخ","حرارة","سياحة","جريمة عادية",
 )
 STRATEGIC_TERMS=(
  "war","missile","drone","military","airspace","border","ceasefire","terror","sanction","naval","nuclear","attack",
@@ -127,6 +136,24 @@ def _phrase_hit(text:str,phrase:str)->bool:
         return False
     return re.search(r"(?<!\w)"+re.escape(phrase)+r"(?!\w)",text,flags=re.UNICODE) is not None
 
+def _has_phrase(text,terms)->bool:
+    folded=clean(text).casefold()
+    return any(_phrase_hit(folded,term) for term in terms)
+
+def _uae_subject(text)->bool:
+    return _has_phrase(text,UAE_SUBJECT_TERMS)
+
+def clip_words(value,limit):
+    value=clean(value)
+    if len(value)<=limit:
+        return value
+    if limit<2:
+        return value[:limit]
+    head=value[:limit-1].rstrip()
+    if " " in head:
+        head=head.rsplit(" ",1)[0].rstrip(" ،,;:.-")
+    return (head or value[:limit-1]).rstrip()+"…"
+
 def region_for(text:str,source_region:str)->str|None:
     folded=clean(text).casefold()
     # "عمان" is intrinsically ambiguous between Oman and Amman. If no explicit
@@ -156,9 +183,10 @@ def relevant(text:str,language:str="en",country:str|None=None)->bool:
     strategic=any(_phrase_hit(folded,k) for k in STRATEGIC_TERMS)
     if routine and not strategic:
         return False
-    if country=="AE" and (uae_secondary_relevant(folded) or
-                          (any(k in folded for k in UAE_CONTEXT) and any(k in folded for k in UAE_EXTRA))):
-        return not any(k in folded for k in UAE_ROUTINE)
+    if country=="AE" and _uae_subject(folded):
+        uae_policy=(security or _has_phrase(folded,UAE_EXTRA) or _has_phrase(folded,UAE_LEADER_TERMS))
+        if uae_policy:
+            return not any(k in folded for k in UAE_ROUTINE)
     if any(k in folded for k in FINANCE) and not security:
         return False
     if any(k in folded for k in EXCLUDE_WORDS) and not security:
@@ -271,10 +299,10 @@ def collect(hours=6):
     return dedup,health
 
 def is_uae_item(item)->bool:
-    if item.get("country")=="AE":
-        return True
-    folded=clean((item.get("title") or "")+" "+(item.get("summary") or "")).casefold()
-    return any(k in folded for k in UAE_CONTEXT)
+    if item.get("region")!="gcc":
+        return False
+    text=(item.get("title") or "")+" "+(item.get("summary") or "")
+    return _uae_subject(text)
 
 def impact_score(item)->float:
     text=clean((item.get("title") or "")+" "+(item.get("summary") or "")).casefold()
@@ -348,7 +376,7 @@ def make_event(x,index):
     return {
       "region":x["region"],"topic":"security",
       "title_ar":title,
-      "summary_ar":summary[:700],
+      "summary_ar":clip_words(summary,700),
       "assessment_ar":"",
       "watch_ar":"",
       "severity":"high" if impact_score(x)>=10 else ("medium" if impact_score(x)>=5 else "low"),
@@ -607,8 +635,18 @@ def main():
     print(f"V3 stage=collect_complete items={len(items)}",flush=True)
 
     selected,translation_health=prepare_selected(items,event_limit,morning)
-    print(f"V3 stage=selection_complete selected={len(selected)} uae={sum(is_uae_item(x) for x in selected)} "
-          f"translated={translation_health.get('translated_foreign',0)}",flush=True)
+    selection_report={
+      "candidate_count":len(items),
+      "uae_candidates":sum(is_uae_item(x) for x in items),
+      "selected_count":len(selected),
+      "selected_uae":sum(is_uae_item(x) for x in selected),
+      "selected_regions":dict(Counter(x.get("region") or "unknown" for x in selected)),
+      "selected_sources":dict(Counter(x.get("source") or "unknown" for x in selected)),
+      "translation":translation_health,
+    }
+    (OUT/"selection_report.json").write_text(json.dumps(selection_report,ensure_ascii=False,indent=2),encoding="utf-8")
+    print(f"V3 stage=selection_complete selected={len(selected)} uae_candidates={selection_report['uae_candidates']} "
+          f"uae={selection_report['selected_uae']} translated={translation_health.get('translated_foreign',0)}",flush=True)
     raw_events=[make_event(x,i) for i,x in enumerate(selected)]
     base_llm={"status":"not_attempted","translation":translation_health,"analysis_routes":[]}
     brief=build_canonical_brief(
