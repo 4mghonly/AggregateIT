@@ -103,9 +103,11 @@ gaps could appear intermittently even after a successful engine or market refres
 **Immediate mitigation:** refresh market, macro, and social data inside the Gazette job and
 fall back from a 24-hour event window to 72 hours with an explicit diagnostic.
 
-**Current mitigation:** every workflow touching the shared cache is serialized through one
-Actions concurrency group, preventing overlapping stale writers. A transactional store such
-as Neon/Postgres remains the preferred durability upgrade for cross-run exactly-once guarantees.
+**Current mitigation:** only the collection engine saves the canonical `engine-state-` cache.
+Gazette, search, diagnostics and backup restore it without publishing another database copy.
+Market snapshots and Gazette comparison reports use separate cache namespaces and concurrency
+groups. This removes cross-workflow pending-run replacement while preserving one database writer.
+A transactional store such as Neon/Postgres remains the preferred durability upgrade.
 
 ### 4.4 Market and curve panels depended on previous snapshots
 

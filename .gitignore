@@ -4,3 +4,6 @@ data/
 reports/
 audit_report.json
 *.log
+
+arabic_newsletter/runtime/
+qa-samples/

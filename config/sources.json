@@ -719,5 +719,12 @@
   "Category": "Asia",
   "tier": 1,
   "Id": 106
+ },
+ {
+  "Id": 107,
+  "Source_name": "Abu Dhabi Media Office Government",
+  "Category": "UAE Government",
+  "Url": "https://www.mediaoffice.abudhabi/en/government-affairs/rss",
+  "Verification_status": "Active"
  }
 ]

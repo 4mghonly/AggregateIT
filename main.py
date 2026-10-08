@@ -197,10 +197,14 @@ async def fetch_rss(session, src, sem):
     txt = await fetch_text(session, src["_url"], sem); out = []
     if txt:
         for e in feedparser.parse(txt).entries[:MAX_PER_SOURCE]:
+            published=e.get("published_parsed") or e.get("updated_parsed")
+            if not published: continue
+            ts=calendar.timegm(published)
+            if ts>time.time()+300: continue
             out.append({"source_type": "rss", "source_name": src.get("Source_name", ""),
                 "category": src.get("Category", ""), "url": e.get("link", ""),
                 "title": e.get("title", ""), "text": re.sub("<[^>]+>", "", e.get("summary", "")),
-                "ts": calendar.timegm(e.published_parsed) if e.get("published_parsed") else time.time()})
+                "ts": ts})
     if txt is None: HEALTH["rss_fail"] += 1
     elif out: HEALTH["rss_ok"] += 1
     else: HEALTH["rss_empty"] += 1
@@ -492,11 +496,11 @@ def analyze_event(c, prior):
         macro_context=macro_context, n_sources=c["independent_sources"], sources_block=sources_block)}
     for attempt in (1, 2):
         try:
-            content = chat([sys_msg, usr_msg], temperature=0.1, max_tokens=1100)
-            m = re.search(r"\{[\s\S]*\}", content)
-            if not m: raise ValueError("no JSON object in response")
-            raw_json = re.sub(r',\s*([\]}])', r'\1', m.group(0))
-            obj = json.loads(raw_json)
+            def check_response(obj):
+                valid, _, errors = validate_analysis(obj, evidence_text=sources_block)
+                if not valid: raise ValueError("analysis_schema: "+"; ".join(errors))
+            obj = llm.chat_json([sys_msg, usr_msg], validator=check_response,
+                                temperature=0.1, max_tokens=2000)
             ok, cleaned, errs = validate_analysis(obj, evidence_text=sources_block)
             if ok:
                 HEALTH["llm_ok"] += 1
@@ -651,6 +655,8 @@ def build_health(report, store_stats):
     if (HEALTH["reddit_ok"] + HEALTH["reddit_fail"]) and reddit_r < 0.8: degraded.append(f"Reddit degraded ({reddit_r:.0%} ok)")
     if HEALTH["reddit_empty"] and not HEALTH["reddit_ok"]:
         notes.append("Reddit social coverage empty; OAuth/public fallbacks returned no items in this window")
+    if HEALTH.get("social_empty"):
+        degraded.append("All social lanes empty; coverage unverified")
     if (HEALTH["github_ok"] + HEALTH["github_fail"]) and gh_r < 0.8: degraded.append(f"GitHub degraded ({gh_r:.0%} ok)")
     if HEALTH["llm_fail"]: degraded.append(f"{HEALTH['llm_fail']} LLM API failures")
     if HEALTH["llm_invalid"]: degraded.append(f"{HEALTH['llm_invalid']} LLM outputs rejected")
@@ -685,6 +691,7 @@ async def main():
     sem = asyncio.Semaphore(20)
     since = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_H)
     social_items = social.fetch_all(since.timestamp())
+    HEALTH["social_empty"] = int(not social_items)
     reddit_social=[i for i in social_items if i.get("source_type") in ("reddit","reddit_comment")]
     HEALTH["reddit_ok" if reddit_social else "reddit_empty"] += 1
     async with aiohttp.ClientSession(headers=UA) as s:
@@ -856,6 +863,11 @@ async def main():
     store.record_run(report["fetched"], report["new"], report["matched"], len(report["events"]))
     store_stats = store.stats()
     health = build_health(report, store_stats)
+    try:
+        with open(os.path.join(DATA,"social_pulse.json"),encoding="utf-8") as f:
+            health["social"] = json.load(f)
+    except (OSError,ValueError):
+        health["social"] = {"status":"missing_telemetry"}
     with open(os.path.join(REPORTS, "run.json"), "w", encoding="utf-8") as f: json.dump(report, f, indent=2)
     with open(os.path.join(REPORTS, "health.json"), "w", encoding="utf-8") as f: json.dump(health, f, indent=2)
     with open(os.path.join(REPORTS, "errors.json"), "w", encoding="utf-8") as f: json.dump(ERRORS, f, indent=2)

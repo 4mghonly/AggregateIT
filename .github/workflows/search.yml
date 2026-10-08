@@ -7,7 +7,7 @@ on:
         required: true
         type: string
 concurrency:
-  group: aggregateit-writers
+  group: aggregateit-search
   cancel-in-progress: false
 
 jobs:
@@ -19,11 +19,12 @@ jobs:
       - uses: actions/setup-python@v6
         with: { python-version: "3.11" }
       - run: pip install requests
-      - uses: actions/cache@v5
+      - uses: actions/cache/restore@v5
         with:
           path: data
           key: data-${{ github.run_id }}-search
           restore-keys: |
+            engine-state-
             data-
       - name: Search
         env:

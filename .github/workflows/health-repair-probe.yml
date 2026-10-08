@@ -1,0 +1,59 @@
+name: Repair Branch LLM Verification
+on:
+  push:
+    branches: [fix/aggregator-health-2026-10-08]
+    paths:
+      - '.github/workflows/health-repair-probe.yml'
+      - 'arabic_live_v2.py'
+      - 'llm_response.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      ARABIC_LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      ARABIC_LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+      ARABIC_LLM_MODEL: ${{ secrets.LLM_MODEL }}
+      ARABIC_LLM_AUTH_HEADER: ${{ vars.LLM_AUTH_HEADER }}
+      ARABIC_LLM_AUTH_SCHEME: ${{ vars.LLM_AUTH_SCHEME }}
+      ARABIC_LLM_CHAT_PATH: ${{ vars.LLM_CHAT_PATH }}
+      ARABIC_LLM_REQUEST_OPTIONS_JSON: ${{ vars.LLM_REQUEST_OPTIONS_JSON }}
+      ARABIC_LLM_EXTRA_HEADERS_JSON: ${{ vars.LLM_EXTRA_HEADERS_JSON }}
+      ARABIC_LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
+      ARABIC_LLM_FALLBACK_BASE_URL: ${{ secrets.LLM_FALLBACK_BASE_URL }}
+      ARABIC_LLM_FALLBACK_MODEL: ${{ secrets.LLM_FALLBACK_MODEL }}
+      ARABIC_LLM_FALLBACK_AUTH_HEADER: ${{ vars.LLM_FALLBACK_AUTH_HEADER }}
+      ARABIC_LLM_FALLBACK_AUTH_SCHEME: ${{ vars.LLM_FALLBACK_AUTH_SCHEME }}
+      ARABIC_LLM_FALLBACK_CHAT_PATH: ${{ vars.LLM_FALLBACK_CHAT_PATH }}
+      ARABIC_LLM_FALLBACK_REQUEST_OPTIONS_JSON: ${{ vars.LLM_FALLBACK_REQUEST_OPTIONS_JSON }}
+      ARABIC_LLM_FALLBACK_EXTRA_HEADERS_JSON: ${{ vars.LLM_FALLBACK_EXTRA_HEADERS_JSON }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install requests feedparser beautifulsoup4 pillow
+      - name: Check both engines without posting a briefing
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from datetime import datetime, timezone
+          from arabic_live_v2 import probe_llms
+          results=probe_llms()
+          payload={"checked_at":datetime.now(timezone.utc).isoformat(),"routes":results,"all_ok":all(r.get("ok") for r in results)}
+          Path("reports").mkdir(exist_ok=True)
+          Path("reports/repair_route_health.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2))
+          print(json.dumps(payload,ensure_ascii=False))
+          if not payload["all_ok"]:
+              raise SystemExit("One or both configured routes still fail the structured-output probe")
+          PY
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: repair-route-health
+          path: reports/repair_route_health.json
+          retention-days: 7

@@ -3863,5 +3863,50 @@
       "recent_72h": 0,
       "reason": "ok"
     }
+  },
+  {
+    "id": "s116",
+    "name": "Abu Dhabi Media Office — Government",
+    "region": "gcc",
+    "country": "AE",
+    "language": "ar",
+    "website": "https://www.mediaoffice.abudhabi/ar/",
+    "feed": "https://www.mediaoffice.abudhabi/ar/government-affairs/rss",
+    "affiliation": "official",
+    "enabled": true,
+    "verification_status": "active",
+    "verified_at": "2026-10-08",
+    "verification_environment": "Read-only HTTP and RSS parse check: HTTP 200, 24 entries",
+    "social": []
+  },
+  {
+    "id": "s117",
+    "name": "Abu Dhabi Media Office — Security",
+    "region": "gcc",
+    "country": "AE",
+    "language": "ar",
+    "website": "https://www.mediaoffice.abudhabi/ar/",
+    "feed": "https://www.mediaoffice.abudhabi/ar/security/rss",
+    "affiliation": "official",
+    "enabled": true,
+    "verification_status": "active",
+    "verified_at": "2026-10-08",
+    "verification_environment": "Read-only HTTP and RSS parse check: HTTP 200, 24 entries",
+    "social": []
+  },
+  {
+    "id": "s118",
+    "name": "Abu Dhabi Media Office — Crown Prince",
+    "region": "gcc",
+    "country": "AE",
+    "language": "ar",
+    "website": "https://www.mediaoffice.abudhabi/ar/",
+    "feed": "https://www.mediaoffice.abudhabi/ar/crown-prince-news/rss",
+    "affiliation": "official",
+    "enabled": true,
+    "verification_status": "active",
+    "verified_at": "2026-10-08",
+    "verification_environment": "Read-only HTTP and RSS parse check: HTTP 200, 24 entries",
+    "social": []
   }
 ]

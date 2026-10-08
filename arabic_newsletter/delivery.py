@@ -32,7 +32,7 @@ def webhook_info():
     print(f'Arabic Discord route confirmed: channel_id={channel} webhook_id={webhook_id} name={name}',flush=True)
     return info
 
-def send(state,edition,paths):
+def send(state,edition,paths,health_notice=""):
     if not paths or any(Path(p).suffix.lower()!='.png' for p in paths):
         raise DeliveryError('DISCORD_WEBHOOK_ARABIC accepts Arabic slide PNGs only')
     paths=[Path(p) for p in paths]
@@ -73,6 +73,8 @@ def send(state,edition,paths):
                   'content':f'النشرة الجيوسياسية والأمنية | {edition} | بتوقيت الإمارات',
                   'allowed_mentions':{'parse':[]}
                 }
+                if health_notice:
+                    payload['content']+='\n⚠️ تنبيه جودة / Degraded: '+str(health_notice)[:1200]
                 response=requests.post(
                   url,
                   data={'payload_json':json.dumps(payload,ensure_ascii=False)},

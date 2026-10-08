@@ -4,7 +4,7 @@ on:
     - cron: "0 6 * * 0"            # Sunday 10:00 UAE
   workflow_dispatch:
 concurrency:
-  group: aggregateit-writers
+  group: aggregateit-backup
   cancel-in-progress: false
 
 jobs:
@@ -13,11 +13,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/cache@v5
+      - uses: actions/cache/restore@v5
         with:
           path: data
           key: data-${{ github.run_id }}-backup
           restore-keys: |
+            engine-state-
             data-
       - name: Upload state database
         uses: actions/upload-artifact@v6

@@ -25,6 +25,7 @@ RSSHUB_PUBLIC = ["https://rsshub.rssforever.com", "https://hub.slarker.me", "htt
 RSSHUB = ([RSSHUB_BASE_URL] if RSSHUB_BASE_URL else []) + RSSHUB_PUBLIC
 UA = {"User-Agent": "AggregateIT/1.0 (+https://github.com/4mghonly/AggregateIT)"}
 _reddit_token = {"value": "", "expires": 0}
+SOURCE_HEALTH = []
 
 def _route(url, params=None):
     if params:
@@ -99,7 +100,7 @@ def _shift_get(path, params):
 
 def _parse_ts(s):
     try: return datetime.fromisoformat((s or "").replace("Z", "+00:00")).timestamp()
-    except Exception: return time.time()
+    except Exception: return 0
 
 def _entry_ts(entry):
     """Return a feed entry timestamp without turning undated items into fresh news."""
@@ -132,11 +133,13 @@ def _reddit_items(since_ts, expired=None):
         url = row.get("permalink") or ""
         if url and not url.startswith("http"): url = "https://www.reddit.com" + url
         title = row.get("title") or ("Comment: " + (row.get("body") or "")[:70])
+        ts = row.get("created_utc") or 0
+        if not since_ts <= ts <= now + 300: return
         out.append({"source_type": "reddit_comment" if is_comment else "reddit",
                     "source_name": "r/" + (row.get("subreddit") or "?"), "category": "Reddit",
                     "url": url or ("https://redd.it/" + pid), "title": (title or "")[:200],
                     "text": (row.get("selftext") or row.get("body") or "")[:4000],
-                    "ts": row.get("created_utc") or since_ts, "lane": lane})
+                    "ts": ts, "lane": lane})
 
     for sub in subs:
         if expired and expired(): break
@@ -314,18 +317,26 @@ def _blog_items(since_ts, expired=None):
     chat = _load_chatter(); out = []
     per = chat.get("caps", {}).get("blog_items_per_feed", 3)
     for src in chat.get("blog_feeds", []):
+        if src.get("enabled",True) is False:
+            SOURCE_HEALTH.append({"source":src["name"],"status":"disabled_requires_reaudit"}); continue
         if expired and expired(): break
         try:
             r = requests.get(_route(src["url"]), timeout=8, headers=UA)
-            if r.status_code != 200: continue
-            for e in feedparser.parse(r.content).entries[:per]:
+            if r.status_code != 200:
+                SOURCE_HEALTH.append({"source":src["name"],"status":"http_"+str(r.status_code)}); continue
+            entries=feedparser.parse(r.content).entries
+            recent=sorted((e for e in entries if since_ts <= _entry_ts(e) <= time.time()+300),key=_entry_ts,reverse=True)
+            SOURCE_HEALTH.append({"source":src["name"],"status":"ok" if recent else "quiet_or_stale",
+                                  "parsed":len(entries),"recent":len(recent)})
+            for e in recent[:per]:
                 ts = _entry_ts(e)
                 if not ts or ts < since_ts: continue
                 out.append({"source_type": "blog", "source_name": "BLOG:" + src["name"],
                             "category": "Blog/" + src.get("category", "Analysis"),
                             "url": e.get("link", ""), "title": (e.get("title") or "")[:200],
                             "text": re.sub("<[^>]+>", "", e.get("summary", ""))[:4000], "ts": ts})
-        except Exception: pass
+        except Exception as exc:
+            SOURCE_HEALTH.append({"source":src["name"],"status":"error_"+type(exc).__name__})
     return out
 
 def _balanced_merge(streams, total, quotas):
@@ -339,6 +350,7 @@ def _balanced_merge(streams, total, quotas):
     return sorted(picked, key=lambda x: -x.get("ts", 0))[:total]
 
 def fetch_all(since_ts):
+    SOURCE_HEALTH.clear()
     # Wall-clock budget: expanded source surface means a degraded-mirror day
     # could otherwise starve the hourly engine job (25-min timeout, 2 passes).
     deadline = time.time() + float(os.environ.get("SOCIAL_BUDGET_S", "180"))
@@ -370,7 +382,10 @@ def fetch_all(since_ts):
     out = _balanced_merge(streams, total, quotas)
     try:
         os.makedirs(DATA, exist_ok=True)
-        sp = {"ts": time.time(), "counts": {}, "coverage": {k: len(v) for k, v in streams.items()}, "top": []}
+        sp = {"ts": time.time(), "counts": {}, "coverage": {k: len(v) for k, v in streams.items()}, "top": [],
+              "sources":list(SOURCE_HEALTH),
+              "status":"ok" if out else "empty_unverified"}
+        if not out: print("::warning::Social collection empty across all lanes; source health requires review",flush=True)
         for i in out:
             lane = (":" + i["lane"]) if i.get("lane") else ""
             k = i.get("source_type", "?") + lane

@@ -849,16 +849,18 @@
     "youtube": []
   },
   "blog_feeds": [
-    {"name": "Oryx", "category": "Defense OSINT", "url": "https://www.oryxspioenkop.com/feeds/posts/default"},
+    {"name": "Oryx", "category": "Defense OSINT", "url": "https://www.oryxspioenkop.com/feeds/posts/default", "enabled": false, "disabled_reason": "Feed stale or transport blocked in read-only 2026-10-08 check; retain for future re-audit"},
     {"name": "Atlantic Council", "category": "Geopolitics", "url": "https://www.atlanticcouncil.org/feed/"},
-    {"name": "CSIS", "category": "Geopolitics", "url": "https://www.csis.org/rss.xml"},
-    {"name": "CISA Advisories", "category": "Cyber", "url": "https://www.cisa.gov/cybersecurity-advisories/all.xml"},
-    {"name": "CISA News", "category": "Cyber", "url": "https://www.cisa.gov/news.xml"},
+    {"name": "CSIS", "category": "Geopolitics", "url": "https://www.csis.org/rss.xml", "enabled": false, "disabled_reason": "Feed stale or transport blocked in read-only 2026-10-08 check; retain for future re-audit"},
+    {"name": "CISA Advisories", "category": "Cyber", "url": "https://www.cisa.gov/cybersecurity-advisories/all.xml", "enabled": false, "disabled_reason": "Feed stale or transport blocked in read-only 2026-10-08 check; retain for future re-audit"},
+    {"name": "CISA News", "category": "Cyber", "url": "https://www.cisa.gov/news.xml", "enabled": false, "disabled_reason": "Feed stale or transport blocked in read-only 2026-10-08 check; retain for future re-audit"},
     {"name": "BIS Press", "category": "Central Banks", "url": "https://www.bis.org/doclist/all_pressrels.rss"},
     {"name": "BIS Speeches", "category": "Central Banks", "url": "https://www.bis.org/doclist/cbspeeches.rss"},
     {"name": "Financial Stability Board", "category": "Financial Stability", "url": "https://www.fsb.org/feed/"},
     {"name": "CEPR VoxEU", "category": "Economics", "url": "https://cepr.org/rss/vox-content"},
-    {"name": "RAND Commentary", "category": "Policy", "url": "https://www.rand.org/blog.xml"}
+    {"name": "RAND Commentary", "category": "Policy", "url": "https://www.rand.org/blog.xml"},
+    {"name": "Cloudflare Security", "category": "Cyber", "url": "https://blog.cloudflare.com/tag/security/rss/", "enabled": true},
+    {"name": "Bellingcat", "category": "Defense OSINT", "url": "https://www.bellingcat.com/feed/", "enabled": true}
   ],
   "caps": {
     "reddit_per_lane": 3,

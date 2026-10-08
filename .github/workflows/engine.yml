@@ -13,7 +13,7 @@ on:
         type: boolean
         default: true
 concurrency:
-  group: aggregateit-writers
+  group: aggregateit-engine-writer
   cancel-in-progress: false
 jobs:
   engine:
@@ -40,15 +40,29 @@ jobs:
         uses: actions/cache@v5
         with:
           path: data/
-          key: data-${{ github.run_id }}-engine
+          key: engine-state-${{ github.run_id }}
           restore-keys: |
+            engine-state-
             data-
+      - name: Restore latest market inputs without replacing the event database
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            data/tv_universe.json
+            data/movers.json
+            data/market_pulse.json
+            data/macro_pulse.json
+            data/yield_hist.json
+          key: market-state-${{ github.run_id }}
+          restore-keys: |
+            market-state-
       - name: Restore reports cache
         uses: actions/cache@v5
         with:
           path: reports/
-          key: reports-${{ github.run_id }}-engine
+          key: engine-reports-${{ github.run_id }}
           restore-keys: |
+            engine-reports-
             reports-
       - name: Run collection engine without legacy Discord digest delivery
         env:

@@ -1,5 +1,8 @@
 name: Source Health Audit
-on: [workflow_dispatch]
+on:
+  schedule:
+    - cron: "43 3 * * *"
+  workflow_dispatch:
 jobs:
   audit:
     runs-on: ubuntu-latest
