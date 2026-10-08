@@ -6,6 +6,7 @@ endpoint, or model is hard-coded.
 """
 import os, json, time, hashlib, requests
 from datetime import datetime, timezone
+from llm_response import content_text, response_text, json_object
 BASE=os.path.dirname(os.path.abspath(__file__))
 def _env(name,default=""): return (os.environ.get(name,default) or "").strip()
 def _json_env(name):
@@ -36,7 +37,7 @@ except Exception as exc:
     EXTRA_HEADERS={}; REQUEST_OPTIONS={}; FALLBACK_EXTRA_HEADERS={}; FALLBACK_REQUEST_OPTIONS={}
     _CONFIG_ERROR=str(exc)
 MAX_CALLS=int(_env("LLM_MAX_CALLS","40") or 40)
-PROMPT_VERSION=1
+PROMPT_VERSION=2
 USAGE_FILE=os.path.join(BASE,"reports","token_usage.json")
 LEDGER_FILE=os.path.join(BASE,"data","qwen_ledger.json")
 class BudgetExceeded(RuntimeError): pass
@@ -58,8 +59,9 @@ def _endpoint_url(base,path):
     base=(base or "").rstrip("/")
     path="/"+(path or "").lstrip("/")
     return base if base.endswith(path) else base+path
-def _request(base,key,model,messages,temperature,max_tokens,timeout,fallback=False):
+def _request(base,key,model,messages,temperature,max_tokens,timeout,fallback=False,json_mode=False):
     body={"model":model,"messages":messages,"temperature":temperature,"max_tokens":max_tokens}
+    if json_mode: body["response_format"]={"type":"json_object"}
     body.update(FALLBACK_REQUEST_OPTIONS if fallback else REQUEST_OPTIONS)
     path=FALLBACK_CHAT_PATH if fallback else CHAT_PATH
     return requests.post(_endpoint_url(base,path),headers=_headers(key,fallback),json=body,timeout=timeout)
@@ -151,26 +153,63 @@ def _post(messages,temperature,max_tokens,timeout):
         obj=_decode_or_raise(r); _force_fallback=True; return obj,FALLBACK_MODEL
     r=_request(BASE_URL,API_KEY,MODEL,messages,temperature,max_tokens,timeout,False)
     return _decode_or_raise(r),MODEL
-def chat(messages,temperature=0.3,timeout=90,max_tokens=2000):
+def chat(messages,temperature=0.3,timeout=90,max_tokens=2000,validator=None,json_mode=False):
     global _calls
     model=FALLBACK_MODEL if _force_fallback and _route_complete(True) else MODEL
     if not model: model=FALLBACK_MODEL
     key=_ledger_key(model or "<unconfigured>",messages); led=_load_json(LEDGER_FILE,{})
     hit=led.get(key)
     if hit and hit.get("status")=="success":
-        print("LLM LEDGER HIT (no API call)"); _log_usage(model,0,0,cached=True); return hit["response"]
-    if _calls>=MAX_CALLS: raise BudgetExceeded("LLM_MAX_CALLS=%d reached"%MAX_CALLS)
-    _calls+=1; print("LLM CALL %d/%d configured_model=%s"%(_calls,MAX_CALLS,model or "<none>")); last=None
-    for attempt in (1,2):
         try:
-            obj,used_model=_post(messages,temperature,max_tokens,timeout); content=_content_text(obj["choices"][0]["message"]); u=obj.get("usage",{})
-            used_model=obj.get("model") or used_model; _log_usage(used_model,u.get("prompt_tokens"),u.get("completion_tokens"))
-            led[key]={"status":"success","model":used_model,"ts":time.time(),"response":content}; _save_ledger(led); return content
-        except LLMTransient as exc:
-            last=exc
-            if attempt==1: time.sleep(2)
-        except LLMPermanent as exc:
-            led[key]={"status":"failed","model":model,"ts":time.time(),"error":str(exc)[:200]}; _save_ledger(led); raise
-        except Exception as exc: last=exc
+            if validator: validator(hit["response"])
+            print("LLM LEDGER HIT (no API call)"); _log_usage(model,0,0,cached=True); return hit["response"]
+        except (ValueError,TypeError,KeyError):
+            led.pop(key,None)
+    if _CONFIG_ERROR: raise LLMPermanent("Invalid LLM route options")
+    routes=[False,True] if not _force_fallback else [True,False]
+    routes=[f for f in routes if _route_complete(f)]
+    last=None
+    if not routes: raise LLMPermanent("No complete LLM route configured")
+    for fallback in routes:
+        route_model=FALLBACK_MODEL if fallback else MODEL
+        base=FALLBACK_BASE_URL if fallback else BASE_URL
+        api_key=FALLBACK_API_KEY if fallback else API_KEY
+        mode=json_mode
+        # One repair attempt per route; every physical request consumes budget.
+        for attempt in range(2):
+            if _calls>=MAX_CALLS: raise BudgetExceeded("LLM_MAX_CALLS=%d reached"%MAX_CALLS)
+            _calls+=1
+            print("LLM CALL %d/%d route=%s"%(_calls,MAX_CALLS,"fallback" if fallback else "primary"),flush=True)
+            try:
+                request_messages=messages
+                if attempt and validator:
+                    request_messages=messages+[{"role":"user","content":"The previous response was unusable. Return one complete, concise JSON object with every required field and no reasoning or markdown."}]
+                r=_request(base,api_key,route_model,request_messages,temperature,max_tokens,(8,min(timeout,60)),fallback,mode)
+                if r.status_code==400 and mode and "response_format" in (r.text or "").lower():
+                    mode=False; continue
+                obj=_decode_or_raise(r)
+                u=obj.get("usage",{})
+                _log_usage(route_model,u.get("prompt_tokens"),u.get("completion_tokens"))
+                content=response_text(obj)
+                if validator: validator(content)
+                led[key]={"status":"success","model":route_model,"ts":time.time(),"response":content}
+                _save_ledger(led)
+                return content
+            except LLMPermanent as exc:
+                last=RuntimeError("HTTP %d"%r.status_code); break
+            except requests.RequestException as exc:
+                last=RuntimeError(type(exc).__name__)
+                print("LLM route transport failed: "+type(exc).__name__,flush=True)
+                break
+            except Exception as exc:
+                # Do not log endpoint URLs, provider bodies, or credentials.
+                last=RuntimeError(type(exc).__name__)
+                print("LLM route response rejected: "+type(exc).__name__,flush=True)
     led[key]={"status":"failed","model":model,"ts":time.time(),"error":str(last)[:200]}; _save_ledger(led)
     raise last or RuntimeError("LLM chat failed")
+
+def chat_json(messages,validator=None,**kwargs):
+    def validate(text):
+        obj=json_object(text)
+        if validator: validator(obj)
+    return json_object(chat(messages,validator=validate,json_mode=True,**kwargs))

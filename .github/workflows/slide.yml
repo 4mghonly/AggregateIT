@@ -8,7 +8,7 @@ on:
     paths:
       - .github/slide-trigger
 concurrency:
-  group: aggregateit-writers
+  group: aggregateit-gazette
   cancel-in-progress: false
 jobs:
   slide:
@@ -29,18 +29,32 @@ jobs:
           python -m py_compile slide.py gazette_render.py llm.py briefing.py main.py
           python -m unittest -v test_gazette_layout
       - name: Restore data cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: data/
-          key: data-${{ github.run_id }}-slide
+          key: engine-state-${{ github.run_id }}
           restore-keys: |
+            engine-state-
             data-
+      - name: Restore latest market inputs without replacing the event database
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            data/tv_universe.json
+            data/movers.json
+            data/market_pulse.json
+            data/macro_pulse.json
+            data/yield_hist.json
+          key: market-state-${{ github.run_id }}
+          restore-keys: |
+            market-state-
       - name: Restore reports cache
         uses: actions/cache@v5
         with:
           path: reports/
-          key: reports-${{ github.run_id }}-slide
+          key: gazette-reports-${{ github.run_id }}
           restore-keys: |
+            gazette-reports-
             reports-
       - name: Confirm Gazette Discord route
         env:
@@ -90,6 +104,7 @@ jobs:
           path: |
             reports/intel_slide_p1.png
             reports/intel_slide_p2.png
+            reports/gazette_health.json
           if-no-files-found: warn
       - name: Alert on Gazette failure
         if: failure()

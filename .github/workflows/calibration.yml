@@ -4,7 +4,7 @@ on:
     - cron: "0 6 * * 1"         # Monday 10:00 UAE
   workflow_dispatch:
 concurrency:
-  group: aggregateit-writers
+  group: aggregateit-calibration
   cancel-in-progress: false
 jobs:
   calibrate:
@@ -15,11 +15,12 @@ jobs:
       - uses: actions/setup-python@v6
         with: { python-version: "3.11" }
       - run: pip install requests
-      - uses: actions/cache@v5
+      - uses: actions/cache/restore@v5
         with:
           path: data
           key: data-${{ github.run_id }}-calibration
           restore-keys: |
+            engine-state-
             data-
       - name: Refresh latest market snapshot
         run: python tv.py --pulse || echo "::warning::Pulse refresh failed; diagnostic will use the latest cached snapshot."

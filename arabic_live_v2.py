@@ -15,14 +15,16 @@ import html
 import json
 import os
 import re
+import time
 from collections import Counter
 from difflib import SequenceMatcher
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 import feedparser
 import requests
+from llm_response import response_text, json_object
 from bs4 import BeautifulSoup
 
 from arabic_newsletter.core import (
@@ -119,7 +121,32 @@ def published_ts(entry)->float:
                 if dt.tzinfo is None: dt=dt.replace(tzinfo=timezone.utc)
                 return dt.timestamp()
             except Exception: pass
-    return datetime.now(timezone.utc).timestamp()
+    return 0
+
+def html_published_ts(soup):
+    """Read publisher date metadata; never substitute collection time."""
+    dates=[]
+    for meta in soup.find_all("meta"):
+        key=meta.get("property") or meta.get("name")
+        if key in ("article:published_time","datePublished","pubdate","publish-date"):
+            dates.append(meta.get("content"))
+    for script in soup.find_all("script",type="application/ld+json"):
+        try:
+            obj=json.loads(script.get_text())
+            stack=obj if isinstance(obj,list) else [obj]
+            while stack:
+                row=stack.pop()
+                if not isinstance(row,dict): continue
+                if row.get("datePublished"): dates.append(row["datePublished"])
+                stack.extend(row.get("@graph",[]) if isinstance(row.get("@graph"),list) else [])
+        except (ValueError,TypeError): pass
+    for raw in dates:
+        try:
+            dt=datetime.fromisoformat(str(raw).replace("Z","+00:00"))
+            # A date without timezone is not enough to assert an exact timestamp.
+            if dt.tzinfo is not None: return dt.timestamp()
+        except ValueError: pass
+    return 0
 
 def _phrase_hit(text:str,phrase:str)->bool:
     phrase=clean(phrase).casefold()
@@ -206,7 +233,7 @@ def fetch_source(src):
             if r.status_code!=200:
                 return [],{**base_health,"status":f"html_http_{r.status_code}","parsed_entries":0,"items":0}
             soup=BeautifulSoup(r.text,"html.parser")
-            out=[]; seen=set(); parsed_count=0
+            out=[]; seen=set(); parsed_count=0; date_probes=0; undated=0
             for a in soup.find_all("a",href=True):
                 title=strip_html(a.get_text(" ",strip=True))
                 if len(title)<20 or len(title)>240 or title in seen:
@@ -216,12 +243,21 @@ def fetch_source(src):
                     continue
                 parsed_count+=1
                 seen.add(title)
-                row=_item(src,title,title,urljoin(target,href),datetime.now(timezone.utc).timestamp())
-                if row:
-                    out.append(row)
+                url=urljoin(target,href)
+                row=_item(src,title,title,url,0)
+                if row and date_probes<4 and urlsplit(url).hostname==urlsplit(target).hostname:
+                    date_probes+=1
+                    try:
+                        article=requests.get(url,timeout=(4,8),headers={"User-Agent":"AggregateIT-Arabic-V3/1.1"})
+                        ts=html_published_ts(BeautifulSoup(article.text,"html.parser")) if article.status_code==200 else 0
+                    except requests.RequestException: ts=0
+                    if ts:
+                        row["published"]=ts; out.append(row)
+                    else: undated+=1
                 if len(out)>=32:
                     break
-            return out,{**base_health,"status":"ok","items":len(out),"parsed_entries":parsed_count}
+            return out,{**base_health,"status":"ok" if out else "publication_date_unverified",
+                        "items":len(out),"parsed_entries":parsed_count,"undated":undated}
 
         r=requests.get(src["feed"],timeout=(5,10),headers={"User-Agent":"AggregateIT-Arabic-V3/1.1"})
         if r.status_code!=200:
@@ -259,7 +295,7 @@ def collect(hours=6):
         futures=[pool.submit(fetch_source,s) for s in sources]
         for fut in concurrent.futures.as_completed(futures):
             rows,h=fut.result(); health.append(h)
-            items.extend(x for x in rows if x["published"]>=cutoff)
+            items.extend(x for x in rows if cutoff<=x["published"]<=datetime.now(timezone.utc).timestamp()+300)
     seen=[]; dedup=[]
     for item in sorted(items,key=lambda x:x["published"],reverse=True):
         key=_dedupe_key(item["title"])
@@ -385,7 +421,7 @@ def _route(prefix):
     return {"key":key,"base":base,"model":model,"chat":chat,"headers":headers,
             "options":_json_env(prefix+"REQUEST_OPTIONS_JSON")}
 
-def _route_call(route,system,user,max_tokens=1800):
+def _route_call(route,system,user,max_tokens=1800,deadline=None):
     url=route["base"] if route["base"].endswith(route["chat"]) else route["base"]+route["chat"]
     payload={"model":route["model"],
              "messages":[{"role":"system","content":system},{"role":"user","content":json.dumps(user,ensure_ascii=False)}],
@@ -393,45 +429,20 @@ def _route_call(route,system,user,max_tokens=1800):
              "response_format":{"type":"json_object"}}
     payload.update(route["options"])
     for attempt in range(2):
+        remaining=(deadline-time.monotonic()) if deadline else 60
+        if remaining<=1: raise RuntimeError("stage_budget_exhausted")
         try:
-            r=requests.post(url,headers=route["headers"],json=payload,timeout=(8,45))
+            r=requests.post(url,headers=route["headers"],json=payload,timeout=(8,min(60,remaining)))
         except requests.RequestException as exc:
-            if attempt==0: continue
+            # Move to the independent route instead of spending two read timeouts.
             raise RuntimeError("network_"+type(exc).__name__) from None
         if r.status_code==400 and "response_format" in r.text.lower() and "response_format" in payload:
             payload.pop("response_format",None); continue
-        if r.status_code in (408,409,425,429,500,502,503,504) and attempt==0:
-            continue
         if r.status_code!=200:
             raise RuntimeError(f"http_{r.status_code}")
         try:
-            body=r.json()
-            content=body["choices"][0]["message"]["content"]
-            if isinstance(content,list):
-                content="".join(item if isinstance(item,str) else str(item.get("text") or item.get("content") or "")
-                                for item in content if isinstance(item,(str,dict)))
-            if isinstance(content,dict):
-                return content
-            text=str(content or "").strip()
-            fence=chr(96)*3
-            if text.startswith(fence):
-                text=re.sub(r"^"+re.escape(fence)+r"(?:json)?\s*|\s*"+re.escape(fence)+r"$","",text,flags=re.I)
-            try:
-                obj=json.loads(text)
-            except ValueError:
-                decoder=json.JSONDecoder(); obj=None
-                for match in re.finditer(r"\{",text):
-                    try:
-                        candidate,_=decoder.raw_decode(text[match.start():])
-                        if isinstance(candidate,dict):
-                            obj=candidate; break
-                    except ValueError:
-                        continue
-                if obj is None: raise
-            if not isinstance(obj,dict):
-                raise ValueError("json_object_required")
-            return obj
-        except Exception as exc:
+            return json_object(response_text(r.json()))
+        except (ValueError,KeyError,TypeError,IndexError) as exc:
             raise RuntimeError("invalid_json_"+type(exc).__name__) from None
     raise RuntimeError("route_failed")
 
@@ -472,34 +483,43 @@ def _normalize_translations(obj,rows):
                 continue
             if SequenceMatcher(None,clean(source_text),clean(title+" "+summary)).ratio()>=0.78:
                 continue
-        if not _numbers(title+" "+summary).issubset(_numbers(source_text)):
+        if _numbers(title+" "+summary) != _numbers(source_text):
             continue
         clone=dict(original); clone["title_ar"]=title; clone["summary_ar"]=summary
         translated[idx]=clone
     return translated
 
 def translate_items_with_failover(rows):
-    if not rows:
-        return [],[],None
-    payload={"items":[{
-      "index":i,"language":r.get("language"),"source":r.get("source"),
-      "title":r.get("title"),"summary":r.get("summary")
-    } for i,r in enumerate(rows)]}
-    health=[]
-    for name,route in [("primary",_route("ARABIC_LLM_")),("fallback",_route("ARABIC_LLM_FALLBACK_"))]:
-        if not route:
-            health.append({"route":name,"configured":False,"ok":False,"error":"missing_configuration"}); continue
-        try:
-            mapping=_normalize_translations(_route_call(route,TRANSLATE_SYSTEM,payload,max_tokens=6200),rows)
-            if not mapping:
-                raise RuntimeError("no_valid_translations")
-            health.append({"route":name,"configured":True,"ok":True,"model":route["model"],
-                           "translated":len(mapping),"requested":len(rows)})
-            return [mapping[i] for i in sorted(mapping)],health,name
-        except Exception as exc:
-            health.append({"route":name,"configured":True,"ok":False,"model":route["model"],"error":str(exc)[:160]})
-            print(f"V3 translation {name} failed: {type(exc).__name__}: {exc}",flush=True)
-    raise RuntimeError("Both translation routes failed: "+json.dumps(health,ensure_ascii=False))
+    if not rows: return [],[],None
+    # Small batches avoid truncation and slow free-provider responses. Failed or
+    # missing rows, including partial primary results, go to the fallback route.
+    deadline=time.monotonic()+360
+    health=[]; translated={}; selected_routes=set()
+    routes=[("primary",_route("ARABIC_LLM_")),("fallback",_route("ARABIC_LLM_FALLBACK_"))]
+    for start in range(0,len(rows),3):
+        pending=list(range(start,min(start+3,len(rows))))
+        for name,route in routes:
+            if not pending or time.monotonic()>=deadline: break
+            if not route:
+                health.append({"route":name,"configured":False,"ok":False,"error":"missing_configuration"}); continue
+            batch=[rows[i] for i in pending]
+            payload={"items":[{"index":i,"language":r.get("language"),"source":r.get("source"),
+                               "title":r.get("title"),"summary":r.get("summary")} for i,r in enumerate(batch)]}
+            try:
+                mapping=_normalize_translations(_route_call(route,TRANSLATE_SYSTEM,payload,max_tokens=2200,deadline=deadline),batch)
+                if not mapping: raise RuntimeError("no_valid_translations")
+                health.append({"route":name,"configured":True,"ok":len(mapping)==len(batch),
+                               "batch_start":start,"translated":len(mapping),"requested":len(batch)})
+                for local,row in mapping.items(): translated[pending[local]]=row
+                pending=[idx for local,idx in enumerate(pending) if local not in mapping]
+                selected_routes.add(name)
+            except Exception as exc:
+                health.append({"route":name,"configured":True,"ok":False,"batch_start":start,"error":str(exc)[:160]})
+                print(f"V3 translation {name} failed: {type(exc).__name__}: {exc}",flush=True)
+    if not translated:
+        raise RuntimeError("Both translation routes failed: "+json.dumps(health,ensure_ascii=False))
+    route="mixed" if len(selected_routes)>1 else next(iter(selected_routes))
+    return [translated[i] for i in sorted(translated)],health,route
 
 def _source_is_arabic(item):
     lang=(item.get("language") or "unknown").lower()
@@ -529,7 +549,7 @@ def prepare_selected(items,limit,morning):
         if _source_is_arabic(x):
             prepared.append(dict(x,title_ar=x["title"],summary_ar=x["summary"])); used.add(key)
     prepared=sorted(prepared,key=impact_score,reverse=True)[:limit]
-    return prepared,{"status":"ok" if (not foreign or translated) else "degraded",
+    return prepared,{"status":"ok" if len(translated)==len(foreign) else "degraded",
                      "selected_route":route,"routes":translation_health,
                      "requested_foreign":len(foreign),"translated_foreign":len(translated)}
 
@@ -552,12 +572,18 @@ def _analysis_prompt(events):
     } for e in events[:17]]}
 
 def _normalize_analysis(obj):
+    if not isinstance(obj,dict) or not all(isinstance(obj.get(k),str) for k in ("situation_ar","implications_ar")):
+        raise RuntimeError("analysis_fields")
     situation=clean(obj.get("situation_ar","")) if isinstance(obj,dict) else ""
     implications=clean(obj.get("implications_ar","")) if isinstance(obj,dict) else ""
     developing=obj.get("developing_ar") if isinstance(obj,dict) else None
     watch=obj.get("watch_ar") if isinstance(obj,dict) else None
     if not situation or not implications or not isinstance(developing,list) or not isinstance(watch,list):
         raise RuntimeError("analysis_fields")
+    if not is_arabic(situation+" "+implications):
+        raise RuntimeError("analysis_fields_not_arabic")
+    if any(not isinstance(x,str) for x in developing+watch):
+        raise RuntimeError("analysis_lists")
     developing=[clean(x) for x in developing if clean(x)][:5]
     watch=[clean(x) for x in watch if clean(x)][:6]
     if not developing or not watch:
@@ -565,19 +591,36 @@ def _normalize_analysis(obj):
     return {"situation_ar":situation[:1200],"implications_ar":implications[:1200],
             "developing_ar":[x[:420] for x in developing],"watch_ar":[x[:420] for x in watch]}
 
+def probe_llms():
+    """Bounded independent structured-output probes; never publish or render."""
+    results=[]
+    for name,prefix in [("primary","ARABIC_LLM_"),("fallback","ARABIC_LLM_FALLBACK_")]:
+        route=_route(prefix)
+        if not route:
+            results.append({"route":name,"configured":False,"ok":False,"error":"missing_configuration"}); continue
+        try:
+            raw=_route_call(route,ANALYSIS_COMPACT_SYSTEM,{"events":[{"region":"iraq","title_ar":"اختبار أمني تجريبي","summary_ar":"بيانات اختبار فقط، ليست أخباراً حقيقية."}]},max_tokens=1400)
+            _normalize_analysis(raw)
+            results.append({"route":name,"configured":True,"ok":True})
+        except Exception as exc:
+            results.append({"route":name,"configured":True,"ok":False,"error":str(exc)[:120]})
+    return results
+
 def llm_analysis_with_failover(events):
     health=[]
+    deadline=time.monotonic()+240
     for name,route in [("primary",_route("ARABIC_LLM_")),("fallback",_route("ARABIC_LLM_FALLBACK_"))]:
         if not route:
             health.append({"route":name,"configured":False,"ok":False,"error":"missing_configuration"}); continue
         try:
             try:
-                raw=_route_call(route,LLM_SYSTEM,_analysis_prompt(events),max_tokens=3600)
+                raw=_route_call(route,ANALYSIS_COMPACT_SYSTEM,_analysis_prompt(events),max_tokens=2200,deadline=deadline)
+                analysis=_normalize_analysis(raw)
             except RuntimeError as first:
-                if "invalid_json" not in str(first):
+                if not any(reason in str(first) for reason in ("invalid_json","analysis_fields","analysis_lists")):
                     raise
                 print(f"V3 LLM {name} malformed JSON; retrying compact analysis",flush=True)
-                raw=_route_call(route,ANALYSIS_COMPACT_SYSTEM,_analysis_prompt(events),max_tokens=1800)
+                raw=_route_call(route,ANALYSIS_COMPACT_SYSTEM,_analysis_prompt(events),max_tokens=2200,deadline=deadline)
             analysis=_normalize_analysis(raw)
             health.append({"route":name,"configured":True,"ok":True,"model":route["model"]})
             return analysis,health,name
@@ -650,6 +693,11 @@ def main():
     errors=validate_brief(brief)
     if errors:
         raise RuntimeError("V3 canonical JSON validation failed: "+",".join(errors))
+    from runtime_health import arabic_health
+    run_health=arabic_health(brief,selected)
+    (OUT/"health.json").write_text(json.dumps(run_health,ensure_ascii=False,indent=2),encoding="utf-8")
+    if run_health["issues"]:
+        print("::warning::Arabic production degraded: "+"; ".join(run_health["issues"]),flush=True)
     (OUT/"briefing.json").write_text(dump_brief(brief),encoding="utf-8")
     print("V3 stage=render_start",flush=True)
     paths,_=render(brief,OUT)
@@ -658,7 +706,9 @@ def main():
     try:
         edition="V3-"+brief["window_end"]
         print("V3 stage=discord_post_start",flush=True)
-        receipt=send(state,edition,paths)
+        receipt=send(state,edition,paths,health_notice="; ".join(run_health["issues"]))
+        run_health["delivery"]={"confirmed":True,"message_id":str(receipt)}
+        (OUT/"health.json").write_text(json.dumps(run_health,ensure_ascii=False,indent=2),encoding="utf-8")
         print("V3 stage=complete receipt="+str(receipt),flush=True)
     finally:
         state.close()

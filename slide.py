@@ -9,6 +9,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from datetime import datetime, timezone
 from llm import chat
+from llm import chat_json
 from storage import SQLiteStore
 import market
 from briefing import fetch_stocktwits, load_window, theme_counts, DOMAIN_NAMES
@@ -212,15 +213,13 @@ def analyze(d):
     out = None
     try:
         prompt = ANALYSIS_PROMPT.replace("__DATA__", _data_text(d)).replace("__PREV__", _prev_text(prev))
-        content = chat([
+        def validate(obj):
+            if not all(isinstance(obj.get(k),str) and len(obj[k])>=10 for k in REQUIRED_KEYS):
+                raise ValueError("gazette_analysis_fields")
+        out = chat_json([
             {"role": "system", "content": "Gazette editor. Output ONLY valid JSON. NO EMOJIS. NO DOLLAR FIGURES."},
             {"role": "user", "content": prompt}
-        ])
-        m = re.search(r"\{[\s\S]*\}", content)
-        if m:
-            obj = json.loads(m.group(0))
-            if all(isinstance(obj.get(k), str) and len(obj.get(k)) >= 10 for k in REQUIRED_KEYS):
-                out = obj
+        ],validator=validate)
     except Exception: pass
     if out is None:
         out, llm = _fallback_analysis(d, prev), False
@@ -293,8 +292,15 @@ if __name__ == "__main__":
     os.makedirs(REPORTS, exist_ok=True)
     data = collect()
     analysis, llm_ok, prev = analyze(data)
+    health={"checked_at":datetime.now(timezone.utc).isoformat(),
+            "status":"ok" if llm_ok else "degraded", "llm_ok":llm_ok,
+            "delivery":{"confirmed":False}}
+    if not llm_ok: print("::warning::Gazette LLM analysis unavailable; deterministic fallback used",flush=True)
+    with open(os.path.join(REPORTS,"gazette_health.json"),"w") as f: json.dump(health,f)
     render_p1(data, analysis, llm_ok)
     render_p2(data, analysis, llm_ok)
     send([P1, P2])
+    health["delivery"]={"confirmed":True}
+    with open(os.path.join(REPORTS,"gazette_health.json"),"w") as f: json.dump(health,f)
     # Only a confirmed Discord edition becomes the comparison baseline.
     _save_prev(analysis, data)
