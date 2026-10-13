@@ -229,14 +229,25 @@ def analyze(d):
         out[k] = _scrub(out[k]) or out[k]
     return out, llm, prev
 
-# Layout is isolated from collection and API calls for offline visual testing.
+# Layout is isolated from collection, LLM routing, and Discord delivery.
+# The original renderer remains the production default. A new theme requires
+# an explicit GAZETTE_THEME setting and is never enabled by branch creation.
 from gazette_render import render_p1 as _page1, render_p2 as _page2
 
+def _selected_page(page):
+    theme=(os.environ.get("GAZETTE_THEME") or "").strip().lower()
+    if theme in ("", "classic", "original"):
+        return (_page1, _page2)[page-1]
+    if theme == "sandstone_editorial":
+        from newsletter_themes.sandstone import render_p1, render_p2
+        return (render_p1, render_p2)[page-1]
+    raise ValueError("Unsupported GAZETTE_THEME: "+theme)
+
 def render_p1(d, a, llm_ok):
-    _page1(d, a, llm_ok, P1)
+    _selected_page(1)(d, a, llm_ok, P1)
 
 def render_p2(d, a, llm_ok):
-    _page2(d, a, llm_ok, P2)
+    _selected_page(2)(d, a, llm_ok, P2)
 
 def _discord_webhook_url(wait=False):
     raw=(os.environ.get("DISCORD_WEBHOOK") or "").strip()
