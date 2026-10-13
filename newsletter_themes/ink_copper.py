@@ -73,9 +73,9 @@ def _tile(c, x,y,w,h,e, regional=False):
     if e:
         region=REGIONS.get(e.get("region"),"المشهد الإقليمي")
         if regional: c.text(region,(x+30,y+15,w-80,45),32,True,COPPER,"right",28)
-        c.text(compact(e.get("title_ar"),175),(x+38,y+(68 if regional else 32),w-91,132),44,True,INK,"right",34)
-        c.body(e.get("summary_ar"),(x+42,y+(200 if regional else 174),w-99,max(75,h-(290 if regional else 270))),33,False,INK)
-        c.text("المصدر: "+_src(e),(x+36,y+h-68,w-88,43),26,True,MUTED,"right",23)
+        c.text(compact(e.get("title_ar"),175),(x+38,y+(68 if regional else 25),w-91,(132 if regional else 80)),(44 if regional else 35),True,INK,"right",29)
+        c.body(e.get("summary_ar"),(x+42,y+(200 if regional else 113),w-99,(max(75,h-290) if regional else 77)),(33 if regional else 28),False,INK)
+        c.text("المصدر: "+_src(e),(x+36,y+h-52,w-88,37),25,True,MUTED,"right",22)
     else:
         c.text("لا توجد وقائع مؤهلة لهذه الخانة في فترة التغطية.",(x+38,y+55,w-91,h-90),35,False,MUTED,"right",27)
 
@@ -84,8 +84,8 @@ def _delta(brief):
     prev=brief.get("previous_events")
     if not isinstance(prev,list) or not prev:
         return "المقارنة مع الإصدار السابق غير متاحة؛ لا يُفترض أن العناوين الحالية أحداث جديدة."
-    old={str(e.get("fingerprint") or e.get("title_ar") or "").strip() for e in prev if isinstance(e,dict)}
-    novel=[e for e in events if str(e.get("fingerprint") or e.get("title_ar") or "").strip() not in old]
+    old={str(e.get("title_ar") or "").strip() for e in prev if isinstance(e,dict)}
+    novel=[e for e in events if str(e.get("title_ar") or "").strip() not in old]
     return f"{len(novel)} من {len(events)} مواد لا تطابق سجل الإصدار السابق نصياً؛ اختلاف القوائم لا يثبت وقوع أحداث جديدة."
 
 def page1(brief,path):
@@ -168,7 +168,8 @@ def page3(brief,path):
     _list(c,a.get("watch_ar"),x,y,w,h,5)
     x,y,w,h=c.section(80,1150,1810,805,"الملفات قيد التطور والفجوات")
     _list(c,a.get("developing_ar"),x,y,w,h,4)
-    status=(brief.get("llm_health") or {}).get("status","غير متاح")
+    status=(brief.get("llm_health") or {}).get("status","unknown")
+    status={"ok":"متاح","degraded_analysis_routes_failed":"متدهور، تحليل بديل","skipped_empty_collection":"لا مواد مؤهلة","unknown":"غير متاح"}.get(status,"بحاجة إلى مراجعة")
     coverage=brief.get("coverage") or {}
     unresolved=coverage.get("unresolved_regions") or []
     c.text("حالة التحليل: "+str(status)+"  |  أقاليم دون تغطية كافية: "+str(len(unresolved)),(120,1976,3500,56),28,True,MUTED,"right",23)
