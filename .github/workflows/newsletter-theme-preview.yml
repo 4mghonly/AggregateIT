@@ -1,0 +1,46 @@
+name: Newsletter Theme Preview QA
+on:
+  push:
+    branches:
+      - design/sandstone-ink-copper-v1
+    paths:
+      - "newsletter_themes/**"
+      - "test_newsletter_themes.py"
+      - "render_theme_samples.py"
+      - "arabic_newsletter/render.py"
+      - "slide.py"
+      - ".github/workflows/newsletter-theme-preview.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GAZETTE_THEME: sandstone_editorial
+      ARABIC_NEWSLETTER_THEME: ink_copper
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install offline render dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pillow
+      - name: Compile theme modules
+        run: python -m py_compile newsletter_themes/*.py arabic_newsletter/render.py slide.py render_theme_samples.py test_newsletter_themes.py
+      - name: Test layouts with network unavailable
+        run: python -m unittest -v test_newsletter_themes
+      - name: Render sample slides without delivery
+        run: python render_theme_samples.py --out reports/theme-preview
+      - name: Upload review slides
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: newsletter-theme-previews
+          path: reports/theme-preview/
+          retention-days: 14
+          if-no-files-found: warn
