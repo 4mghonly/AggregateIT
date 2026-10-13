@@ -50,7 +50,6 @@ class ThemeTests(unittest.TestCase):
         from arabic_layout.render_pages import render as original
         with tempfile.TemporaryDirectory() as folder:
             with patch.dict(os.environ,{"ARABIC_NEWSLETTER_THEME":""}):
-                self.assertIsNone(os.getenv("GAZETTE_THEME") if False else None)
                 self.assertIsNot(render,original)
             with patch.dict(os.environ,{"ARABIC_NEWSLETTER_THEME":"unsupported"}):
                 with self.assertRaises(ValueError): render({"sample":True},folder)
