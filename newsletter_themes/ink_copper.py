@@ -140,10 +140,13 @@ def page2(brief,path):
         y=350+(i//2)*518
         _tile(c,x,y,1810,475,e,regional=True)
     active={e.get("region") for e in brief.get("events") or []}
+    displayed={e.get("region") for e in chosen}
+    other=[REGIONS[k] for k in REGIONS if k in active and k not in displayed]
     quiet=[REGIONS[k] for k in REGIONS if k not in active]
     c.rounded((80,1940,3680,112),TINT,BORDER,18,1)
-    foot="نطاق الرصد الكامل: "+ "، ".join(REGIONS.values()) if not quiet else "مناطق بلا مواد مؤهلة هذه الدورة: "+ "، ".join(quiet)
-    c.text(compact(foot,240),(135,1963,3570,65),30,True,INK,"right",24)
+    foot=("أقاليم نشطة إضافية: "+("، ".join(other) if other else "لا يوجد")
+          +"  |  بلا مواد مؤهلة: "+("، ".join(quiet) if quiet else "لا يوجد"))
+    c.text(compact(foot,245),(135,1963,3570,65),28,True,INK,"right",22)
     c.footer(brief);c.save(path);return c.clipped
 
 def _list(c,items,x,y,w,h,max_items=4):
