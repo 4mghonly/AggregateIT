@@ -43,3 +43,7 @@ For real English data use `--english-json` with a JSON object holding the existi
 - Arabic stays geopolitical/security focused (no financial section).
 - Option-chain data are not fabricated; the English theme omits an options board until sourced structured rows are available.
 - Sample fixtures are synthetic; do not represent them as live news.
+
+## Legacy test contract discrepancy (observed; not introduced here)
+
+The unchanged `main` implementation of `arabic_layout.render_pages.layout_plan` deliberately collects up to **ten** secondary event cards (`[:10]`), but `arabic_newsletter.test_arabic.RenderTests.test_layout_slots_never_repeat_news_events` still asserts a maximum of **three**. Running that stale assertion in the broader legacy suite fails with `AssertionError: 10 not less than or equal to 3`. This branch does not alter the original renderer or its expectations. The preview CI runs the compatible legacy rendering tests separately; reconcile this discrepancy in its own production-scoped maintenance change before merging production modifications.
