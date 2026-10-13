@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-10-12T07:21:16.461951+00:00",
+  "checked_at": "2026-10-13T07:42:31.808830+00:00",
   "total": 118,
-  "compatible": 59,
+  "compatible": 62,
   "regions": {
     "global": {
       "compatible": 10,
@@ -580,7 +580,7 @@
       ]
     },
     "afghanistan": {
-      "compatible": 2,
+      "compatible": 3,
       "configured": 5,
       "sources": [
         {
@@ -610,8 +610,8 @@
         {
           "id": "s091",
           "name": "Khaama Press",
-          "ok": false,
-          "reason": "http_202"
+          "ok": true,
+          "reason": "ok"
         },
         {
           "id": "s109",
@@ -635,7 +635,7 @@
           "id": "s057",
           "name": "SONNA",
           "ok": false,
-          "reason": "http_503"
+          "reason": "zero_entries"
         },
         {
           "id": "s058",
@@ -652,7 +652,7 @@
       ]
     },
     "horn": {
-      "compatible": 2,
+      "compatible": 4,
       "configured": 5,
       "sources": [
         {
@@ -676,14 +676,14 @@
         {
           "id": "s062",
           "name": "Shabait",
-          "ok": false,
-          "reason": "http_202"
+          "ok": true,
+          "reason": "ok"
         },
         {
           "id": "s092",
           "name": "The Reporter Ethiopia",
-          "ok": false,
-          "reason": "http_202"
+          "ok": true,
+          "reason": "ok"
         },
         {
           "id": "s093",
@@ -833,8 +833,8 @@
       "feed_configured": true,
       "feed_ok": true,
       "feed_http": 200,
-      "entries": 24,
-      "recent_72h": 24,
+      "entries": 37,
+      "recent_72h": 37,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -855,7 +855,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 35,
-      "recent_72h": 7,
+      "recent_72h": 11,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -882,7 +882,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.aljazeera.net",
-      "arabic_chars": 429
+      "arabic_chars": 402
     },
     {
       "id": "s004",
@@ -903,7 +903,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.france24.com",
-      "arabic_chars": 554
+      "arabic_chars": 491
     },
     {
       "id": "s005",
@@ -917,8 +917,8 @@
       "feed_configured": true,
       "feed_ok": true,
       "feed_http": 200,
-      "entries": 12,
-      "recent_72h": 12,
+      "entries": 13,
+      "recent_72h": 13,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -939,7 +939,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 45,
-      "recent_72h": 38,
+      "recent_72h": 36,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -981,7 +981,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 25,
-      "recent_72h": 2,
+      "recent_72h": 6,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -1002,7 +1002,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 15,
-      "recent_72h": 15,
+      "recent_72h": 14,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -1158,8 +1158,8 @@
       "feed_configured": true,
       "feed_ok": true,
       "feed_http": 200,
-      "entries": 92,
-      "recent_72h": 85,
+      "entries": 100,
+      "recent_72h": 100,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -1206,7 +1206,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.irna.ir",
-      "arabic_chars": 386
+      "arabic_chars": 350
     },
     {
       "id": "s020",
@@ -1227,7 +1227,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.isna.ir",
-      "arabic_chars": 400
+      "arabic_chars": 365
     },
     {
       "id": "s021",
@@ -1248,7 +1248,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.mehrnews.com",
-      "arabic_chars": 386
+      "arabic_chars": 379
     },
     {
       "id": "s022",
@@ -1281,8 +1281,8 @@
       "feed_configured": true,
       "feed_ok": true,
       "feed_http": 200,
-      "entries": 23,
-      "recent_72h": 23,
+      "entries": 30,
+      "recent_72h": 30,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -1350,7 +1350,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "shafaq.com",
-      "arabic_chars": 370
+      "arabic_chars": 446
     },
     {
       "id": "s027",
@@ -1410,7 +1410,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.alsumaria.tv",
-      "arabic_chars": 313
+      "arabic_chars": 366
     },
     {
       "id": "s030",
@@ -1488,7 +1488,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.dabangasudan.org",
-      "arabic_chars": 442
+      "arabic_chars": 226
     },
     {
       "id": "s034",
@@ -1529,7 +1529,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "sudanwarmonitor.com",
-      "arabic_chars": 509
+      "arabic_chars": 629
     },
     {
       "id": "s036",
@@ -1579,8 +1579,8 @@
       "region": "sahel",
       "country": "NE",
       "language": "fr",
-      "enabled_before": false,
-      "verification_status_before": "failed",
+      "enabled_before": true,
+      "verification_status_before": "active",
       "website_ok": true,
       "feed_configured": true,
       "feed_ok": true,
@@ -1613,7 +1613,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.alakhbar.info",
-      "arabic_chars": 352
+      "arabic_chars": 370
     },
     {
       "id": "s040",
@@ -1634,7 +1634,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.alwihdainfo.com",
-      "arabic_chars": 107
+      "arabic_chars": 59
     },
     {
       "id": "s041",
@@ -1665,7 +1665,7 @@
       "language": "ar",
       "enabled_before": false,
       "verification_status_before": "failed",
-      "website_ok": true,
+      "website_ok": false,
       "feed_configured": false,
       "feed_ok": false,
       "feed_http": null,
@@ -1674,7 +1674,7 @@
       "bozo": false,
       "production_compatible": false,
       "reason": "no_feed",
-      "website_http": 200
+      "website_error": "ConnectionError"
     },
     {
       "id": "s043",
@@ -1733,7 +1733,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.hespress.com",
-      "arabic_chars": 347
+      "arabic_chars": 339
     },
     {
       "id": "s046",
@@ -1754,7 +1754,7 @@
       "reason": "ok",
       "website_http": 404,
       "feed_final_host": "www.madamasr.com",
-      "arabic_chars": 429
+      "arabic_chars": 492
     },
     {
       "id": "s047",
@@ -1788,13 +1788,13 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 30,
-      "recent_72h": 23,
+      "recent_72h": 29,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "libyaalahrar.tv",
-      "arabic_chars": 509
+      "arabic_chars": 589
     },
     {
       "id": "s049",
@@ -1827,8 +1827,8 @@
       "feed_configured": true,
       "feed_ok": true,
       "feed_http": 200,
-      "entries": 29,
-      "recent_72h": 29,
+      "entries": 28,
+      "recent_72h": 28,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -1934,7 +1934,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "amu.tv",
-      "arabic_chars": 374
+      "arabic_chars": 362
     },
     {
       "id": "s056",
@@ -1965,16 +1965,16 @@
       "language": "ar",
       "enabled_before": false,
       "verification_status_before": "failed",
-      "website_ok": false,
+      "website_ok": true,
       "feed_configured": true,
       "feed_ok": false,
-      "feed_http": 503,
+      "feed_http": 200,
       "entries": 0,
       "recent_72h": 0,
-      "bozo": false,
+      "bozo": true,
       "production_compatible": false,
-      "reason": "http_503",
-      "website_http": 503,
+      "reason": "zero_entries",
+      "website_http": 200,
       "feed_final_host": "sonna.so"
     },
     {
@@ -2050,7 +2050,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 50,
-      "recent_72h": 9,
+      "recent_72h": 10,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -2064,19 +2064,20 @@
       "region": "horn",
       "country": "ER",
       "language": "en",
-      "enabled_before": true,
-      "verification_status_before": "active",
+      "enabled_before": false,
+      "verification_status_before": "failed",
       "website_ok": true,
       "feed_configured": true,
-      "feed_ok": false,
-      "feed_http": 202,
-      "entries": 0,
-      "recent_72h": 0,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 10,
+      "recent_72h": 10,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
-      "feed_final_host": "shabait.com"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "shabait.com",
+      "arabic_chars": 0
     },
     {
       "id": "s063",
@@ -2194,7 +2195,7 @@
       "reason": "ok",
       "website_http": 403,
       "feed_final_host": "www.enabbaladi.net",
-      "arabic_chars": 361
+      "arabic_chars": 349
     },
     {
       "id": "s069",
@@ -2215,7 +2216,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "sana.sy",
-      "arabic_chars": 389
+      "arabic_chars": 448
     },
     {
       "id": "s070",
@@ -2235,7 +2236,7 @@
       "production_compatible": true,
       "reason": "ok",
       "website_http": 200,
-      "arabic_chars": 1161
+      "arabic_chars": 1097
     },
     {
       "id": "s071",
@@ -2288,8 +2289,8 @@
       "feed_configured": true,
       "feed_ok": true,
       "feed_http": 200,
-      "entries": 73,
-      "recent_72h": 37,
+      "entries": 74,
+      "recent_72h": 43,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -2329,7 +2330,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 50,
-      "recent_72h": 31,
+      "recent_72h": 50,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -2369,7 +2370,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 50,
-      "recent_72h": 2,
+      "recent_72h": 3,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -2447,13 +2448,13 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 50,
-      "recent_72h": 46,
+      "recent_72h": 45,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "yemenat.net",
-      "arabic_chars": 414
+      "arabic_chars": 416
     },
     {
       "id": "s082",
@@ -2473,7 +2474,7 @@
       "production_compatible": true,
       "reason": "ok",
       "website_http": 200,
-      "arabic_chars": 1077
+      "arabic_chars": 1084
     },
     {
       "id": "s083",
@@ -2583,7 +2584,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 38,
-      "recent_72h": 11,
+      "recent_72h": 10,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -2635,19 +2636,20 @@
       "region": "afghanistan",
       "country": "AF",
       "language": "en",
-      "enabled_before": true,
-      "verification_status_before": "active",
+      "enabled_before": false,
+      "verification_status_before": "failed",
       "website_ok": true,
       "feed_configured": true,
-      "feed_ok": false,
-      "feed_http": 202,
-      "entries": 0,
-      "recent_72h": 0,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 100,
+      "recent_72h": 45,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
-      "feed_final_host": "www.khaama.com"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "www.khaama.com",
+      "arabic_chars": 0
     },
     {
       "id": "s092",
@@ -2655,19 +2657,20 @@
       "region": "horn",
       "country": "ET",
       "language": "en",
-      "enabled_before": true,
-      "verification_status_before": "active",
+      "enabled_before": false,
+      "verification_status_before": "failed",
       "website_ok": true,
       "feed_configured": true,
-      "feed_ok": false,
-      "feed_http": 202,
-      "entries": 0,
-      "recent_72h": 0,
+      "feed_ok": true,
+      "feed_http": 200,
+      "entries": 10,
+      "recent_72h": 10,
       "bozo": false,
-      "production_compatible": false,
-      "reason": "http_202",
-      "website_http": 202,
-      "feed_final_host": "www.thereporterethiopia.com"
+      "production_compatible": true,
+      "reason": "ok",
+      "website_http": 200,
+      "feed_final_host": "www.thereporterethiopia.com",
+      "arabic_chars": 0
     },
     {
       "id": "s093",
@@ -2728,7 +2731,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "palinfo.com",
-      "arabic_chars": 461
+      "arabic_chars": 503
     },
     {
       "id": "s096",
@@ -2743,7 +2746,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 30,
-      "recent_72h": 28,
+      "recent_72h": 27,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -2842,7 +2845,7 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 30,
-      "recent_72h": 24,
+      "recent_72h": 30,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
@@ -2969,7 +2972,7 @@
       "production_compatible": true,
       "reason": "ok",
       "website_http": 200,
-      "arabic_chars": 841
+      "arabic_chars": 829
     },
     {
       "id": "s108",
@@ -2990,7 +2993,7 @@
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.masrawy.com",
-      "arabic_chars": 476
+      "arabic_chars": 453
     },
     {
       "id": "s109",
@@ -3026,13 +3029,13 @@
       "feed_ok": true,
       "feed_http": 200,
       "entries": 50,
-      "recent_72h": 32,
+      "recent_72h": 34,
       "bozo": false,
       "production_compatible": true,
       "reason": "ok",
       "website_http": 200,
       "feed_final_host": "www.alwatan.com.sa",
-      "arabic_chars": 387
+      "arabic_chars": 470
     },
     {
       "id": "s111",
@@ -3105,7 +3108,7 @@
       "feed_configured": true,
       "feed_ok": true,
       "feed_http": 200,
-      "entries": 9,
+      "entries": 10,
       "recent_72h": 0,
       "bozo": false,
       "production_compatible": true,
