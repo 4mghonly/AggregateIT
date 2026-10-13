@@ -108,9 +108,12 @@ def page1(brief,path):
     c.body(_delta(brief),(2020,1325,1660,185),43,True)
     rest=[e for e in events if e not in domestic and e not in gulf]
     if rest:
-        c.text("أهم تطور إقليمي في هذه الدورة",(2020,1590,1640,60),36,True,COPPER)
-        c.body(rest[0].get("title_ar"),(2015,1670,1640,150),41,True)
-        c.text("المصدر: "+_src(rest[0]),(2020,1880,1630,48),27,False,MUTED)
+        c.text("نطاق التطورات خارج الخليج",(2020,1590,1640,60),36,True,COPPER)
+        names=[]
+        for event in rest:
+            label=REGIONS.get(event.get("region"))
+            if label and label not in names: names.append(label)
+        c.body("وردت مواد مؤهلة في: "+"، ".join(names),(2015,1670,1640,205),38,False)
     c.section(80,1160,1810,820,"سجل التغطية والمصادر")
     coverage=brief.get("coverage") or {}
     rows=[
