@@ -90,9 +90,9 @@ def render_p1(data, analysis, llm_ok, path):
     # Leading editorial overview, with the original analysis retained rather
     # than replaced by unverified photo captions or generated stories.
     y=_card(A,.035,.48,.605,.34,"Lead development")
-    y=_paragraph(A,_safe(a.get("headline"),"No editorial headline available"),.055,y,width=48,limit=3,size=23,lead=.048,bold=True)
+    y=_paragraph(A,_safe(a.get("headline"),"No editorial headline available"),.055,y,width=48,limit=2,size=23,lead=.048,bold=True)
     y-=.015
-    _paragraph(A,_safe(a.get("lead"),"Editorial context unavailable"),.055,y,width=79,limit=5,size=12.8,lead=.031)
+    _paragraph(A,_safe(a.get("lead"),"Editorial context unavailable"),.055,y,width=79,limit=4,size=12.8,lead=.031)
     A.text(.056,.497,"Editorial analysis  |  "+("LLM route confirmed" if llm_ok else "Fallback analysis / degraded"),fontsize=9.5,color=MUTED)
     y=_card(A,.665,.48,.300,.34,"Markets at a glance")
     macro=d.get("macro",{}); inst=macro.get("instruments",[])
