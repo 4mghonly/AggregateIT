@@ -29,7 +29,8 @@ class Page(Canvas):
         self.text("موجز جيوسياسي وأمني",(85,148,1250,55),41,True,"#E0C2AA","left",34)
         self.text(heading,(1810,42,1900,100),79,True,PAPER,"right",60)
         self.text(subtitle,(1810,154,1900,65),34,False,"#E5DDD7","right",30)
-        self.text(f"{number:02d} / 03",(85,233,400,46),34,True,PAPER,"left",30)
+        # Page numerals must remain LTR even though surrounding content is RTL.
+        self.d.text((85,232),f"{number:02d} / 03",font=self.font(34,True),fill=PAPER,direction="ltr")
         stamp = brief.get("window_end","")
         try: stamp = datetime.fromisoformat(stamp).astimezone(UAE).strftime("%Y-%m-%d %H:%M UAE")
         except (ValueError,TypeError): stamp = "وقت الإصدار غير متاح"
