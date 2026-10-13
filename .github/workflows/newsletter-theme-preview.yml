@@ -34,6 +34,8 @@ jobs:
         run: python -m py_compile newsletter_themes/*.py arabic_newsletter/render.py slide.py render_theme_samples.py test_newsletter_themes.py
       - name: Test layouts with network unavailable
         run: python -m unittest -v test_newsletter_themes
+      - name: Run existing renderer regression suites
+        run: python -m unittest -v test_gazette_layout arabic_newsletter.test_arabic.RenderTests
       - name: Render sample slides without delivery
         run: python render_theme_samples.py --out reports/theme-preview
       - name: Upload review slides
