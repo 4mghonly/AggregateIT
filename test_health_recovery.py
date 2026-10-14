@@ -44,7 +44,7 @@ class EnglishRecovery(unittest.TestCase):
             return reply(None if "primary" in url else '{"valid":true}')
         with patch.object(llm.requests,"post",side_effect=post):
             self.assertEqual(llm.chat_json([{"role":"user","content":"JSON"}]),{"valid":True})
-        self.assertEqual(len(sent),3)
+        self.assertEqual(len(sent),2)
         self.assertIn("fallback",sent[-1])
         ledger=json.loads(Path(llm.LEDGER_FILE).read_text())
         self.assertEqual(next(iter(ledger.values()))["response"],'{"valid":true}')
@@ -96,11 +96,11 @@ class ArabicRecovery(unittest.TestCase):
         calls=[]
         def translate(route,system,payload,**kwargs):
             calls.append(len(payload["items"]))
-            count=1 if len(calls)==1 else len(payload["items"])
+            count=0 if len(calls)==1 else len(payload["items"])
             return {"items":[{"index":i,"title_ar":"تطور أمني","summary_ar":"متابعة أمن الحدود"} for i in range(count)]}
         with patch.object(arabic,"_route",return_value={"model":"synthetic"}),patch.object(arabic,"_route_call",side_effect=translate):
             out,health,route=arabic.translate_items_with_failover(rows)
-        self.assertEqual(len(out),4);self.assertEqual(calls,[3,2,1]);self.assertEqual(route,"mixed")
+        self.assertEqual(len(out),4);self.assertEqual(calls,[1,1,1,1,1]);self.assertEqual(route,"mixed")
 
     def test_partial_translation_is_degraded(self):
         rows=[{"title":"security","summary":"border","language":"en","source":"test","source_id":str(i),"country":"IQ","region":"iraq","url":str(i),"published":0} for i in range(2)]
@@ -142,5 +142,57 @@ class CadenceRecovery(unittest.TestCase):
                 if step.get('with',{}).get('path','').rstrip('/')=='data':
                     self.assertEqual(step['uses'],'actions/cache/restore@v5',name)
 
+
+
+class October14Recovery(unittest.TestCase):
+    setUp=EnglishRecovery.setUp
+    def test_last_two_calls_reserve_a_fallback_attempt(self):
+        with patch.object(llm,'MAX_CALLS',2),patch.object(llm.requests,'post',side_effect=[reply(None),reply('{"ok":true}')]) as post:
+            self.assertTrue(llm.chat_json([])['ok'])
+            self.assertIn('fallback',post.call_args_list[-1].args[0])
+
+    def test_truncation_repair_increases_output_allowance(self):
+        with patch.object(llm,'_route_complete',side_effect=lambda f=False:not f),patch.object(llm.requests,'post',side_effect=[reply('{}','length'),reply('{"ok":true}')]) as post:
+            self.assertTrue(llm.chat_json([],max_tokens=2200)['ok'])
+            self.assertGreater(post.call_args_list[1].kwargs['json']['max_tokens'],2200)
+
+    def test_runtime_options_cannot_override_input_or_output_budget(self):
+        with patch.object(llm,'REQUEST_OPTIONS',{'max_tokens':1,'messages':[],'model':'other'}),patch.object(llm.requests,'post',return_value=reply('{"ok":true}')) as post:
+            llm.chat_json([{'role':'user','content':'test'}],max_tokens=4096)
+        body=post.call_args.kwargs['json']
+        self.assertEqual(body['max_tokens'],4096);self.assertEqual(body['model'],'primary')
+        self.assertEqual(body['messages'][0]['content'],'test')
+
+    def test_http_cooldown_persists_and_expires(self):
+        import http_backoff
+        with patch.object(http_backoff,'STATE',Path(self.tmp.name)/'cooldown.json'),patch.object(http_backoff.time,'time',return_value=1000):
+            http_backoff.observe('https://example.test/feed',429,{'Retry-After':'60'})
+            self.assertTrue(http_backoff.blocked('https://example.test/other'))
+            self.assertFalse(http_backoff.blocked('https://other.test/feed'))
+        with patch.object(http_backoff,'STATE',Path(self.tmp.name)/'cooldown.json'),patch.object(http_backoff.time,'time',return_value=2000):
+            self.assertFalse(http_backoff.blocked('https://example.test/feed'))
+
+    def test_uae_context_remains_dated_and_is_never_older_than_one_day(self):
+        now=datetime.now(timezone.utc).timestamp()
+        rows=[{'title':'Fresh','summary':'News','country':'IQ','published':now-10},
+              {'title':'UAE context','summary':'News','country':'AE','published':now-12*3600},
+              {'title':'Old UAE','summary':'News','country':'AE','published':now-25*3600}]
+        with patch.object(arabic,'load_sources',return_value=[{}]),patch.object(arabic,'fetch_source',return_value=(rows,{})):
+            items,_=arabic.collect(6)
+        self.assertEqual(len(items),2)
+        context=next(x for x in items if x.get('context_only'))
+        self.assertEqual(context['published'],rows[1]['published'])
+        self.assertIn('24',context['summary'])
+
+class RedditEndpointRecovery(unittest.TestCase):
+    def test_current_arctic_endpoint_and_supported_sort(self):
+        import social
+        response=type("Response",(),{"status_code":200,"headers":{},"json":lambda self:{"data":[{"id":"verified"}]}})()
+        with patch.object(social.requests,"get",return_value=response) as get,patch.object(social.http_backoff,"blocked",return_value=False):
+            self.assertEqual(social._shift_get("/submissions/search",{"subreddit":"stocks","sort":"score:desc","limit":3})[0]["id"],"verified")
+        url=get.call_args.args[0]
+        self.assertIn("arctic-shift.photon-reddit.com/api/posts/search",url)
+        self.assertIn("sort=desc",url)
+        self.assertNotIn("score",url)
 
 if __name__=="__main__": unittest.main()

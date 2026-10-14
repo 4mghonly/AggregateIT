@@ -5,6 +5,7 @@ Reddit: official OAuth when configured, then Arctic Shift/PullPush/RSS-Bridge.
 X/Telegram: self-hosted RSSHub first, public failover, optional RSS-Bridge.
 Bluesky/Mastodon/YouTube: native public feeds/APIs first.
 Writes data/social_pulse.json for the Gazette. Items match main.py schema."""
+import http_backoff
 import os, json, time, re, calendar, requests, feedparser
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone, timedelta
@@ -18,7 +19,7 @@ RSS_BRIDGE_URL = os.environ.get("RSS_BRIDGE_URL", "").rstrip("/")
 REDDIT_CLIENT_ID = os.environ.get("REDDIT_CLIENT_ID", "")
 REDDIT_CLIENT_SECRET = os.environ.get("REDDIT_CLIENT_SECRET", "")
 SHIFT_MIRRORS = [
-    ("https://arctic-shift.philo.berkeley.edu/api/reddit", "arctic"),
+    ("https://arctic-shift.photon-reddit.com/api", "arctic"),
     ("https://api.pullpush.io/reddit", "pullpush"),
 ]
 RSSHUB_PUBLIC = ["https://rsshub.rssforever.com", "https://hub.slarker.me", "https://rsshub.ktachibana.party", "https://rsshub.app", "https://rsshub.pseudoyu.com"]
@@ -78,8 +79,12 @@ def _reddit_official(sub, lane, limit):
     params = {"limit": limit, "raw_json": 1}
     if endpoint == "top": params["t"] = "day"
     try:
-        r = requests.get(f"https://oauth.reddit.com/r/{sub}/{endpoint}", params=params,
+        url=f"https://oauth.reddit.com/r/{sub}/{endpoint}"
+        if http_backoff.blocked(url): return []
+        r = requests.get(url, params=params,
                          headers={**UA, "Authorization": "Bearer " + token}, timeout=8)
+        http_backoff.observe(url,r.status_code,r.headers)
+        SOURCE_HEALTH.append({"source":"reddit_oauth", "status":"ok" if r.status_code==200 else "http_%d"%r.status_code})
         if r.status_code != 200: return []
         return [x.get("data", {}) for x in r.json().get("data", {}).get("children", [])]
     except Exception:
@@ -89,11 +94,22 @@ def _shift_get(path, params):
     for base, kind in SHIFT_MIRRORS:
         url = base + path
         p = dict(params)
+        if kind == "arctic":
+            url=url.replace("/submissions/search","/posts/search")
+            # Current API accepts date order, not Pushshift's field:direction.
+            p["sort"]="asc" if str(p.get("sort","")).endswith("asc") else "desc"
+            if "q" in p:
+                # Arctic comment keyword search requires a subreddit/author.
+                if not p.get("subreddit"): continue
+                p["body"]=p.pop("q")
         if kind == "pullpush":
             url = url.replace("/submissions/search", "/search/submission").replace("/comments/search", "/search/comment")
             p["size"] = p.pop("limit", 5)
+        if http_backoff.blocked(url): continue
         try:
             r = requests.get(_route(url, p), timeout=8, headers=UA)
+            http_backoff.observe(url,r.status_code,r.headers)
+            SOURCE_HEALTH.append({"source":"reddit_"+kind,"status":"ok" if r.status_code==200 else "http_%d"%r.status_code})
             if r.status_code == 200: return r.json().get("data", [])
         except Exception: continue
     return []

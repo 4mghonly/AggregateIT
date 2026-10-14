@@ -1,3 +1,4 @@
+import http_backoff
 import asyncio, json, os
 import aiohttp, feedparser
 from urllib.parse import urlencode
@@ -11,16 +12,19 @@ def load(n):
 RAW = load("sources.json"); REDDIT = load("reddit.json"); CHATTER = load("chatter.json")
 seen = set(); RSS = []; GH = []
 for s in RAW:
+    if s.get("enabled") is False: continue
     u = s.get("Url", "").replace("http://", "https://").rstrip("/")
     if not u or u in seen: continue
     seen.add(u)
-    (GH if "github.com/" in u else RSS).append({**s, "_url": u})
+    (GH if "github.com/" in u else RSS).append({**s, "_url": s.get("Url",u).replace("http://","https://")})
 
 RESULTS = []
 
 async def get(session, url, sem):
+    if http_backoff.blocked(url): return 429,""
     async with sem:
         async with session.get(url, timeout=aiohttp.ClientTimeout(total=20)) as r:
+            http_backoff.observe(url,r.status,r.headers)
             return r.status, (await r.text() if r.status == 200 else "")
 
 async def check_rss(session, src, sem):
@@ -34,14 +38,22 @@ async def check_rss(session, src, sem):
                         "http": "ERR", "items": 0, "ok": False, "err": str(e)[:80]})
 
 async def check_reddit(session, sub, sem):
-    try:
-        status, txt = await get(session, f"https://www.reddit.com/r/{sub}/new/.rss", sem)
-        n = len(feedparser.parse(txt).entries) if txt else 0
-        RESULTS.append({"kind": "REDDIT", "name": "r/" + sub, "http": status, "items": n,
-                        "comments": 0, "ok": status == 200 and n > 0})
-    except Exception as e:
-        RESULTS.append({"kind": "REDDIT", "name": "r/" + sub, "http": "ERR", "items": 0,
-                        "comments": 0, "ok": False, "err": str(e)[:80]})
+    # Audit the same authenticated/fallback paths used by production, rather
+    # than hammering the unauthenticated Reddit RSS endpoint from a datacenter.
+    import social
+    cutoff=int(_time.time()-86400)
+    async with sem:
+        rows=await asyncio.to_thread(social._reddit_official,sub,"new",3)
+        route="oauth"
+        if not rows:
+            route="archive_fallback"
+            rows=await asyncio.to_thread(social._shift_get,"/submissions/search",
+                {"subreddit":sub,"after":cutoff,"sort":"created_utc:desc","limit":3})
+    fresh=[r for r in rows if cutoff<=float(r.get("created_utc") or 0)<=_time.time()+300]
+    RESULTS.append({"kind":"REDDIT","name":"r/"+sub,"route":route,
+                    "http":200 if fresh else "unavailable","items":len(fresh),
+                    "comments":0,"ok":bool(fresh),
+                    "oauth_configured":bool(social.REDDIT_CLIENT_ID and social.REDDIT_CLIENT_SECRET)})
 
 async def check_gh(session, repo, sem):
     try:

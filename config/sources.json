@@ -444,7 +444,7 @@
   "Id": 64,
   "Source_name": "The Independent - Breaking",
   "Category": "Breaking News",
-  "Url": "https://www.independent.co.uk/news/rss",
+  "Url": "https://www.independent.co.uk/news/world/rss",
   "Verification_status": "Active"
  },
  {
@@ -466,6 +466,8 @@
   "Source_name": "Yahoo Finance - Top",
   "Category": "US Markets",
   "Url": "https://finance.yahoo.com/news/rssindex",
+  "enabled": false,
+  "disabled_reason": "2026-10-14: HTTP 404; market coverage retained by existing Bloomberg, CNBC and MarketWatch feeds",
   "Verification_status": "Active"
  },
  {

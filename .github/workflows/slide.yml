@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "30 11 * * *"        # 15:30 UAE time (GitHub cron uses UTC)
   workflow_dispatch:
+    inputs:
+      scheduler_slot:
+        description: Independent scheduler slot (leave empty for manual runs)
+        type: string
+        default: ""
   push:
     branches: [main]
     paths:
@@ -11,7 +16,24 @@ concurrency:
   group: aggregateit-gazette
   cancel-in-progress: false
 jobs:
+  cadence:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      proceed: ${{ steps.slot.outputs.proceed }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: slot
+        run: python3 cadence_gate.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCHEDULER_SLOT: ${{ inputs.scheduler_slot }}
+          CADENCE_WORKFLOW: slide.yml
   slide:
+    needs: cadence
+    if: needs.cadence.outputs.proceed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -59,7 +81,7 @@ jobs:
       - name: Confirm Gazette Discord route
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID }}
+          DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID || '1538296006918021153' }}
         run: python -c "import slide; slide.discord_webhook_info()"
       - name: Refresh Gazette inputs
         env:
@@ -76,7 +98,7 @@ jobs:
       - name: Render and deliver Gazette
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID }}
+          DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID || '1538296006918021153' }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
           LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
@@ -93,7 +115,7 @@ jobs:
           LLM_FALLBACK_CHAT_PATH: ${{ vars.LLM_FALLBACK_CHAT_PATH }}
           LLM_FALLBACK_REQUEST_OPTIONS_JSON: ${{ vars.LLM_FALLBACK_REQUEST_OPTIONS_JSON }}
           LLM_FALLBACK_EXTRA_HEADERS_JSON: ${{ vars.LLM_FALLBACK_EXTRA_HEADERS_JSON }}
-          LLM_MAX_CALLS: "3"
+          LLM_MAX_CALLS: "4"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python slide.py
       - name: Upload Gazette pages

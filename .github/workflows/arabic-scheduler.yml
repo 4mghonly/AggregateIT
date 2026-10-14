@@ -11,16 +11,39 @@ on:
     paths:
       - .github/arabic-v2-trigger
   workflow_dispatch:
+    inputs:
+      scheduler_slot:
+        description: Independent scheduler slot (leave empty for manual runs)
+        type: string
+        default: ""
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: arabic-v2-production
   cancel-in-progress: false
 
 jobs:
+  cadence:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      proceed: ${{ steps.slot.outputs.proceed }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: slot
+        run: python3 cadence_gate.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCHEDULER_SLOT: ${{ inputs.scheduler_slot }}
+          CADENCE_WORKFLOW: arabic-scheduler.yml
   publish:
+    needs: cadence
+    if: needs.cadence.outputs.proceed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -41,7 +64,7 @@ jobs:
       ARABIC_LLM_FALLBACK_REQUEST_OPTIONS_JSON: ${{ vars.LLM_FALLBACK_REQUEST_OPTIONS_JSON }}
       ARABIC_LLM_FALLBACK_EXTRA_HEADERS_JSON: ${{ vars.LLM_FALLBACK_EXTRA_HEADERS_JSON }}
       DISCORD_WEBHOOK_ARABIC: ${{ secrets.DISCORD_WEBHOOK_ARABIC }}
-      DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID }}
+      DISCORD_ARABIC_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_ARABIC_CHANNEL_ID || vars.DISCORD_ARABIC_CHANNEL_ID || '1550620365502418956' }}
       ARABIC_DISCORD_MAX_FILE_BYTES: "19000000"
       ARABIC_SCHEDULE_EXPR: ${{ github.event.schedule }}
     steps:
