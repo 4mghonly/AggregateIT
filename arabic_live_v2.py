@@ -614,7 +614,7 @@ def probe_llms():
             payload={"events":[{"region":"iraq","title_ar":"اختبار أمني تجريبي","summary_ar":"بيانات اختبار فقط، ليست أخباراً حقيقية."}]}
             for attempt in range(2):
                 try:
-                    raw=_route_call(route,ANALYSIS_COMPACT_SYSTEM,payload,max_tokens=2200)
+                    raw=_route_call(route,ANALYSIS_COMPACT_SYSTEM,payload,max_tokens=4096)
                     _normalize_analysis(raw)
                     break
                 except RuntimeError as exc:
@@ -632,13 +632,13 @@ def llm_analysis_with_failover(events):
             health.append({"route":name,"configured":False,"ok":False,"error":"missing_configuration"}); continue
         try:
             try:
-                raw=_route_call(route,ANALYSIS_COMPACT_SYSTEM,_analysis_prompt(events),max_tokens=2200,deadline=deadline)
+                raw=_route_call(route,ANALYSIS_COMPACT_SYSTEM,_analysis_prompt(events),max_tokens=4096,deadline=deadline)
                 analysis=_normalize_analysis(raw)
             except RuntimeError as first:
                 if not any(reason in str(first) for reason in ("invalid_json","analysis_fields","analysis_lists")):
                     raise
                 print(f"V3 LLM {name} malformed JSON; retrying compact analysis",flush=True)
-                raw=_route_call(route,ANALYSIS_COMPACT_SYSTEM,_analysis_prompt(events),max_tokens=2200,deadline=deadline)
+                raw=_route_call(route,ANALYSIS_COMPACT_SYSTEM,_analysis_prompt(events),max_tokens=8192,deadline=deadline)
             analysis=_normalize_analysis(raw)
             health.append({"route":name,"configured":True,"ok":True,"model":route["model"]})
             return analysis,health,name

@@ -47,8 +47,16 @@ def main_probe():
         def analysis():
             if not route:raise RuntimeError('missing_configuration')
             payload={'events':[{'region':'iraq','title_ar':'بيان بشأن أمن الحدود','summary_ar':AR_FACT,'sources':['Synthetic probe']} for _ in range(17)]}
-            ar._normalize_analysis(ar._route_call(route,ar.ANALYSIS_COMPACT_SYSTEM,payload,max_tokens=4096,deadline=time.monotonic()+90))
+            deadline=time.monotonic()+150
+            for attempt in range(2):
+                try:
+                    ar._normalize_analysis(ar._route_call(route,ar.ANALYSIS_COMPACT_SYSTEM,payload,max_tokens=4096 if not attempt else 8192,deadline=deadline))
+                    break
+                except RuntimeError as exc:
+                    if attempt or not any(x in str(exc) for x in ('invalid_json','analysis_fields','analysis_lists')):raise
         for component,check in [('english_gazette',gazette),('english_event',event),('arabic_translation',translation),('arabic_analysis',analysis)]:
+            components=os.getenv('PROBE_COMPONENTS','all')
+            if components!='all' and component not in components.split(','):continue
             start=time.monotonic()
             try:
                 check();result={'route':name,'component':component,'ok':True}

@@ -143,9 +143,9 @@ class CadenceRecovery(unittest.TestCase):
                     self.assertEqual(step['uses'],'actions/cache/restore@v5',name)
 
 
-if __name__=="__main__": unittest.main()
 
-class October14Recovery(EnglishRecovery):
+class October14Recovery(unittest.TestCase):
+    setUp=EnglishRecovery.setUp
     def test_last_two_calls_reserve_a_fallback_attempt(self):
         with patch.object(llm,'MAX_CALLS',2),patch.object(llm.requests,'post',side_effect=[reply(None),reply('{"ok":true}')]) as post:
             self.assertTrue(llm.chat_json([])['ok'])
@@ -183,3 +183,5 @@ class October14Recovery(EnglishRecovery):
         context=next(x for x in items if x.get('context_only'))
         self.assertEqual(context['published'],rows[1]['published'])
         self.assertIn('24',context['summary'])
+
+if __name__=="__main__": unittest.main()

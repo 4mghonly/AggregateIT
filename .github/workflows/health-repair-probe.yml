@@ -9,6 +9,11 @@ on:
       - 'llm.py'
       - 'repair_probe.py'
   workflow_dispatch:
+    inputs:
+      components:
+        description: all or comma-separated component names
+        default: all
+        type: string
 permissions:
   contents: read
 jobs:
@@ -16,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
+      PROBE_COMPONENTS: ${{ inputs.components || 'arabic_analysis' }}
       ARABIC_LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       ARABIC_LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
       ARABIC_LLM_MODEL: ${{ secrets.LLM_MODEL }}

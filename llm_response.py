@@ -51,7 +51,11 @@ def rejection_reason(exc):
     """Allowlisted diagnostics only: never echo arbitrary provider text."""
     reason=str(exc)
     allowed=("empty_response_content","response_truncated","json_object_required",
-             "message_object_required","gazette_analysis_fields")
+             "message_object_required","gazette_analysis_fields",
+             "analysis_fields","analysis_fields_not_arabic","analysis_lists",
+             "translation_validation_failed","missing_configuration",
+             "invalid_json_response_truncated","invalid_json_empty_response_content",
+             "invalid_json_json_object_required")
     if reason in allowed: return reason
     if reason.startswith("analysis_schema:"): return "analysis_schema_invalid"
     return type(exc).__name__

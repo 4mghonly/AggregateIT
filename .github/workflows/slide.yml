@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "30 11 * * *"        # 15:30 UAE time (GitHub cron uses UTC)
   workflow_dispatch:
+    inputs:
+      scheduler_slot:
+        description: Independent scheduler slot (leave empty for manual runs)
+        type: string
+        default: ""
   push:
     branches: [main]
     paths:
@@ -11,7 +16,24 @@ concurrency:
   group: aggregateit-gazette
   cancel-in-progress: false
 jobs:
+  cadence:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      proceed: ${{ steps.slot.outputs.proceed }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: slot
+        run: python3 cadence_gate.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCHEDULER_SLOT: ${{ inputs.scheduler_slot }}
+          CADENCE_WORKFLOW: slide.yml
   slide:
+    needs: cadence
+    if: needs.cadence.outputs.proceed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

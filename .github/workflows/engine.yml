@@ -8,15 +8,39 @@ on:
       - .github/engine-trigger
   workflow_dispatch:
     inputs:
+      scheduler_slot:
+        description: Independent scheduler slot (leave empty for manual runs)
+        type: string
+        default: ""
       dry_run:
         description: Collect and score without storing
         type: boolean
         default: true
+permissions:
+  contents: read
+  actions: read
 concurrency:
   group: aggregateit-engine-writer
   cancel-in-progress: false
 jobs:
+  cadence:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      proceed: ${{ steps.slot.outputs.proceed }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: slot
+        run: python3 cadence_gate.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCHEDULER_SLOT: ${{ inputs.scheduler_slot }}
+          CADENCE_WORKFLOW: engine.yml
   engine:
+    needs: cadence
+    if: needs.cadence.outputs.proceed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

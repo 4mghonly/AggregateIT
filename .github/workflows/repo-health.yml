@@ -40,7 +40,7 @@ jobs:
       - name: Run Gazette layout tests
         run: python -m unittest -v test_gazette_layout
       - name: Reproduce production health failures offline
-        run: python -m unittest -v test_health_recovery
+        run: python -m unittest -v test_health_recovery test_cadence_gate
       - name: Validate YAML, JSON and configuration uniqueness
         run: |
           python - <<'PY'
