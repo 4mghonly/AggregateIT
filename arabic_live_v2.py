@@ -290,11 +290,12 @@ def _dedupe_key(title):
 def collect(hours=6):
     cutoff=(datetime.now(timezone.utc)-timedelta(hours=hours)).timestamp()
     sources=load_sources()
-    items=[]; health=[]
+    items=[]; health=[]; uae_context=[]
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
         futures=[pool.submit(fetch_source,s) for s in sources]
         for fut in concurrent.futures.as_completed(futures):
             rows,h=fut.result(); health.append(h)
+            uae_context.extend(x for x in rows if is_uae_item(x))
             items.extend(x for x in rows if cutoff<=x["published"]<=datetime.now(timezone.utc).timestamp()+300)
     seen=[]; dedup=[]
     for item in sorted(items,key=lambda x:x["published"],reverse=True):
@@ -304,6 +305,16 @@ def collect(hours=6):
         if key in seen or any(SequenceMatcher(None,key,prior).ratio()>=0.94 for prior in seen[-120:]):
             continue
         seen.append(key); dedup.append(item)
+    if not any(is_uae_item(x) for x in dedup):
+        context_cutoff=(datetime.now(timezone.utc)-timedelta(hours=24)).timestamp()
+        # Reuse fetched rows; no extra network fanout. Only UAE rows are widened.
+        context=[x for x in uae_context if context_cutoff<=x["published"]<cutoff]
+        for x in sorted(context,key=lambda r:r["published"],reverse=True)[:3]:
+            x=dict(x)
+            stamp=datetime.fromtimestamp(x["published"],UAE).strftime("%d/%m %H:%M")
+            x["summary"]=x["summary"]+" — سياق سابق خلال 24 ساعة، نُشر "+stamp+" بتوقيت الإمارات."
+            x["context_only"]=True
+            dedup.append(x)
     return dedup,health
 
 def is_uae_item(item)->bool:
@@ -427,7 +438,7 @@ def _route_call(route,system,user,max_tokens=1800,deadline=None):
              "messages":[{"role":"system","content":system},{"role":"user","content":json.dumps(user,ensure_ascii=False)}],
              "temperature":0.1,"max_tokens":max_tokens,
              "response_format":{"type":"json_object"}}
-    payload.update(route["options"])
+    payload.update({k:v for k,v in route["options"].items() if k not in ("model","messages","max_tokens","max_completion_tokens")})
     for attempt in range(2):
         remaining=(deadline-time.monotonic()) if deadline else 60
         if remaining<=1: raise RuntimeError("stage_budget_exhausted")
@@ -497,8 +508,8 @@ def translate_items_with_failover(rows):
     deadline=time.monotonic()+360
     health=[]; translated={}; selected_routes=set()
     routes=[("primary",_route("ARABIC_LLM_")),("fallback",_route("ARABIC_LLM_FALLBACK_"))]
-    for start in range(0,len(rows),3):
-        pending=list(range(start,min(start+3,len(rows))))
+    for start in range(0,len(rows),1):
+        pending=list(range(start,min(start+1,len(rows))))
         for name,route in routes:
             if not pending or time.monotonic()>=deadline: break
             if not route:
@@ -507,7 +518,7 @@ def translate_items_with_failover(rows):
             payload={"items":[{"index":i,"language":r.get("language"),"source":r.get("source"),
                                "title":r.get("title"),"summary":r.get("summary")} for i,r in enumerate(batch)]}
             try:
-                mapping=_normalize_translations(_route_call(route,TRANSLATE_SYSTEM,payload,max_tokens=2200,deadline=deadline),batch)
+                mapping=_normalize_translations(_route_call(route,TRANSLATE_SYSTEM,payload,max_tokens=4096,deadline=deadline),batch)
                 if not mapping: raise RuntimeError("no_valid_translations")
                 health.append({"route":name,"configured":True,"ok":len(mapping)==len(batch),
                                "batch_start":start,"translated":len(mapping),"requested":len(batch)})

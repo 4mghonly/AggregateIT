@@ -5,6 +5,7 @@ Reddit: official OAuth when configured, then Arctic Shift/PullPush/RSS-Bridge.
 X/Telegram: self-hosted RSSHub first, public failover, optional RSS-Bridge.
 Bluesky/Mastodon/YouTube: native public feeds/APIs first.
 Writes data/social_pulse.json for the Gazette. Items match main.py schema."""
+import http_backoff
 import os, json, time, re, calendar, requests, feedparser
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone, timedelta
@@ -78,8 +79,12 @@ def _reddit_official(sub, lane, limit):
     params = {"limit": limit, "raw_json": 1}
     if endpoint == "top": params["t"] = "day"
     try:
-        r = requests.get(f"https://oauth.reddit.com/r/{sub}/{endpoint}", params=params,
+        url=f"https://oauth.reddit.com/r/{sub}/{endpoint}"
+        if http_backoff.blocked(url): return []
+        r = requests.get(url, params=params,
                          headers={**UA, "Authorization": "Bearer " + token}, timeout=8)
+        http_backoff.observe(url,r.status_code,r.headers)
+        SOURCE_HEALTH.append({"source":"reddit_oauth", "status":"ok" if r.status_code==200 else "http_%d"%r.status_code})
         if r.status_code != 200: return []
         return [x.get("data", {}) for x in r.json().get("data", {}).get("children", [])]
     except Exception:
@@ -92,8 +97,11 @@ def _shift_get(path, params):
         if kind == "pullpush":
             url = url.replace("/submissions/search", "/search/submission").replace("/comments/search", "/search/comment")
             p["size"] = p.pop("limit", 5)
+        if http_backoff.blocked(url): continue
         try:
             r = requests.get(_route(url, p), timeout=8, headers=UA)
+            http_backoff.observe(url,r.status_code,r.headers)
+            SOURCE_HEALTH.append({"source":"reddit_"+kind,"status":"ok" if r.status_code==200 else "http_%d"%r.status_code})
             if r.status_code == 200: return r.json().get("data", [])
         except Exception: continue
     return []

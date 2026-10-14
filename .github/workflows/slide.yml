@@ -59,7 +59,7 @@ jobs:
       - name: Confirm Gazette Discord route
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID }}
+          DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID || '1538296006918021153' }}
         run: python -c "import slide; slide.discord_webhook_info()"
       - name: Refresh Gazette inputs
         env:
@@ -76,7 +76,7 @@ jobs:
       - name: Render and deliver Gazette
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID }}
+          DISCORD_EXPECTED_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID || '1538296006918021153' }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
           LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
@@ -93,7 +93,7 @@ jobs:
           LLM_FALLBACK_CHAT_PATH: ${{ vars.LLM_FALLBACK_CHAT_PATH }}
           LLM_FALLBACK_REQUEST_OPTIONS_JSON: ${{ vars.LLM_FALLBACK_REQUEST_OPTIONS_JSON }}
           LLM_FALLBACK_EXTRA_HEADERS_JSON: ${{ vars.LLM_FALLBACK_EXTRA_HEADERS_JSON }}
-          LLM_MAX_CALLS: "3"
+          LLM_MAX_CALLS: "4"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python slide.py
       - name: Upload Gazette pages

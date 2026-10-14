@@ -1,3 +1,4 @@
+import http_backoff
 import asyncio, json, os
 import aiohttp, feedparser
 from urllib.parse import urlencode
@@ -11,16 +12,19 @@ def load(n):
 RAW = load("sources.json"); REDDIT = load("reddit.json"); CHATTER = load("chatter.json")
 seen = set(); RSS = []; GH = []
 for s in RAW:
+    if s.get("enabled") is False: continue
     u = s.get("Url", "").replace("http://", "https://").rstrip("/")
     if not u or u in seen: continue
     seen.add(u)
-    (GH if "github.com/" in u else RSS).append({**s, "_url": u})
+    (GH if "github.com/" in u else RSS).append({**s, "_url": s.get("Url",u).replace("http://","https://")})
 
 RESULTS = []
 
 async def get(session, url, sem):
+    if http_backoff.blocked(url): return 429,""
     async with sem:
         async with session.get(url, timeout=aiohttp.ClientTimeout(total=20)) as r:
+            http_backoff.observe(url,r.status,r.headers)
             return r.status, (await r.text() if r.status == 200 else "")
 
 async def check_rss(session, src, sem):

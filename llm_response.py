@@ -45,3 +45,13 @@ def json_object(text):
     if not isinstance(obj, dict):
         raise ValueError("json_object_required")
     return obj
+
+
+def rejection_reason(exc):
+    """Allowlisted diagnostics only: never echo arbitrary provider text."""
+    reason=str(exc)
+    allowed=("empty_response_content","response_truncated","json_object_required",
+             "message_object_required","gazette_analysis_fields")
+    if reason in allowed: return reason
+    if reason.startswith("analysis_schema:"): return "analysis_schema_invalid"
+    return type(exc).__name__

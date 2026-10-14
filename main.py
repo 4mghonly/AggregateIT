@@ -1,4 +1,5 @@
 """main.py v11 — AggregateIT engine orchestrator."""
+import http_backoff
 import os, re, json, time, sqlite3, asyncio, calendar, hashlib, sys, subprocess
 import feedparser, aiohttp, requests, trafilatura
 from datetime import datetime, timezone, timedelta
@@ -113,10 +114,11 @@ MOVERS, TV_TICKERS, TV_NAMES = load_market_context()
 
 seen_u = set(); RSS = []; GH = []
 for s in RAW:
+    if s.get("enabled") is False: continue
     u = s.get("Url", "").replace("http://", "https://").rstrip("/")
     if not u or u in seen_u: continue
     seen_u.add(u)
-    (GH if "github.com/" in u else RSS).append({**s, "_url": u})
+    (GH if "github.com/" in u else RSS).append({**s, "_url": s.get("Url",u).replace("http://","https://")})
 
 store = SQLiteStore()
 
@@ -182,9 +184,11 @@ def score_item(i):
 
 # ================= INGESTION =================
 async def fetch_text(session, url, sem, headers=None):
+    if http_backoff.blocked(url): return None
     async with sem:
         try:
             async with session.get(url, timeout=aiohttp.ClientTimeout(total=20), headers=headers) as r:
+                http_backoff.observe(url,r.status,r.headers)
                 if r.status == 200: return await r.text()
                 log_failure("http", url, "HTTP %d" % r.status)
         except Exception as e:
@@ -500,7 +504,7 @@ def analyze_event(c, prior):
                 valid, _, errors = validate_analysis(obj, evidence_text=sources_block)
                 if not valid: raise ValueError("analysis_schema: "+"; ".join(errors))
             obj = llm.chat_json([sys_msg, usr_msg], validator=check_response,
-                                temperature=0.1, max_tokens=2000)
+                                temperature=0.1, max_tokens=4096)
             ok, cleaned, errs = validate_analysis(obj, evidence_text=sources_block)
             if ok:
                 HEALTH["llm_ok"] += 1

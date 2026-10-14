@@ -217,10 +217,12 @@ def analyze(d):
             if not all(isinstance(obj.get(k),str) and len(obj[k])>=10 for k in REQUIRED_KEYS):
                 raise ValueError("gazette_analysis_fields")
         out = chat_json([
-            {"role": "system", "content": "Gazette editor. Output ONLY valid JSON. NO EMOJIS. NO DOLLAR FIGURES."},
+            {"role": "system", "content": "Gazette editor. Output ONLY valid JSON. NO EMOJIS. NO DOLLAR FIGURES. Each field is one concise sentence, 10 to 240 characters. No preamble or reasoning."},
             {"role": "user", "content": prompt}
-        ],validator=validate)
-    except Exception: pass
+        ],validator=validate,max_tokens=4096)
+    except Exception as exc:
+        from llm_response import rejection_reason
+        print("Gazette analysis unavailable: "+rejection_reason(exc),flush=True)
     if out is None:
         out, llm = _fallback_analysis(d, prev), False
     else:
