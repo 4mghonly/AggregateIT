@@ -184,4 +184,15 @@ class October14Recovery(unittest.TestCase):
         self.assertEqual(context['published'],rows[1]['published'])
         self.assertIn('24',context['summary'])
 
+class RedditEndpointRecovery(unittest.TestCase):
+    def test_current_arctic_endpoint_and_supported_sort(self):
+        import social
+        response=type("Response",(),{"status_code":200,"headers":{},"json":lambda self:{"data":[{"id":"verified"}]}})()
+        with patch.object(social.requests,"get",return_value=response) as get,patch.object(social.http_backoff,"blocked",return_value=False):
+            self.assertEqual(social._shift_get("/submissions/search",{"subreddit":"stocks","sort":"score:desc","limit":3})[0]["id"],"verified")
+        url=get.call_args.args[0]
+        self.assertIn("arctic-shift.photon-reddit.com/api/posts/search",url)
+        self.assertIn("sort=desc",url)
+        self.assertNotIn("score",url)
+
 if __name__=="__main__": unittest.main()
