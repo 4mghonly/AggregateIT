@@ -5,7 +5,7 @@
 
 ## Files
 - [MASTER CSV](../../config/v2/source_master_candidates_2026-10-24.csv): **509 rows** = **222 legacy V2 registry entries + 287 curated source/endpoint candidates**. Rows are *endpoints or registry records*, **not 509 unique publishers**. Existing and new entries intentionally coexist so the provenance of older settings is not lost. Some curated entries are alternative pages belonging to the same publisher; publisher-family reconciliation is pending.
-- [Prioritized shortlist CSV](../../config/v2/source_shortlist_2026-10-24.csv): **98 nominated entrypoints**, spanning international, regional, national and specialist outlets plus official and data sources. This is **candidate selection**, not admission to automatic harvesting.
+- [Prioritized shortlist CSV](../../config/v2/source_shortlist_2026-10-24.csv): **100 nominated entrypoints**, spanning international, regional, national and specialist outlets plus official and data sources. This is **candidate selection**, not admission to automatic harvesting.
 - [Existing registry](../../config/v2/source_registry.json): original 222 source records kept **unchanged**.
 
 ## How to read the master file
@@ -85,7 +85,7 @@
 - [Sana'a Center for Strategic Studies](https://sanaacenter.org/) — ar,en; Official site / section; cur-125; P1
 - [The Maritime Executive](https://maritime-executive.com/) — en; Official site / section; cur-130; P1
 
-### Sudan and Horn of Africa — 7
+### Sudan and Horn of Africa — 9
 - [Dabanga](https://www.dabangasudan.org/ar/feed) — ar (registry stream; not certified); feed; ar-s033; B
 - [Sudan Tribune](https://sudantribune.com/feed/) — ar (registry stream; not certified); feed; ar-s034; B
 - [Radio Tamazuj](https://radiotamazuj.org/) — en; Official site / section; cur-138; P1
@@ -93,6 +93,9 @@
 - [Hiiraan Online (Somali-language edition)](https://www.hiiraan.com/) — so,en; Official site / section; cur-145; P1
 - [Radio Ergo](https://radioergo.org/feed/) — ar (registry stream; not certified); feed; ar-s056; B
 - [Addis Standard](https://addisstandard.com/feed/) — ar (registry stream; not certified); feed; ar-s059; B
+
+- [IOM DTM Sudan](https://dtm.iom.int/) — en; Official site / section; cur-153; P1
+- [UNHCR Sudan situation](https://data.unhcr.org/) — en,ar; Official site / section; cur-154; P1
 
 ### Sahel and North Africa — 8
 - [Studio Tamani](https://www.studiotamani.org/feed) — ar (registry stream; not certified); feed; ar-s036; B
