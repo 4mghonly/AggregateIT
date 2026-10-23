@@ -7,10 +7,10 @@ No production integration before owner-approved B8.
 | B0 Foundation | COMPLETE — seven planning/fixture files committed and verified | MASTER_PLAN_V2, QUALITY_BASELINE, ARCHITECTURE_V2, fixtures, HANDOFF, branch/base comparison |
 | B1 Reliability | PARTIAL — isolated code/test package, 10 offline regressions passed; installed/e2e tests pending | Route failover, safe diagnostics, audit dependency/isolation, degraded-state marking; B1_RELIABILITY_REPORT.md |
 | B2 Source inventory | PARTIAL — offline joint snapshot and 14 stdlib tests PASS; live health, rights and family verification pending | 222 records, 8 cross-product duplicate feeds, 18 region snapshots, 4 dated-freshness deficits plus UAE-host gap; B2_SOURCE_INVENTORY_REPORT.md |
-| B3 Evidence core | PARTIAL — in-memory evidence contracts and graph ledger, 34 synthetic regression tests PASS; integration/durable provenance pending | v2_evidence.py, v2_evidence_ledger.py, 34 source-bound tests, B3_EVIDENCE_REPORT.md |
-| B4 Editorial engines | NOT STARTED | Structured Arabic and English editor, cross-lingual QA, abstention contract |
-| B5 Layout | NOT STARTED | Preview-scale screenshot suite, typography/RTL, fixed page count with no clipping |
-| B6 Operations | NOT STARTED | Durable scheduling, receipts and semantic health, fault-injection and rollback |
+| B3 Evidence core | PARTIAL — 48 offline core/graph/replay tests PASS; filesystem crash recovery and authenticated publisher provenance pending | v2_evidence.py, v2_evidence_ledger.py, v2_evidence_journal.py, B3_B6_OFFLINE_BATCH_REPORT.md |
+| B4 Editorial engines | PARTIAL — independent topic/region/native-evidence admission, 15 offline tests PASS | v2_editorial.py; no verified translation, generative editorial prose or production connection |
+| B5 Layout | PARTIAL — 2/3-page immutable layout admission, explicit overflow and 8 tests PASS | v2_layout.py; no raster or screenshot legibility testing yet |
+| B6 Operations | PARTIAL — optional analytics budget and dry-run retention controls, 12 tests PASS | v2_analytics_controls.py; no D1, persistent scheduler, receipts, backups or deletion |
 | B7 Shadow | NOT STARTED | Same-window scorecard, no real Discord publishing |
 | B8 Cutover | BLOCKED — requires user approval | Canary, successful SLO, migration and rollback |
 
@@ -71,3 +71,9 @@ No production integration before owner-approved B8.
 - `v2_evidence_ledger.py`: bounded observation graph, append-only event revisions, idempotent registration, strict source-revision/excerpt/claim/event reference checks, and explicit-only contradiction/correction relations.
 - Excerpt identity now includes source ID to preserve dual English/Arabic collector provenance; core 19/19 retested, ledger 15/15 passed in isolated Python 3.12.
 - B3 still PARTIAL: memory-only; no replay/persistence, rights-cleared authentic fixture, full collector integration or publisher ownership attestation.
+
+## 23 October 2026 — B3c/B4/B5a/B6a isolated continuation
+- Added source-bound journal replay, separate editorial admission policies, fixed-page layout budget prototype and fail-closed no-resource analytics budget/retention preview.
+- Focused offline result: **83/83** Python unit cases PASS (34 existing + 14 journal + 15 editorial + 8 layout + 12 budget). All cases synthetic, all modules executed from in-memory source; not installed full suite or production e2e.
+- Exact files and remaining acceptance gates: `docs/v2/B3_B6_OFFLINE_BATCH_REPORT.md`.
+- No main updates, scheduled workflows, model/source/network requests, Discord, D1, PocketBase, Drive backup, data deletion or paid resources.

@@ -58,3 +58,11 @@ Owner accepted a small analytics store with strict no-paid-plan budget and perio
 - Added `v2_evidence_ledger.py` and `tests/test_b3_evidence_ledger.py`. Evidence core was strengthened so excerpt IDs include their source ID and observation IDs are integrity-checked.
 - In-memory graph rejects missing/tampered article revision, excerpt, claim and event references; append-only event versions; explicit-only unverified correction/contradiction relations; bounded observations and raw-evidence-free counters.
 - Regression proof: B3 core 19/19 + B3 ledger 15/15 = 34/34 PASS, using actual source in isolated Python runtime. No persistent database, online fetch, LLM, Action or Discord call.
+
+## B3c–B6a isolated continuation — 23 October 2026
+- Added `v2_evidence_journal.py`, `v2_editorial.py`, `v2_layout.py`, `v2_analytics_controls.py` with their isolated regression files. 83/83 B3–B6 focus tests PASSED in Python 3.12 in-memory, without packages or external calls.
+- B3c hash-chain replay requires separately retained head receipt and caller-controlled exclusive writer; disk durability and crash simulation not proven.
+- B4 admits only native-language exact cited source excerpts, flags unverified publisher independence and abstains from foreign language without verified translation; distinct English/Arabic product rules; no generative newsroom capability yet.
+- B5 determines fixed pages and records overflow; no rendered PNG, scale test or font QA.
+- B6 fail-closed D1 budget simulation and no-delete retention preview; no DB or Drive integration, no cron or deletion permission.
+- Details and precise gates: `docs/v2/B3_B6_OFFLINE_BATCH_REPORT.md`. B1/B2 still partial; B3–B6 partial; B7 shadow and B8 cutover still untouched. Work solely on rebuild branch.
