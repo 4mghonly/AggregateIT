@@ -34,7 +34,9 @@ def validate_run(row: dict) -> dict:
     if not isinstance(revision, str) or not 7 <= len(revision) <= 64 or not all(
             c in "0123456789abcdef" for c in revision):
         raise ValueError("invalid_revision")
-    if row["delivery_status"] not in {"not_attempted", "unknown", "confirmed_unverified", "confirmed_external"}:
+    # This offline manifest has no authenticated receipt evidence field. Never
+    # accept a bare caller assertion of externally confirmed delivery.
+    if row["delivery_status"] not in {"not_attempted", "unknown", "confirmed_unverified"}:
         raise ValueError("bad_delivery_status")
     m = row["metrics"]
     if not isinstance(m, dict) or set(m) != METRIC_KEYS or any(
@@ -43,6 +45,9 @@ def validate_run(row: dict) -> dict:
     if (m["sources_usable"] > m["sources_attempted"] or
         m["items_cited"] > m["events_selected"] or
         m["items_rendered"] > m["events_selected"] or
+        m["items_rendered"] > m["items_cited"] or
+        m["clipped_items"] > m["items_rendered"] or
+        m["layout_omissions"] > m["events_selected"] or
         m["translation_succeeded"] > m["translation_attempted"]):
         raise ValueError("contradictory_metric_counts")
     geo = row["region_counts"]

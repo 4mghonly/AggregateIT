@@ -110,6 +110,25 @@ class ScorecardTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"contradictory"):
             validate_run(bad)
 
+    def test_uncited_rendered_items_never_count_as_coverage_gain(self):
+        bad=run()
+        bad["metrics"]["items_rendered"]=10
+        self.assertLess(bad["metrics"]["items_cited"],bad["metrics"]["items_rendered"])
+        with self.assertRaisesRegex(ValueError,"contradictory"):
+            compare_runs(run(),bad)
+
+    def test_unverified_shadow_manifest_cannot_claim_confirmed_external_delivery(self):
+        bad=run()
+        bad["delivery_status"]="confirmed_external"
+        with self.assertRaisesRegex(ValueError,"bad_delivery_status"):
+            validate_run(bad)
+
+    def test_clipped_items_cannot_exceed_items_rendered(self):
+        bad=run()
+        bad["metrics"]["clipped_items"]=9
+        with self.assertRaisesRegex(ValueError,"contradictory"):
+            validate_run(bad)
+
     def test_extra_unapproved_raw_text_refused(self):
         bad=run();bad["article_text"]="private"
         with self.assertRaisesRegex(ValueError,"invalid_run_manifest"):

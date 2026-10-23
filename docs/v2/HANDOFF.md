@@ -121,3 +121,29 @@ Never touch main/production or other branches, Discord, Actions/schedules, secre
 3. Wikinews: first-party Wikinews/Arabic Wikimedia notices confirm entire project ceased new publication in May 2026. Reusable historical text does not make it a live news alternative. UN News automated web search was blocked by robots; not circumvented.
 
 Per owner three-distinct-attempt stop rule, **B2 source-discovery for this batch is stopped** with no rights/source promotion and no body collection. The approved no-cost offline development proceeds independently; future B2 advancement needs materially new first-party candidate evidence or publisher permission. Record: `docs/v2/B1_B2_B3_B5_CONTINUATION_2026-10-23.md`.
+
+## 24 October 2026 — B1/B3/B4/B5/B7 product-rehearsal continuation
+
+**Evidence:** `docs/v2/B1_B3_B4_B5_B7_NOPOST_2026-10-24.md`. Starting branch `5022fee`; protected main observed at `c7a53e9` and not written. Isolated dependencies installed in a disposable Python 3.12 virtualenv. New suite result **208/208 V2 PASS**; **55/55 Arabic app PASS**, **6/6 original English layout PASS**, all offline/mocked. Two actual English 3840×2160 sample PNGs generated with no network/model/Discord.
+
+- `v2_english_application_rehearsal.py` is the **safe** V2-native-English evidence→actual-Gazette renderer adapter and CLI. It calls the B3–B6 offline rehearsal, maps only admitted source excerpts and renders directly using `gazette_render` in memory. It does **not** import `slide.py` or invoke its `__main__` (live collect, LLM, Discord). The optional CLI requires an already existing directory and refuses overwrite. Synthetic English publisher IDs `en-001`/`002`/`003` pass; a Persian-only event is withheld. Genuine source-to-translation/editorial testing remains outstanding.
+- `v2_evidence_anchor.py` implements a **portable operator HMAC checkpoint** and linked digest verification against B3 receipt; tests detect rollback if a separately retained newer anchor is supplied. No off-host anchor actually exists, no operational key custody, and this does not certify any news publisher. Never claim verified off-host attestation from these tests.
+- `v2_script_guard.py` plus `v2_editorial.py` now withhold snippets whose declared English/Arabic language label plainly conflicts with their Unicode letter script. This does **not** distinguish Arabic from other Arabic-script languages or prove correct translation. Do not assign native-Arabic coverage from script alone.
+- `gazette_render.py` suppresses empty market-chart default 0–1 axes and no longer displays 0% high/critical when no event is rated. Observed/measured zero remains distinct from unavailable data. Existing 3-page Arabic renderer untouched; future mobile-density/font QA still required.
+- `v2_shadow_scorecard.py` forbids claiming more rendered items than cited items in any same-window scorecard.
+
+**Next permitted, decision-free batches:** (1) harder synthetic English/Arabic editorial and service-boundary fault cases; (2) B3 local loss/corruption fault injection and anchor key-rotation specification; (3) B5 real-font/mobile-density synthetic QA; (4) B6 in-memory telemetry/delivery and B7 equal-input synthetic comparison. Run focused tests after each, full suite at closure. Stop on three materially different failures or an authority blocker. Do **not** retry B2's three exhausted public-source approaches.
+
+**Still separately gated:** licensed and fresh real-source acquisition, verified Arabic translation, true publisher-family independence, deployment-font choice, D1/Cloudflare resource provisioning, any backup/deletion schedule, paid models, real parallel V1/V2 shadow, Discord posting, main/CI/workflows and B8 cutover. B1–B7 remain PARTIAL and B8 BLOCKED even when local suites pass.
+
+## 24 October 2026 — B6/B7 next batch completed offline
+
+**Evidence:** `docs/v2/B6_DURABLE_RECEIPT_2026-10-24.md`; module `v2_delivery_receipt_store.py`; test `tests/test_b6_durable_receipt_store.py`. The previous B6 receipt gate had no restart durability. The new local POSIX exclusive-lock/checksummed/atomic-fsync snapshot persists reserved, ambiguous, and caller-confirmed-unverified state. It **must** complete `mark_network_attempt` before any future hypothetical send; an abrupt subprocess exit left ambiguous status safely unretryable upon reopen. Ten fault and boundary tests PASS. External reconciliation, cross-host proof and live integration are not implemented or authorized.
+
+B7 `v2_shadow_scorecard.py` now rejects `delivery_status=confirmed_external` from untrusted offline manifests, along with clipped counts exceeding rendered and omissions exceeding selected; focused **16/16** suite PASS. All reported improvements remain synthetic and no `main`, production, model, source registry, database, webhook or workflow was touched.
+
+Full isolated V2 test suite after this batch: **220/220 PASS**. Actual English synthetic pages re-rendered after the empty-plot and severity edits, with two verified 3840×2160 PNGs: page 1 SHA-256 `475a270e03748ace1781f46ad6a5abd69401c319fab84d1d19a3c11b76c1194d`; page 2 SHA-256 `a723f665644d045bf3fe8c9152a2866ea1c18b0fa49461747c94b8388e02e16d`. The two PNGs remain uncommitted disposable QA artifacts.
+
+Independent closing tests: original Arabic application **55/55 PASS** with mocked Discord/model traffic, and original English Gazette layout **6/6 PASS** with temporary synthetic PNG output. All test suites exited 0.
+
+**Next zero-cost gate:** run broad tests/visual QA, inspect diff and branch protections, record exact branch commit and final test totals. Continue B1/B4 native-language/evidence failure tests and B5 density only where fully offline. Never retry exhausted B2 search paths, schedule/distribute anything or claim B8 readiness.

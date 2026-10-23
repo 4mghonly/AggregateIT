@@ -10,6 +10,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 
 from v2_evidence import _time
+from v2_script_guard import script_consistent
 
 AR_REGIONS = frozenset({
     "gcc", "oman", "iran", "turkey", "iraq", "yemen", "egypt",
@@ -73,6 +74,11 @@ def _native_excerpt(ledger, event: dict, language: str, now: datetime,
             literal = excerpt["literal"]
             if len(literal) > 240 or len(literal.strip()) < 4:
                 reason = "quote_exceeds_safe_text_budget"
+                continue
+            # A language tag alone is not proof. This only rejects a clear
+            # script/label mismatch; Arabic-script Persian is NOT identified.
+            if not script_consistent(literal, excerpt["original_language"]):
+                reason = "source_script_mismatch"
                 continue
             candidates.append({
                 "quote": literal, "literal_sha256": excerpt["literal_sha256"],

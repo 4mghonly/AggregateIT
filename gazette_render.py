@@ -161,6 +161,23 @@ def _lax(ax):
     ax.title.set_color(INK); ax.title.set_fontsize(10.5); ax.title.set_weight("bold")
     ax.xaxis.label.set_fontweight("bold"); ax.yaxis.label.set_fontweight("bold")
 
+
+def _no_plot_data(ax):
+    """A missing snapshot is not an observed zero or an arbitrary 0–1 chart."""
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.text(0.5, 0.5, "No verified snapshot", transform=ax.transAxes,
+            color=MUT2, fontsize=11, ha="center", va="center")
+
+
+def severity_summary(events):
+    """Return observed high/critical count and share, or two absent values."""
+    rated = [e for e in events if e.get("severity") in ("Critical", "High", "Medium", "Low")]
+    if not rated:
+        return None, None
+    high = sum(1 for e in rated if e["severity"] in ("High", "Critical"))
+    return high, 100 * high / len(rated)
+
 def _masthead(A, title, r1, r2):
     A.text(.03, .978, r1, color=MUT2, fontsize=10)
     A.text(.97, .978, r2, color=MUT2, fontsize=10, ha="right")
@@ -184,9 +201,9 @@ def render_p1(d, a, llm_ok, path):
     tot = max(sum(rolls.values()), 1)
     mega = [m for m in pulse.get("mega_caps", []) if m.get("pct") is not None]
     adv = sum(1 for m in mega if m["pct"] > 0)
-    hi_crit = sum(1 for e in d["events"] if (e.get("severity") or "") in ("High", "Critical"))
+    hi_crit, high_share = severity_summary(d["events"])
     im = {i["name"]: i for i in macro.get("instruments", [])}
-    stats = [("EVENTS %dH" % d["event_window_h"], str(len(d["events"])), "tracked"), ("HIGH/CRIT", str(hi_crit), "severity"),
+    stats = [("EVENTS %dH" % d["event_window_h"], str(len(d["events"])), "tracked"), ("HIGH/CRIT", str(hi_crit) if hi_crit is not None else "-", "rated events"),
              ("BULLISH", "%d%%" % round(100 * rolls["bullish"] / tot) if sum(rolls.values()) else "-", "classified news"),
              ("BREADTH", "%d/%d" % (adv, len(mega)) if mega else "-", "mega-cap sample"),
              ("VIX", number(im.get("VIX", {}).get("price"), "%.1f"), regime.get("vix", "")),
@@ -245,11 +262,12 @@ def render_p1(d, a, llm_ok, path):
         A.text(px + 0.010, y - 0.014, "%s | %s | %s" % (sev, (str(conf) + "/100") if conf is not None else "-", (e.get("source") or "")[:22]), color=MUT2, fontsize=9)
         y -= 0.033
     y -= 0.004
-    A.text(px, y, "HIGH / CRITICAL EVENT SHARE", color=GEO, fontsize=10, weight="bold"); y -= 0.018
-    score = 100 * hi_crit / max(len(d["events"]), 1)
+    A.text(px, y, "HIGH / CRITICAL SHARE OF RATED EVENTS", color=GEO, fontsize=10, weight="bold"); y -= 0.018
+    score = high_share
     A.add_patch(plt.Rectangle((px, y - 0.006), pw * .86, 0.011, color=CARDL))
-    A.add_patch(plt.Rectangle((px, y - 0.006), pw * .86 * score / 100.0, 0.011, color=GEO))
-    A.text(px + pw, y - 0.006, "%d%%" % score if d["events"] else "-", color=GEO, fontsize=10, weight="bold", ha="right")
+    if score is not None:
+        A.add_patch(plt.Rectangle((px, y - 0.006), pw * .86 * score / 100.0, 0.011, color=GEO))
+    A.text(px + pw, y - 0.006, "%d%%" % score if score is not None else "-", color=GEO, fontsize=10, weight="bold", ha="right")
     y -= 0.026
     A.text(px, y, "ACTIVE NEWS SOURCES", color=GEO, fontsize=10, weight="bold"); y -= 0.016
     for line in _wrap(", ".join(d.get("sources_active", [])[:14]) or "No sources in window.", _chars(pw, 9))[:5]:
@@ -351,18 +369,24 @@ def render_p2(d, a, llm_ok, path):
         ax.barh(names, vals, color=[UP if v > 0 else DN for v in vals], height=0.72)
         ax.axvline(0, color=MUT2, lw=0.6)
         mm = max([abs(v) for v in vals] + [0.1]); ax.set_xlim(-mm * 1.3, mm * 1.3)
+    else:
+        _no_plot_data(ax)
     ax = fig.add_axes([0.06, 0.535, 0.26, 0.145]); _lax(ax); ax.set_title("SECTOR SAMPLE (avg %chg)", pad=6)
     if d["sector_tape"]:
         ks = [k[:14] for k, _ in d["sector_tape"][:8]][::-1]; vs = [v for _, v in d["sector_tape"][:8]][::-1]
         ax.barh(ks, vs, color=[UP if v > 0 else DN for v in vs], height=0.7)
         ax.axvline(0, color=MUT2, lw=0.6)
+    else:
+        _no_plot_data(ax)
     ax = fig.add_axes([0.05, 0.335, 0.27, 0.13]); _lax(ax); ax.set_title("MOVERS: %CHG vs REL-VOLUME", pad=6)
     sig = [{"t": k, **v} for k, v in pulse.get("sig", {}).items() if v.get("pct") is not None and v.get("relvol")][:50]
     if sig:
         ax.scatter([v["pct"] for v in sig], [v["relvol"] for v in sig], c=[UP if v["pct"] > 0 else DN for v in sig], s=12, alpha=0.7)
         for v in sorted(sig, key=lambda x: -x["relvol"])[:4]:
             ax.annotate(_clean(v["t"]), (v["pct"], v["relvol"]), color=INK, fontsize=8.5, weight="bold", xytext=(4, 5), textcoords="offset points")
-    ax.set_xlabel("Session change (%)", color=MUT2, fontsize=9.5, weight="bold", labelpad=3)
+        ax.set_xlabel("Session change (%)", color=MUT2, fontsize=9.5, weight="bold", labelpad=3)
+    else:
+        _no_plot_data(ax)
 
     px, py, pw = _panel(A, 0.34, 0.91, 0.36, 0.29, "MACRO & RATES - FULL BOARD", MKT)
     groups = {}
@@ -414,12 +438,12 @@ def render_p2(d, a, llm_ok, path):
             ax.margins(y=.25)
             ax.set_title("US YIELD CURVE (%) - CURRENT SNAPSHOT", pad=10)
         else:
-            ax.text(0.5, 0.5, "no data", color=MUT2, ha="center")
+            _no_plot_data(ax)
 
     ax = fig.add_axes([0.72, 0.80, 0.25, 0.11]); _lax(ax); ax.set_title("COMMODITIES (SESSION CHANGE %)", pad=6)
     coms = [i for i in groups.get("commodity", []) if i.get("pct") is not None]
     if not coms:
-        ax.text(0.5, 0.5, "No data", color=MUT2, ha="center", transform=ax.transAxes)
+        _no_plot_data(ax)
     else:
         ax.bar([_clean(i["name"])[:8] for i in coms], [i["pct"] for i in coms], color=[UP if i["pct"] > 0 else DN for i in coms])
         ax.axhline(0, color=MUT2, lw=0.6)
