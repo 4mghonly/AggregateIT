@@ -191,7 +191,8 @@ def build_report(proposals, *, ledger, as_of, verified_families, verified_langua
                                as_of=as_of,verified_families=verified_families,
                                verified_languages=verified_languages,product=product,
                                cadence=cadence,slot_id=slot_id)]
-        gate=True;reason='candidate_evidence_links_only'
+        gate=sections[0]['review_status'] in ('supported_challenge','assessment_survives')
+        reason='candidate_evidence_links_only' if gate else 'visible_degraded_notice_only'
     else:
         sections=[build_review(p,ledger=ledger,as_of=as_of,
                                verified_families=verified_families,verified_languages=verified_languages,
