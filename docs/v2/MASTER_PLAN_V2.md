@@ -75,3 +75,11 @@ Quality goals must be tested on sufficient dates, languages, sources and source 
 
 ## Accepted analytics-storage amendment (23 Oct 2026)
 Add a dedicated, free-tier-bounded telemetry store and operator dashboard. Cloudflare D1 Free is the provisional backend; PocketBase remains a self-hosted alternative, not a dependency. Telemetry is separate from raw article/evidence storage. Record ingestion/probe outcomes beginning in B1/B2, then deploy and activate retention only in B6 with independent approval. Enforce internal limits lower than D1 Free caps (250 MB warning, 300 MB optional-detail throttle, 350 MB analytics write stop, 20k writes/day, 250k rows scanned/day). Roll up detail, dry-run deletion first, and never delete existing raw source/evidence. Manual export to Google Drive and restore validation are required before live retention. Full policy: ANALYTICS_STORAGE_POLICY.md.
+
+## Editorial revision — 24 October 2026
+The owner's revised product direction in [EDITORIAL_PRODUCT_ARCHITECTURE_2026-10-24.md](EDITORIAL_PRODUCT_ARCHITECTURE_2026-10-24.md) **supersedes any rigid old two-page English / three-slide Arabic completeness assumptions**:
+- English integrates geopolitics and financial markets, including TradingView market news and display widgets, with independent primary market-price series for arithmetic.
+- Arabic restricts itself to geopolitics/security and UAE-first area monitoring, not standalone financial news.
+- Daily regular briefings feature new/developing stories and light analysis; separate weekly editions analyze a complete week of reports, changes, scenarios and deeper bilingual Naysayer.
+- The project is **not offline-only**: deterministic offline testing, live bounded public-source validation and isolated comparative preview are complementary. The owner is open to reasonable connected development. Actual user-owned production and billing mutations remain explicit deliberate decisions, not assumptions.
+- Preserve comprehensive area coverage through an annex or responsive report rather than unreadably crowding fixed Discord images. Source and evidence gates remain mandatory.
