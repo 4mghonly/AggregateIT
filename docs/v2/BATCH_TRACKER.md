@@ -9,7 +9,7 @@ No production integration before owner-approved B8.
 | B2 Source inventory | PARTIAL — 222-record ledger; 3 capped current reads, 3 robots unavailable, 3 rights-restricted not probed; 0 rights/family promotions | Radio Ergo dated 3/10, Masrawy dated 0/10, South24 HTML not RSS; explicit publisher restrictions; source review report + JSON ledger |
 | B3 Evidence core | PARTIAL — 48 earlier core/graph/replay checks; 4 new durable filesystem journal regressions passed; exclusive writer and authenticated publisher still pending | v2_evidence_journal.py, tests/test_b3_file_backed_recovery.py, source review report |
 | B4 Editorial engines | PARTIAL — native-language admission checks pass; English-only Ammon and Somali/English Radio Ergo cannot satisfy Arabic-native floor without validated translation | v2_editorial.py; source language evidence recorded, no live extraction or translation fidelity proof |
-| B5 Layout | PARTIAL — 2/3-page immutable layout admission, explicit overflow and 8 tests PASS | v2_layout.py; no raster or screenshot legibility testing yet |
+| B5 Layout | PARTIAL — offline admission/raster checks plus actual production renderer no-post smoke: English 2×3840×2160, Arabic 3×3840×2160 (long fixture, clipped=0) | DejaVu fallback only; approved Arabic Noto font and actual Discord-size legibility unverified; B5_ACTUAL_NOPOST_RENDER_2026-10-23.md |
 | B6 Operations | PARTIAL — 12 analytics plus 6 no-network receipt-gate tests PASS | v2_analytics_controls.py, v2_delivery_gate.py; no D1, durable sender/scheduler or deletion |
 | B7 Shadow | PARTIAL — 7 deterministic same-window comparison tests PASS; live captures unavailable | v2_shadow_scorecard.py; no real V1/V2 shadow execution or Discord publishing |
 | B8 Cutover | BLOCKED — requires user approval | Canary, successful SLO, migration and rollback |
@@ -109,3 +109,8 @@ No production integration before owner-approved B8.
 - Official terms: `ar-s017` The National, `ar-s118` Abu Dhabi Media Office and `ar-s046` Mada Masr have material automated-use/republishing restrictions; excluded from direct feed probes, permission required before proposed reuse. No source family or publication license certified.
 - B4: official Ammon English edition, Radio Ergo Somali/English publisher sections; current source counts cannot be treated as Arabic-native coverage. Do not infer native language from registry stream field or substitute machine translation without source-linked quality proof.
 - Evidence: `docs/v2/B1_B4_INSTALLED_SOURCE_REVIEW_2026-10-23.md` and `config/v2/source_probe_review_2026-10-23.json`. B1–B7 remain PARTIAL; B8 BLOCKED. No CI dispatch, webhook, source promotion, deletion, DB provisioning, production/main edits or paid model calls.
+
+## 23 October 2026 — B5 direct production-renderer NO-POST pass
+- After `54dd93a` checkpoint, directly invoked `gazette_render.render_p1/render_p2` with wholly synthetic, stamped sample data: 2 actual English PNGs, 3840×2160 RGBA each; no `slide.py` entry point invoked, so no collect, analysis, model or Discord.
+- Directly invoked `arabic_newsletter.render.render` with `sample.fixture(long=True)`: 3 actual Arabic PNGs, 3840×2160 RGB, renderer `clipped=0`, all in disposable `/tmp` with no Discord.
+- Local system has no approved production Noto Sans Arabic; fallback DejaVu was used. Render completion and internal clipping counter are not visual legibility or genuine news-content QA; still B5 PARTIAL. Report `docs/v2/B5_ACTUAL_NOPOST_RENDER_2026-10-23.md`.
