@@ -10,8 +10,8 @@ No production integration before owner-approved B8.
 | B3 Evidence core | PARTIAL — 48 offline core/graph/replay tests PASS; filesystem crash recovery and authenticated publisher provenance pending | v2_evidence.py, v2_evidence_ledger.py, v2_evidence_journal.py, B3_B6_OFFLINE_BATCH_REPORT.md |
 | B4 Editorial engines | PARTIAL — independent topic/region/native-evidence admission, 15 offline tests PASS | v2_editorial.py; no verified translation, generative editorial prose or production connection |
 | B5 Layout | PARTIAL — 2/3-page immutable layout admission, explicit overflow and 8 tests PASS | v2_layout.py; no raster or screenshot legibility testing yet |
-| B6 Operations | PARTIAL — optional analytics budget and dry-run retention controls, 12 tests PASS | v2_analytics_controls.py; no D1, persistent scheduler, receipts, backups or deletion |
-| B7 Shadow | NOT STARTED | Same-window scorecard, no real Discord publishing |
+| B6 Operations | PARTIAL — 12 analytics plus 6 no-network receipt-gate tests PASS | v2_analytics_controls.py, v2_delivery_gate.py; no D1, durable sender/scheduler or deletion |
+| B7 Shadow | PARTIAL — 7 deterministic same-window comparison tests PASS; live captures unavailable | v2_shadow_scorecard.py; no real V1/V2 shadow execution or Discord publishing |
 | B8 Cutover | BLOCKED — requires user approval | Canary, successful SLO, migration and rollback |
 
 ## B0 acceptance checklist
@@ -77,3 +77,8 @@ No production integration before owner-approved B8.
 - Focused offline result: **83/83** Python unit cases PASS (34 existing + 14 journal + 15 editorial + 8 layout + 12 budget). All cases synthetic, all modules executed from in-memory source; not installed full suite or production e2e.
 - Exact files and remaining acceptance gates: `docs/v2/B3_B6_OFFLINE_BATCH_REPORT.md`.
 - No main updates, scheduled workflows, model/source/network requests, Discord, D1, PocketBase, Drive backup, data deletion or paid resources.
+
+## B6b/B7a no-post continuation — 23 October 2026
+- Added product/slot receipt state machine with symbolic English/Arabic destination separation and ambiguous-send retry refusal, plus same-window multi-metric quality scorecard with explicit geographic losses.
+- Combined focus run 96/96 synthetic in-memory Python unittests PASS. Details: `docs/v2/B6_B7_NO_POST_REPORT.md`.
+- Real receipts, time-window captures, durable transactions, deployment, source-quality proof and B8 cutover remain explicitly pending.

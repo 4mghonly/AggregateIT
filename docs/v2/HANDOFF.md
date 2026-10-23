@@ -66,3 +66,8 @@ Owner accepted a small analytics store with strict no-paid-plan budget and perio
 - B5 determines fixed pages and records overflow; no rendered PNG, scale test or font QA.
 - B6 fail-closed D1 budget simulation and no-delete retention preview; no DB or Drive integration, no cron or deletion permission.
 - Details and precise gates: `docs/v2/B3_B6_OFFLINE_BATCH_REPORT.md`. B1/B2 still partial; B3–B6 partial; B7 shadow and B8 cutover still untouched. Work solely on rebuild branch.
+
+## B6b/B7a no-post follow-on — 23 October 2026
+- Added `v2_delivery_gate.py` and `v2_shadow_scorecard.py` plus 13 simulated regression cases; combined B3–B7 focus suite **96/96 PASS** in isolated in-memory Python. 
+- Receipt gate protects separate English/Arabic destinations, slots and ambiguous outcomes but has no durable database or authenticated Discord acknowledgement. Scorecard refuses different-window comparisons and reports region losses without claims of measured truthfulness.
+- See `docs/v2/B6_B7_NO_POST_REPORT.md`. B7 is only PARTIAL; no live comparison job, model call, delivery or cutover.
