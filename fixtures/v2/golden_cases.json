@@ -1,0 +1,185 @@
+{
+  "schema": "aggregateit-golden-cases/1",
+  "synthetic": true,
+  "citationPolicy": "No fixture is real news or publishable evidence.",
+  "cases": [
+    {
+      "id": "B0-01",
+      "layer": "editorial_evidence",
+      "description": "One supported UAE example event, two truly different family sources",
+      "input": {
+        "region": "gcc",
+        "subject_country": "AE",
+        "language": "en",
+        "headline": "Aster agency opens a regional warning centre",
+        "lead": "According to the Aster agency, a regional warning centre opened.",
+        "claims": [
+          {
+            "text": "A regional warning centre opened",
+            "article_ids": [
+              "syn-001",
+              "syn-002"
+            ],
+            "excerpt_ids": [
+              "syn-001-e1",
+              "syn-002-e1"
+            ]
+          }
+        ],
+        "articles": [
+          {
+            "article_id": "syn-001",
+            "source_id": "syn-pub-a",
+            "family_id": "family-a",
+            "url": "https://example.com/syn/a",
+            "excerpt": "A regional warning centre opened."
+          },
+          {
+            "article_id": "syn-002",
+            "source_id": "syn-pub-b",
+            "family_id": "family-b",
+            "url": "https://example.org/syn/b",
+            "excerpt": "The centre began operations."
+          }
+        ]
+      },
+      "expect": {
+        "decision": "ACCEPT",
+        "independent_families": 2,
+        "requires_exact_excerpt": true
+      }
+    },
+    {
+      "id": "B0-02",
+      "layer": "headline_integrity",
+      "description": "Source says inspection, headline invents an arrest",
+      "input": {
+        "headline": "Officials arrest five suspects",
+        "lead": "A synthetic inspector announced a routine inspection.",
+        "article_id": "syn-003",
+        "excerpt": "The inspector conducted a routine inspection."
+      },
+      "expect": {
+        "decision": "REJECT",
+        "reason": "unsupported_action_and_quantity"
+      }
+    },
+    {
+      "id": "B0-03",
+      "layer": "source_independence",
+      "description": "Multiple wire copies from one upstream family",
+      "input": {
+        "article_ids": [
+          "syn-004",
+          "syn-005"
+        ],
+        "family_ids": [
+          "wire-family",
+          "wire-family"
+        ],
+        "topic": "Syndicated border report"
+      },
+      "expect": {
+        "decision": "DEGRADE",
+        "independent_families": 1,
+        "reason": "syndicated_not_independent"
+      }
+    },
+    {
+      "id": "B0-04",
+      "layer": "coverage_health",
+      "description": "Only one source works for Somalia slot",
+      "input": {
+        "region": "somalia",
+        "configured": 3,
+        "compatible": 1,
+        "fresh_usable": 1,
+        "distinct_families": 1
+      },
+      "expect": {
+        "decision": "DEGRADE",
+        "region_green": false,
+        "reason": "source_family_floor"
+      }
+    },
+    {
+      "id": "B0-05",
+      "layer": "translation_fallback",
+      "description": "Both translation routes unusable for selected foreign-language item",
+      "input": {
+        "language": "fa",
+        "original_headline": "عنوان آزمایشی",
+        "primary_error": "INVALID_SCHEMA",
+        "fallback_error": "AUTH_403",
+        "original_article_id": "syn-006"
+      },
+      "expect": {
+        "decision": "WITHHOLD",
+        "reason": "no_verified_arabic_translation",
+        "preserve_original": true,
+        "no_fabricated_arabic": true
+      }
+    },
+    {
+      "id": "B0-06",
+      "layer": "event_delta",
+      "description": "Same event gains a distinct later confirmed update",
+      "input": {
+        "event_id": "evt-syn-007",
+        "previous": {
+          "as_of": "2026-10-22T06:00:00+04:00",
+          "claim_ids": [
+            "clm-a"
+          ]
+        },
+        "current": {
+          "as_of": "2026-10-22T12:00:00+04:00",
+          "claim_ids": [
+            "clm-a",
+            "clm-b"
+          ]
+        }
+      },
+      "expect": {
+        "decision": "UPDATE",
+        "new_claim_ids": [
+          "clm-b"
+        ],
+        "not_a_new_event": true
+      }
+    },
+    {
+      "id": "B0-07",
+      "layer": "layout",
+      "description": "Long Arabic RTL text must fit or be omitted explicitly",
+      "input": {
+        "product": "arabic",
+        "page_budget": 3,
+        "language": "ar",
+        "text": "تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. تقرير تجريبي طويل حول متابعة الأحداث الأمنية في المنطقة. "
+      },
+      "expect": {
+        "decision": "DEGRADE",
+        "must_not_clip": true,
+        "must_log_admission": true,
+        "rtl": true
+      }
+    },
+    {
+      "id": "B0-08",
+      "layer": "delivery",
+      "description": "Repeated dispatch of same Arabic slot with an already confirmed receipt",
+      "input": {
+        "product": "arabic",
+        "slot_id": "2026-10-23T06:00:00+04:00",
+        "existing_receipt": "synthetic-message-id",
+        "new_attempt": true
+      },
+      "expect": {
+        "decision": "WITHHOLD",
+        "reason": "slot_already_confirmed",
+        "no_duplicate_post": true
+      }
+    }
+  ]
+}
