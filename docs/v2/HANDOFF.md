@@ -198,3 +198,5 @@ Combined closing test result **231/231 V2 PASS**, original Arabic application **
 - HTML prototype polished, locally Chromium checked all 4 variants at 1320/390 width; new zip preview provided in conversation. Not wired to actual deployed image renderers.
 - Exact new evidence report: `docs/v2/B2_B7_DISCORD_WEEKLY_CONTINUATION_2026-10-24.md`. Next: run installed full suite on the branch, bounded live feed probes / TradingView current market scanner with no mutations and data-attribution fixes, connect real source excerpts and hosted model candidates, native Discord renderer visual QA and genuine V1/V2 shadow. B1–B7 PARTIAL; B8 release-gated.
 - Do not change `main`, existing production Discord webhooks/schedules, credentials, paid plans, databases or Actions just to test. Use progressive isolated development and ask before a real cutover or money-changing action.
+
+- Follow-on: B2 one-shot rate-limit/source HTTP classifier added; four more mock network tests passed. Current isolated focus 38/38; full repo suite not executed.
