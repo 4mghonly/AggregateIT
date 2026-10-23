@@ -17,7 +17,13 @@ BG='#08141B'; PAPER='#101D25'; PANEL_ALT='#13232C'; INK='#FBFDFC'; MUTED='#C6D0D
 COMMAND='#D6DCDD'; OLIVE='#68A77D'; SAND='#C6A557'; STEEL='#6AA4C5'
 ALERT='#D5646B'; AMBER='#C99B55'; TEAL='#62A29C'; BLUE='#66A8D0'; PURPLE='#9382A3'
 PALE_RED='#332126'; PALE_AMBER='#342D1F'; PALE_GREEN='#173127'; PALE_BLUE='#172C39'
-SEV={'high':('مرتفع',ALERT,PALE_RED),'medium':('متوسط',AMBER,PALE_AMBER),'low':('منخفض',OLIVE,PALE_GREEN)}
+SEV={
+    'high':('مرتفع',ALERT,PALE_RED),
+    'medium':('متوسط',AMBER,PALE_AMBER),
+    'low':('منخفض',OLIVE,PALE_GREEN),
+    # Missing or explicitly unrated evidence cannot become a measured LOW risk.
+    'unknown':('غير مصنف',MUTED,PANEL_ALT),
+}
 AR_MONTHS={1:'يناير',2:'فبراير',3:'مارس',4:'أبريل',5:'مايو',6:'يونيو',7:'يوليو',8:'أغسطس',9:'سبتمبر',10:'أكتوبر',11:'نوفمبر',12:'ديسمبر'}
 AR_WEEKDAYS={0:'الاثنين',1:'الثلاثاء',2:'الأربعاء',3:'الخميس',4:'الجمعة',5:'السبت',6:'الأحد'}
 
@@ -195,7 +201,7 @@ def panel(c,box,title,color=COMMAND,subtitle=None):
 
 
 def severity(e):
-    return SEV.get(e.get('severity','low'),SEV['low'])
+    return SEV.get(e.get('severity'),SEV['unknown'])
 
 def is_uae(e):
     text=(e.get('title_ar','')+' '+e.get('summary_ar',''))

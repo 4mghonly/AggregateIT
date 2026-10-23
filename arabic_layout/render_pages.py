@@ -264,6 +264,30 @@ def _continuity_events(brief):
 def _event_text(e):
     return sanitize_text(' '.join(str(e.get(k,'')) for k in ('title_ar','summary_ar','assessment_ar','watch_ar')))
 
+def _factual_text(e):
+    # Category membership must not be inferred from speculative assessments or
+    # monitoring suggestions alone. This is lexical screening, not fact-checking.
+    return sanitize_text(' '.join(str(e.get(k,'')) for k in ('title_ar','summary_ar')))
+
+_MILITANT_TERMS=('الحوث','أنصار الله','حماس','الجهاد الإسلامي','حزب الله',
+                 'حركة الشباب','داعش','القاعدة','طالبان','ميليش','فصائل مسلحة')
+_CONFLICT_TERMS=('هجوم','قصف','غارة','حرب','قتال','اشتباك','نزاع مسلح','مواجهات',
+                 'صاروخ','استهداف','تصعيد عسكري','إطلاق نار')
+_MARITIME_TERMS=('البحر الأحمر','باب المندب','هرمز','خليج عدن','الملاحة','بحري',
+                 'سفينة','ميناء','ساحل','المتوسط')
+_MARITIME_TENSION_TERMS=('هجوم','تهديد','صاروخ','اشتباك','إغلاق','تعطيل','توتر',
+                         'حظر','استهداف','انفجار','قرصنة','قصف')
+
+def _is_militant_story(e):
+    return any(t in _factual_text(e) for t in _MILITANT_TERMS)
+
+def _is_conflict_story(e):
+    return any(t in _factual_text(e) for t in _CONFLICT_TERMS)
+
+def _is_maritime_tension(e):
+    text=_factual_text(e)
+    return any(t in text for t in _MARITIME_TERMS) and any(t in text for t in _MARITIME_TENSION_TERMS)
+
 def _first_matching(events,predicate):
     for e in events:
         if predicate(e): return e
@@ -277,11 +301,9 @@ def _brief_line(e,limit=220):
     return compact(text,limit)
 
 def _page3_stats(c,brief,events):
-    militant_terms=('الحوث','حماس','الجهاد الإسلامي','حزب الله','الشباب','داعش','القاعدة','طالبان','فصائل','ميليش')
-    maritime_terms=('البحر الأحمر','باب المندب','هرمز','الخليج','خليج عدن','الملاحة','بحري','ساحل','ميناء','المتوسط')
-    militant=sum(any(t in _event_text(e) for t in militant_terms) for e in events)
-    maritime=sum(any(t in _event_text(e) for t in maritime_terms) for e in events)
-    conflicts=sum(e.get('topic') in ('military','security','humanitarian_conflict') for e in events)
+    militant=sum(_is_militant_story(e) for e in events)
+    maritime=sum(_is_maritime_tension(e) for e in events)
+    conflicts=sum(_is_conflict_story(e) for e in events)
     vals=[('أقاليم رئيسية',len(REGIONS),BLUE),('جماعات مسلحة',militant,OLIVE),
           ('نزاعات',conflicts,ALERT),('توترات بحرية',maritime,SAND)]
     margin=55; gap=18; y=190; h=108; cw=(W-2*margin-gap*3)//4
@@ -296,7 +318,7 @@ def _category_rows(c,box,title,subtitle,color,rows):
     x,y,w,h=panel(c,box,title,color,subtitle)
     rows=[(sanitize_text(a),sanitize_text(b)) for a,b in rows if sanitize_text(a) or sanitize_text(b)]
     if not rows:
-        rows=[('متابعة مستمرة','تستمر المتابعة من خلال أفضل المصادر الإقليمية المتاحة.')]
+        rows=[('لا توجد مادة مؤهلة','لا تتوافر وقائع مصنفة لهذه الفئة ضمن مادة الدورة الحالية.')]
     step=max(1,h//len(rows))
     for i,(head,body) in enumerate(rows):
         yy=y+i*step
@@ -318,18 +340,19 @@ def _militant_rows(events):
       ('الحوثيون',('الحوث','أنصار الله')),
       ('حماس والفصائل في غزة',('حماس','الجهاد الإسلامي','الفصائل في غزة')),
       ('الفصائل المسلحة على المحور العراقي السوري',('فصائل','ميليش','الحشد','كتائب','عصائب')),
-      ('حركة الشباب',('حركة الشباب','الشباب','الصومال')),
+      ('حركة الشباب',('حركة الشباب',)),
     ]
     rows=[]; used=set()
     for label,terms in specs:
-        e=_first_matching(events,lambda ev,terms=terms:any(t in _event_text(ev) for t in terms))
+        e=_first_matching(events,lambda ev,terms=terms:_is_militant_story(ev) and any(t in _factual_text(ev) for t in terms))
         if e:
             used.add(_event_key(e)); rows.append((label,_brief_line(e)))
-    # Always fill the panel with the strongest remaining armed/conflict stories.
+    # Fill only with stories explicitly naming an armed group. Generic security
+    # developments must never be relabelled as militant activity to fill space.
     for e in events:
         if len(rows)>=4: break
         if _event_key(e) in used: continue
-        if e.get('topic') in ('military','security','humanitarian_conflict'):
+        if _is_militant_story(e):
             rows.append((REGIONS.get(e.get('region'),'فاعل مسلح'),_brief_line(e))); used.add(_event_key(e))
     return rows[:4]
 
@@ -342,13 +365,13 @@ def _conflict_rows(events):
     ]
     rows=[]; used=set()
     for label,regs in preferred:
-        e=_first_matching(events,lambda ev,regs=regs:ev.get('region') in regs and ev.get('topic') in ('military','security','humanitarian_conflict','political_stability'))
+        e=_first_matching(events,lambda ev,regs=regs:ev.get('region') in regs and _is_conflict_story(ev))
         if e:
             used.add(_event_key(e)); rows.append((label,_brief_line(e)))
     for e in events:
         if len(rows)>=4: break
         if _event_key(e) in used: continue
-        if e.get('topic') in ('military','security','humanitarian_conflict'):
+        if _is_conflict_story(e):
             rows.append((REGIONS.get(e.get('region'),'نزاع إقليمي'),_brief_line(e))); used.add(_event_key(e))
     return rows[:4]
 
@@ -361,15 +384,14 @@ def _maritime_rows(events):
     ]
     rows=[]; used=set()
     for label,terms in specs:
-        e=_first_matching(events,lambda ev,terms=terms:any(t in _event_text(ev) for t in terms))
+        e=_first_matching(events,lambda ev,terms=terms:_is_maritime_tension(ev) and any(t in _factual_text(ev) for t in terms))
         if e:
             rows.append((label,_brief_line(e))); used.add(_event_key(e))
-    # If the current/prior cycle contains fewer explicit maritime stories,
-    # retain the strongest related regional story instead of leaving empty space.
+    # Do not turn unrelated GCC/Red Sea regional stories into maritime tensions.
     for e in events:
         if len(rows)>=4: break
         if _event_key(e) in used: continue
-        if e.get('region') in ('yemen','gcc','oman','somalia','horn','levant','palestine_israel'):
+        if _is_maritime_tension(e):
             rows.append((REGIONS.get(e.get('region'),'مسار بحري'),_brief_line(e))); used.add(_event_key(e))
     return rows[:4]
 

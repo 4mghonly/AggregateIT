@@ -147,3 +147,11 @@ Full isolated V2 test suite after this batch: **220/220 PASS**. Actual English s
 Independent closing tests: original Arabic application **55/55 PASS** with mocked Discord/model traffic, and original English Gazette layout **6/6 PASS** with temporary synthetic PNG output. All test suites exited 0.
 
 **Next zero-cost gate:** run broad tests/visual QA, inspect diff and branch protections, record exact branch commit and final test totals. Continue B1/B4 native-language/evidence failure tests and B5 density only where fully offline. Never retry exhausted B2 search paths, schedule/distribute anything or claim B8 readiness.
+
+## 24 October 2026 — B1/B5 Arabic source-to-real-renderer continuation
+
+**Evidence:** `docs/v2/B1_B5_ARABIC_BRIDGE_2026-10-24.md`. Starting published V2 branch `9c3888a`. The new `v2_arabic_application_rehearsal.py` passes only source-bound original Arabic quotes from B3/B4 to the *actual* three-slide PIL/RAQM renderer, in a disposable temporary directory with network sockets refused. Six English/Persian/Arabic source events were selected or withheld correctly: **three Arabic events selected, three non-Arabic events held**, three 4K PNGs rendered at zero reported text clipping. All analysis, translation, publisher-quality and rights claims remain unverified/abstained. Source and image samples are synthetic and not posted.
+
+Actual page-3 visual QA exposed unrelated safe security/maritime drills wrongly categorized as tensions, conflicts or armed groups. The branch renderer now requires factual source text support for these categories, never generic region/topic or speculative assessments alone; unrelated panels are explicitly empty. The earlier missing-severity→Low bug is also fixed to neutral **غير مصنف**. Focused Arabic bridge tests **7/7 PASS** and category tests **4/4 PASS**. No production/main/Claude/CI/webhook/storage changes, and all B1–B7 release gates remain PARTIAL, B8 BLOCKED.
+
+Combined closing test result **231/231 V2 PASS**, original Arabic application **55/55 PASS**, original English layout **6/6 PASS**—all fresh isolated post-change executions. Genuine live collection, fresh provenance, translation fidelity, independent publisher proof, qualified incidents and scheduled Discord delivery remain **NOT TESTED**.
