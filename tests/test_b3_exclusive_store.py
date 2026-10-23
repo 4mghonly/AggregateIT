@@ -133,6 +133,41 @@ class ExclusiveStoreTests(unittest.TestCase):
             with EvidenceStore(root) as recovered:
                 self.assertEqual(recovered.journal.seq, 1)
 
+    def test_symlinked_store_directory_refused(self):
+        with self.directory() as parent:
+            actual = Path(parent) / "real"
+            actual.mkdir()
+            alias = Path(parent) / "alias"
+            alias.symlink_to(actual, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlink_refused"):
+                with EvidenceStore(alias):
+                    pass
+            self.assertFalse((actual / "evidence.jsonl").exists())
+
+    def test_symlinked_head_receipt_refused_without_target_access(self):
+        with self.directory() as root:
+            with EvidenceStore(root):
+                pass
+            actual_receipt = Path(root) / "retained.json"
+            existing = Path(root) / "evidence.head.json"
+            existing.rename(actual_receipt)
+            existing.symlink_to(actual_receipt)
+            with self.assertRaisesRegex(ValueError, "symlink_refused"):
+                with EvidenceStore(root):
+                    pass
+            self.assertTrue(actual_receipt.is_file())
+
+    def test_fifo_as_journal_is_refused_without_hanging(self):
+        with self.directory() as root:
+            with EvidenceStore(root):
+                pass
+            log = Path(root) / "evidence.jsonl"
+            log.unlink()
+            os.mkfifo(log)
+            with self.assertRaisesRegex(ValueError, "nonregular_file"):
+                with EvidenceStore(root):
+                    pass
+
 
 if __name__ == "__main__":
     unittest.main()

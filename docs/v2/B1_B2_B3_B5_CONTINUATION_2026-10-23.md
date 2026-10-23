@@ -36,6 +36,12 @@ New **`v2_evidence_store.py`** owns one local POSIX journal inside an existing c
 
 **Limit:** local advisory lock only; cooperating single-host POSIX writers. Receipt checksums/hash-chain detect accidental drift, **not authenticated publisher identity** or malicious rollback of both journal and receipt. No forced power-loss rig, Windows adapter, off-host signed checkpoint, collector integration or production DB proof. B3 remains PARTIAL.
 
+### Follow-on B3 path-safety gate (same-day second batch)
+
+After publishing the first checkpoint, a separate bounded hardening pass required an existing **non-symlink directory** and regular journal, receipt and lock files. File descriptors use `O_NOFOLLOW` (where POSIX supported) and `O_NONBLOCK` plus `fstat(S_ISREG)`, so symlink/FIFO file-substitution probes refuse instead of following arbitrary paths or hanging. The append descriptor now explicitly seeks to the verified journal byte-end before a text writer is constructed; the first post-hardening test run exposed this offset regression and it was fixed before closure. Added **three** targeted tests: symlinked root, symlinked receipt and FIFO journal. All **12/12** B3 exclusive-store cases subsequently pass.
+
+This remains a cooperative-writer prototype, not a secure directory service: a malicious actor who can rename parent paths, bypass advisory locks or roll back both files is still outside its defended threat model. The operator must use a trusted isolated directory and independent off-host receipts in any later deployment design.
+
 ## B2 — single new permissive-source candidate; no admission
 
 First-party [Global Voices RSS directory](https://globalvoices.org/feeds/) lists [Arabic RSS feeds](https://ar.globalvoices.org/feeds/). Its [republishing guidelines](https://globalvoices.org/about/global-voices-attribution-policy/) say Global Voices-authored material is CC BY 3.0 unless otherwise stated, including commercial adaptation if correctly attributed and changes disclosed. **Embedded third-party photographs/video/audio are expressly excluded unless their own permission permits reuse.** Treat this as a *candidate* for content-specific verification, not blanket feed/asset clearance.
