@@ -1,0 +1,4053 @@
+{
+  "schema_version": "2.0.0-preview",
+  "as_of_utc": "2026-10-23",
+  "sources_of_record": {
+    "english": "config/sources.json",
+    "arabic": "arabic_newsletter/sources.json",
+    "historical_arabic_audit": "arabic_newsletter/SOURCE_AUDIT.json",
+    "arabic_audit_checked_at": "2026-10-22T06:07:28.669454+00:00"
+  },
+  "interpretation": {
+    "status": "Offline snapshot; never interpret legacy Active as currently usable.",
+    "independence": "All host candidates are unverified family independence; syndication/mirrors cannot be counted as independent.",
+    "english_language": "Unknown per source; English legacy file has no language/region fields.",
+    "freshness": "Arabic audit checked 2026-10-22, dated_72h is historical only, English has no comparable audit.",
+    "rights": "All source-specific rights are not reviewed; source discovery, article reading, analysis and redistribution are separate permissions.",
+    "html": "HTML adapters may be adapter-compatible even when dated_72h is zero."
+  },
+  "sources": [
+    {
+      "id": "en-001",
+      "stream": "english",
+      "legacy_id": 1,
+      "name": "BBC World",
+      "entrypoint": "https://feeds.bbci.co.uk/news/world/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.bbci.co.uk",
+      "category": "Global News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-002",
+      "stream": "english",
+      "legacy_id": 2,
+      "name": "BBC Politics",
+      "entrypoint": "https://feeds.bbci.co.uk/news/politics/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.bbci.co.uk",
+      "category": "Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-003",
+      "stream": "english",
+      "legacy_id": 3,
+      "name": "BBC Business",
+      "entrypoint": "https://feeds.bbci.co.uk/news/business/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.bbci.co.uk",
+      "category": "Economics / Business",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-004",
+      "stream": "english",
+      "legacy_id": 4,
+      "name": "BBC Middle East",
+      "entrypoint": "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.bbci.co.uk",
+      "category": "Middle East",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-005",
+      "stream": "english",
+      "legacy_id": 5,
+      "name": "BBC US & Canada",
+      "entrypoint": "https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.bbci.co.uk",
+      "category": "US Politics / US News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-006",
+      "stream": "english",
+      "legacy_id": 6,
+      "name": "Al Jazeera",
+      "entrypoint": "https://www.aljazeera.com/xml/rss/all.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "aljazeera.com",
+      "category": "Global News / Middle East",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-007",
+      "stream": "english",
+      "legacy_id": 7,
+      "name": "The Guardian World",
+      "entrypoint": "https://www.theguardian.com/world/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "theguardian.com",
+      "category": "Global News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-008",
+      "stream": "english",
+      "legacy_id": 8,
+      "name": "The Guardian Politics",
+      "entrypoint": "https://www.theguardian.com/politics/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "theguardian.com",
+      "category": "Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-009",
+      "stream": "english",
+      "legacy_id": 9,
+      "name": "The Guardian US News",
+      "entrypoint": "https://www.theguardian.com/us-news/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "theguardian.com",
+      "category": "US Politics / US News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-010",
+      "stream": "english",
+      "legacy_id": 10,
+      "name": "The Guardian Middle East",
+      "entrypoint": "https://www.theguardian.com/world/middleeast/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "theguardian.com",
+      "category": "Middle East",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-011",
+      "stream": "english",
+      "legacy_id": 11,
+      "name": "The Guardian Business",
+      "entrypoint": "https://www.theguardian.com/business/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "theguardian.com",
+      "category": "Economics / Business",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-012",
+      "stream": "english",
+      "legacy_id": 12,
+      "name": "The Guardian Economics",
+      "entrypoint": "https://www.theguardian.com/business/economics/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "theguardian.com",
+      "category": "Economics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-013",
+      "stream": "english",
+      "legacy_id": 13,
+      "name": "NPR News",
+      "entrypoint": "https://feeds.npr.org/1001/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.npr.org",
+      "category": "US Politics / Breaking",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-014",
+      "stream": "english",
+      "legacy_id": 14,
+      "name": "NPR World",
+      "entrypoint": "https://feeds.npr.org/1004/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.npr.org",
+      "category": "Global News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-015",
+      "stream": "english",
+      "legacy_id": 15,
+      "name": "NPR Politics",
+      "entrypoint": "https://feeds.npr.org/1014/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.npr.org",
+      "category": "US Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-016",
+      "stream": "english",
+      "legacy_id": 16,
+      "name": "PBS NewsHour",
+      "entrypoint": "https://www.pbs.org/newshour/feeds/rss/headlines",
+      "entrypoint_type": "feed",
+      "host_candidate": "pbs.org",
+      "category": "US Politics / World News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-017",
+      "stream": "english",
+      "legacy_id": 17,
+      "name": "France 24",
+      "entrypoint": "https://www.france24.com/en/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "france24.com",
+      "category": "Global News / Geopolitics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-018",
+      "stream": "english",
+      "legacy_id": 18,
+      "name": "DW World",
+      "entrypoint": "https://rss.dw.com/rdf/rss-en-world",
+      "entrypoint_type": "feed",
+      "host_candidate": "rss.dw.com",
+      "category": "Global News / Geopolitics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-019",
+      "stream": "english",
+      "legacy_id": 19,
+      "name": "DW Business",
+      "entrypoint": "https://rss.dw.com/rdf/rss-en-bus",
+      "entrypoint_type": "feed",
+      "host_candidate": "rss.dw.com",
+      "category": "Economics / Business",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-020",
+      "stream": "english",
+      "legacy_id": 20,
+      "name": "ABC Australia News",
+      "entrypoint": "https://www.abc.net.au/news/feed/51120/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "abc.net.au",
+      "category": "Global News / Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-021",
+      "stream": "english",
+      "legacy_id": 21,
+      "name": "ABC Australia Business",
+      "entrypoint": "https://www.abc.net.au/news/feed/51892/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "abc.net.au",
+      "category": "Economics / Business",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-022",
+      "stream": "english",
+      "legacy_id": 22,
+      "name": "MarketWatch Top Stories",
+      "entrypoint": "http://feeds.marketwatch.com/marketwatch/topstories/",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.marketwatch.com",
+      "category": "US Markets / Stocks",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-023",
+      "stream": "english",
+      "legacy_id": 23,
+      "name": "Seeking Alpha",
+      "entrypoint": "https://seekingalpha.com/feed.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "seekingalpha.com",
+      "category": "Stocks / Earnings",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-024",
+      "stream": "english",
+      "legacy_id": 24,
+      "name": "CoinDesk",
+      "entrypoint": "https://www.coindesk.com/arc/outboundfeeds/rss/?output=1",
+      "entrypoint_type": "feed",
+      "host_candidate": "coindesk.com",
+      "category": "Crypto / Financial Markets",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-025",
+      "stream": "english",
+      "legacy_id": 25,
+      "name": "Cointelegraph",
+      "entrypoint": "https://cointelegraph.com/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "cointelegraph.com",
+      "category": "Crypto / Financial Markets",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-026",
+      "stream": "english",
+      "legacy_id": 26,
+      "name": "Decrypt",
+      "entrypoint": "https://decrypt.co/feed",
+      "entrypoint_type": "feed",
+      "host_candidate": "decrypt.co",
+      "category": "Crypto / Financial Markets",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-027",
+      "stream": "english",
+      "legacy_id": 27,
+      "name": "Bitcoin Magazine",
+      "entrypoint": "https://bitcoinmagazine.com/feed",
+      "entrypoint_type": "feed",
+      "host_candidate": "bitcoinmagazine.com",
+      "category": "Bitcoin / Crypto",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-028",
+      "stream": "english",
+      "legacy_id": 28,
+      "name": "CryptoSlate",
+      "entrypoint": "https://cryptoslate.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "cryptoslate.com",
+      "category": "Crypto / Financial Markets",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-029",
+      "stream": "english",
+      "legacy_id": 29,
+      "name": "Federal Reserve",
+      "entrypoint": "https://www.federalreserve.gov/feeds/press_all.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "federalreserve.gov",
+      "category": "US Monetary Policy / Economics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-030",
+      "stream": "english",
+      "legacy_id": 30,
+      "name": "European Central Bank",
+      "entrypoint": "https://www.ecb.europa.eu/rss/press.html",
+      "entrypoint_type": "feed",
+      "host_candidate": "ecb.europa.eu",
+      "category": "European Monetary Policy / Economics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-031",
+      "stream": "english",
+      "legacy_id": 31,
+      "name": "ECB Market Information",
+      "entrypoint": "http://mid.ecb.europa.eu/rss/mid.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "mid.ecb.europa.eu",
+      "category": "Markets / Central Banks",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-032",
+      "stream": "english",
+      "legacy_id": 32,
+      "name": "ECB USD Exchange Rate",
+      "entrypoint": "https://www.ecb.europa.eu/rss/fxref-usd.html",
+      "entrypoint_type": "feed",
+      "host_candidate": "ecb.europa.eu",
+      "category": "Forex / EURUSD",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-033",
+      "stream": "english",
+      "legacy_id": 33,
+      "name": "Dow Jones Markets Wire",
+      "entrypoint": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.a.dj.com",
+      "category": "Energy / Economics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-034",
+      "stream": "english",
+      "legacy_id": 34,
+      "name": "OilPrice.com Headlines",
+      "entrypoint": "https://oilprice.com/rss/main",
+      "entrypoint_type": "feed",
+      "host_candidate": "oilprice.com",
+      "category": "Oil / Energy / Commodities",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-035",
+      "stream": "english",
+      "legacy_id": 35,
+      "name": "Investing.com Global",
+      "entrypoint": "https://www.investing.com/rss/news.rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "investing.com",
+      "category": "Global Financial News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-036",
+      "stream": "english",
+      "legacy_id": 36,
+      "name": "Investing.com Stock Market",
+      "entrypoint": "https://www.investing.com/rss/news_285.rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "investing.com",
+      "category": "Stocks / Equities",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-037",
+      "stream": "english",
+      "legacy_id": 37,
+      "name": "Investing.com Forex",
+      "entrypoint": "https://www.investing.com/rss/news_1.rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "investing.com",
+      "category": "Forex / FX",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-038",
+      "stream": "english",
+      "legacy_id": 38,
+      "name": "Investing.com Commodities",
+      "entrypoint": "https://www.investing.com/rss/news_11.rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "investing.com",
+      "category": "Commodities / Oil / Gold",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-039",
+      "stream": "english",
+      "legacy_id": 39,
+      "name": "Investing.com Economics",
+      "entrypoint": "https://www.investing.com/rss/news_14.rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "investing.com",
+      "category": "Economics / Macro",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-040",
+      "stream": "english",
+      "legacy_id": 40,
+      "name": "Investing.com Cryptocurrency",
+      "entrypoint": "https://www.investing.com/rss/news_301.rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "investing.com",
+      "category": "Crypto / Markets",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-041",
+      "stream": "english",
+      "legacy_id": 41,
+      "name": "Investing.com Market Overview",
+      "entrypoint": "https://www.investing.com/rss/market_overview.rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "investing.com",
+      "category": "US Markets",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-042",
+      "stream": "english",
+      "legacy_id": 42,
+      "name": "Politico - Top Stories",
+      "entrypoint": "https://rss.politico.com/politics-news.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "rss.politico.com",
+      "category": "US Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-043",
+      "stream": "english",
+      "legacy_id": 43,
+      "name": "The Hill - Administration",
+      "entrypoint": "https://thehill.com/homenews/administration/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "thehill.com",
+      "category": "US Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-044",
+      "stream": "english",
+      "legacy_id": 44,
+      "name": "The Hill - Senate",
+      "entrypoint": "https://thehill.com/homenews/senate/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "thehill.com",
+      "category": "US Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-045",
+      "stream": "english",
+      "legacy_id": 45,
+      "name": "Roll Call - Politics",
+      "entrypoint": "https://rollcall.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "rollcall.com",
+      "category": "US Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-046",
+      "stream": "english",
+      "legacy_id": 46,
+      "name": "RealClearPolitics",
+      "entrypoint": "https://www.realclearpolitics.com/index.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "realclearpolitics.com",
+      "category": "US Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-047",
+      "stream": "english",
+      "legacy_id": 47,
+      "name": "Washington Examiner",
+      "entrypoint": "https://www.washingtonexaminer.com/tag/politics/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "washingtonexaminer.com",
+      "category": "US Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-048",
+      "stream": "english",
+      "legacy_id": 48,
+      "name": "NYT - US Politics",
+      "entrypoint": "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "rss.nytimes.com",
+      "category": "US Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-049",
+      "stream": "english",
+      "legacy_id": 49,
+      "name": "Fox News - Politics",
+      "entrypoint": "https://moxie.foxnews.com/google-publisher/politics.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "moxie.foxnews.com",
+      "category": "US Politics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-050",
+      "stream": "english",
+      "legacy_id": 50,
+      "name": "Middle East Eye",
+      "entrypoint": "https://www.middleeasteye.net/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "middleeasteye.net",
+      "category": "Middle East News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-051",
+      "stream": "english",
+      "legacy_id": 51,
+      "name": "NYT - World",
+      "entrypoint": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "rss.nytimes.com",
+      "category": "World News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-052",
+      "stream": "english",
+      "legacy_id": 52,
+      "name": "WSJ - World News",
+      "entrypoint": "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.a.dj.com",
+      "category": "World News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-053",
+      "stream": "english",
+      "legacy_id": 53,
+      "name": "Foreign Policy",
+      "entrypoint": "https://foreignpolicy.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "foreignpolicy.com",
+      "category": "World News / Geopolitics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-054",
+      "stream": "english",
+      "legacy_id": 54,
+      "name": "The Diplomat",
+      "entrypoint": "https://thediplomat.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "thediplomat.com",
+      "category": "World News / Geopolitics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-055",
+      "stream": "english",
+      "legacy_id": 55,
+      "name": "Financial Times - Global Economy",
+      "entrypoint": "https://www.ft.com/global-economy?format=rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "ft.com",
+      "category": "Economy",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-056",
+      "stream": "english",
+      "legacy_id": 56,
+      "name": "Bloomberg - Economics",
+      "entrypoint": "https://feeds.bloomberg.com/economics/news.rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.bloomberg.com",
+      "category": "Economy",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-057",
+      "stream": "english",
+      "legacy_id": 57,
+      "name": "WSJ - Economy",
+      "entrypoint": "https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.a.dj.com",
+      "category": "Economy",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-058",
+      "stream": "english",
+      "legacy_id": 58,
+      "name": "The Economist - Economics",
+      "entrypoint": "https://www.economist.com/finance-and-economics/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "economist.com",
+      "category": "Economy",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-059",
+      "stream": "english",
+      "legacy_id": 59,
+      "name": "MarketWatch - Economy",
+      "entrypoint": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.content.dowjones.io",
+      "category": "Economy",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-060",
+      "stream": "english",
+      "legacy_id": 60,
+      "name": "NYT - Breaking / Home",
+      "entrypoint": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "rss.nytimes.com",
+      "category": "Breaking News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-061",
+      "stream": "english",
+      "legacy_id": 61,
+      "name": "NBC News - Top Stories",
+      "entrypoint": "https://feeds.nbcnews.com/nbcnews/public/news",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.nbcnews.com",
+      "category": "Breaking News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-062",
+      "stream": "english",
+      "legacy_id": 62,
+      "name": "CBS News - Breaking",
+      "entrypoint": "https://www.cbsnews.com/latest/rss/main",
+      "entrypoint_type": "feed",
+      "host_candidate": "cbsnews.com",
+      "category": "Breaking News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-063",
+      "stream": "english",
+      "legacy_id": 63,
+      "name": "ABC News - Breaking",
+      "entrypoint": "https://abcnews.go.com/abcnews/topstories",
+      "entrypoint_type": "feed",
+      "host_candidate": "abcnews.go.com",
+      "category": "Breaking News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-064",
+      "stream": "english",
+      "legacy_id": 64,
+      "name": "The Independent - Breaking",
+      "entrypoint": "https://www.independent.co.uk/news/world/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "independent.co.uk",
+      "category": "Breaking News",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-066",
+      "stream": "english",
+      "legacy_id": 66,
+      "name": "Bloomberg - Markets",
+      "entrypoint": "https://feeds.bloomberg.com/markets/news.rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.bloomberg.com",
+      "category": "US Markets",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-067",
+      "stream": "english",
+      "legacy_id": 67,
+      "name": "MarketWatch - Market Pulse",
+      "entrypoint": "https://feeds.content.dowjones.io/public/rss/mw_marketpulse",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.content.dowjones.io",
+      "category": "US Markets",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-068",
+      "stream": "english",
+      "legacy_id": 68,
+      "name": "Yahoo Finance - Top",
+      "entrypoint": "https://finance.yahoo.com/news/rssindex",
+      "entrypoint_type": "feed",
+      "host_candidate": "finance.yahoo.com",
+      "category": "US Markets",
+      "legacy_state": "disabled"
+    },
+    {
+      "id": "en-069",
+      "stream": "english",
+      "legacy_id": 69,
+      "name": "Seeking Alpha - Market News",
+      "entrypoint": "https://seekingalpha.com/market_currents.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "seekingalpha.com",
+      "category": "US Markets",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-070",
+      "stream": "english",
+      "legacy_id": 70,
+      "name": "ZeroHedge",
+      "entrypoint": "http://feeds.feedburner.com/zerohedge/feed",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.feedburner.com",
+      "category": "Financial OSINT",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-071",
+      "stream": "english",
+      "legacy_id": 71,
+      "name": "Financial Times - Alphaville",
+      "entrypoint": "https://ftalphaville.ft.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "ftalphaville.ft.com",
+      "category": "Financial OSINT",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-072",
+      "stream": "english",
+      "legacy_id": 72,
+      "name": "Business Insider - Finance",
+      "entrypoint": "https://www.businessinsider.com/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "businessinsider.com",
+      "category": "Financial OSINT",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-073",
+      "stream": "english",
+      "legacy_id": 73,
+      "name": "Mish Talk - Global Econ Trends",
+      "entrypoint": "https://mishtalk.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "mishtalk.com",
+      "category": "Financial OSINT",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-074",
+      "stream": "english",
+      "legacy_id": 74,
+      "name": "Calculated Risk",
+      "entrypoint": "https://www.calculatedriskblog.com/feeds/posts/default",
+      "entrypoint_type": "feed",
+      "host_candidate": "calculatedriskblog.com",
+      "category": "Financial OSINT",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-075",
+      "stream": "english",
+      "legacy_id": 75,
+      "name": "Naked Capitalism",
+      "entrypoint": "https://www.nakedcapitalism.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "nakedcapitalism.com",
+      "category": "Financial OSINT",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-076",
+      "stream": "english",
+      "legacy_id": 76,
+      "name": "Defense News",
+      "entrypoint": "https://www.defensenews.com/arc/outboundfeeds/rss/category/global/",
+      "entrypoint_type": "feed",
+      "host_candidate": "defensenews.com",
+      "category": "Geopolitics / Defense",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-077",
+      "stream": "english",
+      "legacy_id": 77,
+      "name": "War on the Rocks",
+      "entrypoint": "https://warontherocks.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "warontherocks.com",
+      "category": "Geopolitics / Defense",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-078",
+      "stream": "english",
+      "legacy_id": 78,
+      "name": "Geopolitical Futures",
+      "entrypoint": "https://geopoliticalfutures.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "geopoliticalfutures.com",
+      "category": "Geopolitics",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-079",
+      "stream": "english",
+      "legacy_id": 79,
+      "name": "Bellingcat (OSINT)",
+      "entrypoint": "https://www.bellingcat.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "bellingcat.com",
+      "category": "Threat Intel / OSINT",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-080",
+      "stream": "english",
+      "legacy_id": 80,
+      "name": "The Hacker News",
+      "entrypoint": "https://feeds.feedburner.com/TheHackersNews",
+      "entrypoint_type": "feed",
+      "host_candidate": "feeds.feedburner.com",
+      "category": "Threat Intel / Cyber",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-081",
+      "stream": "english",
+      "legacy_id": 81,
+      "name": "Krebs on Security",
+      "entrypoint": "https://krebsonsecurity.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "krebsonsecurity.com",
+      "category": "Threat Intel / Cyber",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-082",
+      "stream": "english",
+      "legacy_id": 82,
+      "name": "Dark Reading",
+      "entrypoint": "https://www.darkreading.com/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "darkreading.com",
+      "category": "Threat Intel / Cyber",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-083",
+      "stream": "english",
+      "legacy_id": 83,
+      "name": "Bleeping Computer",
+      "entrypoint": "https://www.bleepingcomputer.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "bleepingcomputer.com",
+      "category": "Threat Intel / Cyber",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-084",
+      "stream": "english",
+      "legacy_id": 84,
+      "name": "The Cipher Brief",
+      "entrypoint": "https://www.thecipherbrief.com/feed",
+      "entrypoint_type": "feed",
+      "host_candidate": "thecipherbrief.com",
+      "category": "Threat Intel",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-085",
+      "stream": "english",
+      "legacy_id": 85,
+      "name": "IntelNews",
+      "entrypoint": "https://intelnews.org/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "intelnews.org",
+      "category": "Threat Intel",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-086",
+      "stream": "english",
+      "legacy_id": 86,
+      "name": "SecList / Full Disclosure",
+      "entrypoint": "https://seclists.org/rss/fulldisclosure.rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "seclists.org",
+      "category": "Threat Intel / Cyber",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-087",
+      "stream": "english",
+      "legacy_id": 87,
+      "name": "BreaGG/OSINT-MONITOR",
+      "entrypoint": "https://github.com/BreaGG/OSINT-MONITOR",
+      "entrypoint_type": "discovery_only",
+      "host_candidate": "github.com",
+      "category": "GitHub Repository",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-088",
+      "stream": "english",
+      "legacy_id": 88,
+      "name": "Sinndarkblade/deepdive",
+      "entrypoint": "https://github.com/Sinndarkblade/deepdive",
+      "entrypoint_type": "discovery_only",
+      "host_candidate": "github.com",
+      "category": "GitHub Repository",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-089",
+      "stream": "english",
+      "legacy_id": 89,
+      "name": "koala73/worldmonitor",
+      "entrypoint": "https://github.com/koala73/worldmonitor",
+      "entrypoint_type": "discovery_only",
+      "host_candidate": "github.com",
+      "category": "GitHub Repository",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-090",
+      "stream": "english",
+      "legacy_id": 90,
+      "name": "Mendoraa/deevo-monitor",
+      "entrypoint": "https://github.com/Mendoraa/deevo-monitor",
+      "entrypoint_type": "discovery_only",
+      "host_candidate": "github.com",
+      "category": "GitHub Repository",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-091",
+      "stream": "english",
+      "legacy_id": 91,
+      "name": "frangelbarrera/OSINT-BIBLE",
+      "entrypoint": "https://github.com/frangelbarrera/OSINT-BIBLE",
+      "entrypoint_type": "discovery_only",
+      "host_candidate": "github.com",
+      "category": "GitHub Repository",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "en-092",
+      "stream": "english",
+      "legacy_id": 92,
+      "name": "Breaking Defense",
+      "entrypoint": "https://breakingdefense.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "breakingdefense.com",
+      "category": "Defense",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-093",
+      "stream": "english",
+      "legacy_id": 93,
+      "name": "Benzinga",
+      "entrypoint": "https://www.benzinga.com/feed",
+      "entrypoint_type": "feed",
+      "host_candidate": "benzinga.com",
+      "category": "Markets",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-095",
+      "stream": "english",
+      "legacy_id": 95,
+      "name": "FreightWaves",
+      "entrypoint": "https://www.freightwaves.com/feed",
+      "entrypoint_type": "feed",
+      "host_candidate": "freightwaves.com",
+      "category": "Trade",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-097",
+      "stream": "english",
+      "legacy_id": 97,
+      "name": "TechCrunch",
+      "entrypoint": "https://techcrunch.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "techcrunch.com",
+      "category": "Tech",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-098",
+      "stream": "english",
+      "legacy_id": 98,
+      "name": "The Verge",
+      "entrypoint": "https://www.theverge.com/rss/index.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "theverge.com",
+      "category": "Tech",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-099",
+      "stream": "english",
+      "legacy_id": 99,
+      "name": "Ars Technica",
+      "entrypoint": "https://arstechnica.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "arstechnica.com",
+      "category": "Tech",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-100",
+      "stream": "english",
+      "legacy_id": 100,
+      "name": "Wired",
+      "entrypoint": "https://www.wired.com/feed/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "wired.com",
+      "category": "Tech",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-101",
+      "stream": "english",
+      "legacy_id": 101,
+      "name": "EE Times",
+      "entrypoint": "https://www.eetimes.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "eetimes.com",
+      "category": "Semis",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-102",
+      "stream": "english",
+      "legacy_id": 102,
+      "name": "The Record",
+      "entrypoint": "https://therecord.media/feed",
+      "entrypoint_type": "feed",
+      "host_candidate": "therecord.media",
+      "category": "Cyber",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-103",
+      "stream": "english",
+      "legacy_id": 103,
+      "name": "CyberScoop",
+      "entrypoint": "https://www.cyberscoop.com/feed/",
+      "entrypoint_type": "feed",
+      "host_candidate": "cyberscoop.com",
+      "category": "Cyber",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-104",
+      "stream": "english",
+      "legacy_id": 104,
+      "name": "The Block",
+      "entrypoint": "https://www.theblock.co/rss.xml",
+      "entrypoint_type": "feed",
+      "host_candidate": "theblock.co",
+      "category": "Crypto",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-105",
+      "stream": "english",
+      "legacy_id": 105,
+      "name": "SCMP",
+      "entrypoint": "https://www.scmp.com/rss/2/feed",
+      "entrypoint_type": "feed",
+      "host_candidate": "scmp.com",
+      "category": "Asia",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-106",
+      "stream": "english",
+      "legacy_id": 106,
+      "name": "South China Morning Post",
+      "entrypoint": "https://www.scmp.com/rss/91/feed",
+      "entrypoint_type": "feed",
+      "host_candidate": "scmp.com",
+      "category": "Asia",
+      "legacy_state": "unverified"
+    },
+    {
+      "id": "en-107",
+      "stream": "english",
+      "legacy_id": 107,
+      "name": "Abu Dhabi Media Office Government",
+      "entrypoint": "https://www.mediaoffice.abudhabi/en/government-affairs/rss",
+      "entrypoint_type": "feed",
+      "host_candidate": "mediaoffice.abudhabi",
+      "category": "UAE Government",
+      "legacy_state": "claimed_active"
+    },
+    {
+      "id": "ar-s001",
+      "stream": "arabic",
+      "legacy_id": "s001",
+      "name": "BBC World",
+      "entrypoint": "https://feeds.bbci.co.uk/news/world/rss.xml",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.bbc.com/news",
+      "host_candidate": "bbc.com",
+      "region": "global",
+      "country": "GB",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 38,
+        "dated_72h": 38,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s002",
+      "stream": "arabic",
+      "legacy_id": "s002",
+      "name": "BBC Middle East",
+      "entrypoint": "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.bbc.com/news",
+      "host_candidate": "bbc.com",
+      "region": "global",
+      "country": "GB",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 38,
+        "dated_72h": 8,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s003",
+      "stream": "arabic",
+      "legacy_id": "s003",
+      "name": "Al Jazeera",
+      "entrypoint": "https://www.aljazeera.net/aljazeerarss/ar/all.xml",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.aljazeera.net",
+      "host_candidate": "aljazeera.net",
+      "region": "global",
+      "country": "QA",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 25,
+        "dated_72h": 25,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s004",
+      "stream": "arabic",
+      "legacy_id": "s004",
+      "name": "France 24",
+      "entrypoint": "https://www.france24.com/ar/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.france24.com/ar/",
+      "host_candidate": "france24.com",
+      "region": "global",
+      "country": "FR",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 24,
+        "dated_72h": 24,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s005",
+      "stream": "arabic",
+      "legacy_id": "s005",
+      "name": "DW World",
+      "entrypoint": "https://rss.dw.com/rdf/rss-en-world",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.dw.com",
+      "host_candidate": "dw.com",
+      "region": "global",
+      "country": "DE",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 12,
+        "dated_72h": 12,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s006",
+      "stream": "arabic",
+      "legacy_id": "s006",
+      "name": "Guardian World",
+      "entrypoint": "https://www.theguardian.com/world/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.theguardian.com/world",
+      "host_candidate": "theguardian.com",
+      "region": "global",
+      "country": "GB",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 45,
+        "dated_72h": 43,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s007",
+      "stream": "arabic",
+      "legacy_id": "s007",
+      "name": "Middle East Eye",
+      "entrypoint": "https://www.middleeasteye.net/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.middleeasteye.net",
+      "host_candidate": "middleeasteye.net",
+      "region": "global",
+      "country": "GB",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 20,
+        "dated_72h": 20,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s008",
+      "stream": "arabic",
+      "legacy_id": "s008",
+      "name": "Defense News",
+      "entrypoint": "https://www.defensenews.com/arc/outboundfeeds/rss/category/global/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.defensenews.com",
+      "host_candidate": "defensenews.com",
+      "region": "global",
+      "country": "US",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 25,
+        "dated_72h": 8,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s009",
+      "stream": "arabic",
+      "legacy_id": "s009",
+      "name": "Breaking Defense",
+      "entrypoint": "https://breakingdefense.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://breakingdefense.com",
+      "host_candidate": "breakingdefense.com",
+      "region": "global",
+      "country": "US",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 15,
+        "dated_72h": 15,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s010",
+      "stream": "arabic",
+      "legacy_id": "s010",
+      "name": "Bellingcat",
+      "entrypoint": "https://www.bellingcat.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.bellingcat.com",
+      "host_candidate": "bellingcat.com",
+      "region": "global",
+      "country": "NL",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 0,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s011",
+      "stream": "arabic",
+      "legacy_id": "s011",
+      "name": "WAM",
+      "entrypoint": "https://www.wam.ae/ar",
+      "entrypoint_type": "html_headlines",
+      "publisher_site": "https://www.wam.ae/ar",
+      "host_candidate": "wam.ae",
+      "region": "gcc",
+      "country": "AE",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "html_insufficient_headlines",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s012",
+      "stream": "arabic",
+      "legacy_id": "s012",
+      "name": "SPA",
+      "entrypoint": "https://www.spa.gov.sa",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.spa.gov.sa",
+      "host_candidate": "spa.gov.sa",
+      "region": "gcc",
+      "country": "SA",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s013",
+      "stream": "arabic",
+      "legacy_id": "s013",
+      "name": "QNA",
+      "entrypoint": "https://www.qna.org.qa",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.qna.org.qa",
+      "host_candidate": "qna.org.qa",
+      "region": "gcc",
+      "country": "QA",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s014",
+      "stream": "arabic",
+      "legacy_id": "s014",
+      "name": "KUNA",
+      "entrypoint": "https://www.kuna.net.kw",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.kuna.net.kw",
+      "host_candidate": "kuna.net.kw",
+      "region": "gcc",
+      "country": "KW",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s015",
+      "stream": "arabic",
+      "legacy_id": "s015",
+      "name": "BNA",
+      "entrypoint": "https://www.bna.bh",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.bna.bh",
+      "host_candidate": "bna.bh",
+      "region": "gcc",
+      "country": "BH",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s016",
+      "stream": "arabic",
+      "legacy_id": "s016",
+      "name": "ONA",
+      "entrypoint": "https://omannews.gov.om",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://omannews.gov.om",
+      "host_candidate": "omannews.gov.om",
+      "region": "oman",
+      "country": "OM",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s017",
+      "stream": "arabic",
+      "legacy_id": "s017",
+      "name": "The National",
+      "entrypoint": "https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.thenationalnews.com",
+      "host_candidate": "thenationalnews.com",
+      "region": "gcc",
+      "country": "AE",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 100,
+        "dated_72h": 100,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s018",
+      "stream": "arabic",
+      "legacy_id": "s018",
+      "name": "Al Arabiya",
+      "entrypoint": "https://www.alarabiya.net/feed/rss2/ar.xml",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.alarabiya.net",
+      "host_candidate": "alarabiya.net",
+      "region": "gcc",
+      "country": "SA",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s019",
+      "stream": "arabic",
+      "legacy_id": "s019",
+      "name": "IRNA",
+      "entrypoint": "https://www.irna.ir/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.irna.ir",
+      "host_candidate": "irna.ir",
+      "region": "iran",
+      "country": "IR",
+      "language": "fa",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 30,
+        "dated_72h": 30,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s020",
+      "stream": "arabic",
+      "legacy_id": "s020",
+      "name": "ISNA",
+      "entrypoint": "https://www.isna.ir/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.isna.ir",
+      "host_candidate": "isna.ir",
+      "region": "iran",
+      "country": "IR",
+      "language": "fa",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 30,
+        "dated_72h": 30,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s021",
+      "stream": "arabic",
+      "legacy_id": "s021",
+      "name": "Mehr",
+      "entrypoint": "https://www.mehrnews.com/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.mehrnews.com",
+      "host_candidate": "mehrnews.com",
+      "region": "iran",
+      "country": "IR",
+      "language": "fa",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 30,
+        "dated_72h": 30,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s022",
+      "stream": "arabic",
+      "legacy_id": "s022",
+      "name": "Iran International",
+      "entrypoint": "https://www.iranintl.com",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.iranintl.com",
+      "host_candidate": "iranintl.com",
+      "region": "iran",
+      "country": "GB",
+      "language": "fa",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s023",
+      "stream": "arabic",
+      "legacy_id": "s023",
+      "name": "Anadolu",
+      "entrypoint": "https://www.aa.com.tr/tr/rss/default?cat=guncel",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.aa.com.tr/tr",
+      "host_candidate": "aa.com.tr",
+      "region": "turkey",
+      "country": "TR",
+      "language": "tr",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 30,
+        "dated_72h": 30,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s024",
+      "stream": "arabic",
+      "legacy_id": "s024",
+      "name": "TRT Haber",
+      "entrypoint": "https://www.trthaber.com/sondakika.rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.trthaber.com",
+      "host_candidate": "trthaber.com",
+      "region": "turkey",
+      "country": "TR",
+      "language": "tr",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 50,
+        "dated_72h": 50,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s025",
+      "stream": "arabic",
+      "legacy_id": "s025",
+      "name": "Bianet",
+      "entrypoint": "https://bianet.org/feed",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://bianet.org",
+      "host_candidate": "bianet.org",
+      "region": "turkey",
+      "country": "TR",
+      "language": "tr",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_404",
+        "http": 404
+      }
+    },
+    {
+      "id": "ar-s026",
+      "stream": "arabic",
+      "legacy_id": "s026",
+      "name": "Shafaq",
+      "entrypoint": "https://shafaq.com/ar?rss=1",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://shafaq.com/ar",
+      "host_candidate": "shafaq.com",
+      "region": "iraq",
+      "country": "IQ",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 25,
+        "dated_72h": 25,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s027",
+      "stream": "arabic",
+      "legacy_id": "s027",
+      "name": "Iraqi News Agency",
+      "entrypoint": "https://ina.iq",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://ina.iq",
+      "host_candidate": "ina.iq",
+      "region": "iraq",
+      "country": "IQ",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s028",
+      "stream": "arabic",
+      "legacy_id": "s028",
+      "name": "Rudaw",
+      "entrypoint": "https://www.rudaw.net/english/rss.xml",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.rudaw.net/english",
+      "host_candidate": "rudaw.net",
+      "region": "iraq",
+      "country": "IQ",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "zero_entries",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s029",
+      "stream": "arabic",
+      "legacy_id": "s029",
+      "name": "Alsumaria",
+      "entrypoint": "https://www.alsumaria.tv/Rss/iraq-latest-news/ar",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.alsumaria.tv",
+      "host_candidate": "alsumaria.tv",
+      "region": "iraq",
+      "country": "IQ",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 20,
+        "dated_72h": 20,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s030",
+      "stream": "arabic",
+      "legacy_id": "s030",
+      "name": "Al Masdar Online",
+      "entrypoint": "https://almasdaronline.com",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://almasdaronline.com",
+      "host_candidate": "almasdaronline.com",
+      "region": "yemen",
+      "country": "YE",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s031",
+      "stream": "arabic",
+      "legacy_id": "s031",
+      "name": "Belqees",
+      "entrypoint": "https://belqees.net",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://belqees.net",
+      "host_candidate": "belqees.net",
+      "region": "yemen",
+      "country": "YE",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s032",
+      "stream": "arabic",
+      "legacy_id": "s032",
+      "name": "Yemen Shabab",
+      "entrypoint": "https://yemenshabab.net",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://yemenshabab.net",
+      "host_candidate": "yemenshabab.net",
+      "region": "yemen",
+      "country": "YE",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s033",
+      "stream": "arabic",
+      "legacy_id": "s033",
+      "name": "Dabanga",
+      "entrypoint": "https://www.dabangasudan.org/ar/feed",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.dabangasudan.org/ar",
+      "host_candidate": "dabangasudan.org",
+      "region": "sudan",
+      "country": "SD",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 12,
+        "dated_72h": 12,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s034",
+      "stream": "arabic",
+      "legacy_id": "s034",
+      "name": "Sudan Tribune",
+      "entrypoint": "https://sudantribune.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://sudantribune.com",
+      "host_candidate": "sudantribune.com",
+      "region": "sudan",
+      "country": "SD",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s035",
+      "stream": "arabic",
+      "legacy_id": "s035",
+      "name": "Sudan War Monitor",
+      "entrypoint": "https://sudanwarmonitor.com/feed",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://sudanwarmonitor.com",
+      "host_candidate": "sudanwarmonitor.com",
+      "region": "sudan",
+      "country": "SD",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 20,
+        "dated_72h": 9,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s036",
+      "stream": "arabic",
+      "legacy_id": "s036",
+      "name": "Studio Tamani",
+      "entrypoint": "https://www.studiotamani.org/feed",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.studiotamani.org",
+      "host_candidate": "studiotamani.org",
+      "region": "sahel",
+      "country": "ML",
+      "language": "fr",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s037",
+      "stream": "arabic",
+      "legacy_id": "s037",
+      "name": "Sidwaya",
+      "entrypoint": "https://www.sidwaya.info/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.sidwaya.info",
+      "host_candidate": "sidwaya.info",
+      "region": "sahel",
+      "country": "BF",
+      "language": "fr",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s038",
+      "stream": "arabic",
+      "legacy_id": "s038",
+      "name": "Le Sahel",
+      "entrypoint": "https://www.lesahel.org/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.lesahel.org",
+      "host_candidate": "lesahel.org",
+      "region": "sahel",
+      "country": "NE",
+      "language": "fr",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s039",
+      "stream": "arabic",
+      "legacy_id": "s039",
+      "name": "Alakhbar",
+      "entrypoint": "https://www.alakhbar.info/latest/rss/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://alakhbar.info",
+      "host_candidate": "alakhbar.info",
+      "region": "sahel",
+      "country": "MR",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 15,
+        "dated_72h": 15,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s040",
+      "stream": "arabic",
+      "legacy_id": "s040",
+      "name": "Alwihda Info",
+      "entrypoint": "https://www.alwihdainfo.com/rss/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.alwihdainfo.com",
+      "host_candidate": "alwihdainfo.com",
+      "region": "sahel",
+      "country": "TD",
+      "language": "fr",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 15,
+        "dated_72h": 15,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s041",
+      "stream": "arabic",
+      "legacy_id": "s041",
+      "name": "APS Senegal",
+      "entrypoint": "https://aps.sn/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://aps.sn",
+      "host_candidate": "aps.sn",
+      "region": "sahel",
+      "country": "SN",
+      "language": "fr",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s042",
+      "stream": "arabic",
+      "legacy_id": "s042",
+      "name": "APS Algeria",
+      "entrypoint": "https://www.aps.dz",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.aps.dz",
+      "host_candidate": "aps.dz",
+      "region": "north_africa",
+      "country": "DZ",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s043",
+      "stream": "arabic",
+      "legacy_id": "s043",
+      "name": "TAP",
+      "entrypoint": "https://www.tap.info.tn/ar",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.tap.info.tn/ar",
+      "host_candidate": "tap.info.tn",
+      "region": "north_africa",
+      "country": "TN",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s044",
+      "stream": "arabic",
+      "legacy_id": "s044",
+      "name": "MAP",
+      "entrypoint": "https://www.mapnews.ma/ar",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.mapnews.ma/ar",
+      "host_candidate": "mapnews.ma",
+      "region": "north_africa",
+      "country": "MA",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s045",
+      "stream": "arabic",
+      "legacy_id": "s045",
+      "name": "Hespress",
+      "entrypoint": "https://www.hespress.com/feed",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.hespress.com",
+      "host_candidate": "hespress.com",
+      "region": "north_africa",
+      "country": "MA",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 12,
+        "dated_72h": 12,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s046",
+      "stream": "arabic",
+      "legacy_id": "s046",
+      "name": "Mada Masr",
+      "entrypoint": "https://www.madamasr.com/ar/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.madamasr.com/ar",
+      "host_candidate": "madamasr.com",
+      "region": "egypt",
+      "country": "EG",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s047",
+      "stream": "arabic",
+      "legacy_id": "s047",
+      "name": "Ahram Online",
+      "entrypoint": "https://english.ahram.org.eg",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://english.ahram.org.eg",
+      "host_candidate": "english.ahram.org.eg",
+      "region": "egypt",
+      "country": "EG",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s048",
+      "stream": "arabic",
+      "legacy_id": "s048",
+      "name": "Libya Al Ahrar",
+      "entrypoint": "https://libyaalahrar.tv/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://libyaalahrar.tv",
+      "host_candidate": "libyaalahrar.tv",
+      "region": "north_africa",
+      "country": "LY",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 30,
+        "dated_72h": 30,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s049",
+      "stream": "arabic",
+      "legacy_id": "s049",
+      "name": "Al Wasat",
+      "entrypoint": "https://alwasat.ly",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://alwasat.ly",
+      "host_candidate": "alwasat.ly",
+      "region": "north_africa",
+      "country": "LY",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s050",
+      "stream": "arabic",
+      "legacy_id": "s050",
+      "name": "Dawn",
+      "entrypoint": "https://www.dawn.com/feeds/home",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.dawn.com",
+      "host_candidate": "dawn.com",
+      "region": "pakistan",
+      "country": "PK",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 28,
+        "dated_72h": 28,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s051",
+      "stream": "arabic",
+      "legacy_id": "s051",
+      "name": "Geo News",
+      "entrypoint": "https://urdu.geo.tv/rss/1",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://urdu.geo.tv",
+      "host_candidate": "urdu.geo.tv",
+      "region": "pakistan",
+      "country": "PK",
+      "language": "ur",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "zero_entries",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s052",
+      "stream": "arabic",
+      "legacy_id": "s052",
+      "name": "ISPR",
+      "entrypoint": "https://ispr.gov.pk",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://ispr.gov.pk",
+      "host_candidate": "ispr.gov.pk",
+      "region": "pakistan",
+      "country": "PK",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s053",
+      "stream": "arabic",
+      "legacy_id": "s053",
+      "name": "TOLOnews",
+      "entrypoint": "https://tolonews.com/feed",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://tolonews.com/fa",
+      "host_candidate": "tolonews.com",
+      "region": "afghanistan",
+      "country": "AF",
+      "language": "fa",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s054",
+      "stream": "arabic",
+      "legacy_id": "s054",
+      "name": "Pajhwok",
+      "entrypoint": "https://pajhwok.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://pajhwok.com",
+      "host_candidate": "pajhwok.com",
+      "region": "afghanistan",
+      "country": "AF",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_410",
+        "http": 410
+      }
+    },
+    {
+      "id": "ar-s055",
+      "stream": "arabic",
+      "legacy_id": "s055",
+      "name": "Amu TV",
+      "entrypoint": "https://amu.tv/fa/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://amu.tv/fa",
+      "host_candidate": "amu.tv",
+      "region": "afghanistan",
+      "country": "AF",
+      "language": "fa",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s056",
+      "stream": "arabic",
+      "legacy_id": "s056",
+      "name": "Radio Ergo",
+      "entrypoint": "https://radioergo.org/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://radioergo.org",
+      "host_candidate": "radioergo.org",
+      "region": "somalia",
+      "country": "SO",
+      "language": "so",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 3,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s057",
+      "stream": "arabic",
+      "legacy_id": "s057",
+      "name": "SONNA",
+      "entrypoint": "https://sonna.so/ar/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://sonna.so/ar",
+      "host_candidate": "sonna.so",
+      "region": "somalia",
+      "country": "SO",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "zero_entries",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s058",
+      "stream": "arabic",
+      "legacy_id": "s058",
+      "name": "Goobjoog",
+      "entrypoint": "https://goobjoog.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://goobjoog.com",
+      "host_candidate": "goobjoog.com",
+      "region": "somalia",
+      "country": "SO",
+      "language": "so",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_404",
+        "http": 404
+      }
+    },
+    {
+      "id": "ar-s059",
+      "stream": "arabic",
+      "legacy_id": "s059",
+      "name": "Addis Standard",
+      "entrypoint": "https://addisstandard.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://addisstandard.com",
+      "host_candidate": "addisstandard.com",
+      "region": "horn",
+      "country": "ET",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s060",
+      "stream": "arabic",
+      "legacy_id": "s060",
+      "name": "ENA",
+      "entrypoint": "https://www.ena.et/web/eng",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.ena.et/web/eng",
+      "host_candidate": "ena.et",
+      "region": "horn",
+      "country": "ET",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s061",
+      "stream": "arabic",
+      "legacy_id": "s061",
+      "name": "ADI",
+      "entrypoint": "https://www.adi.dj/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.adi.dj",
+      "host_candidate": "adi.dj",
+      "region": "horn",
+      "country": "DJ",
+      "language": "fr",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 50,
+        "dated_72h": 9,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s062",
+      "stream": "arabic",
+      "legacy_id": "s062",
+      "name": "Shabait",
+      "entrypoint": "https://shabait.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://shabait.com",
+      "host_candidate": "shabait.com",
+      "region": "horn",
+      "country": "ER",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_202",
+        "http": 202
+      }
+    },
+    {
+      "id": "ar-s063",
+      "stream": "arabic",
+      "legacy_id": "s063",
+      "name": "WAFA",
+      "entrypoint": "https://www.wafa.ps",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.wafa.ps",
+      "host_candidate": "wafa.ps",
+      "region": "palestine_israel",
+      "country": "PS",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s064",
+      "stream": "arabic",
+      "legacy_id": "s064",
+      "name": "Maan",
+      "entrypoint": "https://www.maannews.net",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.maannews.net",
+      "host_candidate": "maannews.net",
+      "region": "palestine_israel",
+      "country": "PS",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s065",
+      "stream": "arabic",
+      "legacy_id": "s065",
+      "name": "Times of Israel",
+      "entrypoint": "https://www.timesofisrael.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.timesofisrael.com",
+      "host_candidate": "timesofisrael.com",
+      "region": "palestine_israel",
+      "country": "IL",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s066",
+      "stream": "arabic",
+      "legacy_id": "s066",
+      "name": "LOrient Today",
+      "entrypoint": "https://today.lorientlejour.com/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://today.lorientlejour.com",
+      "host_candidate": "today.lorientlejour.com",
+      "region": "levant",
+      "country": "LB",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_404",
+        "http": 404
+      }
+    },
+    {
+      "id": "ar-s067",
+      "stream": "arabic",
+      "legacy_id": "s067",
+      "name": "NNA",
+      "entrypoint": "https://www.nna-leb.gov.lb/ar",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.nna-leb.gov.lb/ar",
+      "host_candidate": "nna-leb.gov.lb",
+      "region": "levant",
+      "country": "LB",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s068",
+      "stream": "arabic",
+      "legacy_id": "s068",
+      "name": "Enab Baladi",
+      "entrypoint": "https://www.enabbaladi.net/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.enabbaladi.net",
+      "host_candidate": "enabbaladi.net",
+      "region": "levant",
+      "country": "SY",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 19,
+        "dated_72h": 19,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s069",
+      "stream": "arabic",
+      "legacy_id": "s069",
+      "name": "SANA",
+      "entrypoint": "https://sana.sy/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://sana.sy",
+      "host_candidate": "sana.sy",
+      "region": "levant",
+      "country": "SY",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s070",
+      "stream": "arabic",
+      "legacy_id": "s070",
+      "name": "Petra",
+      "entrypoint": "https://petra.gov.jo/ar/",
+      "entrypoint_type": "html_headlines",
+      "publisher_site": "https://petra.gov.jo/ar/",
+      "host_candidate": "petra.gov.jo",
+      "region": "jordan",
+      "country": "JO",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 87,
+        "dated_72h": 0,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s071",
+      "stream": "arabic",
+      "legacy_id": "s071",
+      "name": "Al Mamlaka",
+      "entrypoint": "https://www.almamlakatv.com",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.almamlakatv.com",
+      "host_candidate": "almamlakatv.com",
+      "region": "jordan",
+      "country": "JO",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s072",
+      "stream": "arabic",
+      "legacy_id": "s072",
+      "name": "Gulf News",
+      "entrypoint": "https://gulfnews.com/uae",
+      "entrypoint_type": "html_headlines",
+      "publisher_site": "https://gulfnews.com/uae",
+      "host_candidate": "gulfnews.com",
+      "region": "gcc",
+      "country": "AE",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 13,
+        "dated_72h": 0,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s073",
+      "stream": "arabic",
+      "legacy_id": "s073",
+      "name": "Oman Observer",
+      "entrypoint": "https://www.omanobserver.om/rssFeed/home-page",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.omanobserver.om",
+      "host_candidate": "omanobserver.om",
+      "region": "oman",
+      "country": "OM",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 80,
+        "dated_72h": 42,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s074",
+      "stream": "arabic",
+      "legacy_id": "s074",
+      "name": "Arab News Saudi",
+      "entrypoint": "https://www.arabnews.com/saudiarabia",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.arabnews.com/saudiarabia",
+      "host_candidate": "arabnews.com",
+      "region": "gcc",
+      "country": "SA",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s075",
+      "stream": "arabic",
+      "legacy_id": "s075",
+      "name": "Kuwait Times",
+      "entrypoint": "https://kuwaittimes.com/rssFeed/14",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://kuwaittimes.com",
+      "host_candidate": "kuwaittimes.com",
+      "region": "gcc",
+      "country": "KW",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 50,
+        "dated_72h": 42,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s076",
+      "stream": "arabic",
+      "legacy_id": "s076",
+      "name": "Gulf Daily News",
+      "entrypoint": "https://www.gdnonline.com",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.gdnonline.com",
+      "host_candidate": "gdnonline.com",
+      "region": "gcc",
+      "country": "BH",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s077",
+      "stream": "arabic",
+      "legacy_id": "s077",
+      "name": "Daily Sabah Diplomacy",
+      "entrypoint": "https://www.dailysabah.com/rss/politics/diplomacy",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.dailysabah.com/politics/diplomacy",
+      "host_candidate": "dailysabah.com",
+      "region": "turkey",
+      "country": "TR",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 50,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s078",
+      "stream": "arabic",
+      "legacy_id": "s078",
+      "name": "Iraqi News",
+      "entrypoint": "https://www.iraqinews.com",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.iraqinews.com",
+      "host_candidate": "iraqinews.com",
+      "region": "iraq",
+      "country": "IQ",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s079",
+      "stream": "arabic",
+      "legacy_id": "s079",
+      "name": "Kurdistan24",
+      "entrypoint": "https://www.kurdistan24.net/en",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.kurdistan24.net/en",
+      "host_candidate": "kurdistan24.net",
+      "region": "iraq",
+      "country": "IQ",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s080",
+      "stream": "arabic",
+      "legacy_id": "s080",
+      "name": "SABA Yemen",
+      "entrypoint": "https://sabanews.info/en",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://sabanews.info/en",
+      "host_candidate": "sabanews.info",
+      "region": "yemen",
+      "country": "YE",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s081",
+      "stream": "arabic",
+      "legacy_id": "s081",
+      "name": "Yemenat",
+      "entrypoint": "https://yemenat.net/feed",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://yemenat.net",
+      "host_candidate": "yemenat.net",
+      "region": "yemen",
+      "country": "YE",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 50,
+        "dated_72h": 34,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s082",
+      "stream": "arabic",
+      "legacy_id": "s082",
+      "name": "South24",
+      "entrypoint": "https://south24.net/",
+      "entrypoint_type": "html_headlines",
+      "publisher_site": "https://south24.net/",
+      "host_candidate": "south24.net",
+      "region": "yemen",
+      "country": "YE",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 32,
+        "dated_72h": 0,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s083",
+      "stream": "arabic",
+      "legacy_id": "s083",
+      "name": "Ayin Network",
+      "entrypoint": "https://3ayin.com",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://3ayin.com",
+      "host_candidate": "3ayin.com",
+      "region": "sudan",
+      "country": "SD",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s084",
+      "stream": "arabic",
+      "legacy_id": "s084",
+      "name": "TSA Algerie",
+      "entrypoint": "https://www.tsa-algerie.dz",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.tsa-algerie.dz",
+      "host_candidate": "tsa-algerie.dz",
+      "region": "north_africa",
+      "country": "DZ",
+      "language": "fr",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s085",
+      "stream": "arabic",
+      "legacy_id": "s085",
+      "name": "Mosaique FM",
+      "entrypoint": "https://www.mosaiquefm.net/ar/actualite-tunisie",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.mosaiquefm.net/ar/actualite-tunisie",
+      "host_candidate": "mosaiquefm.net",
+      "region": "north_africa",
+      "country": "TN",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s086",
+      "stream": "arabic",
+      "legacy_id": "s086",
+      "name": "Morocco World News",
+      "entrypoint": "https://www.moroccoworldnews.com/morocco/",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.moroccoworldnews.com/morocco/",
+      "host_candidate": "moroccoworldnews.com",
+      "region": "north_africa",
+      "country": "MA",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s087",
+      "stream": "arabic",
+      "legacy_id": "s087",
+      "name": "Egypt Independent",
+      "entrypoint": "https://www.egyptindependent.com",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.egyptindependent.com",
+      "host_candidate": "egyptindependent.com",
+      "region": "egypt",
+      "country": "EG",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s088",
+      "stream": "arabic",
+      "legacy_id": "s088",
+      "name": "Express Tribune Pakistan",
+      "entrypoint": "https://tribune.com.pk/feed/pakistan",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://tribune.com.pk/pakistan",
+      "host_candidate": "tribune.com.pk",
+      "region": "pakistan",
+      "country": "PK",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 38,
+        "dated_72h": 11,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s089",
+      "stream": "arabic",
+      "legacy_id": "s089",
+      "name": "Radio Pakistan",
+      "entrypoint": "https://www.radio.gov.pk",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.radio.gov.pk",
+      "host_candidate": "radio.gov.pk",
+      "region": "pakistan",
+      "country": "PK",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s090",
+      "stream": "arabic",
+      "legacy_id": "s090",
+      "name": "Ariana News",
+      "entrypoint": "https://www.ariananews.af",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.ariananews.af",
+      "host_candidate": "ariananews.af",
+      "region": "afghanistan",
+      "country": "AF",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s091",
+      "stream": "arabic",
+      "legacy_id": "s091",
+      "name": "Khaama Press",
+      "entrypoint": "https://www.khaama.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.khaama.com",
+      "host_candidate": "khaama.com",
+      "region": "afghanistan",
+      "country": "AF",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_202",
+        "http": 202
+      }
+    },
+    {
+      "id": "ar-s092",
+      "stream": "arabic",
+      "legacy_id": "s092",
+      "name": "The Reporter Ethiopia",
+      "entrypoint": "https://www.thereporterethiopia.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.thereporterethiopia.com",
+      "host_candidate": "thereporterethiopia.com",
+      "region": "horn",
+      "country": "ET",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_202",
+        "http": 202
+      }
+    },
+    {
+      "id": "ar-s093",
+      "stream": "arabic",
+      "legacy_id": "s093",
+      "name": "Ethiopia Insight",
+      "entrypoint": "https://www.ethiopia-insight.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.ethiopia-insight.com",
+      "host_candidate": "ethiopia-insight.com",
+      "region": "horn",
+      "country": "ET",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 9,
+        "dated_72h": 1,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s094",
+      "stream": "arabic",
+      "legacy_id": "s094",
+      "name": "Hiiraan Online",
+      "entrypoint": "https://www.hiiraan.com",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.hiiraan.com",
+      "host_candidate": "hiiraan.com",
+      "region": "somalia",
+      "country": "SO",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s095",
+      "stream": "arabic",
+      "legacy_id": "s095",
+      "name": "Palestinian Information Center",
+      "entrypoint": "https://palinfo.com/feed",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://palinfo.com",
+      "host_candidate": "palinfo.com",
+      "region": "palestine_israel",
+      "country": "PS",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s096",
+      "stream": "arabic",
+      "legacy_id": "s096",
+      "name": "Jerusalem Post Israel",
+      "entrypoint": "https://www.jpost.com/rss/rssfeedsisraelnews.aspx",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.jpost.com/israel-news",
+      "host_candidate": "jpost.com",
+      "region": "palestine_israel",
+      "country": "IL",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 30,
+        "dated_72h": 29,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s097",
+      "stream": "arabic",
+      "legacy_id": "s097",
+      "name": "+972 Magazine",
+      "entrypoint": "https://www.972mag.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.972mag.com",
+      "host_candidate": "972mag.com",
+      "region": "palestine_israel",
+      "country": "IL",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s098",
+      "stream": "arabic",
+      "legacy_id": "s098",
+      "name": "Roya News Jordan",
+      "entrypoint": "https://en.royanews.tv/news",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://en.royanews.tv/news",
+      "host_candidate": "en.royanews.tv",
+      "region": "jordan",
+      "country": "JO",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s099",
+      "stream": "arabic",
+      "legacy_id": "s099",
+      "name": "Jordan Times",
+      "entrypoint": "https://jordantimes.com/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://jordantimes.com",
+      "host_candidate": "jordantimes.com",
+      "region": "jordan",
+      "country": "JO",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s100",
+      "stream": "arabic",
+      "legacy_id": "s100",
+      "name": "Naharnet Lebanon",
+      "entrypoint": "https://www.naharnet.com",
+      "entrypoint_type": "unverified",
+      "publisher_site": "https://www.naharnet.com",
+      "host_candidate": "naharnet.com",
+      "region": "levant",
+      "country": "LB",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "no_feed",
+        "http": null
+      }
+    },
+    {
+      "id": "ar-s101",
+      "stream": "arabic",
+      "legacy_id": "s101",
+      "name": "Ammon News Jordan",
+      "entrypoint": "https://en.ammonnews.net/rss.php?id=2&type=news",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://en.ammonnews.net",
+      "host_candidate": "en.ammonnews.net",
+      "region": "jordan",
+      "country": "JO",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 30,
+        "dated_72h": 30,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s102",
+      "stream": "arabic",
+      "legacy_id": "s102",
+      "name": "Yemen Monitor",
+      "entrypoint": "https://www.yemenmonitor.com/feed/",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.yemenmonitor.com",
+      "host_candidate": "yemenmonitor.com",
+      "region": "yemen",
+      "country": "YE",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s103",
+      "stream": "arabic",
+      "legacy_id": "s103",
+      "name": "The Arabian Stories",
+      "entrypoint": "https://thearabianstories.com/feed",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://thearabianstories.com",
+      "host_candidate": "thearabianstories.com",
+      "region": "oman",
+      "country": "OM",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s104",
+      "stream": "arabic",
+      "legacy_id": "s104",
+      "name": "Al Masry Al Youm",
+      "entrypoint": "https://www.almasryalyoum.com/rss/RssFeeds",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.almasryalyoum.com",
+      "host_candidate": "almasryalyoum.com",
+      "region": "egypt",
+      "country": "EG",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "zero_entries",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s105",
+      "stream": "arabic",
+      "legacy_id": "s105",
+      "name": "JO24",
+      "entrypoint": "https://jo24.net/feed",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://jo24.net",
+      "host_candidate": "jo24.net",
+      "region": "jordan",
+      "country": "JO",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s106",
+      "stream": "arabic",
+      "legacy_id": "s106",
+      "name": "Yemen Voice",
+      "entrypoint": "https://ye-voice.com/rss.php?cat=5",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://ye-voice.com",
+      "host_candidate": "ye-voice.com",
+      "region": "yemen",
+      "country": "YE",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "zero_entries",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s107",
+      "stream": "arabic",
+      "legacy_id": "s107",
+      "name": "Al Ghad Jordan",
+      "entrypoint": "https://alghad.com",
+      "entrypoint_type": "html_headlines",
+      "publisher_site": "https://alghad.com",
+      "host_candidate": "alghad.com",
+      "region": "jordan",
+      "country": "JO",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 54,
+        "dated_72h": 0,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s108",
+      "stream": "arabic",
+      "legacy_id": "s108",
+      "name": "Masrawy Egypt",
+      "entrypoint": "https://www.masrawy.com/rss/feed/35/%D9%85%D8%B5%D8%B1",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.masrawy.com",
+      "host_candidate": "masrawy.com",
+      "region": "egypt",
+      "country": "EG",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 0,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s109",
+      "stream": "arabic",
+      "legacy_id": "s109",
+      "name": "Bakhtar News Agency",
+      "entrypoint": "https://www.bakhtarnews.af/dr/rss/category/afghanistan-fa",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.bakhtarnews.af/dr",
+      "host_candidate": "bakhtarnews.af",
+      "region": "afghanistan",
+      "country": "AF",
+      "language": "fa",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 8,
+        "dated_72h": 0,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s110",
+      "stream": "arabic",
+      "legacy_id": "s110",
+      "name": "Al Watan Saudi Politics",
+      "entrypoint": "https://www.alwatan.com.sa/rssFeed/2",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.alwatan.com.sa",
+      "host_candidate": "alwatan.com.sa",
+      "region": "gcc",
+      "country": "SA",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 50,
+        "dated_72h": 29,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s111",
+      "stream": "arabic",
+      "legacy_id": "s111",
+      "name": "Gulf Times Qatar",
+      "entrypoint": "https://www.gulf-times.com/rssFeed/8",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.gulf-times.com",
+      "host_candidate": "gulf-times.com",
+      "region": "gcc",
+      "country": "QA",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 50,
+        "dated_72h": 50,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s112",
+      "stream": "arabic",
+      "legacy_id": "s112",
+      "name": "Al Ayam Bahrain",
+      "entrypoint": "https://www.alayam.com/Archive/News",
+      "entrypoint_type": "html_headlines",
+      "publisher_site": "https://www.alayam.com/Archive/News",
+      "host_candidate": "alayam.com",
+      "region": "gcc",
+      "country": "BH",
+      "language": "ar",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "html_http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s113",
+      "stream": "arabic",
+      "legacy_id": "s113",
+      "name": "Daily Tribune Bahrain",
+      "entrypoint": "https://www.newsofbahrain.com/bahrain/www.newsofbahrain.com",
+      "entrypoint_type": "html_headlines",
+      "publisher_site": "https://www.newsofbahrain.com/bahrain/www.newsofbahrain.com",
+      "host_candidate": "newsofbahrain.com",
+      "region": "gcc",
+      "country": "BH",
+      "language": "en",
+      "legacy_state": "disabled",
+      "observed": {
+        "compatible": false,
+        "entries": 0,
+        "dated_72h": 0,
+        "reason": "html_http_403",
+        "http": 403
+      }
+    },
+    {
+      "id": "ar-s114",
+      "stream": "arabic",
+      "legacy_id": "s114",
+      "name": "Khaleej Times UAE",
+      "entrypoint": "https://www.khaleejtimes.com/uae",
+      "entrypoint_type": "html_headlines",
+      "publisher_site": "https://www.khaleejtimes.com/uae",
+      "host_candidate": "khaleejtimes.com",
+      "region": "gcc",
+      "country": "AE",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 0,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s115",
+      "stream": "arabic",
+      "legacy_id": "s115",
+      "name": "Emirates 24|7 UAE",
+      "entrypoint": "https://www.emirates247.com/uae",
+      "entrypoint_type": "html_headlines",
+      "publisher_site": "https://www.emirates247.com/uae",
+      "host_candidate": "emirates247.com",
+      "region": "gcc",
+      "country": "AE",
+      "language": "en",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 22,
+        "dated_72h": 0,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s116",
+      "stream": "arabic",
+      "legacy_id": "s116",
+      "name": "Abu Dhabi Media Office — Government",
+      "entrypoint": "https://www.mediaoffice.abudhabi/ar/government-affairs/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.mediaoffice.abudhabi/ar/",
+      "host_candidate": "mediaoffice.abudhabi",
+      "region": "gcc",
+      "country": "AE",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 24,
+        "dated_72h": 1,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s117",
+      "stream": "arabic",
+      "legacy_id": "s117",
+      "name": "Abu Dhabi Media Office — Security",
+      "entrypoint": "https://www.mediaoffice.abudhabi/ar/security/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.mediaoffice.abudhabi/ar/",
+      "host_candidate": "mediaoffice.abudhabi",
+      "region": "gcc",
+      "country": "AE",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 24,
+        "dated_72h": 0,
+        "reason": "ok",
+        "http": 200
+      }
+    },
+    {
+      "id": "ar-s118",
+      "stream": "arabic",
+      "legacy_id": "s118",
+      "name": "Abu Dhabi Media Office — Crown Prince",
+      "entrypoint": "https://www.mediaoffice.abudhabi/ar/crown-prince-news/rss",
+      "entrypoint_type": "feed",
+      "publisher_site": "https://www.mediaoffice.abudhabi/ar/",
+      "host_candidate": "mediaoffice.abudhabi",
+      "region": "gcc",
+      "country": "AE",
+      "language": "ar",
+      "legacy_state": "claimed_active",
+      "observed": {
+        "compatible": true,
+        "entries": 24,
+        "dated_72h": 5,
+        "reason": "ok",
+        "http": 200
+      }
+    }
+  ],
+  "shared_feed_urls": [
+    {
+      "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+      "source_ids": [
+        "en-001",
+        "ar-s001"
+      ]
+    },
+    {
+      "url": "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml",
+      "source_ids": [
+        "en-004",
+        "ar-s002"
+      ]
+    },
+    {
+      "url": "https://www.theguardian.com/world/rss",
+      "source_ids": [
+        "en-007",
+        "ar-s006"
+      ]
+    },
+    {
+      "url": "https://rss.dw.com/rdf/rss-en-world",
+      "source_ids": [
+        "en-018",
+        "ar-s005"
+      ]
+    },
+    {
+      "url": "https://www.middleeasteye.net/rss",
+      "source_ids": [
+        "en-050",
+        "ar-s007"
+      ]
+    },
+    {
+      "url": "https://www.defensenews.com/arc/outboundfeeds/rss/category/global",
+      "source_ids": [
+        "en-076",
+        "ar-s008"
+      ]
+    },
+    {
+      "url": "https://www.bellingcat.com/feed",
+      "source_ids": [
+        "en-079",
+        "ar-s010"
+      ]
+    },
+    {
+      "url": "https://breakingdefense.com/feed",
+      "source_ids": [
+        "en-092",
+        "ar-s009"
+      ]
+    }
+  ],
+  "coverage": {
+    "arabic_regions": [
+      {
+        "region": "global",
+        "goal_independent_families": 2,
+        "configured": 10,
+        "legacy_enabled": 10,
+        "historical_adapter_compatible": 10,
+        "historical_dated_recent": 9,
+        "distinct_host_candidates_with_dated_recent": 8,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s001",
+          "ar-s002",
+          "ar-s003",
+          "ar-s004",
+          "ar-s005",
+          "ar-s006",
+          "ar-s007",
+          "ar-s008",
+          "ar-s009"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "gcc",
+        "goal_independent_families": 3,
+        "configured": 20,
+        "legacy_enabled": 10,
+        "historical_adapter_compatible": 10,
+        "historical_dated_recent": 6,
+        "distinct_host_candidates_with_dated_recent": 5,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s017",
+          "ar-s075",
+          "ar-s110",
+          "ar-s111",
+          "ar-s116",
+          "ar-s118"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "oman",
+        "goal_independent_families": 2,
+        "configured": 3,
+        "legacy_enabled": 2,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 2,
+        "distinct_host_candidates_with_dated_recent": 2,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s073",
+          "ar-s103"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "iran",
+        "goal_independent_families": 2,
+        "configured": 4,
+        "legacy_enabled": 3,
+        "historical_adapter_compatible": 3,
+        "historical_dated_recent": 3,
+        "distinct_host_candidates_with_dated_recent": 3,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s019",
+          "ar-s020",
+          "ar-s021"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "turkey",
+        "goal_independent_families": 2,
+        "configured": 4,
+        "legacy_enabled": 3,
+        "historical_adapter_compatible": 3,
+        "historical_dated_recent": 3,
+        "distinct_host_candidates_with_dated_recent": 3,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s023",
+          "ar-s024",
+          "ar-s077"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "iraq",
+        "goal_independent_families": 2,
+        "configured": 6,
+        "legacy_enabled": 2,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 2,
+        "distinct_host_candidates_with_dated_recent": 2,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s026",
+          "ar-s029"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "yemen",
+        "goal_independent_families": 2,
+        "configured": 8,
+        "legacy_enabled": 2,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 1,
+        "distinct_host_candidates_with_dated_recent": 1,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s081"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified",
+          "historical_dated_recent_below_floor",
+          "distinct_host_candidates_below_floor"
+        ]
+      },
+      {
+        "region": "sudan",
+        "goal_independent_families": 2,
+        "configured": 4,
+        "legacy_enabled": 2,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 2,
+        "distinct_host_candidates_with_dated_recent": 2,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s033",
+          "ar-s035"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "sahel",
+        "goal_independent_families": 2,
+        "configured": 6,
+        "legacy_enabled": 6,
+        "historical_adapter_compatible": 6,
+        "historical_dated_recent": 6,
+        "distinct_host_candidates_with_dated_recent": 6,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s036",
+          "ar-s037",
+          "ar-s038",
+          "ar-s039",
+          "ar-s040",
+          "ar-s041"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "north_africa",
+        "goal_independent_families": 2,
+        "configured": 9,
+        "legacy_enabled": 2,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 2,
+        "distinct_host_candidates_with_dated_recent": 2,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s045",
+          "ar-s048"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "egypt",
+        "goal_independent_families": 2,
+        "configured": 5,
+        "legacy_enabled": 2,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 1,
+        "distinct_host_candidates_with_dated_recent": 1,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s046"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified",
+          "historical_dated_recent_below_floor",
+          "distinct_host_candidates_below_floor"
+        ]
+      },
+      {
+        "region": "pakistan",
+        "goal_independent_families": 2,
+        "configured": 5,
+        "legacy_enabled": 2,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 2,
+        "distinct_host_candidates_with_dated_recent": 2,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s050",
+          "ar-s088"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "afghanistan",
+        "goal_independent_families": 2,
+        "configured": 6,
+        "legacy_enabled": 3,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 1,
+        "distinct_host_candidates_with_dated_recent": 1,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s055"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified",
+          "historical_dated_recent_below_floor",
+          "distinct_host_candidates_below_floor"
+        ]
+      },
+      {
+        "region": "somalia",
+        "goal_independent_families": 2,
+        "configured": 4,
+        "legacy_enabled": 2,
+        "historical_adapter_compatible": 1,
+        "historical_dated_recent": 1,
+        "distinct_host_candidates_with_dated_recent": 1,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s056"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified",
+          "historical_compatible_below_floor",
+          "historical_dated_recent_below_floor",
+          "distinct_host_candidates_below_floor"
+        ]
+      },
+      {
+        "region": "horn",
+        "goal_independent_families": 2,
+        "configured": 6,
+        "legacy_enabled": 3,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 2,
+        "distinct_host_candidates_with_dated_recent": 2,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s061",
+          "ar-s093"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "palestine_israel",
+        "goal_independent_families": 2,
+        "configured": 6,
+        "legacy_enabled": 2,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 2,
+        "distinct_host_candidates_with_dated_recent": 2,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s095",
+          "ar-s096"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "levant",
+        "goal_independent_families": 2,
+        "configured": 5,
+        "legacy_enabled": 2,
+        "historical_adapter_compatible": 2,
+        "historical_dated_recent": 2,
+        "distinct_host_candidates_with_dated_recent": 2,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s068",
+          "ar-s069"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified"
+        ]
+      },
+      {
+        "region": "jordan",
+        "goal_independent_families": 2,
+        "configured": 7,
+        "legacy_enabled": 3,
+        "historical_adapter_compatible": 3,
+        "historical_dated_recent": 1,
+        "distinct_host_candidates_with_dated_recent": 1,
+        "verified_independent_families": 0,
+        "historical_dated_source_ids": [
+          "ar-s101"
+        ],
+        "gaps": [
+          "independent_publishers_not_verified",
+          "historical_dated_recent_below_floor",
+          "distinct_host_candidates_below_floor"
+        ]
+      }
+    ],
+    "uae_country": {
+      "region": "AE",
+      "goal_independent_families": 3,
+      "configured": 8,
+      "legacy_enabled": 7,
+      "historical_adapter_compatible": 7,
+      "historical_dated_recent": 3,
+      "distinct_host_candidates_with_dated_recent": 2,
+      "verified_independent_families": 0,
+      "historical_dated_source_ids": [
+        "ar-s017",
+        "ar-s116",
+        "ar-s118"
+      ],
+      "gaps": [
+        "independent_publishers_not_verified",
+        "distinct_host_candidates_below_floor"
+      ]
+    },
+    "english_geo": "unmapped_from_legacy_list"
+  }
+}

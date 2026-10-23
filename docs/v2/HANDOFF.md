@@ -40,3 +40,9 @@ Owner accepted a small analytics store with strict no-paid-plan budget and perio
 - B1 remains PARTIAL. Next: isolated full-dependency clone/tests and no-post end-to-end simulation. Do not dispatch workflows, test secrets or deliver Discord messages as part of this step.
 - D1 telemetry, cleanup, backup/Drive and dashboard not activated; see `ANALYTICS_STORAGE_POLICY.md`.
 - No approval to change main, production Arabic branches, webhooks, deployment, schedules or paid services.
+
+## B2 inventory checkpoint — 23 October 2026
+- Offline unified registry: `config/v2/source_registry.json`, 222 legacy source identities, 8 identical English/Arabic upstream feeds; 18 Arabic region summaries and UAE subset.
+- `v2_sources.py` read-only schema/reconciliation CLI and `tests/test_b2_source_registry.py` standard-library regression suite (14 tests in in-memory real-JSON harness); report: `docs/v2/B2_SOURCE_INVENTORY_REPORT.md`.
+- Historical Arabic audit (22 Oct): 58 adapter-compatible, but 48 had any dated recent stories; Somalia, Yemen, Egypt, Afghanistan, Jordan below two historically dated sources, and UAE only two publisher-host candidates for dated items. Independent ownership and rights **unverified**.
+- NO source promotion/quarantine write, live probing, Actions, Discord, D1, or main update. B2 is PARTIAL; follow triage, perform source-rights/independence review, and rerun bounded live adapter probes before closing.
