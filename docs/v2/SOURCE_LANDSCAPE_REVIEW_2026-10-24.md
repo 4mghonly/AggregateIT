@@ -4,8 +4,8 @@
 **AggregateIT only.** Owner requested a comprehensive source catalogue for **personal-use English finance/geopolitical Gazette** and **Arabic security/geopolitics briefing**, including a compact daily and expanded weekly critical-analysis section. Publisher licensing/legal analysis is out of scope for this deliverable, per owner instruction. This file is a **source inventory and research prioritization**, not a claim that automatic access, live health, language attribution, or operational suitability has been established.
 
 ## Files
-- [MASTER CSV](../../config/v2/source_master_candidates_2026-10-24.csv): **509 rows** = **222 legacy V2 registry entries + 287 curated source/endpoint candidates**. Rows are *endpoints or registry records*, **not 509 unique publishers**. Existing and new entries intentionally coexist so the provenance of older settings is not lost. Some curated entries are alternative pages belonging to the same publisher; publisher-family reconciliation is pending.
-- [Prioritized shortlist CSV](../../config/v2/source_shortlist_2026-10-24.csv): **100 nominated entrypoints**, spanning international, regional, national and specialist outlets plus official and data sources. This is **candidate selection**, not admission to automatic harvesting.
+- [MASTER CSV](../../config/v2/source_master_candidates_2026-10-24.csv): **518 rows** = **222 legacy V2 registry entries + 296 curated source/endpoint candidates**. Rows are *endpoints or registry records*, **not 518 unique publishers**. Existing and new entries intentionally coexist so the provenance of older settings is not lost. Some curated entries are alternative pages belonging to the same publisher; publisher-family reconciliation is pending.
+- [Prioritized shortlist CSV](../../config/v2/source_shortlist_2026-10-24.csv): **105 nominated entrypoints**, spanning international, regional, national and specialist outlets plus official and data sources. This is **candidate selection**, not admission to automatic harvesting.
 - [Existing registry](../../config/v2/source_registry.json): original 222 source records kept **unchanged**.
 
 ## How to read the master file
@@ -127,7 +127,7 @@
 - [UN Security Council briefings](https://press.un.org/en) — en,fr; Official site / section; cur-227; P1
 - [ICRC Middle East](https://www.icrc.org/en/news/middle-east) — en,ar; Official site / section; cur-228; P1
 
-### Finance and macro evidence — 8
+### Finance and macro evidence — 13
 - [IMF Data API](https://data.imf.org/en/Resource-Pages/IMF-API) — en; Official site / section; cur-237; P1
 - [World Bank Indicators API](https://api.worldbank.org/v2/) — en; API / structured data; cur-238; P1
 - [FRED API](https://fred.stlouisfed.org/docs/api/fred/) — en; API / structured data; cur-239; P1
@@ -185,3 +185,14 @@ Daily (English and Arabic): high-confidence new developments, UAE-first in Arabi
 
 ## Do not confuse planning with deployment
 This batch added **catalogues only**; no sources admitted to production, no live bulk probing, no Discord posts, no model calls, no D1/SQLite resources, no CI dispatch, no scheduling, no protected branch edits. Existing B1–B7 stay partially open; B8 remains blocked.
+
+
+## 24 October 2026 — trading and market expansion amendment
+Owner requested **TradingView** be retained explicitly in English market coverage, with primary macro and exchange sources where necessary. These entrypoints were absent from both the original 222-record V2 baseline and original 509-row candidate catalogue; this amendment adds **9 curated rows** (4 TradingView functions and 5 macro/market alternatives), and **5** to the prioritized shortlist. These are research candidates, not live admission.
+
+- [TradingView News](https://www.tradingview.com/news/): broad markets editorial discovery, symbols and providers; deduplicate syndicated Reuters/Dow Jones items against their origin.
+- [TradingView Economic Calendar](https://www.tradingview.com/economic-calendar/): expected/actual/prior economic events as an editorial and calendar reference.
+- [TradingView News Feed Widget](https://www.tradingview.com/widget-docs/widgets/news/news-feed/) and [TradingView Markets](https://www.tradingview.com/markets/): browser-display components and context, not a historical numeric API.
+- [CME FedWatch](https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html), [Cboe VIX](https://www.cboe.com/tradable_products/vix/), [ECB Data Portal](https://data.ecb.europa.eu/), [Bank of England monetary policy](https://www.bankofengland.co.uk/monetary-policy-summary-and-minutes) and [US Treasury yields](https://home.treasury.gov/resource-center/data-chart-center/interest-rates) complement existing FRED, EIA, IMF, World Bank, ADX and DFM source references. Confirm each machine-readable endpoint and date semantics before using values.
+
+TradingView's widget documentation confirms browser-display components and states there is **no general public API to extract its market data**. The English product therefore should show TradingView news and widgets when appropriate but calculate market statistics from primary structured feeds. The Arabic geopolitical-only product must not import any trading widgets or market-news sections. Full revised editorial boundary: `docs/v2/EDITORIAL_PRODUCT_ARCHITECTURE_2026-10-24.md`.
