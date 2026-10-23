@@ -4,7 +4,7 @@ No production integration before owner-approved B8.
 
 | Batch | State as of 23 Oct 2026 | Evidence and exit gate |
 | --- | --- | --- |
-| B0 Foundation | IN PROGRESS — docs and fixtures prepared, publication/verification pending | MASTER_PLAN_V2, QUALITY_BASELINE, ARCHITECTURE_V2, fixtures, HANDOFF, branch/base comparison |
+| B0 Foundation | COMPLETE — seven planning/fixture files committed and verified | MASTER_PLAN_V2, QUALITY_BASELINE, ARCHITECTURE_V2, fixtures, HANDOFF, branch/base comparison |
 | B1 Reliability | NOT STARTED | Offline route/error tests; translation budgets; audit dependency fix; no live calls or posts |
 | B2 Source inventory | NOT STARTED | Versioned joint registry, validated publisher independence, freshness/rights/region floor |
 | B3 Evidence core | NOT STARTED | Article/excerpt/claim/event provenance and stable delta regression |
@@ -19,10 +19,10 @@ No production integration before owner-approved B8.
 - [x] Select a separate branch directly from pinned production main.
 - [x] Select progressive modular replacement and spell out reject alternatives.
 - [x] Define quality measures and observed vs unknown categories.
-- [ ] Commit isolated documents and synthetic fixtures.
-- [ ] Verify branch ancestry and that diff contains ONLY docs/fixtures.
-- [ ] Verify JSON schema structure and uniqueness of fixture IDs.
-- [ ] Verify main still points to unchanged base (it may independently advance via source bot; compare against pinned SHA, do not alter).
+- [x] Commit isolated documents and synthetic fixtures.
+- [x] Verify branch ancestry and that diff contains ONLY docs/fixtures (ahead by one at evidence commit 21380a6e).
+- [x] Verify JSON structure, declared decisions, eight synthetic fixtures and unique IDs; no runtime tests claimed.
+- [x] Verify main still at pinned 6deea127 at closure, with no V2 production edits.
 
 ## B1 planning and work packages (next)
 1. B1a characterize response handling: primary/fallback 403, invalid/truncated/empty, timeouts and success; add deterministic test fixtures and no-live-call harness.
@@ -33,3 +33,9 @@ No production integration before owner-approved B8.
 
 ## Change log
 - 23 Oct 2026 — B0 started and current-production baseline pinned; no production changes authorized.
+
+## B0 verification record
+- Branch initial evidence commit: 21380a6e5721ad7793a793d58a8ca2290dee8bf9, parent 6deea127; seven added files, zero modifications or deletions; main unchanged at verification.
+- Remote fetch content comparison for plan and fixture: exact match; fixture JSON parsed, unique B0-01..B0-08, all have supported expected decisions.
+- Branch-specific GitHub Actions runs: 0 at verification. No production run, Discord delivery, model call, or paid resource was triggered by this batch.
+- These are static contract checks, NOT end-to-end simulation or B1 behavior evidence.
