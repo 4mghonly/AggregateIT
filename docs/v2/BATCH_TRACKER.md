@@ -89,3 +89,8 @@ No production integration before owner-approved B8.
 - B2 gap candidates: Somalia only one compatible dated source, Yemen/Egypt/Jordan one each with one stale alternative, UAE two dated hosts. All live current checks, usage rights and independent publisher families UNVERIFIED. No source probe executed.
 - Offline bilingual fixture passes evidence → journal replay → distinct English/Arabic editorial admission → immutable layout → fail-closed analytics → unsent delivery reservation. Persian without verified native translation is explicitly withheld. No live model, source, storage, publishing or real E2E verification.
 - **Status unchanged:** B1–B7 PARTIAL; B8 BLOCKED. File-backed crash tests, dependency-installed no-post run, publisher rights, language fidelity, rendered-slide QA, durable delivery and same-window genuine shadow remain gates.
+
+## B5b in-memory bilingual raster preview — 23 October 2026
+- New `v2_raster_preview.py` and 8 Pillow/RAQM pixel-geometry/regression tests; **125/125** current offline tests PASS when combined with the B3–B7 + B2 source-gate suite.
+- Actual 3840x2160 Arabic (3) and 2480x3508 English (2) PNG bytes and smaller scale previews generated **in memory only**. One-item synthetic layouts visually inspected at reduced scale; Arabic six-card synthetic stress fixture passes without clipping; missing fonts/overlong tokens fail closed.
+- DejaVu Sans was used because Siraj Noir is absent; no genuine article text, release font, authentic screenshot/Discord delivery proof, user-approved legibility QA or production rendering. B5 still PARTIAL. See `docs/v2/B5_RASTER_NOPOST_REPORT.md`.
