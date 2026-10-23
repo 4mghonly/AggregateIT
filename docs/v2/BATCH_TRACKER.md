@@ -158,3 +158,11 @@ No production integration before owner-approved B8.
 - Final synthetic three-page preview visually inspected with explicit sample labels and no category invention. Evidence `docs/v2/B1_B5_ARABIC_BRIDGE_2026-10-24.md`.
 - Combined installed-dependency V2 **231/231 PASS**, original Arabic **55/55 PASS**, original English layout **6/6 PASS** in fresh post-change tests.
 - **B1/B4/B5 remain PARTIAL**; lexical categories cannot certify factual truth, rights, translation, source families or mobile-scale legibility; B2 remains STOP and B8 BLOCKED.
+
+## 24 October 2026 — B2/B4/B5 bilingual Naysayer and source-review kickoff (docs/fixtures only)
+- Owner requested a comprehensive fresh source landscape review and a consistently present **Naysayer**/adversarial analyst, smaller in each daily English/Arabic edition and expanded in distinct weekly English/Arabic supplements.
+- New `docs/v2/B4_B5_NAYSAYER_DAILY_WEEKLY_CONTRACT.md` defines evidence-gated challenge/abstention, source-family independence, native-language/verified-translation rules, provisional daily/weekly word/page budgets, visual slots and safety/factual quality gates. Weekly cadence and format are **proposals only**; no schedules or live products changed.
+- New `fixtures/v2/naysayer_cases.json` has **10 synthetic, non-publishable expected-decision cases** spanning both products and both cadences. JSON structure and uniqueness checked during authoring; **no Python/runtime tests executed** for this documentation-only batch.
+- A separate deep-source research request is being commissioned. No candidate source has been approved or promoted; existing B2 source-discovery stop remains in force until new evidence is evaluated. Copyright/robots/terms remain binding despite the desire for broader coverage.
+- B4/B5 implementation, test-first behavior verification, genuine source-linked editorial comparison and actual daily/weekly rendered QA remain **OPEN**. B1–B7 PARTIAL; B8 BLOCKED.
+- Production/main, Discord, CI, Cloudflare/D1, secrets, scheduled cleanup and paid resources were not modified.
