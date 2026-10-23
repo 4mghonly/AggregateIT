@@ -48,6 +48,18 @@ First-party [Global Voices RSS directory](https://globalvoices.org/feeds/) lists
 
 One bounded, read-only metadata probe on `2026-10-23`: `https://ar.globalvoices.org/robots.txt` HTTP 200 and allowed the feed; `https://ar.globalvoices.org/feed/` HTTP 200, RSS mime type, **96,000-byte cap**, five partially parsed entries, parser `bozo=True` because the captured feed was truncated. The sampled top dates were **6–11 October 2026**, not a recent 72h source for 23 October. No bodies saved, no source registry addition, promotion, regional-floor or independent-family credit. The Arabic attribution-page link returned 404, but the official English policy was reachable; record this caveat if ever admitted. No repeated probes or scraping of restricted publishers.
 
+### B2 bounded alternative-source stop decision
+
+Three **materially different** official-source options have now been screened for the requested legally reusable *current* Arabic/news floor:
+
+| Publisher / option | First-party evidence | Current acceptance |
+| --- | --- | --- |
+| Global Voices Arabic (`ar.globalvoices.org`) | Published CC BY attribution/republishing policy and official Arabic RSS directory; robots-first HTTP 200 metadata probe above | **HOLD**: sample newest 11 Oct, so no <=72h window proof; article-level third-party material and Arabic original-vs-translation still require review |
+| UN OCHA Humanitarian Action / country reports (`gho.unocha.org`, `reports.unocha.org`) | Pages visibly declare **CC BY 4.0 unless otherwise noted**, e.g. `https://gho.unocha.org/` and `https://reports.unocha.org/en/country/ethiopia` | **SUPPLEMENTAL CANDIDATE**, not a 6-hour native-Arabic news-feed substitute. Original work/asset language, dated recency, machine interface and third-party exceptions not checked; no content ingestion |
+| Wikimedia Wikinews (`www.wikinews.org`) | Official portal states the project **closed**; Arabic project `https://ar.wikinews.org/wiki/ويكي_الأخبار:عن` records read-only from **4 May 2026**; English copyright page carries historical CC-BY rules | **REJECT AS CURRENT FEED** despite reusable historical text: cannot meet a 23 Oct 2026 recent-production window |
+
+The UN News host was marked inaccessible by the read-only search interface's robots policy and was **not** probed directly. No attempts to circumvent the restriction. After three distinct routes failed to establish a legally reusable, timely, native-Arabic regional news feed, this bounded **source-discovery pass stops** per owner instruction. B2 remains PARTIAL and cannot be promoted without fresh first-party evidence or publisher permission; existing 222 identities remain unchanged. Humanitarian CC-BY reports may be considered later as attributed context, not as independent daily news corroboration.
+
 ## B5 — observed contrast defect corrected only on V2
 
 An actual rendered Arabic sample image showed UAE story headlines drawn in the map decoration shade `#8B343B` over paper panel `#101D25`: computed relative luminance contrast **2.17:1**, too dim for paragraph/headline reading when downscaled. `arabic_layout/render_pages.py` now uses `UAE_HEADLINE_COLOR = ALERT` (`#D5646B`), with contrast **4.79:1** over the same panel. Dedicated tests compare the published renderer constant to the background and reject reuse of the low-contrast map shade. All other region colors and the three-page layout remain unchanged.

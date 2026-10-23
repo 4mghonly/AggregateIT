@@ -113,3 +113,11 @@ Owner accepted a small analytics store with strict no-paid-plan budget and perio
 **Next execution order without extra approval:** (1) bounded robust no-post English app integration and source→editor tests with rights-cleared fixtures; (2) B3 stricter off-host receipt/provenance contract and simulated power-loss/read-only recovery, without any external storage; (3) B4 measurable Arabic/native-vs-translated source accuracy and B5 mobile density once genuinely usable content exists. Continue B2 publisher-rights discovery **only** as bounded read-only first-party verification; never revisit restricted endpoints or auto-promote a candidate. B6 D1 resource, B7 real shadow capture and B8 deploy remain separately gated. Font and rights-strategy decisions deferred; do not solicit them to continue other work.
 
 Never touch main/production or other branches, Discord, Actions/schedules, secrets, Cloudflare, database provisioning/deletion, live model billing or deployment in continuation. All external access in this batch was bounded rights/metadata inspection.
+
+### B2 bounded public-source closure (three materially different alternatives)
+
+1. Global Voices Arabic: accessible under a first-party CC BY republishing policy for their *own* authored articles, but observed Arabic RSS metadata last dated **11 Oct 2026**, too old for 23 Oct six-hour news; third-party media and original/translation lineage not cleared.
+2. OCHA humanitarian reports: official `gho.unocha.org`/`reports.unocha.org` pages state CC BY 4.0 unless otherwise noted, but are **not verified current native-Arabic news feeds**. Eligible only for future contextual-source screening, not six-hour region-floor credit.
+3. Wikinews: first-party Wikinews/Arabic Wikimedia notices confirm entire project ceased new publication in May 2026. Reusable historical text does not make it a live news alternative. UN News automated web search was blocked by robots; not circumvented.
+
+Per owner three-distinct-attempt stop rule, **B2 source-discovery for this batch is stopped** with no rights/source promotion and no body collection. The approved no-cost offline development proceeds independently; future B2 advancement needs materially new first-party candidate evidence or publisher permission. Record: `docs/v2/B1_B2_B3_B5_CONTINUATION_2026-10-23.md`.
