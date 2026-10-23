@@ -79,3 +79,23 @@ def inspect_feed_bytes(body,*,now,max_age_hours=72):
     result['status']=('empty_feed' if not items else 'undated_feed' if not dates
                       else 'stale_feed' if not result['recent_count'] else 'usable_dated_feed')
     return result
+
+
+def probe_live_feed(url,*,now,timeout=8,fetcher=None):
+    """One-shot read-only check. Does not retry, crawl bodies or modify registry."""
+    from urllib.error import HTTPError,URLError
+    _url_safe(url)
+    try:
+        body=(fetcher or bounded_fetch)(url,timeout=timeout)
+    except HTTPError as exc:
+        code=int(exc.code)
+        return {'url':url,'status':f'http_{code}',
+                'retryable':code in (408,429,500,502,503,504),
+                'article_bodies_retained':False}
+    except (URLError,TimeoutError):
+        return {'url':url,'status':'network_error','retryable':False,
+                'article_bodies_retained':False}
+    result=inspect_feed_bytes(body,now=now)
+    result['url']=url
+    result['retryable']=False
+    return result
