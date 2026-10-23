@@ -28,3 +28,32 @@ class FeedProbeTests(unittest.TestCase):
             with self.assertRaises(ValueError):bounded_fetch(u)
 
 if __name__=='__main__':unittest.main()
+
+
+class LiveProbeBoundaryTests(unittest.TestCase):
+    def test_429_reported_as_retryable_not_healthy(self):
+        from urllib.error import HTTPError
+        from v2_feed_probe import probe_live_feed
+        def fail(url,*,timeout):raise HTTPError(url,429,'Rate Limited',{},None)
+        r=probe_live_feed('https://example.org/feed',now=NOW,fetcher=fail)
+        self.assertEqual(r['status'],'http_429')
+        self.assertTrue(r['retryable'])
+    def test_403_auth_failure_is_not_retried(self):
+        from urllib.error import HTTPError
+        from v2_feed_probe import probe_live_feed
+        def fail(url,*,timeout):raise HTTPError(url,403,'Forbidden',{},None)
+        r=probe_live_feed('https://example.org/feed',now=NOW,fetcher=fail)
+        self.assertEqual(r['status'],'http_403')
+        self.assertFalse(r['retryable'])
+    def test_rss_passes_as_metadata_only(self):
+        from v2_feed_probe import probe_live_feed
+        r=probe_live_feed('https://example.org/feed',now=NOW,
+                          fetcher=lambda url,timeout:b'<rss><channel><item/></channel></rss>')
+        self.assertEqual(r['status'],'undated_feed')
+        self.assertFalse(r['article_bodies_retained'])
+    def test_unsafe_url_rejected_before_network(self):
+        from v2_feed_probe import probe_live_feed
+        called=[]
+        with self.assertRaises(ValueError):
+            probe_live_feed('https://localhost/feed',now=NOW,fetcher=lambda *args,**kwargs:called.append(1))
+        self.assertEqual(called,[])
