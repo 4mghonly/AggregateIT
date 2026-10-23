@@ -30,3 +30,6 @@ Verified B0 first commit 21380a6e5721ad7793a793d58a8ca2290dee8bf9; diff from par
 
 ## Historical baseline
 Recent data must be compared to the pinned baseline, not to an assumed current main tip. Main's source-audit bot may advance it independently. If that happens, record both SHAs without rebasing or merging the experimental branch automatically.
+
+## Planning amendment after B0 — 23 October 2026
+Owner accepted a small analytics store with strict no-paid-plan budget and periodic cleanup, plus the option to manually copy exports to Google Drive. Added ANALYTICS_STORAGE_POLICY.md and references in the V2 master/architecture/tracker. Provisional choice: Cloudflare D1 Free, NOT PocketBase by default. Do not treat this as permission to create a Cloudflare DB, deploy a Worker, delete production data, or connect Google Drive. Future scripts must implement bounded budgets, dry-run cleanup, backup manifest and restore test. Raw news/evidence stays outside telemetry; B6 must obtain separate approval before retention deletion.

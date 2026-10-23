@@ -39,3 +39,11 @@ No production integration before owner-approved B8.
 - Remote fetch content comparison for plan and fixture: exact match; fixture JSON parsed, unique B0-01..B0-08, all have supported expected decisions.
 - Branch-specific GitHub Actions runs: 0 at verification. No production run, Discord delivery, model call, or paid resource was triggered by this batch.
 - These are static contract checks, NOT end-to-end simulation or B1 behavior evidence.
+
+## Accepted analytics amendment — 23 October 2026
+- B1: specify structured telemetry events and simulate budget/overflow handling offline; no D1 resources yet.
+- B2: source freshness and regional coverage metrics become the first dashboard datasets.
+- B3–B5: append evidence/editorial/translation/layout measurements; separate analytics outage from product failure.
+- B6: build free-tier D1 ingestion and read-only dashboard, with daily dry-run cleaning first; gated live retention and manual export/restore after explicit approval.
+- B7: compare V1/V2 using the same definitions and captured denominators.
+- Account-level cost and storage gates: see ANALYTICS_STORAGE_POLICY.md. No database, Cron trigger or deletion has been enabled by this amendment.

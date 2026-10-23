@@ -65,3 +65,6 @@ Proposed IDs: canonicalized domain/URL plus collision-resistant digest for artic
 4. Model fallback ordering, token budget and availability/cost policy.
 5. Page density and exact font face/size after real preview-scale comparison.
 6. Search/embedding options only if deterministic clustering misses measured cases.
+
+## Telemetry sidecar (accepted plan amendment)
+A separate noncritical operations sidecar receives bounded run/source/model/edition/receipt metrics. It does not own immutable article evidence and cannot block collection, rendering or delivery when storage is at quota. Provisional Cloudflare D1 Free backend and small authenticated Worker UI; no existing server is assumed. Internal budget limits, retention dry-runs, cleanup windows, Cloudflare account-wide free ceilings, and manual SQL/independent raw archive are detailed in ANALYTICS_STORAGE_POLICY.md. This does not resolve the B6 canonical event database choice.

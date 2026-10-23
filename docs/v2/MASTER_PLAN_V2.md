@@ -72,3 +72,6 @@ Quality goals must be tested on sufficient dates, languages, sources and source 
 - Stop on secrets, legal/rights uncertainty, protected workflow changes, irreversible schema decisions or paid dependencies.
 - Never mark B7 acceptance based only on synthetic fixtures; maintain a frozen current-production comparison.
 - B8 is a separate decision after the measured comparison. No automatic branch merge or auto deployment.
+
+## Accepted analytics-storage amendment (23 Oct 2026)
+Add a dedicated, free-tier-bounded telemetry store and operator dashboard. Cloudflare D1 Free is the provisional backend; PocketBase remains a self-hosted alternative, not a dependency. Telemetry is separate from raw article/evidence storage. Record ingestion/probe outcomes beginning in B1/B2, then deploy and activate retention only in B6 with independent approval. Enforce internal limits lower than D1 Free caps (250 MB warning, 300 MB optional-detail throttle, 350 MB analytics write stop, 20k writes/day, 250k rows scanned/day). Roll up detail, dry-run deletion first, and never delete existing raw source/evidence. Manual export to Google Drive and restore validation are required before live retention. Full policy: ANALYTICS_STORAGE_POLICY.md.
