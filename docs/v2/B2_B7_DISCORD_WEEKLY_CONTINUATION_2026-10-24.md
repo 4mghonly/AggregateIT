@@ -42,7 +42,7 @@ Files: `v2_feed_probe.py`, `tests/test_v2_feed_probe.py`.
 - A failing-first test exposed RSS date parsing that mistakenly classified `GMT` (which contains uppercase `T`) as ISO; fixed parser now tries ISO and RFC email formats. The focused suite passed afterward.
 
 ## Local validation
-- **34/34** focused isolated `unittest` tests pass against local equivalents: 10 Discord manifest, 3 renderer bridge, 9 weekly rollup, 4 UAE rhythm, 8 RSS/Atom feed probe.
+- **38/38** focused isolated `unittest` tests pass against local equivalents: 10 Discord manifest, 3 renderer bridge, 9 weekly rollup, 4 UAE rhythm, 12 RSS/Atom feed probe.
 - New modules and tests were published to the V2 GitHub branch individually and remotely fetched/inspected for file presence. **Do not claim the repository-wide 231/231 suite has been rerun**, or that the remote GitHub working tree was executed locally: direct repository clone is unavailable in this runtime. Before integration, clone in an authorized connected runner and execute `python -B -m unittest discover -s tests -p 'test_*.py' -q` plus Arabic and English layout regression suites.
 - Mobile/desktop editorial CSS prototypes were polished, source metadata and Discord edition labels added. Playwright Chromium check reports **8 view screenshots, 4 mobile overflow checks, 0 uncaught JS exceptions**; the user-visible ZIP preview is an external artifact, not a code-integrated native PNG final design.
 
@@ -54,3 +54,9 @@ Files: `v2_feed_probe.py`, `tests/test_v2_feed_probe.py`.
 
 ## No silent release claims
 The above is tested component engineering and design QA, not completed production deployment. The current published source candidates and TradingView integrations are not certified operational; no Discord deliveries were attempted by this batch.
+
+
+## B2 follow-on — failure-classified one-shot source observations
+- The new `probe_live_feed(...,fetcher=...)` wrapper makes **one** bounded HTTP request (no automatic retry), returns `http_403`, `http_429`, `network_error` or parsed freshness metadata, and never treats 403/429 or undated RSS as healthy.
+- Four additional isolated tests cover rate limiting, authorization refusal, undated content and private address refusal. Local focused tests now **38/38 passed**.
+- Important: these 38 isolated unit tests do **not** constitute 105 live source checks or a full repository integration run.
