@@ -5,7 +5,7 @@ No production integration before owner-approved B8.
 | Batch | State as of 23 Oct 2026 | Evidence and exit gate |
 | --- | --- | --- |
 | B0 Foundation | COMPLETE — seven planning/fixture files committed and verified | MASTER_PLAN_V2, QUALITY_BASELINE, ARCHITECTURE_V2, fixtures, HANDOFF, branch/base comparison |
-| B1 Reliability | NOT STARTED | Offline route/error tests; translation budgets; audit dependency fix; no live calls or posts |
+| B1 Reliability | PARTIAL — isolated code/test package, 10 offline regressions passed; installed/e2e tests pending | Route failover, safe diagnostics, audit dependency/isolation, degraded-state marking; B1_RELIABILITY_REPORT.md |
 | B2 Source inventory | NOT STARTED | Versioned joint registry, validated publisher independence, freshness/rights/region floor |
 | B3 Evidence core | NOT STARTED | Article/excerpt/claim/event provenance and stable delta regression |
 | B4 Editorial engines | NOT STARTED | Structured Arabic and English editor, cross-lingual QA, abstention contract |
@@ -47,3 +47,9 @@ No production integration before owner-approved B8.
 - B6: build free-tier D1 ingestion and read-only dashboard, with daily dry-run cleaning first; gated live retention and manual export/restore after explicit approval.
 - B7: compare V1/V2 using the same definitions and captured denominators.
 - Account-level cost and storage gates: see ANALYTICS_STORAGE_POLICY.md. No database, Cron trigger or deletion has been enabled by this amendment.
+
+## B1 package record — 23 October 2026
+- Source edits: `llm.py`, `arabic_newsletter/editor.py`, `arabic_newsletter/run.py`, `audit.py`, `.github/workflows/audit.yml`.
+- New contracts/tests: `v2_route_health.py`, `tests/test_b1_reliability.py`, `docs/v2/B1_RELIABILITY_REPORT.md`.
+- Offline test result: 10/10 focused Python unittest cases PASS, with in-memory mocked network and stubbed unavailable external imports; no installed-dependency or end-to-end run claimed.
+- Main, production schedules, DB, Actions and Discord untouched. B1 remains PARTIAL until an isolated dependency-installed suite and no-post product rehearsal pass.

@@ -1,4 +1,4 @@
-# AggregateIT V2 — B0 Handoff (closed)
+# AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 Date: 23 October 2026  
 Repository: https://github.com/4mghonly/AggregateIT  
 Branch: rebuild/aggregateit-v2  
@@ -33,3 +33,10 @@ Recent data must be compared to the pinned baseline, not to an assumed current m
 
 ## Planning amendment after B0 — 23 October 2026
 Owner accepted a small analytics store with strict no-paid-plan budget and periodic cleanup, plus the option to manually copy exports to Google Drive. Added ANALYTICS_STORAGE_POLICY.md and references in the V2 master/architecture/tracker. Provisional choice: Cloudflare D1 Free, NOT PocketBase by default. Do not treat this as permission to create a Cloudflare DB, deploy a Worker, delete production data, or connect Google Drive. Future scripts must implement bounded budgets, dry-run cleanup, backup manifest and restore test. Raw news/evidence stays outside telemetry; B6 must obtain separate approval before retention deletion.
+
+## B1 reliability checkpoint — 23 October 2026
+- See `B1_RELIABILITY_REPORT.md` for exact code seams, tests, residuals and constraints.
+- Branch-only route fixes, safe bounded telemetry contract, audit dependency/error isolation and accurate Arabic degradation status prepared; 10/10 focused tests passed in an in-memory offline harness (third-party imports stubbed).
+- B1 remains PARTIAL. Next: isolated full-dependency clone/tests and no-post end-to-end simulation. Do not dispatch workflows, test secrets or deliver Discord messages as part of this step.
+- D1 telemetry, cleanup, backup/Drive and dashboard not activated; see `ANALYTICS_STORAGE_POLICY.md`.
+- No approval to change main, production Arabic branches, webhooks, deployment, schedules or paid services.

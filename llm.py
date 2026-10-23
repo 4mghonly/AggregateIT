@@ -7,6 +7,7 @@ endpoint, or model is hard-coded.
 import os, json, time, hashlib, requests
 from datetime import datetime, timezone
 from llm_response import content_text, response_text, json_object, rejection_reason
+from v2_route_health import RouteJournal
 BASE=os.path.dirname(os.path.abspath(__file__))
 def _env(name,default=""): return (os.environ.get(name,default) or "").strip()
 def _json_env(name):
@@ -45,6 +46,7 @@ class LLMPermanent(RuntimeError): pass
 class LLMTransient(RuntimeError): pass
 _calls=0
 _force_fallback=False
+ROUTE_JOURNAL=RouteJournal(max_entries=64)
 print("LLM MODEL:",MODEL or "<not configured>","| budget:",MAX_CALLS)
 def _route_complete(fallback=False):
     return bool((FALLBACK_API_KEY and FALLBACK_BASE_URL and FALLBACK_MODEL) if fallback else (API_KEY and BASE_URL and MODEL))
@@ -155,7 +157,7 @@ def _post(messages,temperature,max_tokens,timeout):
     r=_request(BASE_URL,API_KEY,MODEL,messages,temperature,max_tokens,timeout,False)
     return _decode_or_raise(r),MODEL
 def chat(messages,temperature=0.3,timeout=90,max_tokens=4096,validator=None,json_mode=False):
-    global _calls
+    global _calls, _force_fallback
     model=FALLBACK_MODEL if _force_fallback and _route_complete(True) else MODEL
     if not model: model=FALLBACK_MODEL
     key=_ledger_key(model or "<unconfigured>",messages); led=_load_json(LEDGER_FILE,{})
@@ -200,14 +202,19 @@ def chat(messages,temperature=0.3,timeout=90,max_tokens=4096,validator=None,json
                 if validator: validator(content)
                 led[key]={"status":"success","model":route_model,"ts":time.time(),"response":content}
                 _save_ledger(led)
+                ROUTE_JOURNAL.record('english_chat','fallback' if fallback else 'primary',status=r.status_code)
+                _force_fallback=bool(fallback)  # Prefer the last healthy independent route.
                 return content
             except LLMPermanent:
+                ROUTE_JOURNAL.record('english_chat','fallback' if fallback else 'primary',status=r.status_code)
                 last=RuntimeError("HTTP %d"%r.status_code); disabled.add(fallback)
             except requests.RequestException as exc:
+                ROUTE_JOURNAL.record('english_chat','fallback' if fallback else 'primary',outcome='transport_error')
                 last=RuntimeError(type(exc).__name__); disabled.add(fallback)
                 print("LLM route transport failed: "+type(exc).__name__,flush=True)
             except Exception as exc:
                 reason=rejection_reason(exc); reasons[fallback]=reason
+                ROUTE_JOURNAL.record('english_chat','fallback' if fallback else 'primary',outcome='invalid_content')
                 last=RuntimeError(reason)
                 if reason in ("response_truncated","empty_response_content"):
                     tokens[fallback]=min(8192,max(4096,tokens[fallback]*2))

@@ -6,6 +6,7 @@ import time
 from decimal import Decimal
 from urllib.parse import urlsplit
 import requests
+from v2_route_health import RouteJournal
 from .core import ROOT, REGIONS, clean, digest
 
 TOPICS={'diplomacy','military','security','political_stability','humanitarian_conflict','sanctions','strategic_infrastructure'}
@@ -69,6 +70,7 @@ def _message_json(message):
 class Client:
     def __init__(self,state,max_calls=12,read_timeout=120,wall_budget_s=None):
         self.state=state; self.calls=0
+        self.route_journal=RouteJournal(max_entries=64)
         self.max_calls=max(1,int(max_calls)); self.read_timeout=max(10,int(read_timeout))
         self.deadline=(time.monotonic()+max(30,int(wall_budget_s))) if wall_budget_s else None
         self.key=(os.getenv('ARABIC_LLM_API_KEY') or '').strip()
@@ -240,6 +242,7 @@ class Client:
             try:
                 r=self._send(base,key,payload,fallback)
             except requests.RequestException:
+                self.route_journal.record('arabic_chat','fallback' if self.force_fallback_credential else 'primary',outcome='transport_error')
                 if not transient_retry:
                     transient_retry=True
                     print('Arabic LLM network/latency timeout; retrying active route once',flush=True)
@@ -250,6 +253,7 @@ class Client:
                 raise EditorialError('LLM network failure') from None
 
             if r.status_code!=200:
+                self.route_journal.record('arabic_chat','fallback' if fallback else 'primary',status=r.status_code)
                 try:
                     err=r.json().get('error',{})
                     detail=str(err.get('message') or err.get('code') or 'request rejected') if isinstance(err,dict) else str(err)
@@ -302,6 +306,7 @@ class Client:
                 if finish in ('length','max_tokens'): raise ValueError('truncated')
                 result=_message_json(choice['message'])
             except (ValueError,KeyError,IndexError,TypeError):
+                self.route_journal.record('arabic_chat','fallback' if fallback else 'primary',outcome='invalid_content')
                 if not decode_retry:
                     decode_retry=True
                     payload['temperature']=min(temperature,0.05)
@@ -316,6 +321,7 @@ class Client:
                 # Let the caller invoke its compact structured-output repair path
                 # on the same authenticated route before considering credential failover.
                 raise EditorialError('Invalid or truncated model JSON after retry') from None
+            self.route_journal.record('arabic_chat','fallback' if fallback else 'primary',status=200)
             self.state.put('last_model_used',response.get('model') or model)
             if use_cache: self.state.put(cache_key,result)
             return result
@@ -560,7 +566,12 @@ def synthesize(articles,state):
         request={'regions':REGIONS,'topics':sorted(TOPICS),'glossary':glossary,
                  'previous_events':previous,'articles':bounded,
                  'task':'Compact reliability synthesis after an unparseable full response.'}
-        print('Arabic synthesis switching to compact balanced recovery mode',flush=True)
+        # Two invalid primary responses already consumed the decoding allowance.
+        # Preserve the bounded compact repair but try the independent credential
+        # route first when one is configured, leaving calls for factual review.
+        switched=client._switch_fallback()
+        print('Arabic synthesis switching to compact balanced recovery mode'+
+              (' on fallback route' if switched else ''),flush=True)
         result=_event_envelope(client.chat(COMPACT_SYSTEM,request,max_tokens=6500,temperature=0.05,use_cache=False))
     state.put('last_editorial_draft',result)
     # Validate against only the evidence actually sent to the model.
@@ -626,6 +637,7 @@ All prose must be Modern Standard Arabic. Use only names/numbers already present
 
 def build_analysis(events,state,morning=False,strict=False):
     """Create a bounded executive assessment from already-validated events."""
+    state.put('analysis_degraded',False)
     if not events:
         return {'situation_ar':'لا تتوافر أحداث مؤهلة لبناء تقدير تحليلي في هذه الدورة.',
                 'implications_ar':'','developing_ar':[],'watch_ar':[]}
@@ -655,6 +667,7 @@ def build_analysis(events,state,morning=False,strict=False):
         # Analysis enriches the product but must not suppress a fully validated
         # event edition because of a model formatting/transient failure.
         print('Arabic analysis model degraded to evidence-bound fallback:',str(exc)[:160],flush=True)
+        state.put('analysis_degraded',True)
         result={}
     combined=' '.join(
         (e.get('title_ar','')+' '+e.get('summary_ar','')+' '+e.get('assessment_ar','')+' '+e.get('watch_ar',''))

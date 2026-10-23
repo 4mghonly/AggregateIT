@@ -206,6 +206,8 @@ def main():
                 if args.send and not articles:
                     raise RuntimeError('Live extraction yielded no dated relevant articles; publication blocked')
                 mark_stage(args.output,'synthesize')
+                editorial_degraded=False
+                degraded_reason=None
                 try:
                     phase=time.monotonic(); print('Arabic phase start: synthesize',flush=True)
                     events,rejected=synthesize(articles,state)
@@ -217,6 +219,8 @@ def main():
                     print(f'Arabic phase complete: analysis elapsed_s={time.monotonic()-phase:.1f}',flush=True)
                     mark_stage(args.output,'analysis','ok')
                 except Exception as exc:
+                    editorial_degraded=True
+                    degraded_reason=type(exc).__name__
                     events,analysis=fallback_from_arabic_sources(articles)
                     rejected=[]
                     if not events:
@@ -237,7 +241,9 @@ def main():
                   'events_returned':len(events),
                   'all_event_text_arabic':all(is_arabic(t) for t in translated) if translated else True,
                   'analysis_present':bool((analysis or {}).get('situation_ar')),
-                  'status':'ok',
+                  'status':'degraded' if editorial_degraded or state.get('analysis_degraded') or unresolved else 'ok',
+                  'degraded_reason':degraded_reason or ('analysis_model_unavailable' if state.get('analysis_degraded') else ('source_regions_unresolved' if unresolved else None)),
+                  'unresolved_regions':list(unresolved),
                 }
                 if args.send and (not llm_health['all_event_text_arabic'] or (events and not llm_health['analysis_present'])):
                     raise RuntimeError('Arabic LLM extraction/translation validation failed')
