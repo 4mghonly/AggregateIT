@@ -1,0 +1,98 @@
+{
+  "schema": "aggregateit-naysayer-fixtures/1",
+  "synthetic": true,
+  "non_publishable": true,
+  "description": "Tentative expected decisions for test-first implementation. No runtime behavior is proven.",
+  "cases": [
+    {
+      "id": "NY-01",
+      "product": "english",
+      "cadence": "daily",
+      "situation": "Two independently operated publishers disagree on a synthetic claim; excerpts and source family verified.",
+      "expected_status": "supported_challenge",
+      "expected_disposition": "qualify",
+      "expected_visible": true
+    },
+    {
+      "id": "NY-02",
+      "product": "arabic",
+      "cadence": "daily",
+      "situation": "Only one native-Arabic attributed report; no counterevidence. Model proposes a contrary claim without excerpt.",
+      "expected_status": "insufficient_evidence",
+      "expected_disposition": "abstain",
+      "expected_visible": true
+    },
+    {
+      "id": "NY-03",
+      "product": "english",
+      "cadence": "daily",
+      "situation": "Two feeds syndicate one original publisher; model counts two corroborating sources.",
+      "expected_status": "withheld",
+      "expected_disposition": "abstain",
+      "expected_visible": true
+    },
+    {
+      "id": "NY-04",
+      "product": "arabic",
+      "cadence": "daily",
+      "situation": "Arabic-script Persian excerpt labelled Arabic; translation unverified.",
+      "expected_status": "withheld",
+      "expected_disposition": "abstain",
+      "expected_visible": true
+    },
+    {
+      "id": "NY-05",
+      "product": "english",
+      "cadence": "weekly",
+      "situation": "Lead assessment survives independent contrary-evidence search; no plausible supported alternative.",
+      "expected_status": "assessment_survives",
+      "expected_disposition": "retain",
+      "expected_visible": true
+    },
+    {
+      "id": "NY-06",
+      "product": "arabic",
+      "cadence": "weekly",
+      "situation": "Week-over-week event revision with two evidence-linked updates and one unresolved contradiction.",
+      "expected_status": "supported_challenge",
+      "expected_disposition": "revise",
+      "expected_visible": true
+    },
+    {
+      "id": "NY-07",
+      "product": "english",
+      "cadence": "weekly",
+      "situation": "Counterclaim points to nonexistent excerpt or unverified publisher family.",
+      "expected_status": "withheld",
+      "expected_disposition": "abstain",
+      "expected_visible": true
+    },
+    {
+      "id": "NY-08",
+      "product": "arabic",
+      "cadence": "daily",
+      "situation": "Model route returns invalid schema, and no independent evidence supports a critique.",
+      "expected_status": "insufficient_evidence",
+      "expected_disposition": "abstain",
+      "expected_visible": true
+    },
+    {
+      "id": "NY-09",
+      "product": "english",
+      "cadence": "weekly",
+      "situation": "Weekly summary merely repeats daily objections with no explicit comparison to prior week.",
+      "expected_status": "withheld",
+      "expected_disposition": "abstain",
+      "expected_visible": true
+    },
+    {
+      "id": "NY-10",
+      "product": "arabic",
+      "cadence": "weekly",
+      "situation": "Evidence supports a factual disagreement but a requested excerpt exceeds publisher quotation policy.",
+      "expected_status": "withheld",
+      "expected_disposition": "abstain",
+      "expected_visible": true
+    }
+  ]
+}
