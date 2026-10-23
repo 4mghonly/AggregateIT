@@ -120,6 +120,13 @@ class CriticTests(unittest.TestCase):
                        product='english',cadence='weekly',slot_id=SLOT)
         self.assertFalse(r['quality_gate_passed'])
         self.assertEqual(r['reason'],'weekly_needs_three_distinct_reviews')
+    def test_missing_daily_review_is_visible_but_not_quality_green(self):
+        r=build_report([],ledger=self.l,as_of=NOW,verified_families=self.fam,
+                       verified_languages=self.lang,product='arabic',cadence='daily',slot_id=SLOT)
+        self.assertEqual(r['sections'][0]['review_status'],'insufficient_evidence')
+        self.assertFalse(r['quality_gate_passed'])
+        self.assertEqual(r['reason'],'visible_degraded_notice_only')
+
     def test_daily_report_contains_one_visible_section(self):
         r=build_report([self.p],ledger=self.l,as_of=NOW,
                        verified_families=self.fam,verified_languages=self.lang,
