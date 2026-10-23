@@ -4,9 +4,16 @@ from pathlib import Path
 from arabic_newsletter.core import UAE, REGIONS
 from .render_engine import *
 
-def _footer(c,page):
+# High-contrast text accent over PAPER (#101D25). The geographic 'gcc' map
+# shade (#8B343B) is suitable for decorations, not small Arabic headlines.
+UAE_HEADLINE_COLOR = ALERT
+
+def _footer(c,page,*,sample=False):
     c.text('المعلومات منسوبة إلى مصادرها، والتحليل تقديري وليس تحققاً مستقلاً',(1040,2108,1760,34),22,True,MUTED,'center',min_size=20,line_ratio=1.14)
     c.text(f'الصفحة {page} من 3',(55,2108,300,34),22,True,MUTED,'left',min_size=20,line_ratio=1.14)
+    if sample:
+        c.text('بيانات اختبار — ليست أخباراً حقيقية',(2900,2108,860,36),24,True,ALERT,
+               'right',min_size=21,line_ratio=1.14)
 
 def _event_key(e):
     return e.get('fingerprint') or sanitize_text(e.get('title_ar',''))
@@ -95,8 +102,7 @@ def _uae_panel(c,box,brief,events):
         step=max(190,usable_h//len(events))
         yy=y
         for i,e in enumerate(events):
-            col=REGION_COLORS.get('gcc',OLIVE)
-            c.text(compact(e.get('title_ar',''),82),(x,yy,w,68),34,True,col,min_size=29,line_ratio=1.18)
+            c.text(compact(e.get('title_ar',''),82),(x,yy,w,68),34,True,UAE_HEADLINE_COLOR,min_size=29,line_ratio=1.18)
             c.text(compact(_source_line(e,2),96),(x,yy+72,w,28),19,True,MUTED,min_size=18,line_ratio=1.12)
             c.text(compact(e.get('summary_ar',''),235),(x,yy+108,w,step-148),30,False,INK,min_size=25,line_ratio=1.25)
             if i<len(events)-1: c.line(x,yy+step-5,x+w,yy+step-5,BORDER,1)
@@ -211,7 +217,7 @@ def page1(brief,path):
         for i,e in enumerate(leads,1):
             _story_card(c,(x,y+(i-1)*(rh+gap),w,rh),e,i,True)
 
-    _footer(c,1); c.save(path); return c.clipped
+    _footer(c,1,sample=bool(brief.get('sample'))); c.save(path); return c.clipped
 
 def page2(brief,path):
     c=Canvas(); masthead(c,brief,2); stats(c,brief)
@@ -239,7 +245,7 @@ def page2(brief,path):
     _developing_panel(c,(2345,975,1440,510),brief)
     _watch_panel(c,(2345,1510,1440,565),brief)
 
-    _footer(c,2); c.save(path); return c.clipped
+    _footer(c,2,sample=bool(brief.get('sample'))); c.save(path); return c.clipped
 
 def _continuity_events(brief):
     """Current events first, then clearly tagged prior-edition continuity items."""
@@ -387,7 +393,7 @@ def page3(brief,path):
     c.text('الخلاصة التنفيذية',(W-560,1974,470,40),27,True,STEEL,min_size=24,line_ratio=1.14)
     c.text('استمرار القصة نفسها لا يقلل أهميتها إذا بقيت الأعلى تأثيراً.  •  التمييز مطلوب بين الضجيج الإعلامي والمؤشرات القابلة للرصد.  •  أولوية المتابعة: الجغرافيا، الفاعلون المسلحون، والنقاط البحرية الحساسة.',
            (160,1972,W-800,52),23,True,INK,min_size=20,line_ratio=1.16)
-    _footer(c,3); c.save(path); return c.clipped
+    _footer(c,3,sample=bool(brief.get('sample'))); c.save(path); return c.clipped
 
 
 def render(brief,output):

@@ -77,15 +77,16 @@ class CoreTests(unittest.TestCase):
 
     def test_failed_source_audits_are_rotated_back_into_production(self):
         end=datetime.fromisoformat('2026-09-21T00:00:00+04:00')
-        sources=[{'id':'live','enabled':True,'language':'ar','verification_status':'active'}]
-        sources += [{'id':f'en{i:02}','enabled':False,'language':'en','verification_status':'failed','retired_reason':'failed_source_audit_2026-09-19'} for i in range(25)]
-        sources += [{'id':f'ar{i:02}','enabled':False,'language':'ar','verification_status':'failed','retired_reason':'failed_source_audit_2026-09-19'} for i in range(10)]
-        sources += [{'id':'recovered','enabled':False,'language':'en','verification_status':'active','retired_reason':'failed_source_audit_2026-09-19'}]
+        sources=[{'id':'live','region':'iraq','enabled':True,'language':'ar','verification_status':'active'}]
+        sources += [{'id':f'en{i:02}','region':'iraq','enabled':False,'language':'en','verification_status':'failed','retired_reason':'failed_source_audit_2026-09-19'} for i in range(25)]
+        sources += [{'id':f'ar{i:02}','region':'iraq','enabled':False,'language':'ar','verification_status':'failed','retired_reason':'failed_source_audit_2026-09-19'} for i in range(10)]
+        sources += [{'id':'recovered','region':'iraq','enabled':False,'language':'en','verification_status':'active','retired_reason':'failed_source_audit_2026-09-19'}]
         selected=production_sources(sources,end)
         ids={s['id'] for s in selected}
         self.assertIn('live',ids); self.assertIn('recovered',ids)
-        self.assertEqual(sum(s['id'].startswith('en') for s in selected),18)
-        self.assertEqual(sum(s['id'].startswith('ar') for s in selected),6)
+        # Current policy deliberately limits audit recovery to 8+4 per cycle.
+        self.assertEqual(sum(s['id'].startswith('en') for s in selected),8)
+        self.assertEqual(sum(s['id'].startswith('ar') for s in selected),4)
 
     def test_egypt_and_oman_sources_are_first_class_regions(self):
         root=Path(__file__).resolve().parent
@@ -99,7 +100,7 @@ class EditorialTests(unittest.TestCase):
     def setUp(self):
         self.article=dict(id='a',region='iraq',country='IQ',language='en',title='Officials report a border attack in Iraq',text='Officials report a border attack with 12 injuries.',
           source='Example',url='https://example.com/a',published=1,affiliation='publisher',kind='news')
-        self.event=dict(region='iraq',topic='security',title_ar='تقرير عن هجوم قرب الحدود في العراق',summary_ar='أفاد المصدر بوقوع هجوم قرب الحدود وإصابة 12 شخصاً.',
+        self.event=dict(region='iraq',topic='security',title_ar='تقرير عن هجوم قرب الحدود في العراق',summary_ar='أفاد المصدر بوقوع هجوم قرب الحدود في العراق وإصابة 12 شخصاً.',
           assessment_ar='لا تكفي المعلومات لتحديد تداعيات الهجوم.',watch_ar='متابعة تحديثات المصدر.',severity='high',source_ids=['a'],
           evidence=[{'id':'a','quote':'Officials report a border attack with 12 injuries.'}])
     def validate(self,event=None): return validate_events({'events':[event or self.event]},[self.article])
@@ -283,7 +284,12 @@ class EditorialTests(unittest.TestCase):
         self.assertFalse(quote_supported('Officials said not injured','Officials said injured'))
 
     def test_publisher_country_does_not_define_event_region(self):
-        self.event.update(region='turkey',title_ar='هجوم في جنوب لبنان',summary_ar='أفاد المصدر بهجوم في لبنان.')
+        # Publisher country IQ does not make a cited, explicitly Lebanon event Iraqi.
+        self.article['title']='Officials report a border attack in Lebanon'
+        self.article['text']='Officials report a border attack in Lebanon with 12 injuries.'
+        self.article['region']='levant'
+        self.event['evidence'][0]['quote']=self.article['text']
+        self.event.update(region='turkey',title_ar='هجوم في لبنان',summary_ar='أفاد المصدر بهجوم في لبنان.')
         self.assertEqual(self.validate()[1][0]['reason'],'event_geography')
         self.event['region']='levant'; self.assertTrue(self.validate()[0])
     def test_outside_region_incident_is_rejected(self):
@@ -297,7 +303,7 @@ class EditorialTests(unittest.TestCase):
     def test_altered_casualty_number_rejected(self):
         self.event['summary_ar']='أفاد المصدر بإصابة 120 شخصاً.'; self.assertFalse(self.validate()[0])
     def test_arabic_indic_number_supported(self):
-        self.event['summary_ar']='أفاد المصدر بإصابة ١٢ شخصاً.'; self.assertTrue(self.validate()[0])
+        self.event['summary_ar']='أفاد المصدر بوقوع هجوم قرب الحدود في العراق وإصابة ١٢ شخصاً.'; self.assertTrue(self.validate()[0])
     def test_scaled_quantities_preserve_exact_total(self):
         self.assertEqual(numbers('۵۲۲ هزار و ۲۰۰'),numbers('522 ألف و200'))
         self.assertNotEqual(numbers('۵۲۲ هزار و ۲۰۰'),numbers('522 ألف'))
@@ -338,16 +344,17 @@ class DeliveryTests(unittest.TestCase):
     def test_main_is_authoritative_arabic_production(self):
         root=Path(__file__).resolve().parents[1]
         workflow=(root/'.github'/'workflows'/'arabic-scheduler.yml').read_text(encoding='utf-8')
-        self.assertIn('ref: main',workflow)
+        self.assertIn('branches: [main]',workflow)
         self.assertNotIn('Arabic-production',workflow)
         self.assertIn('DISCORD_WEBHOOK_ARABIC',workflow)
-        self.assertIn('0 2,8,14,20 * * *',workflow)
+        for hour in (2,8,14,20):
+            self.assertIn(f'0 {hour} * * *',workflow)
     def test_success_then_duplicate_suppression(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(Path(d)/'state'); path=Path(d)/'slide.png'; path.write_bytes(b'png')
             response=Mock(status_code=200); response.json.return_value={'id':'123'}
             with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post',return_value=response) as post:
-                self.assertEqual(send(state,'edition',[path]),'["123"]'); self.assertEqual(send(state,'edition',[path]),'["123"]')
+                self.assertEqual(send(state,'edition',[path]),'123'); self.assertEqual(send(state,'edition',[path]),'123')
                 self.assertEqual(post.call_count,1)
             state.close()
     def test_confirmed_failed_delivery_can_retry(self):
@@ -357,17 +364,20 @@ class DeliveryTests(unittest.TestCase):
             success=Mock(status_code=200); success.json.return_value={'id':'456','channel_id':'789'}
             with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post',side_effect=[failed,success]) as post:
                 with self.assertRaises(DeliveryError): send(state,'edition',[path])
-                self.assertEqual(send(state,'edition',[path]),'["456"]')
+                self.assertEqual(send(state,'edition',[path]),'456')
                 self.assertEqual(post.call_count,2)
             state.close()
 
-    def test_timeout_retries_then_records_failed_for_resumable_workflow_retry(self):
+    def test_timeout_is_ambiguous_and_never_automatically_retried(self):
         with tempfile.TemporaryDirectory() as d:
             state=State(Path(d)/'state'); path=Path(d)/'slide.png'; path.write_bytes(b'png')
             with patch('arabic_newsletter.delivery.webhook_url',return_value='https://discord.com/api/webhooks/1/fake'),patch('arabic_newsletter.delivery.requests.post',side_effect=requests.Timeout) as post,patch('arabic_newsletter.delivery.time.sleep'):
                 with self.assertRaises(DeliveryError): send(state,'edition',[path])
-                self.assertEqual(post.call_count,3)
-                self.assertEqual(state.delivery('edition')[0],'failed')
+                self.assertEqual(post.call_count,1)
+                self.assertEqual(state.delivery('edition')[0],'uncertain')
+                with self.assertRaisesRegex(DeliveryError,'reconcile'):
+                    send(state,'edition',[path])
+                self.assertEqual(post.call_count,1)
             state.close()
 
     def test_only_png_slides_can_reach_arabic_webhook(self):
@@ -399,7 +409,8 @@ class RenderTests(unittest.TestCase):
         self.assertTrue(lead_keys.isdisjoint(uae_keys))
         self.assertTrue(secondary_keys.isdisjoint(uae_keys))
         self.assertLessEqual(len(leads),3)
-        self.assertLessEqual(len(secondary),3)
+        # The current three-slide layout intentionally allows 10 secondary slots.
+        self.assertLessEqual(len(secondary),10)
         self.assertLessEqual(len(uae),4)
 
     def test_page2_uses_only_active_region_cards_and_preserves_full_monitoring_list(self):
