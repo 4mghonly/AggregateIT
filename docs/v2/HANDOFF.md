@@ -46,3 +46,10 @@ Owner accepted a small analytics store with strict no-paid-plan budget and perio
 - `v2_sources.py` read-only schema/reconciliation CLI and `tests/test_b2_source_registry.py` standard-library regression suite (14 tests in in-memory real-JSON harness); report: `docs/v2/B2_SOURCE_INVENTORY_REPORT.md`.
 - Historical Arabic audit (22 Oct): 58 adapter-compatible, but 48 had any dated recent stories; Somalia, Yemen, Egypt, Afghanistan, Jordan below two historically dated sources, and UAE only two publisher-host candidates for dated items. Independent ownership and rights **unverified**.
 - NO source promotion/quarantine write, live probing, Actions, Discord, D1, or main update. B2 is PARTIAL; follow triage, perform source-rights/independence review, and rerun bounded live adapter probes before closing.
+
+- Audit refresh: external bot advanced production main to `c7a53e9` (only `arabic_newsletter/SOURCE_AUDIT.json`); V2 safely copied those audit bytes without merging code or changing production. Branch snapshot refreshed from 22 to 23 Oct: 61 adapter-compatible, 52 dated recent, four region shortfalls (Somalia, Yemen, Egypt, Jordan), UAE only 2 publisher-host candidates.
+
+## B3 in-memory evidence-core checkpoint — 23 October 2026
+- `v2_evidence.py` pure standard-library module with stable article/revision/observation IDs, exact code-point excerpt spans, source-bound attributed claims, explicit event IDs/delta/closure and candidate translation records.
+- 19/19 synthetic isolated tests pass in `tests/test_b3_evidence_core.py`; report `docs/v2/B3_EVIDENCE_REPORT.md`. No article raw-data persistence, network fetches, model calls, production integration or real-source validation.
+- Remaining: durable append-only graph, true referential integrity, provenance receipts/rights, cross-language event mapping, correction/contradiction rules, real fixture tests. B3 PARTIAL.

@@ -5,13 +5,13 @@
     "english": "config/sources.json",
     "arabic": "arabic_newsletter/sources.json",
     "historical_arabic_audit": "arabic_newsletter/SOURCE_AUDIT.json",
-    "arabic_audit_checked_at": "2026-10-22T06:07:28.669454+00:00"
+    "arabic_audit_checked_at": "2026-10-23T06:02:32.857382+00:00"
   },
   "interpretation": {
     "status": "Offline snapshot; never interpret legacy Active as currently usable.",
     "independence": "All host candidates are unverified family independence; syndication/mirrors cannot be counted as independent.",
     "english_language": "Unknown per source; English legacy file has no language/region fields.",
-    "freshness": "Arabic audit checked 2026-10-22, dated_72h is historical only, English has no comparable audit.",
+    "freshness": "Arabic audit checked 2026-10-23 at 06:02 UTC; dated_72h is historical only, English has no comparable audit.",
     "rights": "All source-specific rights are not reviewed; source discovery, article reading, analysis and redistribution are separate permissions.",
     "html": "HTML adapters may be adapter-compatible even when dated_72h is zero."
   },
@@ -1175,8 +1175,8 @@
       "legacy_state": "claimed_active",
       "observed": {
         "compatible": true,
-        "entries": 38,
-        "dated_72h": 38,
+        "entries": 28,
+        "dated_72h": 28,
         "reason": "ok",
         "http": 200
       }
@@ -1196,7 +1196,7 @@
       "legacy_state": "claimed_active",
       "observed": {
         "compatible": true,
-        "entries": 38,
+        "entries": 25,
         "dated_72h": 8,
         "reason": "ok",
         "http": 200
@@ -1281,7 +1281,7 @@
       "observed": {
         "compatible": true,
         "entries": 45,
-        "dated_72h": 43,
+        "dated_72h": 42,
         "reason": "ok",
         "http": 200
       }
@@ -1323,7 +1323,7 @@
       "observed": {
         "compatible": true,
         "entries": 25,
-        "dated_72h": 8,
+        "dated_72h": 12,
         "reason": "ok",
         "http": 200
       }
@@ -1365,7 +1365,7 @@
       "observed": {
         "compatible": true,
         "entries": 10,
-        "dated_72h": 0,
+        "dated_72h": 1,
         "reason": "ok",
         "http": 200
       }
@@ -1890,7 +1890,7 @@
       "observed": {
         "compatible": true,
         "entries": 20,
-        "dated_72h": 9,
+        "dated_72h": 7,
         "reason": "ok",
         "http": 200
       }
@@ -2331,7 +2331,7 @@
       "observed": {
         "compatible": true,
         "entries": 10,
-        "dated_72h": 3,
+        "dated_72h": 2,
         "reason": "ok",
         "http": 200
       }
@@ -2436,7 +2436,7 @@
       "observed": {
         "compatible": true,
         "entries": 50,
-        "dated_72h": 9,
+        "dated_72h": 10,
         "reason": "ok",
         "http": 200
       }
@@ -2455,11 +2455,11 @@
       "language": "en",
       "legacy_state": "claimed_active",
       "observed": {
-        "compatible": false,
-        "entries": 0,
-        "dated_72h": 0,
-        "reason": "http_202",
-        "http": 202
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 10,
+        "reason": "ok",
+        "http": 200
       }
     },
     {
@@ -2542,8 +2542,8 @@
         "compatible": false,
         "entries": 0,
         "dated_72h": 0,
-        "reason": "http_404",
-        "http": 404
+        "reason": "http_403",
+        "http": 403
       }
     },
     {
@@ -2624,7 +2624,7 @@
       "legacy_state": "claimed_active",
       "observed": {
         "compatible": true,
-        "entries": 87,
+        "entries": 90,
         "dated_72h": 0,
         "reason": "ok",
         "http": 200
@@ -2687,8 +2687,8 @@
       "legacy_state": "claimed_active",
       "observed": {
         "compatible": true,
-        "entries": 80,
-        "dated_72h": 42,
+        "entries": 81,
+        "dated_72h": 39,
         "reason": "ok",
         "http": 200
       }
@@ -2730,7 +2730,7 @@
       "observed": {
         "compatible": true,
         "entries": 50,
-        "dated_72h": 42,
+        "dated_72h": 49,
         "reason": "ok",
         "http": 200
       }
@@ -2772,7 +2772,7 @@
       "observed": {
         "compatible": true,
         "entries": 50,
-        "dated_72h": 10,
+        "dated_72h": 11,
         "reason": "ok",
         "http": 200
       }
@@ -2856,7 +2856,7 @@
       "observed": {
         "compatible": true,
         "entries": 50,
-        "dated_72h": 34,
+        "dated_72h": 37,
         "reason": "ok",
         "http": 200
       }
@@ -3003,7 +3003,7 @@
       "observed": {
         "compatible": true,
         "entries": 38,
-        "dated_72h": 11,
+        "dated_72h": 10,
         "reason": "ok",
         "http": 200
       }
@@ -3064,11 +3064,11 @@
       "language": "en",
       "legacy_state": "claimed_active",
       "observed": {
-        "compatible": false,
-        "entries": 0,
-        "dated_72h": 0,
-        "reason": "http_202",
-        "http": 202
+        "compatible": true,
+        "entries": 100,
+        "dated_72h": 42,
+        "reason": "ok",
+        "http": 200
       }
     },
     {
@@ -3085,11 +3085,11 @@
       "language": "en",
       "legacy_state": "disabled",
       "observed": {
-        "compatible": false,
-        "entries": 0,
-        "dated_72h": 0,
-        "reason": "http_202",
-        "http": 202
+        "compatible": true,
+        "entries": 10,
+        "dated_72h": 4,
+        "reason": "ok",
+        "http": 200
       }
     },
     {
@@ -3276,7 +3276,7 @@
       "observed": {
         "compatible": true,
         "entries": 30,
-        "dated_72h": 30,
+        "dated_72h": 28,
         "reason": "ok",
         "http": 200
       }
@@ -3401,7 +3401,7 @@
       "legacy_state": "claimed_active",
       "observed": {
         "compatible": true,
-        "entries": 54,
+        "entries": 48,
         "dated_72h": 0,
         "reason": "ok",
         "http": 200
@@ -3465,7 +3465,7 @@
       "observed": {
         "compatible": true,
         "entries": 50,
-        "dated_72h": 29,
+        "dated_72h": 34,
         "reason": "ok",
         "http": 200
       }
@@ -3569,7 +3569,7 @@
       "legacy_state": "claimed_active",
       "observed": {
         "compatible": true,
-        "entries": 22,
+        "entries": 21,
         "dated_72h": 0,
         "reason": "ok",
         "http": 200
@@ -3633,7 +3633,7 @@
       "observed": {
         "compatible": true,
         "entries": 24,
-        "dated_72h": 5,
+        "dated_72h": 4,
         "reason": "ok",
         "http": 200
       }
@@ -3705,8 +3705,8 @@
         "configured": 10,
         "legacy_enabled": 10,
         "historical_adapter_compatible": 10,
-        "historical_dated_recent": 9,
-        "distinct_host_candidates_with_dated_recent": 8,
+        "historical_dated_recent": 10,
+        "distinct_host_candidates_with_dated_recent": 9,
         "verified_independent_families": 0,
         "historical_dated_source_ids": [
           "ar-s001",
@@ -3717,7 +3717,8 @@
           "ar-s006",
           "ar-s007",
           "ar-s008",
-          "ar-s009"
+          "ar-s009",
+          "ar-s010"
         ],
         "gaps": [
           "independent_publishers_not_verified"
@@ -3927,17 +3928,16 @@
         "goal_independent_families": 2,
         "configured": 6,
         "legacy_enabled": 3,
-        "historical_adapter_compatible": 2,
-        "historical_dated_recent": 1,
-        "distinct_host_candidates_with_dated_recent": 1,
+        "historical_adapter_compatible": 3,
+        "historical_dated_recent": 2,
+        "distinct_host_candidates_with_dated_recent": 2,
         "verified_independent_families": 0,
         "historical_dated_source_ids": [
-          "ar-s055"
+          "ar-s055",
+          "ar-s091"
         ],
         "gaps": [
-          "independent_publishers_not_verified",
-          "historical_dated_recent_below_floor",
-          "distinct_host_candidates_below_floor"
+          "independent_publishers_not_verified"
         ]
       },
       {
@@ -3964,12 +3964,14 @@
         "goal_independent_families": 2,
         "configured": 6,
         "legacy_enabled": 3,
-        "historical_adapter_compatible": 2,
-        "historical_dated_recent": 2,
-        "distinct_host_candidates_with_dated_recent": 2,
+        "historical_adapter_compatible": 4,
+        "historical_dated_recent": 4,
+        "distinct_host_candidates_with_dated_recent": 4,
         "verified_independent_families": 0,
         "historical_dated_source_ids": [
           "ar-s061",
+          "ar-s062",
+          "ar-s092",
           "ar-s093"
         ],
         "gaps": [
