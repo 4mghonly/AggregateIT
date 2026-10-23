@@ -82,3 +82,10 @@ No production integration before owner-approved B8.
 - Added product/slot receipt state machine with symbolic English/Arabic destination separation and ambiguous-send retry refusal, plus same-window multi-metric quality scorecard with explicit geographic losses.
 - Combined focus run 96/96 synthetic in-memory Python unittests PASS. Details: `docs/v2/B6_B7_NO_POST_REPORT.md`.
 - Real receipts, time-window captures, durable transactions, deployment, source-quality proof and B8 cutover remain explicitly pending.
+
+## B2 source gate + B3–B7 integrated NO-POST continuation — 23 October 2026
+- Added `v2_source_gate.py`, `v2_offline_rehearsal.py`, `tests/test_b2_source_gate.py`, `tests/test_b3_b7_offline_rehearsal.py` and `docs/v2/B2_B7_OFFLINE_INTEGRATION_REPORT.md`.
+- **117/117** focused B3–B7/B2-gate synthetic Python `unittest` cases passed in an in-memory execution; includes 11 genuine module-collaboration rehearsal cases and 10 source-triage cases. Previous source-reconciliation and B1 isolated tests were not rerun in this combined count.
+- B2 gap candidates: Somalia only one compatible dated source, Yemen/Egypt/Jordan one each with one stale alternative, UAE two dated hosts. All live current checks, usage rights and independent publisher families UNVERIFIED. No source probe executed.
+- Offline bilingual fixture passes evidence → journal replay → distinct English/Arabic editorial admission → immutable layout → fail-closed analytics → unsent delivery reservation. Persian without verified native translation is explicitly withheld. No live model, source, storage, publishing or real E2E verification.
+- **Status unchanged:** B1–B7 PARTIAL; B8 BLOCKED. File-backed crash tests, dependency-installed no-post run, publisher rights, language fidelity, rendered-slide QA, durable delivery and same-window genuine shadow remain gates.

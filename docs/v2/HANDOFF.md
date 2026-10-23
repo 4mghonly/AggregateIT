@@ -71,3 +71,9 @@ Owner accepted a small analytics store with strict no-paid-plan budget and perio
 - Added `v2_delivery_gate.py` and `v2_shadow_scorecard.py` plus 13 simulated regression cases; combined B3–B7 focus suite **96/96 PASS** in isolated in-memory Python. 
 - Receipt gate protects separate English/Arabic destinations, slots and ambiguous outcomes but has no durable database or authenticated Discord acknowledgement. Scorecard refuses different-window comparisons and reports region losses without claims of measured truthfulness.
 - See `docs/v2/B6_B7_NO_POST_REPORT.md`. B7 is only PARTIAL; no live comparison job, model call, delivery or cutover.
+
+## B2/B3–B7 synthetic integration checkpoint — 23 October 2026
+- `v2_offline_rehearsal.py` gives one bounded, NO-NETWORK/NO-POST path through real B3 journal/replay, B4 independent native-language editor, B5 layout, B6 metadata/guard and reserved per-product delivery secrets. Only synthetic registered source IDs, example-host article URLs and explicit event annotations are accepted.
+- `v2_source_gate.py` determines a two-candidate maximum historical-audit triage queue for Somalia, Yemen, Egypt, Jordan and UAE; it NEVER certifies freshness, source family or rights and never makes HTTP calls.
+- Full package `docs/v2/B2_B7_OFFLINE_INTEGRATION_REPORT.md`. New tests 11+10, and combined B3–B7 / new B2 gate **117/117** offline synthetic pass. B1 and original B2 tests not included in this run. No full installed-dependency integration, live source, real delivery or production activation.
+- Next: isolated real runtime and durable journal test; then bounded authorized publisher/feed and editorial correctness evidence; then raster QA; then D1 opt-in and real shadow. B8 requires explicit owner approval.
