@@ -106,6 +106,12 @@ def _verify_article_record(article: dict) -> None:
             and article["revision_id"] == "rev_" + _sha(canonical, original)
             and article["text_sha256"] == hashlib.sha256(original.encode("utf-8")).hexdigest()
             and SOURCE_ID.fullmatch(article["source_id"]) is not None
+            and article["observation_id"] == "obs_" + _sha(
+                article["article_id"], article["revision_id"], article["source_id"], article["retrieved_at"]
+            )
+            and _time(article["retrieved_at"]) == article["retrieved_at"]
+            and (article["published_at"] is None or _time(article["published_at"]) == article["published_at"])
+            and LANGUAGE.fullmatch(article["original_language"]) is not None
         )
     except (TypeError, KeyError, AttributeError, ValueError):
         ok = False
@@ -120,7 +126,7 @@ def make_excerpt(article: dict, start: int, end: int) -> dict:
         raise ValueError("invalid_excerpt_offsets")
     literal = text[start:end]
     return {
-        "excerpt_id": "exc_" + _sha(article["revision_id"], str(start), str(end), literal),
+        "excerpt_id": "exc_" + _sha(article["revision_id"], article["source_id"], str(start), str(end), literal),
         "article_id": article["article_id"], "revision_id": article["revision_id"],
         "source_id": article["source_id"], "start_cp": start, "end_cp": end,
         "original_language": article["original_language"], "literal": literal,
@@ -143,7 +149,7 @@ def make_claim(*, statement: str, excerpts: list[dict],
         try:
             valid = (
                 excerpt["excerpt_id"] == "exc_" + _sha(
-                    excerpt["revision_id"], str(excerpt["start_cp"]),
+                    excerpt["revision_id"], excerpt["source_id"], str(excerpt["start_cp"]),
                     str(excerpt["end_cp"]), excerpt["literal"]
                 )
                 and excerpt["literal_sha256"] == hashlib.sha256(excerpt["literal"].encode("utf-8")).hexdigest()

@@ -7,7 +7,7 @@ No production integration before owner-approved B8.
 | B0 Foundation | COMPLETE — seven planning/fixture files committed and verified | MASTER_PLAN_V2, QUALITY_BASELINE, ARCHITECTURE_V2, fixtures, HANDOFF, branch/base comparison |
 | B1 Reliability | PARTIAL — isolated code/test package, 10 offline regressions passed; installed/e2e tests pending | Route failover, safe diagnostics, audit dependency/isolation, degraded-state marking; B1_RELIABILITY_REPORT.md |
 | B2 Source inventory | PARTIAL — offline joint snapshot and 14 stdlib tests PASS; live health, rights and family verification pending | 222 records, 8 cross-product duplicate feeds, 18 region snapshots, 4 dated-freshness deficits plus UAE-host gap; B2_SOURCE_INVENTORY_REPORT.md |
-| B3 Evidence core | PARTIAL — in-memory evidence/claim/event contracts and 19 synthetic regression tests PASS; integration/durable provenance pending | v2_evidence.py, tests/test_b3_evidence_core.py, B3_EVIDENCE_REPORT.md |
+| B3 Evidence core | PARTIAL — in-memory evidence contracts and graph ledger, 34 synthetic regression tests PASS; integration/durable provenance pending | v2_evidence.py, v2_evidence_ledger.py, 34 source-bound tests, B3_EVIDENCE_REPORT.md |
 | B4 Editorial engines | NOT STARTED | Structured Arabic and English editor, cross-lingual QA, abstention contract |
 | B5 Layout | NOT STARTED | Preview-scale screenshot suite, typography/RTL, fixed page count with no clipping |
 | B6 Operations | NOT STARTED | Durable scheduling, receipts and semantic health, fault-injection and rollback |
@@ -66,3 +66,8 @@ No production integration before owner-approved B8.
 ## B3 isolated evidence prototype — 23 October 2026
 - Added `v2_evidence.py`: deterministic article/revision/observation/excerpt/claim/event identities, explicit close/delta handling, source-span and record-integrity checks, and unverified translation candidate linkage. Does not collect, store, classify language or call models.
 - `tests/test_b3_evidence_core.py`: 19/19 synthetic standard-library tests PASS in an in-memory Python runtime; no installed full suite claimed. B3 remains PARTIAL until real source-grounded integration and append-only verification.
+
+## B3b in-memory referential ledger — 23 October 2026
+- `v2_evidence_ledger.py`: bounded observation graph, append-only event revisions, idempotent registration, strict source-revision/excerpt/claim/event reference checks, and explicit-only contradiction/correction relations.
+- Excerpt identity now includes source ID to preserve dual English/Arabic collector provenance; core 19/19 retested, ledger 15/15 passed in isolated Python 3.12.
+- B3 still PARTIAL: memory-only; no replay/persistence, rights-cleared authentic fixture, full collector integration or publisher ownership attestation.

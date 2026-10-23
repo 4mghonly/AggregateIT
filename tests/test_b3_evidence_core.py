@@ -50,6 +50,7 @@ class EvidenceTests(unittest.TestCase):
         b = article("en-001")
         self.assertEqual(a["article_id"], b["article_id"])
         self.assertNotEqual(a["observation_id"], b["observation_id"])
+        self.assertNotEqual(make_excerpt(a, 0, 2)["excerpt_id"], make_excerpt(b, 0, 2)["excerpt_id"])
         self.assertNotEqual(a["source_id"], b["source_id"])
 
     def test_original_arabic_codepoint_spans_are_verbatim(self):

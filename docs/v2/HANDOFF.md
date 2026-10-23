@@ -53,3 +53,8 @@ Owner accepted a small analytics store with strict no-paid-plan budget and perio
 - `v2_evidence.py` pure standard-library module with stable article/revision/observation IDs, exact code-point excerpt spans, source-bound attributed claims, explicit event IDs/delta/closure and candidate translation records.
 - 19/19 synthetic isolated tests pass in `tests/test_b3_evidence_core.py`; report `docs/v2/B3_EVIDENCE_REPORT.md`. No article raw-data persistence, network fetches, model calls, production integration or real-source validation.
 - Remaining: durable append-only graph, true referential integrity, provenance receipts/rights, cross-language event mapping, correction/contradiction rules, real fixture tests. B3 PARTIAL.
+
+## B3b referential ledger — 23 October 2026
+- Added `v2_evidence_ledger.py` and `tests/test_b3_evidence_ledger.py`. Evidence core was strengthened so excerpt IDs include their source ID and observation IDs are integrity-checked.
+- In-memory graph rejects missing/tampered article revision, excerpt, claim and event references; append-only event versions; explicit-only unverified correction/contradiction relations; bounded observations and raw-evidence-free counters.
+- Regression proof: B3 core 19/19 + B3 ledger 15/15 = 34/34 PASS, using actual source in isolated Python runtime. No persistent database, online fetch, LLM, Action or Discord call.
