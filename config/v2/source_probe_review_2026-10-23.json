@@ -1,0 +1,98 @@
+{
+  "schema": "aggregateit-v2-b2-reviewed-sources/1",
+  "reviewed_on": "2026-10-23",
+  "as_of_utc_anchor": "2026-10-23T08:00:00Z",
+  "origin_branch": "rebuild/aggregateit-v2",
+  "origin_head": "0f252ce0fb3680c2424907f58d5fc7d3879d9438",
+  "sample_limit_bytes": 96000,
+  "automated_http_requests_to_rights_restricted_publishers": 0,
+  "source_automatically_promoted": 0,
+  "publication_rights_cleared": 0,
+  "independent_publisher_families_verified": 0,
+  "notes": [
+    "This is a bounded technical and rights triage snapshot, not a license or an Arabic-native source endorsement.",
+    "RSS availability and robots.txt permission never substitute for publication rights.",
+    "No raw article bodies, scraped text or direct Discord payloads are retained."
+  ],
+  "sources": [
+    {
+      "id": "ar-s056",
+      "name": "Radio Ergo",
+      "robots": "allows_path",
+      "feed": "sampled_http_200_rss",
+      "bytes": 88166,
+      "entries": 10,
+      "dated_72h": 3,
+      "rights": "unverified",
+      "native_arabic": "not_demonstrated",
+      "publisher_language_reference": "https://radioergo.org/en/"
+    },
+    {
+      "id": "ar-s081",
+      "name": "Yemenat",
+      "robots": "unavailable_URLError",
+      "feed": "not_probed",
+      "rights": "unverified"
+    },
+    {
+      "id": "ar-s082",
+      "name": "South24",
+      "robots": "allows_path",
+      "feed": "sampled_http_200_html_not_rss",
+      "bytes": 95008,
+      "entries": 0,
+      "dated_72h": 0,
+      "rights": "unverified"
+    },
+    {
+      "id": "ar-s101",
+      "name": "Ammon News",
+      "robots": "unavailable_HTTPError",
+      "feed": "not_probed",
+      "rights": "unverified",
+      "native_arabic": "not_supported_by_english_edition",
+      "publisher_language_reference": "https://en.ammonnews.net/"
+    },
+    {
+      "id": "ar-s070",
+      "name": "Petra",
+      "robots": "unavailable_URLError",
+      "feed": "not_probed",
+      "rights": "unverified"
+    },
+    {
+      "id": "ar-s108",
+      "name": "Masrawy",
+      "robots": "allows_path",
+      "feed": "sampled_http_200_rss",
+      "bytes": 10668,
+      "entries": 10,
+      "dated_72h": 0,
+      "rights": "unverified"
+    },
+    {
+      "id": "ar-s017",
+      "name": "The National",
+      "robots": "not_probed_due_to_terms",
+      "feed": "not_probed",
+      "rights": "express_written_permission_required_for_republication",
+      "terms_url": "https://www.thenationalnews.com/terms-and-conditions/"
+    },
+    {
+      "id": "ar-s118",
+      "name": "Abu Dhabi Media Office",
+      "robots": "not_probed_due_to_terms",
+      "feed": "not_probed",
+      "rights": "automated_collection_and_republication_require_permission",
+      "terms_url": "https://www.mediaoffice.abudhabi/en/terms-conditions/"
+    },
+    {
+      "id": "ar-s046",
+      "name": "Mada Masr",
+      "robots": "not_probed_due_to_terms",
+      "feed": "not_probed",
+      "rights": "automated_access_and_reuse_require_permission",
+      "terms_url": "https://www.madamasr.com/en/2022/05/16/feature/u/privacy-policy/"
+    }
+  ]
+}
