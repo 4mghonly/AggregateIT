@@ -94,3 +94,9 @@ No production integration before owner-approved B8.
 - New `v2_raster_preview.py` and 8 Pillow/RAQM pixel-geometry/regression tests; **125/125** current offline tests PASS when combined with the B3–B7 + B2 source-gate suite.
 - Actual 3840x2160 Arabic (3) and 2480x3508 English (2) PNG bytes and smaller scale previews generated **in memory only**. One-item synthetic layouts visually inspected at reduced scale; Arabic six-card synthetic stress fixture passes without clipping; missing fonts/overlong tokens fail closed.
 - DejaVu Sans was used because Siraj Noir is absent; no genuine article text, release font, authentic screenshot/Discord delivery proof, user-approved legibility QA or production rendering. B5 still PARTIAL. See `docs/v2/B5_RASTER_NOPOST_REPORT.md`.
+
+## B6c SQLite metadata lab and backup/retention rehearsal — 23 October 2026
+- Added `v2_analytics_sqlite_lab.py`, `tests/test_b6_sqlite_lab.py`, `docs/v2/B6_SQLITE_NORESOURCE_REPORT.md`; parameterized SQLite **`:memory:` only**, no external persistence.
+- Approved telemetry is keyed/idempotent, independently grouped by English/Arabic. Unknown free-tier account headroom prevents writes; policy at 250/300/350 MB and daily 20k/250k app limits exercised with synthetic usage; all real D1 usage remains unknown.
+- Local JSON+SHA-256 export/restore and 30-day detail retention **DRY_RUN_ONLY** work without SQL delete, Cron, Drive, D1 or Cloudflare. Two genuine synthetic pipeline telemetry records survive the in-memory roundtrip.
+- 13 new SQLite cases; combined B2/B3–B7/B5/B6 focused tests **138/138 PASS**. B6 PARTIAL until approved D1 resources, actual quotas/remote parity, durable receipts, authenticated dashboard and independently tested backup/restore. Production/Drive/cleanup unchanged.
