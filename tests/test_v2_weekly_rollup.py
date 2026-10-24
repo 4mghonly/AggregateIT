@@ -43,6 +43,10 @@ class WeeklyRollupTests(unittest.TestCase):
     def test_stale_or_wrong_product_is_refused(self):
         with self.assertRaises(ValueError):rollup_week([plan('english',15)],product='english',as_of=END)
         with self.assertRaises(ValueError):rollup_week([plan('arabic',23)],product='english',as_of=END)
+    def test_retains_original_source_quote_with_evidence_identity(self):
+        r=rollup_week([plan('english',23)],product='english',as_of=END)
+        self.assertEqual(r['stories'][0]['evidence']['quote'],'Synthetic source text')
+        self.assertEqual(r['stories'][0]['evidence']['excerpt_id'],'ex1')
     def test_missing_excerpt_id_is_refused(self):
         p=plan('english',23);p['items'][0]['evidence']['excerpt_id']=''
         with self.assertRaises(ValueError):rollup_week([p],product='english',as_of=END)
