@@ -1,6 +1,6 @@
 import http_backoff
 import asyncio, json, os
-import aiohttp, feedparser
+import aiohttp
 from urllib.parse import urlencode
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -20,6 +20,22 @@ for s in RAW:
 
 RESULTS = []
 
+
+def _rss_entry_count(text):
+    """Load optional RSS parsing only when needed; report an explicit failure.
+
+    Importing the audit must remain safe even in a partially provisioned
+    environment. A missing parser must never be reported as an empty feed.
+    """
+    try:
+        import feedparser
+    except ModuleNotFoundError as exc:
+        if exc.name == "feedparser":
+            raise RuntimeError("missing_feedparser_dependency") from None
+        raise
+    return len(feedparser.parse(text).entries)
+
+
 async def get(session, url, sem):
     if http_backoff.blocked(url): return 429,""
     async with sem:
@@ -30,7 +46,7 @@ async def get(session, url, sem):
 async def check_rss(session, src, sem):
     try:
         status, txt = await get(session, src["_url"], sem)
-        n = len(feedparser.parse(txt).entries) if txt else 0
+        n = _rss_entry_count(txt) if txt else 0
         RESULTS.append({"kind": "RSS", "name": src.get("Source_name", "?"), "url": src["_url"],
                         "http": status, "items": n, "ok": status == 200 and n > 0})
     except Exception as e:
@@ -87,7 +103,7 @@ async def check_mastodon(session, account, sem):
         host, user = account.split("/@", 1)
         url = f"https://{host}/@{user}.rss"
         status, txt = await get(session, url, sem)
-        n = len(feedparser.parse(txt).entries) if txt else 0
+        n = _rss_entry_count(txt) if txt else 0
         RESULTS.append({"kind": "MASTO", "name": account, "url": url,
                         "http": status, "items": n, "ok": status == 200 and n > 0})
     except Exception as e:
