@@ -215,3 +215,11 @@ No production integration before owner-approved B8.
 - ACTUAL native offline renderer code produced **two 3840x2160 English PNGs and three 3840x2160 Arabic PNGs**, all SHA-256 hashed and packed into a local sample ZIP; English+Arabic Discord manifests each have one unsendable message. Source material synthetic; **zero live messages**.
 - B3→B4→new B compiler actual call chain accepted bounded source-bound English and Arabic plans; unknown market data not converted to zero, Arabic market exclusion enforced, Naysayer abstains.
 - **Batch A and B remain PARTIAL** pending real source parsers/live data/TradingView checks and genuine model analysis, translation/weekly/Discord design. Full technical evidence: `docs/v2/OPTION_A_EXACT_RECONSTRUCTION_2026-10-24.md`. main/workflows/Discord/DB unchanged.
+
+## 24 October 2026 — Isolated Option A Batch A/B/C continuation
+- Exact original user archive (197 files) reconstructed in standalone ChatGPT container; original tree `f36366c7e3077125386ca357353d9a794b30703c`. No OpenHands.
+- **Normal full V2 test suite 334/334 PASS** locally without import-only shims. Legacy `tests.py` **153/153 PASS** with compatibility shims for runtime collection imports; dependency loading of `feedparser`, `trafilatura`, `ddgs` and real feeds not validated.
+- A: fixed `audit.py` import-time parser dependency, also `v2_feed_probe.py` numeric/localhost loopback aliases; failing-first regressions added.
+- B: rejected evidence-free forged Naysayer success reports and made weekly source chronology retain/display exact escaped original quotes; no unsupported automated analysis asserted. Added tests and updated weekly HTML.
+- C: `v2_weekly_discord.py` + 5 focused tests now stage separate EN/AR weekly PDF as one symbolic unsendable Discord manifest per product. Real B3 fixture-to-weekly HTML-to-2-page PDF-to-manifest rehearsal verified locally; preview files delivered to user. Live Discord unchanged.
+- Evidence: `docs/v2/BATCH_A_B_C_OPTION_A_CONTINUATION_2026-10-24.md`; updated code directly on V2 GitHub branch. No remote CI run of latest changed branch. Batches A and B PARTIAL; C early prototype; D untouched; main and production unchanged.
