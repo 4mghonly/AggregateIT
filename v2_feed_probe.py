@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import datetime,timezone
 from email.utils import parsedate_to_datetime
-import ipaddress,re,urllib.request
+import ipaddress,re,socket,urllib.request
 from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
 
@@ -41,13 +41,40 @@ def _url_safe(url):
         if str(exc)=='unsafe_feed_url':raise
     return url
 
+def _assert_public_dns(host, *, resolver=None):
+    """Fail closed if ANY resolved address is non-global.
+
+    DNS preflight is additional protection, not a substitute for a network
+    egress firewall or IP pinning across DNS rebinding / proxies.
+    """
+    resolver = resolver or socket.getaddrinfo
+    infos = resolver(host, 443, type=socket.SOCK_STREAM)
+    if not infos:
+        raise ValueError('dns_resolution_empty')
+    for info in infos:
+        try:
+            ip = ipaddress.ip_address(info[4][0])
+        except (IndexError, ValueError, TypeError) as exc:
+            raise ValueError('unsafe_resolved_ip') from exc
+        if not ip.is_global:
+            raise ValueError('unsafe_resolved_ip')
+
+
+def _reject_dtd(body):
+    # This V2 intake accepts RSS/Atom only, not external DTDs/entities.
+    # Reject a declaration even if quoted or embedded in an XML document.
+    return b'<!DOCTYPE' in body.upper() or b'<!ENTITY' in body.upper()
+
+
 class _SafeRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self,req,fp,code,msg,headers,newurl):
         _url_safe(newurl)
+        _assert_public_dns(urlsplit(newurl).hostname)
         return super().redirect_request(req,fp,code,msg,headers,newurl)
 
 def bounded_fetch(url,*,timeout=8):
     _url_safe(url)
+    _assert_public_dns(urlsplit(url).hostname)
     if not isinstance(timeout,(float,int)) or not 1<=timeout<=12:raise ValueError('unsafe_timeout')
     opener=urllib.request.build_opener(_SafeRedirect())
     req=urllib.request.Request(url,headers={'User-Agent':'AggregateIT-V2-research/1.0'})
@@ -64,6 +91,8 @@ def inspect_feed_bytes(body,*,now,max_age_hours=72):
             'article_bodies_retained':False,'publisher_independence':'unverified'}
     if len(body)>MAX_BYTES:
         result['status']='oversized_body';return result
+    if _reject_dtd(body):
+        result['status']='invalid_xml';return result
     try:root=ET.fromstring(body)
     except ET.ParseError:
         result['status']='invalid_xml';return result
@@ -99,7 +128,7 @@ def probe_live_feed(url,*,now,timeout=8,fetcher=None):
         return {'url':url,'status':f'http_{code}',
                 'retryable':code in (408,429,500,502,503,504),
                 'article_bodies_retained':False}
-    except (URLError,TimeoutError):
+    except (URLError,TimeoutError,OSError):
         return {'url':url,'status':'network_error','retryable':False,
                 'article_bodies_retained':False}
     result=inspect_feed_bytes(body,now=now)
