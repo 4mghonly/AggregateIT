@@ -1,0 +1,87 @@
+{
+  "schema": "aggregateit-v2-a9-genuine-live-http-to-native-png/1",
+  "observed_at_utc": "2026-10-24T09:49:47.339931+00:00",
+  "execution": "isolated_remote_python_single_process_with_real_pillow_raqm_matplotlib",
+  "run_seconds": 4.07,
+  "source_transport": "explicit_live_https",
+  "network_fetch_completed": true,
+  "html_article_count": 2,
+  "ledger": {
+    "observations": 2,
+    "unique_articles": 2,
+    "excerpts": 2,
+    "claims": 2,
+    "events": 2,
+    "publisher_independence": "not_verified"
+  },
+  "sources": [
+    {
+      "source_id": "en-001",
+      "publisher": "BBC",
+      "language": "en",
+      "article_url": "https://www.bbc.co.uk/news/articles/ck87zlpzny15o",
+      "body_sha256": "e634bb168348475d6c1b04e987a3cde15305084970623a82b30e020cc29e118f",
+      "excerpt_integrity_verified": true,
+      "region": "jordan",
+      "reporting_status": "publisher_attributed_unverified"
+    },
+    {
+      "source_id": "ar-s003",
+      "publisher": "Al Jazeera Arabic",
+      "language": "ar",
+      "article_url": "https://www.aljazeera.net/news/2026/10/24/%d8%a7%d8%b1%d8%aa%d9%81%d8%a7%d8%b9-%d9%82%d8%aa%d9%84%d9%89-%d9%83%d9%86%d9%8a%d8%b3%d8%a9-%d8%a7%d9%84%d9%83%d8%b1%d9%83-%d8%a5%d9%84%d9%89-8-%d9%88%d9%88%d8%a7%d8%b4%d9%86%d8%b7%d9%86",
+      "body_sha256": "a34eb644d322e7e72a68a080058d97dc4ae898669125e290f94dd0ea5174630e",
+      "excerpt_integrity_verified": true,
+      "region": "jordan",
+      "reporting_status": "publisher_attributed_unverified"
+    }
+  ],
+  "pages": [
+    {
+      "name": "english-no-post-1.png",
+      "width": 3840,
+      "height": 2160,
+      "bytes": 371961,
+      "sha256": "30a837a7900290b1a9e1d47e00c8459cb6f44d31b5800ed291663c7a5c3f1916"
+    },
+    {
+      "name": "english-no-post-2.png",
+      "width": 3840,
+      "height": 2160,
+      "bytes": 337964,
+      "sha256": "a3fa78aaac76019fbd3632c82cab848d8a7c51e3264e081af37132ea00fe251e"
+    },
+    {
+      "name": "arabic-no-post-1.png",
+      "width": 3840,
+      "height": 2160,
+      "bytes": 211974,
+      "sha256": "ea1018aa3342961cd3950c404e848380a5f31d36b78137d0f2b526b7b6867f94"
+    },
+    {
+      "name": "arabic-no-post-2.png",
+      "width": 3840,
+      "height": 2160,
+      "bytes": 250983,
+      "sha256": "4749f1c84c709a4399411657cb190d164f725355d50e5a66ce0151ab7dafab32"
+    },
+    {
+      "name": "arabic-no-post-3.png",
+      "width": 3840,
+      "height": 2160,
+      "bytes": 271662,
+      "sha256": "5b40e00bfb23e0106248716b01f43fae1742445d9a9dac68279339a8f9a213c8"
+    }
+  ],
+  "publisher_independence_verified": false,
+  "source_facts_verified": false,
+  "publication_rights_verified": false,
+  "english_selected": 1,
+  "arabic_selected": 1,
+  "arabic_missing_target_regions": 16,
+  "native_renderer_test_double": false,
+  "model_called": false,
+  "discord_sent": false,
+  "delivery_authorized": false,
+  "artifact_note": "Binary PNGs generated and SHA-256 verified within remote temporary browser execution environment. This JSON record does not embed or attach those binary files."
+}
