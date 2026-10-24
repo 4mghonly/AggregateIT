@@ -1,0 +1,472 @@
+{
+  "schema": "aggregateit-v2-rights-coverage-register/1",
+  "as_of_utc": "2026-10-24T11:10:02Z",
+  "scope": "Source technical metadata and rights research; NOT a redistribution licence or permission to scrape",
+  "rights_assessment": "read_only_research_with_specific_restrictions_and_all_unlicensed_publishers_held",
+  "publisher_rights_precedents": [
+    {
+      "publisher": "BBC News",
+      "status": "explicit_permission_required",
+      "url": "https://www.bbc.co.uk/usingthebbc/terms-of-use",
+      "note": "Business use of RSS/metadata and automated content analysis requires separate permission/license."
+    },
+    {
+      "publisher": "Al Jazeera",
+      "status": "explicit_permission_required",
+      "url": "https://terms.aljazeera.net/",
+      "note": "Service terms restrict unauthorized automation, reproduction, data mining and commercial reuse."
+    },
+    {
+      "publisher": "Reuters",
+      "status": "explicit_permission_required",
+      "url": "https://www.reutersconnect.com/general-terms",
+      "note": "Reuters Connect platform/content terms require prior written commercial-use consent; source-specific terms may differ."
+    },
+    {
+      "publisher": "WAM",
+      "status": "explicit_permission_required",
+      "url": "https://wns.wam.ae/public/Privacy-Policy.html",
+      "note": "WAM application materials assert non-personal/commercial-use restrictions; do not extrapolate to a content license for this project."
+    },
+    {
+      "publisher": "WHO publications",
+      "status": "noncommercial_only_document_specific",
+      "url": "https://www.who.int/about/policies/publishing/copyright",
+      "note": "Published WHO works generally CC BY-NC-SA 3.0 IGO; not a blanket commercial news feed license."
+    },
+    {
+      "publisher": "World Bank Open Knowledge Repository",
+      "status": "item_specific_license_required",
+      "url": "https://openknowledge.worldbank.org/",
+      "note": "Individual works may be CC BY or CC BY-NC, some with additional rights; license review per item is required."
+    }
+  ],
+  "coverage": [
+    {
+      "region": "gcc",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s017",
+          "publisher": "The National",
+          "original_language_candidate": "en",
+          "feed_url": "https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml",
+          "observed_recent_entries": 100,
+          "feed_observed_utc": "2026-10-24T10:19:44Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        },
+        {
+          "source_id": "ar-s118",
+          "publisher": "Abu Dhabi Media Office — Crown Prince",
+          "original_language_candidate": "ar",
+          "feed_url": "https://www.mediaoffice.abudhabi/ar/crown-prince-news/rss",
+          "observed_recent_entries": 5,
+          "feed_observed_utc": "2026-10-24T09:51:53Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "oman",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s073",
+          "publisher": "Oman Observer",
+          "original_language_candidate": "en",
+          "feed_url": "https://www.omanobserver.om/rssFeed/home-page",
+          "observed_recent_entries": 33,
+          "feed_observed_utc": "2026-10-24T10:23:18Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "iran",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s019",
+          "publisher": "IRNA",
+          "original_language_candidate": "fa",
+          "feed_url": "https://www.irna.ir/rss",
+          "observed_recent_entries": 30,
+          "feed_observed_utc": "2026-10-24T10:19:44Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "turkey",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s024",
+          "publisher": "TRT Haber",
+          "original_language_candidate": "tr",
+          "feed_url": "https://www.trthaber.com/sondakika.rss",
+          "observed_recent_entries": 50,
+          "feed_observed_utc": "2026-10-24T10:23:18Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "iraq",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s026",
+          "publisher": "Shafaq",
+          "original_language_candidate": "ar",
+          "feed_url": "https://shafaq.com/rss/ar",
+          "observed_recent_entries": 25,
+          "feed_observed_utc": "2026-10-24T10:20:00Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "yemen",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s081",
+          "publisher": "Yemenat",
+          "original_language_candidate": "ar",
+          "feed_url": "https://yemenat.net/feed",
+          "observed_recent_entries": 30,
+          "feed_observed_utc": "2026-10-24T10:19:44Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "sudan",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s033",
+          "publisher": "Dabanga",
+          "original_language_candidate": "ar",
+          "feed_url": "https://www.dabangasudan.org/ar/feed",
+          "observed_recent_entries": 12,
+          "feed_observed_utc": "2026-10-24T09:51:53Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "sahel",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s036",
+          "publisher": "Studio Tamani",
+          "original_language_candidate": "fr",
+          "feed_url": "https://www.studiotamani.org/feed",
+          "observed_recent_entries": 10,
+          "feed_observed_utc": "2026-10-24T11:10:02Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        },
+        {
+          "source_id": "ar-s041",
+          "publisher": "APS Senegal",
+          "original_language_candidate": "fr",
+          "feed_url": "https://aps.sn/feed/",
+          "observed_recent_entries": 10,
+          "feed_observed_utc": "2026-10-24T11:10:02Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "north_africa",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s048",
+          "publisher": "Libya Al Ahrar",
+          "original_language_candidate": "ar",
+          "feed_url": "https://libyaalahrar.tv/feed/",
+          "observed_recent_entries": 30,
+          "feed_observed_utc": "2026-10-24T11:10:02Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        },
+        {
+          "source_id": "ar-s045",
+          "publisher": "Hespress",
+          "original_language_candidate": "ar",
+          "feed_url": "https://www.hespress.com/feed",
+          "observed_recent_entries": 12,
+          "feed_observed_utc": "2026-10-24T11:10:02Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "egypt",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s046",
+          "publisher": "Mada Masr",
+          "original_language_candidate": "ar",
+          "feed_url": "https://www.madamasr.com/ar/feed/",
+          "observed_recent_entries": 10,
+          "feed_observed_utc": "2026-10-24T11:10:02Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "pakistan",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s050",
+          "publisher": "Dawn",
+          "original_language_candidate": "en",
+          "feed_url": "https://www.dawn.com/feeds/home",
+          "observed_recent_entries": 26,
+          "feed_observed_utc": "2026-10-24T10:19:44Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "afghanistan",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s055",
+          "publisher": "Amu TV",
+          "original_language_candidate": "fa",
+          "feed_url": "https://amu.tv/fa/feed/",
+          "observed_recent_entries": 10,
+          "feed_observed_utc": "2026-10-24T11:10:02Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        },
+        {
+          "source_id": "ar-s091",
+          "publisher": "Khaama Press",
+          "original_language_candidate": "en",
+          "feed_url": "https://www.khaama.com/feed/",
+          "observed_recent_entries": 35,
+          "feed_observed_utc": "2026-10-24T11:10:02Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "somalia",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s056",
+          "publisher": "Radio Ergo",
+          "original_language_candidate": "so",
+          "feed_url": "https://radioergo.org/feed/",
+          "observed_recent_entries": 2,
+          "feed_observed_utc": "2026-10-24T10:19:44Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "horn",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s062",
+          "publisher": "Shabait",
+          "original_language_candidate": "en",
+          "feed_url": "https://shabait.com/feed/",
+          "observed_recent_entries": 10,
+          "feed_observed_utc": "2026-10-24T10:23:18Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "palestine_israel",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s096",
+          "publisher": "Jerusalem Post Israel",
+          "original_language_candidate": "en",
+          "feed_url": "https://www.jpost.com/rss/rssfeedsisraelnews.aspx",
+          "observed_recent_entries": 30,
+          "feed_observed_utc": "2026-10-24T09:51:53Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "levant",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s068",
+          "publisher": "Enab Baladi",
+          "original_language_candidate": "ar",
+          "feed_url": "https://www.enabbaladi.net/feed/",
+          "observed_recent_entries": 19,
+          "feed_observed_utc": "2026-10-24T11:10:02Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    },
+    {
+      "region": "jordan",
+      "status": "live_feed_technically_observed_rights_hold",
+      "rights_status": "not_cleared_for_article_redistribution_or_commercial_use",
+      "editorial_coverage_verified": false,
+      "independent_publisher_families_verified": false,
+      "original_article_republication_allowed": false,
+      "sources": [
+        {
+          "source_id": "ar-s101",
+          "publisher": "Ammon News Jordan",
+          "original_language_candidate": "en",
+          "feed_url": "https://en.ammonnews.net/rss.php?id=2&type=news",
+          "observed_recent_entries": 30,
+          "feed_observed_utc": "2026-10-24T10:23:18Z",
+          "article_license_evidence": null,
+          "commercial_reuse_permission_document": null,
+          "allowed_preview": "source identity, independently authored metadata summaries only after rights check",
+          "rights_decision": "hold_until_document_specific_rights_or_permission_confirmed"
+        }
+      ]
+    }
+  ],
+  "release_authorized": false,
+  "model_called": false,
+  "publication_rights_verified": false,
+  "claim_accuracy_verified": false
+}
