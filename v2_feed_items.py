@@ -9,7 +9,7 @@ import html
 import re
 from xml.etree import ElementTree as ET
 
-from v2_feed_probe import MAX_BYTES, _date, _url_safe, _reject_dtd
+from v2_feed_probe import MAX_BYTES, _date, _url_safe, _reject_dtd, _validated_feed_byte_budget
 
 
 def _text(element, local_name: str) -> str:
@@ -27,13 +27,15 @@ def _atom_link(element) -> str:
 
 
 def extract_candidates(feed_bytes: bytes, *, feed_url: str, observed_at: str,
-                       max_age_hours: int=72, max_items: int=30) -> dict:
+                       max_age_hours: int=72, max_items: int=30,
+                       max_bytes: int=MAX_BYTES) -> dict:
     _url_safe(feed_url)
+    _validated_feed_byte_budget(max_bytes)
     now=_date(observed_at)
     if now is None: raise ValueError('timezone_required')
     if type(max_items) is not int or not 1<=max_items<=50: raise ValueError('invalid_item_budget')
     if type(max_age_hours) is not int or not 1<=max_age_hours<=168: raise ValueError('invalid_freshness_window')
-    if not isinstance(feed_bytes, bytes) or len(feed_bytes)>MAX_BYTES:
+    if not isinstance(feed_bytes, bytes) or len(feed_bytes)>max_bytes:
         raise ValueError('invalid_feed_payload')
     if _reject_dtd(feed_bytes):
         raise ValueError('invalid_feed_xml')
