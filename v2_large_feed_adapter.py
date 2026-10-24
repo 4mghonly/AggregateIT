@@ -24,7 +24,7 @@ from v2_feed_items import extract_candidates
 # Persian / Somali are included for metadata purposes, NOT Arabic admission.
 _PROFILES = {
     'ar-s017': ('https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml', 'gcc', 'en', 1000000),
-    'ar-s026': ('https://shafaq.com/ar?rss=1', 'iraq', 'ar', 1000000),
+    'ar-s026': ('https://shafaq.com/rss/ar', 'iraq', 'ar', 1000000),
     'ar-s050': ('https://www.dawn.com/feeds/home', 'pakistan', 'en', 1000000),
     'ar-s081': ('https://yemenat.net/feed', 'yemen', 'ar', 1000000),
     'ar-s019': ('https://www.irna.ir/rss', 'iran', 'fa', MAX_BYTES),
