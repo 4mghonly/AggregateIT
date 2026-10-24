@@ -29,6 +29,32 @@
       "subject_country": "AE",
       "topic": "diplomacy",
       "priority": 80
+    },
+    {
+      "source_id": "ar-s011",
+      "article_url": "https://www.wam.ae/ar/article/c2vys77-الجناح-الوطني-لدولة-الإمارات-يستعرض-القدرات",
+      "verbatim_excerpt": "يشارك الجناح الوطني لدولة الإمارات في معرض ومؤتمر قوات العمليات الخاصة \"سوفكس الأردن 2026\" (SOFEX Jordan 2026)",
+      "original_language": "ar",
+      "published_date": "2026-10-23",
+      "capture_method": "public_web_page_read_manual_transfer",
+      "explicit_event_key": "wam-2026-10-23-uae-sofex-jordan",
+      "region": "gcc",
+      "subject_country": "AE",
+      "topic": "military",
+      "priority": 73
+    },
+    {
+      "source_id": "ar-s003",
+      "article_url": "https://www.aljazeera.net/amp/news/2026/10/23/تصاعد-المعارك-في-اليمن-780-عملية-عسكرية",
+      "verbatim_excerpt": "وكان التحالف قد أعلن، الخميس، اعتراض وتدمير 11 طائرة مسيّرة في مناطق الرياض والمدينة المنورة والمنطقة الشرقية والمنطقة الجنوبية",
+      "original_language": "ar",
+      "published_date": "2026-10-23",
+      "capture_method": "public_web_page_read_manual_transfer",
+      "explicit_event_key": "aljazeera-2026-10-23-yemen-conflict-update",
+      "region": "yemen",
+      "subject_country": "YE",
+      "topic": "military",
+      "priority": 85
     }
   ]
 }
