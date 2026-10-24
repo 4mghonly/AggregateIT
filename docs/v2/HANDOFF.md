@@ -258,3 +258,10 @@ Combined closing test result **231/231 V2 PASS**, original Arabic application **
 
 ## Operational main observation (read-only; not caused by this batch)
 At closure, GitHub shows production `main` at `745c5b7a32d7da84dadfbcc088b43eb7ce32ed0d`, rather than the earlier `c7a53e9...`. GitHub commit metadata identifies `aggregateit-bot` at **2026-10-24 05:53:19 UTC**, message `Arabic sources: update compatibility audit`, with one changed path `arabic_newsletter/SOURCE_AUDIT.json` and parent `c7a53e9...`. The A7 session only wrote to `rebuild/aggregateit-v2`; **A7 did not cause or modify this main advance**. Treat this as production bot activity, not a V2 migration.
+
+
+## 2026-10-24 — A8 atomic two-source/no-post pipeline
+- `v2_a8_single_run.py` and `tests/test_v2_a8_single_run.py` committed; source code SHA matched GitHub blob `b2608cb7a3e204f79b9a159095e78af181eadb5f` and test blob `06ece0aca569828c73effbc6bf2ba1b5d4a39e1b`.
+- Live external Python with **exact A8 branch code** and explicit network permission fetched BBC English + Al Jazeera Arabic article bodies in one run; emitted B3 exact excerpts / B4 held plans. The remote `render_held_editions` was a **nonvisual test double** (the host lacked PIL/matplotlib). It did **not** render real PNGs in that run.
+- Local single-process controlled-HTML fixture did invoke the **actual native renderers** and created five 3840×2160 PNGs atomically, digest verified. New focused tests **9/9**, broader local V2-pattern tests **107/107**; both used an older user-supplied repository tree plus A8 rather than current GitHub full HEAD.
+- Remaining gate: one uninterrupted genuine HTTP→full-body→actual native PNG single runtime, then review content rights/independence and geographic coverage. Model and Discord remain disabled. Details: `docs/v2/A8_SINGLE_RUNTIME_NOPOST_2026-10-24.md`.
