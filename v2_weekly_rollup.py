@@ -50,7 +50,7 @@ def rollup_week(daily_plans, *,product,as_of,market_snapshots=None,max_stories=3
         stories.append({'event_id':eid,'region':row['region'],'priority':row['priority'],
                         'change_status':change,'revision_count':len(row['versions']),
                         'observation_days':len({x.split('T')[0] for x in row['dates']}),
-                        'evidence':{k:latest['evidence'][k] for k in ('source_id','excerpt_id','source_url','original_language')},
+                        'evidence':{k:latest['evidence'][k] for k in ('source_id','excerpt_id','source_url','quote','original_language')},
                         'reporting_status':'publisher_attributed_not_independently_verified'})
     stories.sort(key=lambda x:(-x['priority'],-x['revision_count'],x['event_id']))
     markets=[]
