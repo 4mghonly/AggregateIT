@@ -1,0 +1,75 @@
+{
+  "schema": "aggregateit-v2-real-html-body-b3-b4-a7/1",
+  "observed_at_utc": "2026-10-24T08:57:42.728232+00:00",
+  "networked_execution": "read-only remote Python exact GitHub branch modules",
+  "records": [
+    {
+      "source_id": "en-001",
+      "lang": "en",
+      "http": 200,
+      "html_bytes": 402791,
+      "html_sha256": "e50192faae11e9e947f1d620b5476d5be360449ff7d947ba1ffe93882926df77",
+      "body_sha256": "e634bb168348475d6c1b04e987a3cde15305084970623a82b30e020cc29e118f",
+      "body_chars": 4310,
+      "paragraphs": 34,
+      "source_excerpt_id": "exc_b667d97857048f330c60ae72",
+      "source_article_revision": "rev_a565c5ab9dff79406e4b1a29",
+      "source_quote_matches_full_body": true,
+      "region": "jordan",
+      "topic": "security",
+      "factual_verification": false
+    },
+    {
+      "source_id": "ar-s003",
+      "lang": "ar",
+      "http": 200,
+      "html_bytes": 557684,
+      "html_sha256": "d5dd4578f404ab04f473ff0cbee15f2d9c1086d8824cdf9af3fe78933efdb8ec",
+      "body_sha256": "a5ff3557bceb553446500b65f9845d9526921ec13f01cc450a6e75b0212280e4",
+      "body_chars": 1742,
+      "paragraphs": 9,
+      "source_excerpt_id": "exc_19f109d6b4ccd74c3fa99a8e",
+      "source_article_revision": "rev_7147baf1f4b16bb88b426956",
+      "source_quote_matches_full_body": true,
+      "region": "jordan",
+      "topic": "security",
+      "factual_verification": false
+    }
+  ],
+  "ledger": {
+    "observations": 2,
+    "unique_articles": 2,
+    "duplicate_article_observations": 0,
+    "excerpts": 2,
+    "claims": 2,
+    "events": 2,
+    "event_versions": 2,
+    "explicit_relations": 0,
+    "publisher_independence": "not_verified"
+  },
+  "products": {
+    "english": {
+      "selected": 1,
+      "coverage_gaps": 0,
+      "source_ids": [
+        "en-001"
+      ],
+      "publish": false,
+      "market_status": "unavailable"
+    },
+    "arabic": {
+      "selected": 1,
+      "coverage_gaps": 16,
+      "source_ids": [
+        "ar-s003"
+      ],
+      "publish": false,
+      "market_status": "not_applicable"
+    }
+  },
+  "full_article_body_used_in_evidence_ledger": true,
+  "quote_spans_bound_to_full_revision": true,
+  "independent_publisher_corroboration": false,
+  "llm_called": false,
+  "discord_sent": false
+}
