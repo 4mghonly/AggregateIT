@@ -9,7 +9,7 @@ import html
 import re
 from xml.etree import ElementTree as ET
 
-from v2_feed_probe import MAX_BYTES, _date, _url_safe
+from v2_feed_probe import MAX_BYTES, _date, _url_safe, _reject_dtd
 
 
 def _text(element, local_name: str) -> str:
@@ -35,6 +35,8 @@ def extract_candidates(feed_bytes: bytes, *, feed_url: str, observed_at: str,
     if type(max_age_hours) is not int or not 1<=max_age_hours<=168: raise ValueError('invalid_freshness_window')
     if not isinstance(feed_bytes, bytes) or len(feed_bytes)>MAX_BYTES:
         raise ValueError('invalid_feed_payload')
+    if _reject_dtd(feed_bytes):
+        raise ValueError('invalid_feed_xml')
     try: root=ET.fromstring(feed_bytes)
     except ET.ParseError as exc: raise ValueError('invalid_feed_xml') from exc
     kind=root.tag.rsplit('}',1)[-1].lower()
