@@ -59,7 +59,20 @@ def compile_daily(*, editorial_plan, critic_report=None, market_observations=Non
     else:
         sections=critic_report.get('sections',[])
         if len(sections)!=1:raise ValueError('daily_requires_one_critic_section')
-        critic_state=sections[0]['review_status']
+        section = sections[0]
+        if not isinstance(section, dict) or section.get('review_status') not in (
+                'supported_challenge', 'assessment_survives', 'insufficient_evidence', 'withheld'):
+            raise ValueError('invalid_critical_review_status')
+        # A supplied report is not proof of its own provenance. A substantive
+        # critique must at least have passed the B4 evidence-reference gate.
+        if section['review_status'] in ('supported_challenge', 'assessment_survives'):
+            citations = section.get('cited_evidence')
+            if (critic_report.get('quality_gate_passed') is not True or
+                    not isinstance(citations, list) or not citations or
+                    any(not isinstance(c, dict) or not isinstance(c.get('excerpt_id'), str)
+                        or not c['excerpt_id'] for c in citations)):
+                raise ValueError('unverified_critical_review')
+        critic_state = section['review_status']
     return {'schema':'aggregateit-v2-daily-publication-candidate/1',
             'product':product,'slot_id':slot,'stories':rows,'market_observations':markets,
             'market_data_status':('not_applicable' if product=='arabic' else 'observed_unverified' if markets else 'unavailable'),
