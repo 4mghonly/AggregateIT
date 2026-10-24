@@ -4,3 +4,5 @@ requests
 trafilatura
 matplotlib
 ddgs
+# justext/trafilatura require this separately with lxml>=5.2
+lxml_html_clean>=0.4,<1.0
