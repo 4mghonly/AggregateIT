@@ -26,6 +26,10 @@ class RegisteredLargeFeeds(unittest.TestCase):
     def test_extended_parse_bounded_to_1mb(self):
         with self.assertRaises(ValueError):
             inspect_feed_bytes(rss(),now=NOW,max_bytes=1000001)
+    def test_shafaq_uses_direct_https_feed_not_redirecting_legacy_page(self):
+        # Legacy /ar?rss=1 redirects through HTTP, which must stay blocked.
+        self.assertEqual(profile_for('ar-s026')['url'], 'https://shafaq.com/rss/ar')
+
     def test_regional_adapter_refuses_network_without_opt_in(self):
         with self.assertRaisesRegex(ValueError,'network_opt_in_required'):
             probe_regional_source('ar-s026',now=NOW)
