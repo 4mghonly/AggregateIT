@@ -79,6 +79,8 @@ def render_weekly_html(report:dict)->str:
         evidence=item.get('evidence')
         if not isinstance(evidence,dict):raise ValueError('missing_weekly_evidence')
         event=_safe_text(item.get('event_id'),400)
+        # Prefer the original bounded source excerpt over a cryptic event ID.
+        visible_headline=_safe_text(evidence['quote'],240) if evidence.get('quote') else event
         excerpt=_safe_text(evidence.get('excerpt_id'))
         source=_safe_text(evidence.get('source_id'))
         link=_safe_link(evidence.get('source_url'))
@@ -89,7 +91,7 @@ def render_weekly_html(report:dict)->str:
         title=statuses[change][1 if rtl else 0]
         label=('مرجع المقتطف' if rtl else 'Exact excerpt')
         story_html.append(f'<article class="story"><div class="eyebrow">{i:02d} · {region} · {title}</div>'
-                          f'<h3>{event}</h3><p class="small">{label}: {excerpt} · {source}</p>'
+                          f'<h3>{visible_headline}</h3><p class="small">{label}: {excerpt} · {source}</p>'
                           f'<a href="{link}" rel="noopener noreferrer" target="_blank">'
                           f'{"عرض المقال الأصلي" if rtl else "Open source document"} ↗</a></article>')
     market_lines=[]
