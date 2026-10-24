@@ -38,6 +38,14 @@ class CompilerTests(unittest.TestCase):
         c={'schema':'aggregateit-naysayer-report/1','delivery_authorized':False,'product':'english','cadence':'daily','slot_id':SLOT,'sections':[{'review_status':'insufficient_evidence'}]}
         r=compile_daily(editorial_plan=plan('english'),critic_report=c)
         self.assertEqual(r['naysayer_status'],'insufficient_evidence')
+    def test_nan_market_value_is_rejected(self):
+        with self.assertRaises(ValueError):
+            compile_daily(editorial_plan=plan('english'),market_observations=[{'symbol':'WTI','source':'eia','observed_at':SLOT,'value':float('nan'),'unit':'USD'}])
+    def test_market_observation_with_real_provenance_is_preserved(self):
+        row={'symbol':'WTI','source':'eia','observed_at':SLOT,'value':82.1,'unit':'USD'}
+        r=compile_daily(editorial_plan=plan('english'),market_observations=[row])
+        self.assertEqual(r['market_data_status'],'observed_unverified')
+        self.assertEqual(r['market_observations'][0]['source'],'eia')
     def test_verified_claim_is_not_inferred_from_schema(self):
         p=plan('english');p['items'][0]['reporting_status']='independently_verified'
         with self.assertRaises(ValueError):compile_daily(editorial_plan=p)
