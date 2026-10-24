@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import datetime,timezone
 from email.utils import parsedate_to_datetime
-import ipaddress,urllib.request
+import ipaddress,re,urllib.request
 from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
 
@@ -24,8 +24,15 @@ def _url_safe(url):
     obj=urlsplit(url)
     if obj.scheme!='https' or obj.username or obj.password or not obj.hostname:
         raise ValueError('unsafe_feed_url')
-    host=obj.hostname.lower()
-    if host=='localhost' or host.endswith(('.local','.internal','.test','.invalid')):
+    # DNS treats a terminal dot as absolute, so localhost. is still local.
+    host=obj.hostname.lower().rstrip('.')
+    if (host == 'localhost' or host.endswith(('.localhost', '.local', '.internal', '.test', '.invalid'))):
+        raise ValueError('unsafe_feed_url')
+    # Some URL handlers resolve legacy numeric aliases (127.1, 0177.0.0.1,
+    # 0x7f000001) as loopback, although ipaddress.ip_address rejects them.
+    # Reject all-numeric/hex-component hostnames instead of normalizing them.
+    components=host.split('.')
+    if components and all(re.fullmatch(r'(?:0[xX][0-9a-fA-F]+|[0-9]+)', part) for part in components):
         raise ValueError('unsafe_feed_url')
     try:
         ip=ipaddress.ip_address(host)
