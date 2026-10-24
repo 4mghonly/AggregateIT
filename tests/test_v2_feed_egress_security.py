@@ -32,6 +32,15 @@ class EgressSafetyTests(unittest.TestCase):
         def resolver(host,port,*,type):
             return [(socket.AF_INET,socket.SOCK_STREAM,6,'',('8.8.8.8',port))]
         self.assertIsNone(_assert_public_dns('news.example.org',resolver=resolver))
+    def test_failed_dns_is_not_claimed_as_completed_live_http(self):
+        def resolver(host,port,*,type):
+            return [(socket.AF_INET,socket.SOCK_STREAM,6,'',('127.0.0.1',port))]
+        with patch('v2_feed_probe.socket.getaddrinfo',side_effect=resolver):
+            out=probe_source_batch([{'source_id':'x','url':'https://news.example.org/rss'}],
+                                   now=NOW,allow_network=True)
+        self.assertTrue(out['live_http_attempted'])
+        self.assertFalse(out['live_http_performed'])
+
     def test_batch_records_private_dns_refusal_without_fetching(self):
         def resolver(host,port,*,type):
             return [(socket.AF_INET,socket.SOCK_STREAM,6,'',('169.254.169.254',port))]
