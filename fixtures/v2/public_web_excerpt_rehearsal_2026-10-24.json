@@ -1,0 +1,34 @@
+{
+  "schema": "aggregateit-v2-external-text-fixture/1",
+  "source_notice": "Short literal excerpts from publicly readable publisher pages; manually transferred from a separate public web reader on 24 October 2026; not complete page bytes, RSS parsing, machine collection, rights review, or independent corroboration.",
+  "observed_at": "2026-10-24T06:43:00+04:00",
+  "slot_id": "2026-10-24T06:00:00+04:00",
+  "captures": [
+    {
+      "source_id": "en-107",
+      "article_url": "https://www.mediaoffice.abudhabi/en/government-affairs/theyab-bin-mohamed-bin-zayed-meets-prime-minister-of-india-on-sidelines-of-ndtv-world-summit-2026/",
+      "verbatim_excerpt": "During the meeting, the two sides discussed the friendship and cooperation between the UAE and the Republic of India",
+      "original_language": "en",
+      "published_date": "2026-10-23",
+      "capture_method": "public_web_page_read_manual_transfer",
+      "explicit_event_key": "admo-2026-10-23-uae-india-meeting",
+      "region": "gcc",
+      "subject_country": "AE",
+      "topic": "geopolitics",
+      "priority": 80
+    },
+    {
+      "source_id": "ar-s116",
+      "article_url": "https://www.mediaoffice.abudhabi/ar/government-affairs/theyab-bin-mohamed-bin-zayed-meets-prime-minister-of-india-on-sidelines-of-ndtv-world-summit-2026/",
+      "verbatim_excerpt": "وجرى خلال اللقاء بحث علاقات الصداقة والتعاون بين دولة الإمارات العربية المتحدة وجمهورية الهند، وسبل تعزيزها",
+      "original_language": "ar",
+      "published_date": "2026-10-23",
+      "capture_method": "public_web_page_read_manual_transfer",
+      "explicit_event_key": "admo-2026-10-23-uae-india-meeting",
+      "region": "gcc",
+      "subject_country": "AE",
+      "topic": "diplomacy",
+      "priority": 80
+    }
+  ]
+}
