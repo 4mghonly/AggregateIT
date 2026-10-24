@@ -30,6 +30,8 @@ def probe_source_batch(sources, *, now: str, fetcher=None,
     getter = fetcher if fetcher is not None else bounded_fetch
     output = []
     seen = set()
+    attempted = False
+    http_observed = False
     for source in sources:
         if not isinstance(source, dict) or not isinstance(source.get('source_id'), str):
             raise ValueError('invalid_source_record')
@@ -51,15 +53,18 @@ def probe_source_batch(sources, *, now: str, fetcher=None,
             output.append(obs)
             continue
         seen.add(canon)
+        attempted = attempted or (fetcher is None and allow_network)
         try:
             raw = getter(url, timeout=timeout)
         except ValueError as exc:
             obs['status'] = ('unsafe_source_url' if str(exc).startswith(('unsafe_resolved_ip', 'dns_resolution_empty')) else 'invalid_feed_response')
         except HTTPError as exc:
+            http_observed = True
             obs['status'] = f'http_{int(exc.code)}'
         except (TimeoutError, URLError, OSError):
             obs['status'] = 'network_error'
         else:
+            http_observed = http_observed or (fetcher is None and allow_network)
             result = inspect_feed_bytes(raw, now=now)
             obs['status'] = result['status']
             obs['recent_count'] = result['recent_count']
@@ -73,7 +78,8 @@ def probe_source_batch(sources, *, now: str, fetcher=None,
     return {'schema': 'aggregateit-v2-source-lab/1',
             'checked_at': datetime.fromisoformat(now.replace('Z','+00:00')).isoformat(),
             'sources': output,
-            'live_http_performed': fetcher is None and allow_network,
+            'live_http_attempted': attempted,
+            'live_http_performed': http_observed,
             'source_independence_verified': False,
             'production_promoted': False,
             'discord_sent': False, 'model_called': False}
@@ -106,7 +112,7 @@ def main(argv=None) -> int:
         result=probe_source_batch(sources,now=args.now,allow_network=True)
     else:
         result={'schema':'aggregateit-v2-source-lab/1',
-                'status':'dry_run_only','live_http_performed':False,
+                'status':'dry_run_only','live_http_attempted':False,'live_http_performed':False,
                 'sources':sources,'source_independence_verified':False,
                 'production_promoted':False,'model_called':False,
                 'discord_sent':False}
