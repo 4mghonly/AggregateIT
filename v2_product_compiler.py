@@ -2,6 +2,7 @@
 from __future__ import annotations
 from datetime import datetime
 from copy import deepcopy
+from math import isfinite
 
 AR_TOPICS={'diplomacy','military','security','political_stability','humanitarian_conflict','sanctions','strategic_infrastructure'}
 EN_TOPICS={'geopolitics','markets','finance','macro','energy','security','trade','policy','cyber'}
@@ -48,7 +49,7 @@ def compile_daily(*, editorial_plan, critic_report=None, market_observations=Non
         if not isinstance(m,dict) or m.get('source') in (None,'','tradingview_widget','unknown') or any(k not in m for k in ('symbol','observed_at','value','unit')):
             raise ValueError('unverified_market_observation')
         _timestamp(m['observed_at'])
-        if not isinstance(m['value'],(int,float)) or isinstance(m['value'],bool):
+        if not isinstance(m['value'],(int,float)) or isinstance(m['value'],bool) or not isfinite(m['value']):
             raise ValueError('invalid_market_value')
         markets.append(deepcopy(m))
     if critic_report is None:
