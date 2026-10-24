@@ -7,6 +7,13 @@ from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
 
 MAX_BYTES=200000
+MAX_EXTENDED_BYTES=1000000
+
+
+def _validated_feed_byte_budget(value):
+    if type(value) is not int or value < MAX_BYTES or value > MAX_EXTENDED_BYTES:
+        raise ValueError('invalid_feed_byte_budget')
+    return value
 
 def _date(value):
     if not isinstance(value,str) or not value:return None
@@ -72,24 +79,26 @@ class _SafeRedirect(urllib.request.HTTPRedirectHandler):
         _assert_public_dns(urlsplit(newurl).hostname)
         return super().redirect_request(req,fp,code,msg,headers,newurl)
 
-def bounded_fetch(url,*,timeout=8):
+def bounded_fetch(url,*,timeout=8,max_bytes=MAX_BYTES):
     _url_safe(url)
+    _validated_feed_byte_budget(max_bytes)
     _assert_public_dns(urlsplit(url).hostname)
     if not isinstance(timeout,(float,int)) or not 1<=timeout<=12:raise ValueError('unsafe_timeout')
     opener=urllib.request.build_opener(_SafeRedirect())
     req=urllib.request.Request(url,headers={'User-Agent':'AggregateIT-V2-research/1.0'})
     with opener.open(req,timeout=timeout) as response:
-        return response.read(MAX_BYTES+1)
+        return response.read(max_bytes+1)
 
-def inspect_feed_bytes(body,*,now,max_age_hours=72):
+def inspect_feed_bytes(body,*,now,max_age_hours=72,max_bytes=MAX_BYTES):
     if not isinstance(body,bytes):raise ValueError('bytes_required')
+    _validated_feed_byte_budget(max_bytes)
     if not 1<=max_age_hours<=168:raise ValueError('invalid_freshness_age')
     current=_date(now)
     if current is None:raise ValueError('timezone_required')
     result={'schema':'aggregateit-feed-observation/1','status':'unknown','entry_count':0,
             'dated_count':0,'recent_count':0,'newest_item_at':None,
             'article_bodies_retained':False,'publisher_independence':'unverified'}
-    if len(body)>MAX_BYTES:
+    if len(body)>max_bytes:
         result['status']='oversized_body';return result
     if _reject_dtd(body):
         result['status']='invalid_xml';return result
