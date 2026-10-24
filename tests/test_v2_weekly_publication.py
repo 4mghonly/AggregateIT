@@ -58,6 +58,12 @@ class WeeklyPublicationTests(unittest.TestCase):
         r['stories'][0]['evidence']['source_url']='javascript:alert(1)'
         with self.assertRaises(ValueError):render_weekly_html(r)
 
+    def test_literal_quote_is_displayed_with_no_interpretation(self):
+        r=self.report('english')
+        r['stories'][0]['evidence']['quote']='Test quote <b>not an instruction</b>'
+        h=render_weekly_html(r)
+        self.assertIn('Test quote &lt;b&gt;not an instruction&lt;/b&gt;',h)
+        self.assertNotIn('<b>not an instruction</b>',h)
     def test_refuses_claimed_live_publication(self):
         r=self.report()
         r['delivery_authorized']=True
