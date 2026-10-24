@@ -1,0 +1,19 @@
+# AggregateIT V2 — A8 single-runtime bilingual no-post checkpoint
+**Date:** 24 October 2026 UAE · **Branch:** `rebuild/aggregateit-v2` · Protected `main`: untouched by A8.
+
+## New implementation
+- `v2_a8_single_run.py` orchestrates a *strictly two-publisher pilot*: allowlisted BBC English and Al Jazeera Arabic article URLs → 850 KB bounded HTML fetch/extract via `v2_article_body_gate` → deterministic country/topic grounding from headline plus article body → B3 immutable full-body article revision and literal excerpt/claim/event → B4 native-language editorial plans → actual existing English (2) and Arabic (3) 3840×2160 page renderers via `v2_native_evidence_render`.
+- It refuses outbound HTTP unless `network_opt_in=True` and no injected fetcher is supplied. HTTPS origin/redirect allowlist, DNS public-IP preflight, bounded timeout, exact publisher IDs, original-language script, recent source date, exact body revision offsets, page SHA-256 and **atomic local output-directory publication** are enforced. It cannot call LLMs or post to Discord. Note: DNS preflight alone is not full DNS-rebinding protection; production transport still needs egress enforcement.
+- `tests/test_v2_a8_single_run.py` covers network-off default, real single-process B3/B4 and page generation from controlled HTML fixtures, rollback on second-fetch error, unsafe/impersonated source host, redirect refusal, duplicate-language refusal, renderer failure atomicity and real native 5-page PNG validation.
+
+## Execution evidence
+**Local complete A8 native pipeline:** 9/9 new tests passed. Separate local V2 test-selection `test_v2_*.py`: **107/107 passed**, without dependency placeholders, using the available older user-supplied branch snapshot with A8 additions. It is **not** a fresh full-suite run of latest remote V2 commit and must not be described as such. One local fixture execution produced five actual 3840×2160 PNGs, with no posts and all SHA256 verified. Local mode `source_transport=injected_test_bytes`; `live_http_performed=False`.
+
+**Remote genuine HTTP execution:** Exact GitHub branch `v2_a8_single_run.py` plus supporting V2 evidence/plan modules was copied to an isolated networked Python session. Explicit `network_opt_in=True` fetched the BBC Jordan and Al Jazeera Arabic Jordan stories and produced **two full-body B3 article revisions, two source-anchored excerpts/claims/events and one English + one Arabic held B4 plan**, with geographic labels derived from explicit original text. Remote response `live_http_performed=True`; source publisher status remains `unverified_attributed`, rights and independence unverified, Arabic missing 16 target regions. Body SHA-256 English `e634bb168348475d6c1b04e987a3cde15305084970623a82b30e020cc29e118f`, Arabic `a34eb644d322e7e72a68a080058d97dc4ae898669125e290f94dd0ea5174630e`.
+
+**Critical separation:** the networked Python host lacks Pillow and Matplotlib, so its renderer was a *nonvisual test double writing five .bin placeholders*, NOT native PNGs. Real native PNG rendering was independently exercised *locally with controlled fixture HTML*. One uninterrupted **live HTTP → native PNG in the same runtime is NOT YET VERIFIED**. This is an explicit acceptance gap.
+
+## No-go and next
+- No OpenHands, paid model, secret transfer, webhook, scheduled job, production branch change, database write, or deployment. LLM and fallback remain **DEFERRED** under owner direction.
+- Next: run the exact full branch test suite under installed dependencies, use a safe network+image runtime for uninterrupted authentic fetch→native PNG, expand beyond the fixed two publishers while adding a truly enforced network egress layer and verified region/source/rights coverage, then measure V1/V2 shadow comparison.
+- User-visible local evidence ZIP: `AggregateIT_V2_A8_One_Run_Proof_2026-10-24.zip` (controlled HTML only, five real 4K PNGs, source and tests, receipt, contact sheet).
