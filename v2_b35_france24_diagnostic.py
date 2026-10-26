@@ -115,23 +115,31 @@ def diagnose_bytes(raw: bytes, *, observed_at: str) -> dict:
         if key not in v1_only:
             continue
         matched_v2 = v2_urls.get(url)
-        if matched_v2 is not None:
+        matches = [r for r in xml_rows if r["canonical_url"] == url]
+        # A URL can have an admitted entry and a later rejected duplicate.
+        # Resolve an exact duplicate title/time before comparing to the
+        # admitted entry, or the latter masks the actual rejection cause.
+        exact_duplicates = [r for r in matches if r["decision"] == "duplicate_link"
+                            and r["title"] == title and r["timestamp"] == when_dt]
+        if exact_duplicates:
+            classification = "duplicate_link"
+            details = {"matching_xml_entries": len(matches),
+                       "matched_rejected_duplicate": True}
+        elif matched_v2 is not None:
             v2_dt = _date(matched_v2["published_at"])
             classification = "identity_title_or_timestamp_mismatch"
             details = {"title_same": title == matched_v2["title"],
                        "timestamp_same": when_dt == v2_dt}
+        elif matches:
+            failures = [r["decision"] for r in matches if r["decision"] != "admitted"]
+            classification = failures[0] if failures else "canonicalization_or_identity_mismatch"
+            details = {"matching_xml_entries": len(matches),
+                       "v2_raw_url_same": any(r["literal_url"] == url for r in matches),
+                       "v1_xml_title_equal": any(r["title"] == title for r in matches),
+                       "v1_xml_timestamp_equal": any(r["timestamp"] == when_dt for r in matches)}
         else:
-            matches = [r for r in xml_rows if r["canonical_url"] == url]
-            if matches:
-                failures = [r["decision"] for r in matches if r["decision"] != "admitted"]
-                classification = failures[0] if failures else "canonicalization_or_identity_mismatch"
-                details = {"matching_xml_entries": len(matches),
-                           "v2_raw_url_same": any(r["literal_url"] == url for r in matches),
-                           "v1_xml_title_equal": any(r["title"] == title for r in matches),
-                           "v1_xml_timestamp_equal": any(r["timestamp"] == when_dt for r in matches)}
-            else:
-                classification = "no_equivalent_xml_link"
-                details = {"matching_xml_entries": 0}
+            classification = "no_equivalent_xml_link"
+            details = {"matching_xml_entries": 0}
         finding_rows.append({"v1_item_fingerprint": key,
                              "classification": classification, **details})
     if len(finding_rows) != len(v1_only):

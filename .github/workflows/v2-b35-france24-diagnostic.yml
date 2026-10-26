@@ -1,4 +1,5 @@
 name: AggregateIT V2 B35 France24 parser diagnostic (no post)
+# B35 focused-test correction: disambiguate duplicate XML entries by title and timestamp.
 
 on:
   push:
