@@ -1,8 +1,8 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
-## 26 October — B34 branch-only GitHub Actions acceptance (pending run)
+## 26 October — B34 isolated GitHub Actions closeout
 
-A single workflow-file push on `rebuild/aggregateit-v2` schedules pinned-TLS read-only public RSS comparison and offline Chromium synthetic mobile QA, with no secrets, Discord, database or deployment. Findings cannot be claimed until workflow/job logs and metadata-only artifacts are independently read. The eight-checkpoint evidence bar remains 4/8 pending. See `B34_ISOLATED_ACTIONS_ACCEPTANCE_2026-10-26.md`.
+Run https://github.com/4mghonly/AggregateIT/actions/runs/40388155216 completed **SUCCESS** (2 jobs). V2 **510/510**, legacy English **153/153**, legacy Arabic **55/55**; Chromium synthetic bilingual responsive checks **8/8**. Four registered HTTPS RSS sources captured as SHA-256/size metadata with same-byte V1/V2 comparison. BBC World, BBC Middle East and Al Jazeera aligned; France 24 Arabic had **one V1-only record** (24 vs 23 eligible), unresolved. No raw publisher bytes retained; no source rights claimed. **Evidence bar 6/8**; genuine editorial/delivery shadow and canary/rollback still HOLD. `main`, production schedules, secrets, Discord, databases and model routes untouched. Complete hashes and artifact IDs: `B34_ISOLATED_ACTIONS_ACCEPTANCE_2026-10-26.md`.
 
 ## 26 October 2026 — restore after workspace loss (current recovery)
 
