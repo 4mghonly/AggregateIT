@@ -1,8 +1,8 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
-## B35 targeted discrepancy diagnosis — pending hosted evidence
+## B35 France 24 targeted discrepancy — closed inconclusive (HTTP 403)
 
-One isolated V2 branch workflow is prepared to inspect France 24 Arabic's one B34 V1-only RSS item on one new publisher feed fetch using redacted rejection-class diagnostics. The B34 capture body is not retained or reproducible from its hash. Do not claim root-cause closure until the new runner evidence is reviewed. V1 and V2 parser sources remain unchanged; no production/Discord/DB/model operations. See `B35_FRANCE24_DIAGNOSIS_2026-10-26.md`.
+First [run 40391914604](https://github.com/4mghonly/AggregateIT/actions/runs/40391914604) exposed a synthetic duplicate-link classification defect (5/6, live step skipped). A branch-only harness correction at `b165642f` fixed it: second [run 40392140574](https://github.com/4mghonly/AggregateIT/actions/runs/40392140574) passed **6/6** focused tests and **516/516** V2 regression tests. The one publisher request then returned **HTTP 403**, so no new RSS bytes or B35 artifact exist. B34's 24-vs-23 mismatch cannot be diagnosed from its hash; historical root cause **NOT DETERMINED**. No retry/bypass, no source or parser production changes. Operational evidence remains **6/8 (75%)** and parser parity HOLD. See `B35_FRANCE24_DIAGNOSIS_2026-10-26.md`.
 
 ## 26 October — B34 isolated GitHub Actions closeout
 

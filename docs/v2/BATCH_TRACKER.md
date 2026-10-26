@@ -1,8 +1,8 @@
 # AggregateIT V2 — Batch Tracker
 
-### B35 France 24 Arabic parser discrepancy — diagnosis queued
+### 26 October — B35 France 24 Arabic diagnostic closed, source access blocked
 
-One bounded V2-only GitHub Actions diagnostic will fetch the registered France 24 Arabic RSS once and classify the B34 one-item V1-only difference with redacted identity/rejection metadata. No V1/V2 parser or production changes. **Results pending; evidence remains 6/8 and parser parity HOLD.** See `B35_FRANCE24_DIAGNOSIS_2026-10-26.md`.
+B35 initial [run 40391914604](https://github.com/4mghonly/AggregateIT/actions/runs/40391914604) failed 1/6 synthetic test before network; the branch-only duplicate-link classifier was corrected at `b165642f`. Corrected [run 40392140574](https://github.com/4mghonly/AggregateIT/actions/runs/40392140574) passed **6/6** focused and **516/516** V2 regression tests, but the single permitted France 24 Arabic HTTPS request returned **HTTP 403**. No live source bytes or sanitized comparison artifact were obtained; no bypass or subsequent fetch. B34 historical one V1-only item stays **unresolved**. B35 diagnostic gates **2/3**; operational evidence **6/8 (75%)**, parser parity HOLD; production `main`, V1/V2 parser, Discord, schedules, models, databases unchanged. See `B35_FRANCE24_DIAGNOSIS_2026-10-26.md`.
 
 ### 26 October — B34 isolated hosted acceptance closed
 
