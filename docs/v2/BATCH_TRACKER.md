@@ -1,4 +1,8 @@
 # AggregateIT V2 — Batch Tracker
+
+### 26 October — B34 isolated hosted verification queued
+
+One-shot, V2-branch-only GitHub Actions workflow for bounded public RSS and Chromium checks; no main, production secrets, Discord or databases. One qualifying push only. Offline V2/legacy/Arabic regression included. **Runner results not yet observed; evidence bar remains 4/8.** Details: `B34_ISOLATED_ACTIONS_ACCEPTANCE_2026-10-26.md`.
 Working branch: rebuild/aggregateit-v2  
 No production integration before owner-approved B8.
 

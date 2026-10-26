@@ -1,5 +1,9 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 26 October — B34 branch-only GitHub Actions acceptance (pending run)
+
+A single workflow-file push on `rebuild/aggregateit-v2` schedules pinned-TLS read-only public RSS comparison and offline Chromium synthetic mobile QA, with no secrets, Discord, database or deployment. Findings cannot be claimed until workflow/job logs and metadata-only artifacts are independently read. The eight-checkpoint evidence bar remains 4/8 pending. See `B34_ISOLATED_ACTIONS_ACCEPTANCE_2026-10-26.md`.
+
 ## 26 October 2026 — restore after workspace loss (current recovery)
 
 ### B31–B33 continuation (26 October 2026)
