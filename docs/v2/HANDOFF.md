@@ -2,6 +2,10 @@
 
 ## 26 October 2026 — restore after workspace loss (current recovery)
 
+### B31–B33 continuation (26 October 2026)
+
+No changes to V1/main: V1 reference commit `cb10eb3`, parser blobs identical to V2. Actual `main.fetch_rss` and `arabic_newsletter.collect.collect_source` now run against the same controlled RSS bytes as V2, network mocked and local database side effects disabled. New B31 parser comparison tests 9/9, B32 private mobile static fixture tests 2/2, B33 capture-import integrity and dual comparison tests 5/5 passed. Live original-byte capture unavailable after three distinct access paths; browser installation failed, so neither live feed comparison nor mobile visual acceptance is claimed. Exact states, files, evidence and eight-checkpoint completion definition: `docs/v2/B31_B33_EXACT_INPUT_MOBILE_CAPTURE_2026-10-26.md`. Continue on isolated `rebuild/aggregateit-v2`; no production, webhook, database, schedule or model effects.
+
 The user chose **Option 2: reconstruct with new hashes**. Last GitHub `rebuild/aggregateit-v2` base is `109166a73092e3c5a8d2463fa393d3324980bbc7`, not the unrecoverable unpublished local HEAD `7012312`. The original twelve unpublished commits/bundle cannot be claimed recovered. Rebuilt B14–B30 code, technical test scope, missing evidence and limitations: `docs/v2/B14_B30_RECONSTRUCTION_2026-10-26.md`. Technical tests remain separate from live source, model, visual and cutover validation. Legal/rights review is out of the new AggregateIT V2 engineering acceptance scope by user direction.
 
 Preserve `main`, production workflows, webhooks, SQLite/Cloudflare storage and schedules. All reconstructed output is explicitly private/non-sendable. `PARTIAL_OFFLINE` is not deployment readiness or authorization to replay ambiguous deliveries.

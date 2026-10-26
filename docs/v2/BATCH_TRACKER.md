@@ -6,6 +6,10 @@ No production integration before owner-approved B8.
 
 The owner selected Option 2 (new source-level reconstruction). Last recoverable GitHub base: `109166a73092e3c5a8d2463fa393d3324980bbc7`. Lost local HEAD: `701231256a3967ecb7dccae4980a9f78e264f009`. **Original commit objects not recovered.** B14–B30 replacements and constraints are documented in `B14_B30_RECONSTRUCTION_2026-10-26.md`. Isolated dependency-installed offline verification: **489/489** Python `tests/` pass; **153/153** legacy `tests.py` pass; **55/55** Arabic `unittest` pass. New focused B14–B28 tests **32/32**; B29 pinned transport **16/16**. No real source/integration comparison follows from those counts. B14–B28 **PARTIAL/OFFLINE**, B29–B30 mock transport checks, B7 live shadow HOLD, B8 cutover BLOCKED. Legal/rights review excluded from new V2 engineering acceptance. No production, Discord, database or schedule mutations.
 
+### 26 October continuation: B31–B33
+
+New V1/V2 actual-parser same-byte fixture runner (`v2_b31_same_input_shadow.py`), private bilingual static mobile fixtures and optional browser QA scripts (`v2_b32_*`), and SHA-256 checked offline external capture import bridge (`v2_b33_capture_comparison.py`). Reference V1 main `cb10eb3` was checked independently; `main.py` and Arabic `collect.py` blob hashes match V2 exactly, and V1 was not modified. Focused B31 9/9, B32 2/2, B33 5/5 passed; complete dependency-installed V2 suite **505/505 PASS**, legacy `tests.py` **153/153 PASS**, Arabic `unittest` **55/55 PASS**. Source-byte retrieval STOP after direct DNS failure, HTTPS proxy timeout and unsupported XML in public web viewer. Browser QA HOLD after Chromium install failed. See `B31_B33_EXACT_INPUT_MOBILE_CAPTURE_2026-10-26.md`. **Four of eight explicitly enumerated verification checkpoints pass; this is not a release percentage.** B7 genuine same-window, B8 canary and production remain HOLD/BLOCKED.
+
 | Batch | State as of 24 Oct 2026 | Evidence and exit gate |
 | --- | --- | --- |
 | B0 Foundation | COMPLETE — seven planning/fixture files committed and verified | MASTER_PLAN_V2, QUALITY_BASELINE, ARCHITECTURE_V2, fixtures, HANDOFF, branch/base comparison |
