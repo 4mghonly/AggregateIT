@@ -1,0 +1,47 @@
+name: AggregateIT V2 B35 France24 parser diagnostic (no post)
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b35-france24-diagnostic.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b35-one-shot
+  cancel-in-progress: true
+
+jobs:
+  read-only-france24-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install isolated parser/test dependencies
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi
+      - name: Focused B35 redaction and classification tests
+        run: python -B -m unittest discover -s tests -p test_v2_b35_france24_diagnostic.py -v
+      - name: Full V2 regression
+        run: python -B -m unittest discover -s tests
+      - name: One same-byte bounded France24 Arabic capture and classification
+        run: python -B v2_b35_france24_diagnostic.py --output reports/v2-b35-france24/diagnostic.json
+      - name: Upload only metadata, fingerprints and rejection classes
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: v2-b35-france24-redacted-diagnostic
+          path: reports/v2-b35-france24/diagnostic.json
+          if-no-files-found: warn
+          retention-days: 3

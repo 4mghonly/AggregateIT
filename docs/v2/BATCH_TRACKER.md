@@ -1,5 +1,9 @@
 # AggregateIT V2 — Batch Tracker
 
+### B35 France 24 Arabic parser discrepancy — diagnosis queued
+
+One bounded V2-only GitHub Actions diagnostic will fetch the registered France 24 Arabic RSS once and classify the B34 one-item V1-only difference with redacted identity/rejection metadata. No V1/V2 parser or production changes. **Results pending; evidence remains 6/8 and parser parity HOLD.** See `B35_FRANCE24_DIAGNOSIS_2026-10-26.md`.
+
 ### 26 October — B34 isolated hosted acceptance closed
 
 GitHub Actions run **40388155216** from V2 commit `58d5adc` completed **SUCCESS**, jobs 2/2. **510/510** V2 Python tests, **153/153** legacy English, **55/55** legacy Arabic; Chromium **8/8** synthetic EN/AR viewport checks PASS. Four HTTPS 200 RSS captures recorded with original-byte SHA-256 and metadata only; parser alignment **3/4**, France 24 Arabic V1 24 vs V2 23 (one V1-only item; reason unresolved). **Evidence bar now 6/8**, but genuine complete V1/V2 editorial/delivery shadow and canary/rollback remain HOLD. No production, main, Discord, LLM, DB, secrets or paid-resource changes. See `B34_ISOLATED_ACTIONS_ACCEPTANCE_2026-10-26.md`.

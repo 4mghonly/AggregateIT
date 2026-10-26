@@ -1,5 +1,9 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## B35 targeted discrepancy diagnosis — pending hosted evidence
+
+One isolated V2 branch workflow is prepared to inspect France 24 Arabic's one B34 V1-only RSS item on one new publisher feed fetch using redacted rejection-class diagnostics. The B34 capture body is not retained or reproducible from its hash. Do not claim root-cause closure until the new runner evidence is reviewed. V1 and V2 parser sources remain unchanged; no production/Discord/DB/model operations. See `B35_FRANCE24_DIAGNOSIS_2026-10-26.md`.
+
 ## 26 October — B34 isolated GitHub Actions closeout
 
 Run https://github.com/4mghonly/AggregateIT/actions/runs/40388155216 completed **SUCCESS** (2 jobs). V2 **510/510**, legacy English **153/153**, legacy Arabic **55/55**; Chromium synthetic bilingual responsive checks **8/8**. Four registered HTTPS RSS sources captured as SHA-256/size metadata with same-byte V1/V2 comparison. BBC World, BBC Middle East and Al Jazeera aligned; France 24 Arabic had **one V1-only record** (24 vs 23 eligible), unresolved. No raw publisher bytes retained; no source rights claimed. **Evidence bar 6/8**; genuine editorial/delivery shadow and canary/rollback still HOLD. `main`, production schedules, secrets, Discord, databases and model routes untouched. Complete hashes and artifact IDs: `B34_ISOLATED_ACTIONS_ACCEPTANCE_2026-10-26.md`.
