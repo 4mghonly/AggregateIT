@@ -2,9 +2,10 @@
 from __future__ import annotations
 from datetime import datetime,timezone
 from email.utils import parsedate_to_datetime
-import ipaddress,re,socket,urllib.request
+import ipaddress,re,socket
 from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
+from v2_secure_transport import pinned_https_fetch
 
 MAX_BYTES=200000
 MAX_EXTENDED_BYTES=1000000
@@ -73,21 +74,14 @@ def _reject_dtd(body):
     return b'<!DOCTYPE' in body.upper() or b'<!ENTITY' in body.upper()
 
 
-class _SafeRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self,req,fp,code,msg,headers,newurl):
-        _url_safe(newurl)
-        _assert_public_dns(urlsplit(newurl).hostname)
-        return super().redirect_request(req,fp,code,msg,headers,newurl)
-
 def bounded_fetch(url,*,timeout=8,max_bytes=MAX_BYTES):
     _url_safe(url)
     _validated_feed_byte_budget(max_bytes)
-    _assert_public_dns(urlsplit(url).hostname)
     if not isinstance(timeout,(float,int)) or not 1<=timeout<=12:raise ValueError('unsafe_timeout')
-    opener=urllib.request.build_opener(_SafeRedirect())
-    req=urllib.request.Request(url,headers={'User-Agent':'AggregateIT-V2-research/1.0'})
-    with opener.open(req,timeout=timeout) as response:
-        return response.read(max_bytes+1)
+    # DNS validation and TCP connection use the same pinned numeric address.
+    result=pinned_https_fetch(url,timeout=timeout,max_bytes=max_bytes,max_redirects=2,
+                              headers={'User-Agent':'AggregateIT-V2-research/1.0'})
+    return result['body']
 
 def inspect_feed_bytes(body,*,now,max_age_hours=72,max_bytes=MAX_BYTES):
     if not isinstance(body,bytes):raise ValueError('bytes_required')

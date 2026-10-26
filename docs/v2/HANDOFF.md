@@ -1,4 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
+
+## 26 October 2026 — restore after workspace loss (current recovery)
+
+The user chose **Option 2: reconstruct with new hashes**. Last GitHub `rebuild/aggregateit-v2` base is `109166a73092e3c5a8d2463fa393d3324980bbc7`, not the unrecoverable unpublished local HEAD `7012312`. The original twelve unpublished commits/bundle cannot be claimed recovered. Rebuilt B14–B30 code, technical test scope, missing evidence and limitations: `docs/v2/B14_B30_RECONSTRUCTION_2026-10-26.md`. Technical tests remain separate from live source, model, visual and cutover validation. Legal/rights review is out of the new AggregateIT V2 engineering acceptance scope by user direction.
+
+Preserve `main`, production workflows, webhooks, SQLite/Cloudflare storage and schedules. All reconstructed output is explicitly private/non-sendable. `PARTIAL_OFFLINE` is not deployment readiness or authorization to replay ambiguous deliveries.
 Date: 23 October 2026  
 Repository: https://github.com/4mghonly/AggregateIT  
 Branch: rebuild/aggregateit-v2  

@@ -8,15 +8,13 @@ supported only for deterministic tests and is identified as such in receipts.
 from __future__ import annotations
 
 import hashlib
-import ipaddress
 import json
 import os
-import socket
 import tempfile
-import urllib.request
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlsplit
+from v2_secure_transport import pinned_https_fetch
 
 from v2_article_body_gate import MAX_HTML_BYTES, article_evidence, extract_body
 from v2_evidence import _time, make_article, make_claim, make_event, make_excerpt
@@ -45,37 +43,12 @@ def _checked_host(url: str, *, expected: str) -> str:
     return host
 
 
-def _dns_public(host: str) -> None:
-    answers=socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)
-    if not answers:
-        raise ValueError('dns_resolution_empty')
-    for item in answers:
-        try:
-            address=ipaddress.ip_address(item[4][0])
-        except (IndexError, ValueError) as exc:
-            raise ValueError('unsafe_dns_result') from exc
-        if not address.is_global:
-            raise ValueError('unsafe_dns_result')
-
-
-class _SameOriginRedirect(urllib.request.HTTPRedirectHandler):
-    def __init__(self, allowed_host: str):
-        self.allowed_host=allowed_host
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        _checked_host(newurl, expected=self.allowed_host)
-        _dns_public(self.allowed_host)
-        return super().redirect_request(req,fp,code,msg,headers,newurl)
-
-
 def _live_html_fetch(url: str, *, timeout: int) -> dict:
-    host = urlsplit(url).hostname
-    _dns_public(host)
-    opener=urllib.request.build_opener(_SameOriginRedirect(host))
-    request=urllib.request.Request(url,headers={'User-Agent':'AggregateIT-V2-Bounded-ReadOnly-A8/1.0',
-                                                'Accept':'text/html'})
-    with opener.open(request,timeout=timeout) as response:
-        return {'status':response.status, 'content_type':response.headers.get('Content-Type',''),
-                'final_url':response.url,'body':response.read(MAX_HTML_BYTES+1)}
+    # This pilot refuses redirects, even within the original publisher host.
+    return pinned_https_fetch(url,timeout=timeout,max_bytes=MAX_HTML_BYTES,
+                              max_redirects=0,headers={
+        'User-Agent':'AggregateIT-V2-Bounded-ReadOnly-A8/1.0',
+        'Accept':'text/html'})
 
 
 def run_no_post_chain(sources: list[dict], *, as_of: str, slot_id: str,

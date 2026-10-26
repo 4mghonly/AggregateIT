@@ -2,6 +2,10 @@
 Working branch: rebuild/aggregateit-v2  
 No production integration before owner-approved B8.
 
+## 26 October 2026 — reconstruction after loss of twelve unpublished commits
+
+The owner selected Option 2 (new source-level reconstruction). Last recoverable GitHub base: `109166a73092e3c5a8d2463fa393d3324980bbc7`. Lost local HEAD: `701231256a3967ecb7dccae4980a9f78e264f009`. **Original commit objects not recovered.** B14–B30 replacements and constraints are documented in `B14_B30_RECONSTRUCTION_2026-10-26.md`. Isolated dependency-installed offline verification: **489/489** Python `tests/` pass; **153/153** legacy `tests.py` pass; **55/55** Arabic `unittest` pass. New focused B14–B28 tests **32/32**; B29 pinned transport **16/16**. No real source/integration comparison follows from those counts. B14–B28 **PARTIAL/OFFLINE**, B29–B30 mock transport checks, B7 live shadow HOLD, B8 cutover BLOCKED. Legal/rights review excluded from new V2 engineering acceptance. No production, Discord, database or schedule mutations.
+
 | Batch | State as of 24 Oct 2026 | Evidence and exit gate |
 | --- | --- | --- |
 | B0 Foundation | COMPLETE — seven planning/fixture files committed and verified | MASTER_PLAN_V2, QUALITY_BASELINE, ARCHITECTURE_V2, fixtures, HANDOFF, branch/base comparison |

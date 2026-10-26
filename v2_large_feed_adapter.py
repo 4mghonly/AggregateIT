@@ -9,9 +9,9 @@ from __future__ import annotations
 from datetime import datetime
 import hashlib
 import re
-import urllib.request
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
+from v2_secure_transport import pinned_https_fetch
 
 from v2_feed_probe import (
     MAX_BYTES, MAX_EXTENDED_BYTES, _url_safe, _assert_public_dns,
@@ -41,38 +41,21 @@ def profile_for(source_id: str) -> dict:
             'declared_language_verification':'registry_metadata_not_linguistically_proven',
             'publisher_independence_verified':False}
 
-class _PublisherRedirect(urllib.request.HTTPRedirectHandler):
-    def __init__(self, expected_host: str):
-        self.expected_host=expected_host
-    def redirect_request(self,req,fp,code,msg,headers,newurl):
-        _url_safe(newurl)
-        p=urlsplit(newurl)
-        if p.hostname!=self.expected_host or p.port not in (None,443) or p.username or p.password:
-            raise ValueError('cross_origin_redirect_refused')
-        _assert_public_dns(p.hostname)
-        return super().redirect_request(req,fp,code,msg,headers,newurl)
-
 def _fetch_registered_feed(url: str, *, timeout: int, max_bytes: int) -> bytes:
     _url_safe(url)
     max_bytes=_validated_feed_byte_budget(max_bytes)
     host=urlsplit(url).hostname
-    _assert_public_dns(host)
-    opener=urllib.request.build_opener(_PublisherRedirect(host))
-    request=urllib.request.Request(url,headers={
+    packet=pinned_https_fetch(url,timeout=timeout,max_bytes=max_bytes,max_redirects=2,headers={
         'User-Agent':'AggregateIT-V2-SourceCompatibility/1.0 (read-only)',
-        'Accept':'application/rss+xml,application/atom+xml,text/xml,application/xml',
-        'Accept-Encoding':'identity'
-    })
-    with opener.open(request,timeout=timeout) as response:
-        p=urlsplit(response.url)
-        if p.hostname!=host or p.port not in (None,443):
-            raise ValueError('cross_origin_redirect_refused')
-        if response.status!=200:
-            raise ValueError('non_200_feed')
-        mime=response.headers.get('Content-Type','').split(';',1)[0].lower().strip()
-        if mime not in ('application/rss+xml','application/atom+xml','application/xml','text/xml'):
-            raise ValueError('not_xml_content_type')
-        return response.read(max_bytes+1)
+        'Accept':'application/rss+xml,application/atom+xml,text/xml,application/xml'})
+    if urlsplit(packet['final_url']).hostname!=host:
+        raise ValueError('cross_origin_redirect_refused')
+    if packet['status']!=200:
+        raise ValueError('non_200_feed')
+    mime=packet['content_type'].split(';',1)[0].lower().strip()
+    if mime not in ('application/rss+xml','application/atom+xml','application/xml','text/xml'):
+        raise ValueError('not_xml_content_type')
+    return packet['body']
 
 def _script_fit(items: list[dict], *, language: str) -> bool:
     if not items:

@@ -1,4 +1,8 @@
 # AggregateIT V2 — Master Rebuild Plan
+
+## Recovery amendment — 26 October 2026
+
+The B14–B30 work previously local-only was lost when the execution workspace and temporary Git bundle became unavailable. Owner selected source-level reconstruction with new hashes on `rebuild/aggregateit-v2`, preserving the published branch ancestor; see `B14_B30_RECONSTRUCTION_2026-10-26.md`. New engineering gate B17 does not include legal/rights qualification. B7 authenticated same-window V1/V2 acceptance and B8 production migration still require separate evidence/approval. No schedule, Discord, production/main, model, cloud database or cleanup change is implied by reconstruction.
 Date: 23 October 2026 (UAE)  
 Status: isolated program plan; NOT approved for production cutover  
 Original production baseline: main @ 6deea127bbbd645cc5a4969a5397e745839a95ce  
