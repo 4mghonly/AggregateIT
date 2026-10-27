@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B46 phase 1 actual article→ledger→editorial bridge VALIDATED
+
+[Actions #40471907986](https://github.com/4mghonly/AggregateIT/actions/runs/40471907986) **SUCCESS**: 606/606 V2, legacy English 153/153, Arabic 55/55. Authentic BBC World (2) + Al Jazeera Arabic (1) article HTML bodies admitted through true V2 B3/B4 native-source provenance, attributed excerpts, per-article events, Naysayer abstention and English/Arabic held daily compiler. Arabic topic filter correctly withheld 5 additional stories, rather than guessing relevance. Publisher facts and article/headline semantic equality unproven. **B46 phase 1 PASS; B46 full integration HOLD** pending true change baseline, diverse editorial quality, cross-language event resolution, live market/LLM and rendering. B45 real provider translation and fallback connectivity still HOLD. All V2/production separation preserved. Artifact 12719905376 (metadata only). See `B46_REAL_ARTICLE_EDITORIAL_2026-10-27.md`.
+
+
 ## 27 October — B46 phase 1 publisher article → evidence → editorial integration
 
 B46 stage 1 reuses real V2 B3/B4 source→excerpt→attributed claim→per-article event→EN/AR daily compiler. A bounded pinned-HTTPS runner checks authentic BBC and Al Jazeera article containers and publishes hashes/counts only, holding headline/region ambiguous or missing text. Cross-language semantic grouping, actual provider models, TradingView verified values and Naysayer substantive analysis remain separately unproven. B45 live English/Somali→Arabic quality/fallback tests remain open. No prod/main/Discord/DB changes. Report: `B46_REAL_ARTICLE_EDITORIAL_2026-10-27.md`. Hosted CI pending.

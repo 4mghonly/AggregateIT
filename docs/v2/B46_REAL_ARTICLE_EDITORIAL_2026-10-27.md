@@ -17,7 +17,7 @@ Eight previous English/Somali source-linked samples existed in memory in B44/B45
 
 ## Verification
 
-TDD cases cover successful bilingual real-article-container integration, source host swap rejection, excerpt integrity, repeated article IDs, stale admissions, exact product-topic separation, conservative delta when previous baseline is missing and no persisted publisher body. Focused test run and full hosted regression **PENDING**.
+TDD cases cover successful bilingual real-article-container integration, source host swap rejection, excerpt integrity, repeated article IDs, stale admissions, exact product-topic separation, conservative delta when previous baseline is missing and no persisted publisher body. Focused tests and hosted full regression **PASS** for phase-1 bridge (see final evidence below).
 
 ## Exit and bounds
 
@@ -32,3 +32,19 @@ This stage is a real article-to-graph-to-held-edition integration, but **not** f
 The second isolated run [#40471444477](https://github.com/4mghonly/AggregateIT/actions/runs/40471444477) passed focused **9/9**, V2 **598/598**, English **153/153**, Arabic **55/55**, but 0/6 genuine articles were admitted. Sanitized diagnostics isolated the error to **`no_grounded_region` on all six**. HTTP/TLS and article fetches were healthy. The original B46 runner sampled the first three global RSS headlines per language without filtering for headline geography, and the A7 country dictionary lacked several primary focus areas (Israel/Palestine, Lebanon/Syria, Qatar/Saudi Arabia/Oman).
 
 Corrective work now adds conservative explicit-country headline preselection across the 30-item feed capture, expands narrow country lexemes without semantic inference, and chooses the **exact (region,country)** rule when multiple countries share a region (e.g. Qatar/UAE GCC). Ambiguous headlines, missing article-body country support and non-publisher HTML remain blocked. At most six eligible article URL requests per product; successes capped at three. Added eight focused tests for newly supported countries, GCC same-region accuracy, multiple-country ambiguity and unknown-country refusal. No AI translation, semantic claim verification or new publisher activation.
+
+## Final B46 phase-1 genuine-content evidence — 27 October
+
+[GitHub Actions #40471907986](https://github.com/4mghonly/AggregateIT/actions/runs/40471907986) completed **SUCCESS** on `b30b327b5803ef05c8671328ca1d6d6f5a15b2e9`. New article-body bridge focused tests **9/9** and new country preselector tests **8/8** were included in the complete V2 regression **606/606 PASS**. Legacy English **153/153**, legacy Arabic **55/55** PASS. Sanitized no-post evidence artifact `12719905376` (3-day retention).
+
+Two real RSS feed responses passed; BBC World produced **2** grounded article-body candidates from 2 article requests and Al Jazeera Arabic **1** from 6 article requests. Across the two products, the true production-grade V2 article evidence gate admitted **3 authentic publisher HTML article containers** into the B3 evidence ledger and B4 independent English/Arabic editorial compiler, yielding **2 English and 1 Arabic** source-linked held daily stories. All artifacts contain only hashes, source identity codes and counts; no original publisher article text or title is uploaded.
+
+The Arabic strict classifier rejected **5** otherwise retrievable source articles with `arabic_topic_without_explicit_trigger`. This is an evidence/selection limitation, not a transport or source outage; do not make those articles publishable by assuming a topic. The lexical matching and article-body classifiers are conservative, do not perform genuine same-event multilingual merging or human-verified relevance.
+
+This establishes a genuine article→excerpt→publisher assertion→per-article event→held editorial chain for limited BBC/Al Jazeera content. It is **not** a complete regional briefing, translated analysis, live TradingView/macro snapshot, Naysayer challenge, actual native final PNG/render, verified Discord message, commercial rights certification or B7 full V1/V2 shadow. The current model analysis is withheld and missing-region coverage is reported explicitly. The optional previous-version input is unproven without an authenticated baseline and must not be treated as verified "new since prior briefing" in production.
+
+**B45 carried-forward gate:** No live English/Somali→Arabic model output or actual primary/fallback endpoint connectivity; do not count mock translation checks as semantic translation assurance. Eight prior foreign-language source samples were counted in memory during B44/B45 and do not persist as a user-reusable corpus.
+
+**Next B46 engineering stages:** (2) independently reviewed event identity and genuine previous-slot baseline, (3) source-backed analysis/Naysayer abstention or audited generation, (4) real market source provenance and TradingView scanner current compatibility, (5) broader geographic and language admission/translation and (6) real source-grounded daily/weekly product rendering, plus B49 shadow acceptance. Do not mark B46 overall complete.
+
+Production estimated readiness **60%** and formal evidence **6/8 (75%)** unchanged. No production/main modification, model call, webhook/Discord send, telemetry provisioning or paid API.
