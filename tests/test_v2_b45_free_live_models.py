@@ -19,6 +19,17 @@ class B45Probe(unittest.TestCase):
         self.assertTrue(r["english_structural_pass"]);self.assertTrue(r["somali_structural_pass"])
         self.assertFalse(r["independent_semantic_quality_verified"])
         self.assertFalse(r["can_release"])
+    def test_one_alternative_english_retry_is_bounded_and_still_free(self):
+        def first_english_fails(route_obj,sys,prompt,max_tokens):
+            if prompt["items"][0]["language"]=="en" and max_tokens==400:
+                raise RuntimeError("invalid_json_empty_response_content")
+            return reply(route_obj,sys,prompt,max_tokens)
+        report=run_probe(primary=route(),fallback={},caller=first_english_fails,
+                         resolve_env=False,one_english_retry=True)
+        self.assertTrue(report["english_structural_pass"])
+        self.assertTrue(report["english_retry_attempted"])
+        self.assertEqual(report["actual_free_provider_attempts"],3)
+
     def test_nonfree_fallback_never_called(self):
         r=run_probe(primary=route(),fallback=route(model="glm-5.3"),caller=reply,resolve_env=False)
         self.assertEqual(r["actual_free_provider_attempts"],2)
