@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — B49 genuine same-feed-byte V1/V2 partial shadow (hosted pending)
+
+A one-shot bilingual capture now passes original identical RSS bytes to actual pinned V1/V2 parsers, V1/V2 headline previews and V2 B3/B4 held four-product rendering, with digest equality checked. This improves source comparison provenance but cannot supply unavailable full V1 editorial/model/native/Discord receipts; B7/B49 full-system acceptance stays HOLD. No main change, model usage, external sender or CI dispatch. See `B49_SAME_SLOT_PARTIAL_SHADOW_2026-10-27.md`.
+
+
 ## 27 October — B48 genuine-source operational preflight (CI pending)
 
 B48 consumes live B47 four held products and a read-only main checkout, produces explicit product/source/translation/weekly completeness alerts, verifies actual B39 local receipt persistence on interrupted send, and holds any telemetry writes when account free-tier headroom is unknown. No live Discord API, rollout, backup, retention delete or paid models. This is a rehearsal, not operational monitoring running in production. Evidence remains 6/8. Report: `B48_OPERATIONS_2026-10-27.md`.

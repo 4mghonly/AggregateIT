@@ -4,6 +4,7 @@ Only BBC World and Al Jazeera Arabic as established in V2; bounded feed and
 article attempts. No title, body, translation or HTML is persisted in artifacts.
 """
 import json
+from hashlib import sha256
 from datetime import datetime,timezone
 from pathlib import Path
 from v2_feed_items import extract_candidates
@@ -15,20 +16,39 @@ FEEDS=(
     ('english','https://feeds.bbci.co.uk/news/world/rss.xml'),
     ('arabic','https://www.aljazeera.net/aljazeerarss/ar/all.xml'),
 )
-def run(*,render_native=False,render_four_products=False):
-    at=datetime.now(timezone.utc)
-    slot=at.isoformat()
-    observed=at.isoformat()
-    captures=[];reasons={};count={}
+def run(*,render_native=False,render_four_products=False,
+        rss_snapshots=None,observed_at=None):
+    if rss_snapshots is not None:
+        if not isinstance(rss_snapshots,dict) or set(rss_snapshots)!={'english','arabic'}:
+            raise ValueError('incomplete_shared_rss_snapshots')
+        for product,feed in FEEDS:
+            row=rss_snapshots[product]
+            if (not isinstance(row,dict) or row.get('feed_url')!=feed
+                or not isinstance(row.get('body'),bytes) or not 1<=len(row['body'])<=1_000_000):
+                raise ValueError('unsafe_shared_rss_snapshot')
+    if observed_at is not None:
+        from v2_evidence import _time
+        observed=_time(observed_at)
+    else:
+        observed=datetime.now(timezone.utc).isoformat()
+    slot=observed
+    captures=[];reasons={};count={};feed_digests={}
     for product,feed in FEEDS:
         count[product]={'feed_attempted':True,'feed_ok':False,'article_attempts':0,
                         'article_http_ok':0,'capture_successes':0,
                         'headlines_with_one_supported_country':0,'headline_country_unclassified':0,
                         'article_evidence_eligible':0,'body_gate_rejections':{}}
         try:
-            response=pinned_https_fetch(feed,timeout=8,max_bytes=1_000_000,max_redirects=1,
-                headers={'Accept':'application/rss+xml, application/xml, text/xml'})
-            parsed=extract_candidates(response['body'],feed_url=response['final_url'],
+            if rss_snapshots is None:
+                response=pinned_https_fetch(feed,timeout=8,max_bytes=1_000_000,max_redirects=1,
+                    headers={'Accept':'application/rss+xml, application/xml, text/xml'})
+                raw=response['body']
+                resolved_url=response['final_url']
+            else:
+                raw=rss_snapshots[product]['body']
+                resolved_url=feed
+            feed_digests[product]=sha256(raw).hexdigest()
+            parsed=extract_candidates(raw,feed_url=resolved_url,
                    observed_at=observed,max_items=30,max_bytes=1_000_000)
             count[product]['feed_ok']=True
         except Exception as exc:
@@ -102,6 +122,8 @@ def run(*,render_native=False,render_four_products=False):
             four_products={"status":"HOLD_MISSING_GENUINE_BILINGUAL_EVIDENCE"}
     return {'schema':'aggregateit-v2-b46-live-chain/1',
         'observed_at':observed,'source_attempts':count,
+        'rss_feed_sha256':feed_digests,
+        'rss_shared_snapshot_supplied':rss_snapshots is not None,
         'transport_failures':reasons,'editorial':receipt,'native':native,'four_products':four_products,
         'b45_provider_fallback_connectivity':'NOT_RUN_NO_CREDENTIALS',
         'b45_english_to_arabic_semantic_test':'NOT_RUN',
