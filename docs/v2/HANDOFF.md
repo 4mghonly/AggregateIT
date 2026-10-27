@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B53/B54 original full English+Arabic edition archives and hard release HOLD
+
+New genuine production evidence: English Gazette **two 3840×2160 PNGs** from `main` run #40497262560, archive #12731017257, SHA `0f1353b8…` (the earlier English engine archive alone omitted these). Arabic later **three 3840×2160 PNGs** from run #40517778731, archive #12741710341, SHA `3ba4943e…`. English Gazette health is **degraded, llm_ok=false**; later Arabic translated **2/8** with fallback `http_403`. Production-app delivery claims are not independent Discord proof. Both visual original baselines are now recoverable, but **neither is a full V2 same-source same-slot pair**; no automatic parity admission or cutover. One isolated path-triggered read-only Action now verifies actual artifact hashes and dimensions, runs B52 UTC regressions and complete suites, and emits explicit B54 blocking reasons. No model calls, Discord, main edits or databases. Run pending. Report `B53_B54_GENUINE_EDITION_ACCEPTANCE_2026-10-27.md`.
+
+
 ## 27 October — B52 timezone-equivalent same-slot V1/V2 metadata (isolated; hosted tests pending)
 
 Fixed UTC+04-vs-UTC false mismatch in B7 scorecard and A9 readiness via validated UTC instant comparison; added four regressions. Original run metrics remain unauthenticated without operator attestation; B45 independent fallback and semantic-quality verification, B49 original same-slot full editions, and B50 production canary still HOLD. Production audit missing `requests` on `main` was independently confirmed, but already corrected in V2 branch `audit.yml`; no main change. No CI dispatch, paid call, source fetch or Discord. See `B52_WINDOW_EQUIVALENCE_2026-10-27.md`. Full-suite rerun pending.

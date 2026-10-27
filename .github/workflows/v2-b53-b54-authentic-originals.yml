@@ -1,0 +1,57 @@
+name: AggregateIT V2 B53-B54 real production original edition acceptance NO POST
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths: ['.github/workflows/v2-b53-b54-authentic-originals.yml']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: aggregateit-v2-b53-b54-originals
+  cancel-in-progress: true
+jobs:
+  independent-authentic-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      GITHUB_TOKEN: ${{ github.token }}
+      ARABIC_LLM_API_KEY: ''
+      ARABIC_LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          path: production-baseline
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install existing isolated dependencies
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
+      - name: B52 timezone and new B53-B54 genuine archive focused tests
+        run: |
+          python -B -m unittest discover -s tests -p test_v2_b53_real_full_editions.py -v
+          python -B -m unittest discover -s tests -p test_b6_b7_shadow.py -v
+          python -B -m unittest discover -s tests -p test_v2_a9_shadow_readiness.py -v
+      - name: One V2 and legacy regression for all admission changes
+        run: |
+          python -B -m unittest discover -s tests
+          python -B tests.py
+          python -B -m unittest arabic_newsletter.test_arabic
+      - name: Read original English Gazette PNGs and latest Arabic 4K PNGs only
+        run: python -B v2_b53_b54_originals_runner.py --main-root production-baseline --output reports/b53-b54/sanitized.json
+      - name: Preserve SHA and acceptance flags only not originals
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: aggregateit-v2-b53-b54-authentic-originals-only-metadata
+          path: reports/b53-b54/sanitized.json
+          retention-days: 3
+          if-no-files-found: warn
