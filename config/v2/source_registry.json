@@ -4051,5 +4051,86 @@
       ]
     },
     "english_geo": "unmapped_from_legacy_list"
+  },
+  "staged_sources": [
+    {
+      "id": "candidate-shabelle",
+      "name": "Shabelle Media Network",
+      "stream": "arabic",
+      "publisher_family_candidate": "shabelle",
+      "language": "so",
+      "entrypoint": "https://shabellemedia.com/feed/",
+      "publisher_site": "https://shabellemedia.com",
+      "region": "somalia",
+      "country": "SO",
+      "enabled": false,
+      "eligible_for_collection": false,
+      "eligible_for_publishing": false,
+      "activation_approved": false,
+      "translation_verified": false,
+      "source_family_independence_verified": false,
+      "validated_in": "B43_actual_production_validator"
+    },
+    {
+      "id": "candidate-puntland-post",
+      "name": "Puntland Post",
+      "stream": "arabic",
+      "publisher_family_candidate": "puntland_post",
+      "language": "so",
+      "entrypoint": "https://puntlandpost.net/feed/",
+      "publisher_site": "https://puntlandpost.net",
+      "region": "somalia",
+      "country": "SO",
+      "enabled": false,
+      "eligible_for_collection": false,
+      "eligible_for_publishing": false,
+      "activation_approved": false,
+      "translation_verified": false,
+      "source_family_independence_verified": false,
+      "validated_in": "B43_actual_production_validator"
+    },
+    {
+      "id": "candidate-somali-dispatch",
+      "name": "Somali Dispatch",
+      "stream": "arabic",
+      "publisher_family_candidate": "somali_dispatch",
+      "language": "en",
+      "entrypoint": "https://www.somalidispatch.com/feed/",
+      "publisher_site": "https://www.somalidispatch.com",
+      "region": "somalia",
+      "country": "SO",
+      "enabled": false,
+      "eligible_for_collection": false,
+      "eligible_for_publishing": false,
+      "activation_approved": false,
+      "translation_verified": false,
+      "source_family_independence_verified": false,
+      "validated_in": "B43_actual_production_validator"
+    },
+    {
+      "id": "candidate-goobjoog-en",
+      "name": "Goobjoog English",
+      "stream": "arabic",
+      "publisher_family_candidate": "goobjoog",
+      "language": "en",
+      "entrypoint": "https://en.goobjoog.com/feed/",
+      "publisher_site": "https://en.goobjoog.com",
+      "region": "somalia",
+      "country": "SO",
+      "enabled": false,
+      "eligible_for_collection": false,
+      "eligible_for_publishing": false,
+      "activation_approved": false,
+      "translation_verified": false,
+      "source_family_independence_verified": false,
+      "validated_in": "B43_actual_production_validator"
+    }
+  ],
+  "staging_policy": {
+    "schema": "aggregateit-v2-b44-staging/1",
+    "source_of_record_count_unchanged": 222,
+    "historical_coverage_unchanged": true,
+    "production_source_sync": false,
+    "manual_activation_only": true
   }
 }

@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B44/B45 isolated stage and translation readiness
+
+Four Somalia sources are now in the V2 unified registry as disabled `staged_sources`, preserving the 222 historical records. B44 reports current production regional audit floors separately from hypothetical technical candidate counts. B45 gathers exact-source foreign-language translation requirements and validates only structural, source-bound Arabic outputs; real model quality and fallback connectivity still require separate authorized access. No main/Discord/DB changes, no paid inference. See `B44_B45_STAGE_TRANSLATION_2026-10-27.md`. Hosted CI pending.
+
+
 ## 27 October — B43 production-validator and translation/deduplication test COMPLETED
 
 [Actions #40465932734](https://github.com/4mghonly/AggregateIT/actions/runs/40465932734) **SUCCESS**; B43 focused 10/10, full V2 578/578, legacy English 153/153, legacy Arabic 55/55. Shabelle, Puntland Post, Somali Dispatch and Goobjoog English all pass unchanged production source audit and collector. 34 recent items, zero identical-link/near-identical headline duplicates (semantic or multilingual paraphrases not checked). Headline language detector suggests Somali/Somali/English/English; actual model translation **not tested**. Production translator numerical/Arabic guards and mocked primary→fallback/fail-closed pass. All four remain disabled V2 candidates, **no prod audit floor claim**; no main, webhooks, LLM or DB writes. See `B43_SOMALIA_PRODUCTION_VALIDATOR_TRANSLATION_DEDUPE_2026-10-27.md`.

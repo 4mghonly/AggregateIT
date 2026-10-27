@@ -1,0 +1,58 @@
+name: AggregateIT V2 B44-B45 isolated source and translation gate
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b44-b45-integration.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b44-b45
+  cancel-in-progress: true
+
+jobs:
+  independent-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      ARABIC_LLM_API_KEY: ''
+      ARABIC_LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          path: production-baseline
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install isolated requirements
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
+      - name: B44-B45 focused tests
+        run: python -B -m unittest discover -s tests -p 'test_v2_b4[45]_*.py' -v
+      - name: Full V2 regression at batch closure
+        run: python -B -m unittest discover -s tests
+      - name: English legacy regression
+        run: python -B tests.py
+      - name: Arabic legacy regression
+        run: python -B -m unittest arabic_newsletter.test_arabic
+      - name: Live source plus Arabic translation demand on isolated staging
+        run: python -B v2_b44_b45_integration_runner.py --production-audit production-baseline/arabic_newsletter/SOURCE_AUDIT.json --output reports/b44-b45/metadata.json
+      - name: Publish metadata only
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: v2-b44-b45-isolated-measurements
+          path: reports/b44-b45/metadata.json
+          retention-days: 3
+          if-no-files-found: warn
