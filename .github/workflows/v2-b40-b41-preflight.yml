@@ -1,0 +1,58 @@
+name: AggregateIT V2 B40-B41 same-input preview and production preflight (no post)
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b40-b41-preflight.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b40-b41-preflight
+  cancel-in-progress: true
+
+jobs:
+  no-post-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      LLM_API_KEY: ''
+      LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          path: production-baseline
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install isolated dependencies
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi
+      - name: Focused B40/B41 source and preflight tests
+        run: python -B -m unittest discover -s tests -p 'test_v2_b4[01]_*.py' -v
+      - name: Complete isolated V2 regression
+        run: python -B -m unittest discover -s tests
+      - name: Legacy English regression
+        run: python -B tests.py
+      - name: Legacy Arabic regression
+        run: python -B -m unittest arabic_newsletter.test_arabic
+      - name: Actual same-buffer headlines and static current-main production preflight
+        run: python -B v2_b40_b41_preflight_runner.py --baseline-root production-baseline --candidate-root . --output reports/b40-b41/receipts.json
+      - name: Upload sanitized metadata only
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: v2-b40-b41-no-post-preflight-receipts
+          path: reports/b40-b41/receipts.json
+          if-no-files-found: warn
+          retention-days: 2

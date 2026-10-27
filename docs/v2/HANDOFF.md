@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B40/B41 joint live preview and current-main cutover preflight
+
+B40 uses original V1 and V2 parsers on the same real RSS bytes and compares V1/V2 source-only headline preview admission and hashes; it cannot establish true model, editorial or native-page equivalence. B41 separately checks actual production `main` workflow/legacy parser snapshots and tests simulated rollback policy without sending. Main advanced via the scheduled Arabic audit, and the B41 report records that mutation path. Isolated no-secret one-shot workflow scheduled for full regression. **Operational gates remain 6/8, production cutover HOLD.** See `B40_B41_JOINT_PREFLIGHT_2026-10-27.md`.
+
+
 ## 27 October — B40 no-post stage evidence PASS; genuine full-system comparison HOLD
 
 GitHub Actions [#40458468444](https://github.com/4mghonly/AggregateIT/actions/runs/40458468444) **SUCCESS**, B40 8/8, V2 550/550, English V1 153/153, Arabic V1 55/55. Exact-buffer live RSS V1/V2 parser parity true for the two feeds. Separately, five genuine 3840×2160 native renderer PNGs were built from synthetic evidence and passed two-product no-send Discord packaging. Audit status **HOLD_FULL_SYSTEM_COMPARISON** because source inputs differ between live parsing and synthetic rendering; actual newsroom/LLM/translation/output/delivery deltas cannot be computed. Sanitized artifact 12713152892, 2-day retention. No production/main change, webhook, model call or deployment. Overall operational evidence bar **6/8 (75%)**, unchanged. See `B40_STAGE_SHADOW_2026-10-27.md`.
