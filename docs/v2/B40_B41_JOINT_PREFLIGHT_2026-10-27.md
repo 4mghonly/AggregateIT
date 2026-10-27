@@ -32,3 +32,17 @@ Initial [Actions run 40461369606](https://github.com/4mghonly/AggregateIT/action
 The separately checked current production [Arabic Source Audit #40460139191](https://github.com/4mghonly/AggregateIT/actions/runs/40460139191) returned **FAILURE** with `somalia: 1` compatible source where the workflow requires at least **2**. This is a live source-coverage issue to resolve before cutover. The B41 preflight now reads the checked-out production audit record, reports underfloor regions, and keeps release on HOLD. No production files were changed here.
 
 Corrected one-shot hosted CI: **PASS** (run 40461615674).
+
+## B41 Somalia source audit — precisely identified
+
+Current production `arabic_newsletter/SOURCE_AUDIT.json` (checked 2026-10-27 06:17:20 UTC) reports **59 compatible out of 118 audited sources overall**. For Somalia: **one compatible source**, below the production minimum of two. Publisher status in that audit:
+
+| Source ID | Publisher | Audit result |
+| --- | --- | --- |
+| `s056` | Radio Ergo (Somali-language) | compatible (`ok`) |
+| `s057` | SONNA Arabic | zero entries |
+| `s058` | Goobjoog | HTTP 404 |
+| `s094` | Hiiraan Online | no feed |
+
+Note that the earlier `arabic_newsletter/sources.json` still records Goobjoog as enabled/previously compatible; this is historical metadata, not evidence it still works. The correct remedy is a separately revalidated feed or repaired publisher URL, followed by a clean compatibility audit. Nothing was enabled, promoted or changed in production as part of this batch.
+

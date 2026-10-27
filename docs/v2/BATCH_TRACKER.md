@@ -1,5 +1,8 @@
 # AggregateIT V2 — Batch Tracker
 
+B41 post-run source audit detail: checked at 2026-10-27 06:17 UTC, Somalia s056 Radio Ergo OK; s057 SONNA zero entries; s058 Goobjoog HTTP 404; s094 Hiiraan Online no feed. Only 1 compatible Somalia source vs required 2. No repair or production source promotion has been performed. See `B40_B41_JOINT_PREFLIGHT_2026-10-27.md`.
+
+
 ## 27 October — B40/B41 measured same-byte preview and production preflight
 
 Corrected hosted run [#40461615674](https://github.com/4mghonly/AggregateIT/actions/runs/40461615674) **SUCCESS** on `78e78e104a4a4b38bf9363b4a1ac7537fdbf12e2`: focused **19/19**, V2 **561/561**, legacy English **153/153**, legacy Arabic **55/55**. BBC World EN and Al Jazeera AR true identical-input candidate+held headline previews both returned `COMPARED` and `parity=true`; this is source-only preview agreement, not native Gazette or LLM equality. B41 production baseline pin `ea52e14bc7fd2973058fd659f0ff2e8d617111dc`; its findings: `production_audit_can_advance_main_during_canary` and `production_source_floor_below_two_somalia`. Release status remained `can_release=false`. Sanitized artifact `12714647105`, 2-day retention. Neither workflow, production branch, database, LLM nor Discord was changed. The original failed test-only run is retained in history.
