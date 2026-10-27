@@ -49,11 +49,25 @@ class ProductionPreflightTests(unittest.TestCase):
             with patch('v2_b41_production_preflight._revision',side_effect=['a'*40,'b'*40]):
                 x=inspect_workflows(baseline_root=Path(b),candidate_root=Path(c))
         self.assertIn('schedule_mismatch_slide.yml',x['preflight_findings'])
+    def test_production_somalia_source_floor_is_a_release_blocker(self):
+        import json
+        with tempfile.TemporaryDirectory() as b,tempfile.TemporaryDirectory() as c:
+            build(Path(b));build(Path(c))
+            audit_file=Path(b)/'arabic_newsletter/SOURCE_AUDIT.json'
+            audit_file.parent.mkdir(parents=True,exist_ok=True)
+            audit_file.write_text(json.dumps({'regions':{
+                'somalia':{'compatible':1},'oman':{'compatible':2}}}))
+            with patch('v2_b41_production_preflight._revision',side_effect=['a'*40,'b'*40]):
+                finding=inspect_workflows(baseline_root=Path(b),candidate_root=Path(c))
+        self.assertIn('production_source_floor_below_two_somalia',finding['preflight_findings'])
+        self.assertEqual(finding['production_source_floor']['underfloor_regions'],['somalia'])
+        self.assertFalse(finding['can_release'])
+
     def test_absent_workflow_refused(self):
         with tempfile.TemporaryDirectory() as b,tempfile.TemporaryDirectory() as c:
             build(Path(b));build(Path(c))
             (Path(b)/FILES[0]).unlink()
-            with patch('v2_b41_production_preflight._revision',side_effect=['a'*40,'b'*40']):
+            with patch('v2_b41_production_preflight._revision',side_effect=['a'*40,'b'*40]):
                 with self.assertRaisesRegex(ValueError,'missing_production_workflow'):
                     inspect_workflows(baseline_root=Path(b),candidate_root=Path(c))
 if __name__=='__main__':unittest.main()

@@ -5,6 +5,7 @@ is not runtime health; this module makes no claim of secrets or Discord checks.
 """
 from __future__ import annotations
 from hashlib import sha256
+import json
 from pathlib import Path
 import re
 import subprocess
@@ -76,10 +77,32 @@ def inspect_workflows(*, baseline_root:Path, candidate_root:Path, main_sha:str|N
     audit_writes_main=('git push origin HEAD:main' in audit)
     if audit_writes_main:
         failures.append('production_audit_can_advance_main_during_canary')
+    audit_path=baseline_root/'arabic_newsletter/SOURCE_AUDIT.json'
+    source_floor={'available':False,'underfloor_regions':[],'regions_checked':0}
+    if audit_path.is_file():
+        raw_audit=json.loads(audit_path.read_text(encoding='utf8'))
+        regions=raw_audit.get('regions') if isinstance(raw_audit,dict) else None
+        if not isinstance(regions,dict) or not regions:
+            failures.append('production_source_audit_regions_unverified')
+        else:
+            underfloor=[]
+            for name,info in regions.items():
+                if not isinstance(name,str) or not isinstance(info,dict):
+                    raise ValueError('invalid_source_audit_entry')
+                count=info.get('compatible')
+                if type(count) is not int or count<0:
+                    raise ValueError('invalid_source_compatibility_count')
+                if count<2:underfloor.append(name)
+            source_floor={'available':True,'underfloor_regions':sorted(underfloor),
+                          'regions_checked':len(regions)}
+            failures.extend('production_source_floor_below_two_'+name for name in underfloor)
+    else:
+        failures.append('production_source_audit_unavailable')
     return {'schema':'aggregateit-v2-b41-readonly-preflight/1',
             'baseline_main_sha':actual_sha,'candidate_v2_sha':candidate_sha,
             'workflow_snapshots':rows,'legacy_parsers':legacy,
             'main_auto_write_workflow_present':audit_writes_main,
+            'production_source_floor':source_floor,
             'preflight_findings':sorted(set(failures)),
             'status':'HOLD_PRODUCTION_CANARY',
             'authenticated_external_delivery':False,'live_discord_client_verified':False,

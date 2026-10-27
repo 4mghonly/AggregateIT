@@ -22,3 +22,11 @@ No model/translation execution; no genuine article-body-to-full-native V1/V2 com
 B40 and B41 focused tests authored first; one isolated Actions run with a max runtime of 18 minutes, full installed regression once, no secrets, no Discord, no paid inference, no production/main writes. No publisher feed originals saved. Tests and run observations will be added after completion.
 
 Status: **PENDING hosted verification**.
+
+## Verification correction and production source-floor finding
+
+Initial [Actions run 40461369606](https://github.com/4mghonly/AggregateIT/actions/runs/40461369606) exposed a syntax error in one newly authored B41 test. No full-suite or live preflight result is claimed from that failed run. The B41 test was corrected and a regression was added for the actual production audit's insufficient Somalia source floor.
+
+The separately checked current production [Arabic Source Audit #40460139191](https://github.com/4mghonly/AggregateIT/actions/runs/40460139191) returned **FAILURE** with `somalia: 1` compatible source where the workflow requires at least **2**. This is a live source-coverage issue to resolve before cutover. The B41 preflight now reads the checked-out production audit record, reports underfloor regions, and keeps release on HOLD. No production files were changed here.
+
+Corrected one-shot hosted CI: **pending**.

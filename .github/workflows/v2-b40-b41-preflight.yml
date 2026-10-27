@@ -1,4 +1,5 @@
 name: AggregateIT V2 B40-B41 same-input preview and production preflight (no post)
+# B41 corrected test syntax; production source-floor preflight added.
 
 on:
   push:
