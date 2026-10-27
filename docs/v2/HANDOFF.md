@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B47–B49 final combined verification planned
+
+Final same-public-RSS-byte runner reuses one capture per publisher across B47 genuine bilingual daily PNG + weekly HTML/PDF, B48 read-only production alert/receipt rehearsal and B49 actual V1/V2 parser/headline comparison. This avoids accidentally comparing different RSS responses as the same input. Unchanged B49 full-system V1-equivalent model/editorial/delivery evidence and B50 cutover remain **HOLD**. Single isolated CI run with full suite; no model, Discord, main or database writes. See `B49_SAME_SLOT_PARTIAL_SHADOW_2026-10-27.md`.
+
+
 ## 27 October — B47 weekly partial source PDF added
 
 Two source-excerpt-linked reportlab weekly PDF previews with embedded Arabic-capable font are generated only in held mode and passed through the existing safe weekly Discord attachment packager. They clearly retain partial-week status, are never sent and are not represented as complete weekly products. New focused + full tests and live genuine-source rehearsal pending. `docs/v2/B47_FOUR_PRODUCTS_2026-10-27.md`.

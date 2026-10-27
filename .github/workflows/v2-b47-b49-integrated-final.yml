@@ -1,0 +1,57 @@
+name: AggregateIT V2 B47-B49 integrated final source and operations NO POST
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b47-b49-integrated-final.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b47-b49-integrated-final
+  cancel-in-progress: true
+
+jobs:
+  final-integrated-no-post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      ARABIC_LLM_API_KEY: ''
+      ARABIC_LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          path: production-baseline
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install final isolated runtime and PDF libraries
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
+      - name: Focused B49 common-capture and orchestration tests
+        run: python -B -m unittest discover -s tests -p 'test_v2_b49_*.py' -v
+      - name: One final combined V2 and legacy regression
+        run: |
+          python -B -m unittest discover -s tests
+          python -B tests.py
+          python -B -m unittest arabic_newsletter.test_arabic
+      - name: One-shot authentic RSS and article -> B47 editions B48 alerts B49 comparison
+        run: python -B v2_b49_shadow_runner.py --production-baseline production-baseline --candidate-root . --output reports/b47-b49/sanitized.json
+      - name: Upload metadata-only final integrated evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: aggregateit-v2-b47-b49-final-integrated-sanitized
+          path: reports/b47-b49/sanitized.json
+          retention-days: 3
+          if-no-files-found: warn

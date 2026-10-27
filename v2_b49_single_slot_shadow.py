@@ -53,7 +53,9 @@ def evaluate_shared_shadow(parser:dict, preview:dict, newsroom:dict, *,
             'independent_publisher_factuality_verified':False,
             'owner_cutover_authorized':False,'can_release':False}
 
-def run_one_slot():
+def run_one_slot(*,production_baseline=None,candidate_root=None):
+    if (production_baseline is None)!=(candidate_root is None):
+        raise ValueError('both_production_and_candidate_roots_required')
     at=datetime.now(timezone.utc).isoformat()
     packets={}; parser={}; previews={};failures={}
     for product,label,url in SOURCES:
@@ -80,9 +82,27 @@ def run_one_slot():
         digest=sha256(packets[product]['body']).hexdigest()
         rows.append(evaluate_shared_shadow(parser[product],previews[product],newsroom,
                   expected_source_sha256=digest,product=product))
+    operational=None
+    if production_baseline is not None:
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from v2_b41_production_preflight import inspect_workflows
+        from v2_b39_rollback_rehearsal import exercise_durable_no_send
+        from v2_b48_operations_readiness import evaluate_operations
+        production=inspect_workflows(baseline_root=Path(production_baseline),
+                                     candidate_root=Path(candidate_root))
+        with TemporaryDirectory(prefix='aggregateit-b49-opslab-') as tmp:
+            durable=exercise_durable_no_send(Path(tmp),slot_id=at)
+        if newsroom.get('four_products',{}).get('schema')!='aggregateit-v2-b47-four-product-held/1':
+            raise ValueError('cannot_operationally_assess_missing_four_products')
+        operational=evaluate_operations(newsroom['four_products'],production,durable,observed_at=at)
+        if operational.get('can_release') is not False:
+            raise ValueError('ops_preflight_cannot_grant_release')
     return {'schema':'aggregateit-v2-b49-single-slot-preflight/1',
             'status':'HOLD_NO_FULL_V1_EDITORIAL_BASELINE',
             'rows':rows,'observed_at':at,
+            'operational_preflight':operational,
+            'same_live_capture_used_for_b47_b48_b49':production_baseline is not None,
             'unique_feed_network_requests':2,
             'rss_capture_join_verified':True,
             'same_slot_v2_editorial_no_post':True,
