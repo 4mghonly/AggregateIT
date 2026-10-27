@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — B45 final independently pinned zero-price second model experiment
+
+Two free-router live experiments gave inconsistent EN/Somali results. Existing fallback GLM returned HTTP 403 in production and was not invoked. One final materially different V2-only experiment pins OpenRouter's confirmed $0 `nvidia/nemotron-3.5-lightning:free` (same OpenRouter account; not independent fallback). Two synthetic EN/SO calls maximum. Pending. No source originals/paid calls/Discord. Source: `B45_NAMED_FREE_MODEL_2026-10-27.md`.
+
+
 ## 27 October — B49 archived original production edition evidence (hosted verification pending)
 
 Downloaded archived real GitHub Actions artifacts via connected GitHub read-only tools: V1 Arabic #40471115356 has three actual 4K PNGs and briefing/health with **3 of 8 foreign stories translated** and repeated paid/unverified fallback HTTP 403; English #40478745761 only saved engine run/health JSON (no full native English images in its artifact), health YELLOW/LLM failure. Separate hashes verified; V2 B49 run observed at 2026-10-27T09:15:59Z, so same original RSS bytes/window not available. New private CI will fetch just these artifacts with read-only actions permission, validate PNG/hash/schema/health and report a firm **HOLD** without uploading originals. No Discord/main/model paid calls. See `B49_ORIGINAL_EDITION_ACCEPTANCE_2026-10-27.md`.
