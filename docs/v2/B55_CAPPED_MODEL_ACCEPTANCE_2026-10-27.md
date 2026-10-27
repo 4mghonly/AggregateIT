@@ -10,4 +10,4 @@ Six deterministic maximum one-shot calls (three models × English/Somali), 600 o
 
 The previous 3 free-model experiments and their failure evidence remain closed, not repeated. Original authentic English/Arabic V1 full PNG archives are already verified by B53/54, but they lack like-for-like original source feed bytes and same-slot V2 final outputs; no fabricated equivalent evidence is allowed.
 
-Hosted run: PENDING. Production readiness 60% planning estimate; formal gates 6/8, canary HOLD.
+Hosted B55 run 40557761674 PASS: 5 focused, 682 V2, English 153, Arabic 55. Six billed model requests, reported $0.0013859 and conservative reserved $0.0323148. Gemini 3.1 Flash Lite structurally passed both EN and Somali; Qwen3.5 Flash and DeepSeek V4.1 Flash HOLD_ValueError (exact JSON failure cause not verified). Full source-semantic and production acceptance remain HOLD. Production readiness 60% planning estimate; formal gates 6/8, canary HOLD.

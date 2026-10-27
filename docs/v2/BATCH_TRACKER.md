@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — Paid route B55 and B56 follow-up, single shared $0.50 approval
+
+B55 [run 40557761674](https://github.com/4mghonly/AggregateIT/actions/runs/40557761674) PASS: 682/682 V2, 153 EN and 55 AR; 6 paid model calls at $0.0013859 provider-reported, $0.0323148 conservative reserved. Gemini 3.1 Flash Lite passed both synthetic language structural checks; Qwen3.5 Flash and DeepSeek V4.1 Flash HOLD_ValueError. B56 now tests different gpt-oss-120b and Qwen3.8 Flash models, counting B55 reservation toward the SAME $0.50 cap. No real source text, production, secrets, Discord or canary. Reports B55_CAPPED_MODEL_ACCEPTANCE_2026-10-27.md and B56_SECOND_PROVIDER_2026-10-27.md.
+
+
 ## 27 October — B55 authorized paid-model acceptance, $0.50 hard session ceiling
 
 User approved using existing OpenRouter `LLM_API_KEY` with models Qwen3.5 Flash primary, DeepSeek V4.1 Flash alternate provider, Gemini 3.1 Flash Lite independent comparison. New isolated path-triggered Action permits at most six text-only, synthetic EN/SO→AR test calls, 600 output tokens each, explicit conservative budget reservation never above USD 0.50; reports only sanitized status/cost. No publisher bytes, secrets, main edits, production model changes, Discord or database writes. Tests and live run pending. B53/54 original full PNG proof retained; true same-slot V1/V2 quality and B8 release HOLD. See `B55_CAPPED_MODEL_ACCEPTANCE_2026-10-27.md`.
