@@ -17,7 +17,7 @@ Continue browser/mobile QA using **genuine English and Arabic RSS headline text*
 
 ## Verification
 
-TDD RED: new renderer module initially absent, focused import test failed. TDD GREEN: 5/5 headline-renderer tests passed locally. Hosted live source and browser test **pending** at this first commit. The full V2 regression is rerun in hosted workflow; B36 earlier regression was 527/527, legacy 153/153 English and 55/55 Arabic.
+TDD RED: new renderer module initially absent, focused import test failed. TDD GREEN: 5/5 headline-renderer tests passed locally. Hosted acceptance [run 40452327376](https://github.com/4mghonly/AggregateIT/actions/runs/40452327376) **SUCCESS** on commit `9e4ef89cd3f955a4944c2079ee1a0757d892f1bb`: focused **5/5**, full V2 **532/532**. Live HTTPS capture succeeded for BBC World English and Al Jazeera Arabic, each yielding **6** rendered headlines; Playwright Chromium **8/8 viewport checks** passed at 320, 390, 768, 1320px per language. Source-only metadata ZIP artifact ID `12710644338` (2-day retention); source-body bytes, titles, HTML and screenshots were not uploaded. Live captures SHA-256: BBC World `45e762774e00fb4b39ed06f7befe298cef0ebbd85dd9ce69df0f01e8545e0236`; Al Jazeera Arabic `5d6208100c538f4da5c815ef142c34c3959d37b7a7a5570add45cc9a252fa225`. B36 earlier regression was 527/527, legacy English 153/153, Arabic 55/55.
 
 ## Limitations
 

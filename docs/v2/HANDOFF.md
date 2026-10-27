@@ -1,7 +1,8 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
-## 27 October — B37 genuine RSS headline mobile QA, isolated run pending
+## 27 October — B37 genuine RSS headline mobile QA, hosted PASS
 
+Hosted [run 40452327376](https://github.com/4mghonly/AggregateIT/actions/runs/40452327376) succeeded. **6 English BBC World + 6 Arabic Al Jazeera real RSS titles**, **8/8 Chromium viewports** (320/390/768/1320 across both languages) passed; **5/5 B37 focus** and **532/532 V2 regression** pass. Source titles/bytes/screenshots remain ephemeral, only counts and SHA-256 retained in artifact 12710644338 (2 days). This is headline-card responsive Chromium QA, **not** full private newsletter or physical Discord client verification. B36 run 40451743278 passed 11/11 focus, 527/527 V2, legacy English 153/153, Arabic 55/55. France24 24-vs-23 HOLD; authentic full-system V1/V2 and canary/rollback HOLD. **Evidence bar 6/8 (75%) unchanged.** See `B37_GENUINE_RSS_HEADLINE_MOBILE_2026-10-27.md`.
 Prepared BBC World English + Al Jazeera Arabic single-fetch source-watch preview, with no-post Chromium QA at 320/390/768/1320 px. 5/5 focused renderer tests passed locally. Only sanitized QA counts and source hashes will be retained; source bytes, actual headline text and screenshot files remain ephemeral. This is not full editorial/page or Discord-device acceptance. B36 GitHub run 40451743278 passed 11/11 focused, 527/527 V2, 153/153 legacy English, 55/55 Arabic. Operational evidence bar **6/8**; genuine whole-system shadow and cutover HOLD. See `B37_GENUINE_RSS_HEADLINE_MOBILE_2026-10-27.md`.
 
 
