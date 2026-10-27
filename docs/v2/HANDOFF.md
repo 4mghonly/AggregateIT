@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B46 stage 4 market provenance and Naysayer abstention preflight
+
+New private `v2_b46_market_analytics` wraps existing TradingView scanner validation and quarantines price/quote fields absent exchange timestamps and independent corroboration. One limited public request in isolated CI; results are counts/status only. Independently checks that EN/AR existing Naysayer status stays `insufficient_evidence` without independently supported challenge. No user pricing/market data, model, production or Discord claims. B45 translation still unverified. Stage-4 hosted run pending; see `B46_REAL_ARTICLE_EDITORIAL_2026-10-27.md`.
+
+
 ## 27 October — B46 stage 3 operator-HMAC previous-event and multilingual review candidates
 
 Added HMAC-verified B3 prior-event journal replay (existing `v2_evidence_anchor`) and strict bounded prior-date validation to the held daily compiler. Arbitrary maps still ignored. Cross-language potential matches are metadata-only, same-region **review candidates**, never automatically merged or asserted to describe the same incident. Offline-only full-suite CI pending. This is operator attestation, not independent off-host storage or publisher truth. B45 provider translation still blocked, B46 other analysis/market/render gates open. See `B46_REAL_ARTICLE_EDITORIAL_2026-10-27.md`.
