@@ -1,0 +1,42 @@
+name: AggregateIT V2 B49 original V1 artifact admission (no post)
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths: ['.github/workflows/v2-b49-original-artifacts.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  authentic-production-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v6
+        with: {python-version: '3.12'}
+      - name: Install bounded reader dependencies
+        run: python -m pip install -r requirements.txt pillow
+      - name: Test original artifact schema and source provenance holds
+        run: python -B -m unittest discover -s tests -p 'test_v2_b49_archived_originals.py' -v
+      - name: Full V2 final regression, English and Arabic legacy
+        run: |
+          python -B -m unittest discover -s tests
+          python -B tests.py
+          python -B -m unittest arabic_newsletter.test_arabic
+      - name: Read original current production run artifacts without deploying
+        run: python -B v2_b49_archived_edition_runner.py --output reports/b49/originals-sanitized.json
+      - name: Publish only original artifact digest and deficiency counts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: aggregateit-v2-b49-authentic-original-evidence
+          path: reports/b49/originals-sanitized.json
+          retention-days: 3
+          if-no-files-found: warn

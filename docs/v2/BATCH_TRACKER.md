@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — B49 archived original production edition evidence (hosted verification pending)
+
+Downloaded archived real GitHub Actions artifacts via connected GitHub read-only tools: V1 Arabic #40471115356 has three actual 4K PNGs and briefing/health with **3 of 8 foreign stories translated** and repeated paid/unverified fallback HTTP 403; English #40478745761 only saved engine run/health JSON (no full native English images in its artifact), health YELLOW/LLM failure. Separate hashes verified; V2 B49 run observed at 2026-10-27T09:15:59Z, so same original RSS bytes/window not available. New private CI will fetch just these artifacts with read-only actions permission, validate PNG/hash/schema/health and report a firm **HOLD** without uploading originals. No Discord/main/model paid calls. See `B49_ORIGINAL_EDITION_ACCEPTANCE_2026-10-27.md`.
+
+
 ## 27 October — B45 bounded live FREE-route probe started
 
 A one-shot path-triggered isolated V2 workflow tests original synthetic English and Somali headlines with actual production Arabic normalizer against configured FREE-ONLY OpenRouter routes. Exactly 2 primary and at most 1 free fallback calls, up to 400 tokens per call; paid GLM/nonfree configured routes skipped. No publisher texts, paid API, production changes or Discord. Real model connectivity ≠ factual translation quality or actual paid fallback resilience. Hosted evidence pending. Report: `B45_FREE_LIVE_PROBE_2026-10-27.md`.
