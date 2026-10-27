@@ -70,5 +70,7 @@ if __name__=='__main__':
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print(json.dumps({'source_attempts':result['source_attempts'],
                       'admitted':result['editorial']['admitted_articles'],
+                      'held_reasons':result['editorial']['held_reasons'],
+                      'editorial_held':{p:r['held_reasons'] for p,r in result['editorial']['products'].items()},
                       'products':{p:r['story_count'] for p,r in result['editorial']['products'].items()},
                       'can_release':False},ensure_ascii=False))

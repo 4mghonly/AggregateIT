@@ -1,4 +1,5 @@
 name: AggregateIT V2 B46 real article editorial chain (no post)
+# Capture sanitized held reasons for genuine-data diagnosis.
 
 on:
   push:

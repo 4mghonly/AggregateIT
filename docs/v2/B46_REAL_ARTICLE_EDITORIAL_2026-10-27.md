@@ -22,3 +22,7 @@ TDD cases cover successful bilingual real-article-container integration, source 
 ## Exit and bounds
 
 This stage is a real article-to-graph-to-held-edition integration, but **not** full cross-language resolution, model analysis, Naysayer generation, verified TradingView prices, authenticated commercial rights, complete regional coverage, render/Discord receipt or genuine V1/V2 full shadow. All outputs remain non-sendable and production unmodified. AggregateIT estimated production readiness and formal B7/B8 evidence gates are unchanged.
+
+## Initial genuine-source admission result — 27 October
+
+[GitHub run 40471182889](https://github.com/4mghonly/AggregateIT/actions/runs/40471182889) **SUCCESS** at infrastructure/test level, B46 focused **9/9**, complete V2 suite **598/598**, English legacy **153/153**, Arabic legacy **55/55**. BBC World and Al Jazeera Arabic feeds returned usable RSS; six publisher article URLs fetched successfully (three per product), but **0 of 6 entered the evidence ledger**. The exact reasons are in the sanitized metadata artifact `12718755759`; that artifact has not yet been independently decoded in this session. A second diagnostic run will print sanitized rejection classes, without article bodies or titles, before any parser adjustment. Treat B46 actual editorial intake as **HOLD**, not PASS.
