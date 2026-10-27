@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B43 actual production validator on four Somalia sources
+
+B43 runs unchanged `arabic_source_audit.probe` for Shabelle, Puntland Post, Somali Dispatch and Goobjoog English; feeds are replayed into actual `arabic_newsletter.collect.collect_source` from the same in-memory network response. The production translation normalizer and dedupe keys are tested, with script/language heuristics and cross-source lexical duplicates measured. **No real LLM translation or model fallback**, so translation QA is partial. Four disabled candidates staged in `config/v2/somalia_b43_disabled_candidates.json`. No production source activation, webhook delivery or DB changes. See `B43_SOMALIA_PRODUCTION_VALIDATOR_TRANSLATION_DEDUPE_2026-10-27.md`; hosted run pending.
+
+
 ## 27 October — B42 Somalia RSS discovery, live candidate probe PASS
 
 Hosted [run 40464140654](https://github.com/4mghonly/AggregateIT/actions/runs/40464140654) passed **7/7 tests**. Of 14 HTTPS feed URLs probed, **11 were technically parseable** and **10 carried recent dated linked content**, corresponding to **9 different publisher families** (including existing Radio Ergo and repaired Goobjoog English). Top replacements: Shabelle, Puntland Post and Somali Dispatch; potential existing Goobjoog repair: `https://en.goobjoog.com/feed/`. SONNA Arabic/English remained empty, Goobjoog Somali was 404, and Dalsan was stale. Artifact `12716330716`. Candidate findings are not production approved, no sources added or auto-promoted; B41 Somalia source-floor remains OPEN until production re-audit. See `B42_SOMALIA_FEED_DISCOVERY_2026-10-27.md`.

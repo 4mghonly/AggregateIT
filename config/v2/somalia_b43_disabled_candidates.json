@@ -1,0 +1,48 @@
+{
+  "schema": "aggregateit-v2-b43-somalia-disabled-candidates/1",
+  "description": "For review only. No production source activation or editorial qualification.",
+  "region": "somalia",
+  "enabled": false,
+  "sources": [
+    {
+      "id": "candidate-shabelle",
+      "name": "Shabelle Media Network",
+      "feed": "https://shabellemedia.com/feed/",
+      "website": "https://shabellemedia.com",
+      "declared_language": "so",
+      "language_verified": false,
+      "publisher_family": "shabelle",
+      "enabled": false
+    },
+    {
+      "id": "candidate-puntland-post",
+      "name": "Puntland Post",
+      "feed": "https://puntlandpost.net/feed/",
+      "website": "https://puntlandpost.net",
+      "declared_language": "so",
+      "language_verified": false,
+      "publisher_family": "puntland_post",
+      "enabled": false
+    },
+    {
+      "id": "candidate-somali-dispatch",
+      "name": "Somali Dispatch",
+      "feed": "https://www.somalidispatch.com/feed/",
+      "website": "https://www.somalidispatch.com",
+      "declared_language": "en",
+      "language_verified": false,
+      "publisher_family": "somali_dispatch",
+      "enabled": false
+    },
+    {
+      "id": "candidate-goobjoog-en",
+      "name": "Goobjoog English",
+      "feed": "https://en.goobjoog.com/feed/",
+      "website": "https://en.goobjoog.com",
+      "declared_language": "en",
+      "language_verified": false,
+      "publisher_family": "goobjoog",
+      "enabled": false
+    }
+  ]
+}
