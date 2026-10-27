@@ -1,5 +1,14 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B46 partial engineering closure: publisher evidence + safe delta
+
+**Genuine source integration:** [Actions #40471907986](https://github.com/4mghonly/AggregateIT/actions/runs/40471907986) PASS. After an initial zero-admission diagnosis (`no_grounded_region`), the conservative English/Arabic subject-country lexical prefilter and actual article-body matcher admitted **2 BBC English + 1 Al Jazeera Arabic** publisher article bodies into B3 source→excerpt→claim→per-article event and B4 independent no-post English/Arabic daily compiler. Arabic correctly held five non-explicit-topic articles; model/market/Naysayer factual analysis remained withheld. Original publisher content never uploaded, metadata-only artifact `12719905376`.
+
+**Delta/identity hardening:** [Actions #40472682297](https://github.com/4mghonly/AggregateIT/actions/runs/40472682297) PASS, **20/20 focused**, **609/609 V2**, **153/153 English legacy**, **55/55 Arabic legacy**. Canonical URL dedup rejects UTM-tracking variants and arbitrary previous-version maps cannot fabricate "new since prior briefing"; delta stays `unknown_no_baseline` until authenticated prior evidence exists. The first stage-2 attempt failed on a test import only, subsequently corrected. Second stage made **zero live publisher, model or Discord calls**.
+
+**Open B46 scope:** independent same-event multilingual identity + prior-briefing authenticated change tracking, source-grounded candidate Naysayer/analysis, live market observation/TradingView compatibility, geographic completeness, and genuine final daily/weekly renders. **B45 live Somali/English→Arabic semantic translation, provider connectivity and fallback remain HOLD**. Production `main`, schedules and Discord unchanged. Evidence milestones 6/8, planning readiness estimate 60% unchanged.
+
+
 ## 27 October — B46 phase 1 actual article→ledger→editorial bridge VALIDATED
 
 [Actions #40471907986](https://github.com/4mghonly/AggregateIT/actions/runs/40471907986) **SUCCESS**: 606/606 V2, legacy English 153/153, Arabic 55/55. Authentic BBC World (2) + Al Jazeera Arabic (1) article HTML bodies admitted through true V2 B3/B4 native-source provenance, attributed excerpts, per-article events, Naysayer abstention and English/Arabic held daily compiler. Arabic topic filter correctly withheld 5 additional stories, rather than guessing relevance. Publisher facts and article/headline semantic equality unproven. **B46 phase 1 PASS; B46 full integration HOLD** pending true change baseline, diverse editorial quality, cross-language event resolution, live market/LLM and rendering. B45 real provider translation and fallback connectivity still HOLD. All V2/production separation preserved. Artifact 12719905376 (metadata only). See `B46_REAL_ARTICLE_EDITORIAL_2026-10-27.md`.
