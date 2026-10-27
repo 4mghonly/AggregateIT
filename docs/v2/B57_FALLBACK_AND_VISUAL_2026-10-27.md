@@ -26,4 +26,4 @@ These are qualitative observations, not OCR or a measured cross-version similari
 
 
 
-Hosted B57 run PENDING. No main edits, database writes, production model changes, Discord, release/canary or extra publisher acquisition.
+Hosted B57 [run 40559497674](https://github.com/4mghonly/AggregateIT/actions/runs/40559497674) **SUCCESS**: focused 4/4, full V2 691/691, English legacy 153/153, Arabic legacy 55/55. Under injected (not real) primary transport failure, the *actual unmodified production translation failover controller* selected independent real GPT-OSS fallback with both EN and Somali original synthetic articles structurally passing. Two actual endpoint calls. Combined B55+B56+B57 reported $0.0024507; conservative reserved $0.101496; well below single authorized $0.50 cap. Artifact 12760720205 sanitized. Still no rights-cleared live-news source translation or independent semantic equivalence proof. No main/Discord changes. No main edits, database writes, production model changes, Discord, release/canary or extra publisher acquisition.

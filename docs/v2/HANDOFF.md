@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B55–B58 model testing closed with $0.50 cap respected, release HOLD
+
+Real isolated OpenRouter benchmarking B55: 6 requests, B56: 4, B57: 2. Total provider-reported $0.0024507; conservative cumulative reservation $0.101496 of approved $0.50. Gemini 3.1 Flash Lite and GPT OSS 120B each structurally passed synthetic EN/Somali→Arabic. B57 actual Arabic controller selected real GPT OSS on **simulated** primary failure, not actual primary outage; provider fallback path measured. Four PNG archived original V1 visual QA gaps remain plus B54 release blockers. B58 stages Gemini primary/GPT OSS fallback **disabled in V2 only**, no production secrets/model changes, and hard release HOLD. Full source-synchronized V1/V2 editions, publisher rights, full 7-day week, authentic translation and independent Discord verification still missing. Reports B55–B58.
+
+
 ## 27 October — B57 actual fallback controller and full edition visual quality check
 
 Gemini 3.1 Flash Lite and OpenAI gpt-oss-120b both passed separate paid synthetic EN/SO translation benchmarks; B55+B56 total reported $0.0023537 and conservative reserved $0.074446, within one $0.50 approval. B57 exercises unmodified Arabic translation controller under **injected primary failure** with real GPT-OSS fallback (2 calls maximum), accounting for preceding reserve. No production credential or code changes. Separately visually inspected authentic EN (2) + AR (3) original PNGs: English lead title/editorial mismatch and chart labels clipping; Arabic UAE empty priority panel, dense content and repeated topic panels. These are release QA blockers, not V2 parity. B54 canary HOLD. `B57_FALLBACK_AND_VISUAL_2026-10-27.md`.

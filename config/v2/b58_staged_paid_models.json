@@ -1,0 +1,36 @@
+{
+  "schema": "aggregateit-v2-b58-model-selection/1",
+  "status": "STAGED_DISABLED_NOT_PRODUCTION_ROUTING",
+  "api_base": "https://openrouter.ai/api/v1",
+  "key_secret_name": "LLM_API_KEY",
+  "primary": {
+    "model": "google/gemini-3.1-flash-lite",
+    "family": "google",
+    "synthetic_en_so_structural_pass": true
+  },
+  "fallback": {
+    "model": "openai/gpt-oss-120b",
+    "family": "openai",
+    "synthetic_en_so_structural_pass": true
+  },
+  "budget": {
+    "approved_usd": 0.5,
+    "spent_reported_b55_b56_b57_usd": 0.0024507,
+    "conservative_reserved_b55_b56_b57_usd": 0.101496,
+    "charged_calls_b55": 6,
+    "charged_calls_b56": 4,
+    "charged_calls_b57": 2
+  },
+  "activation": {
+    "enabled": false,
+    "production_model_changes_authorized": false,
+    "applicable_to_production": false,
+    "full_real_news_source_translation_accepted": false,
+    "live_primary_outage_proven": false,
+    "b57_injected_outage_real_fallback_passed": true,
+    "translated_publisher_rights_verified": false,
+    "full_original_v1_v2_same_slot_proven": false,
+    "discord_client_receipts_verified": false,
+    "can_release": false
+  }
+}
