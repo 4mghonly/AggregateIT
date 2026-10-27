@@ -1,8 +1,8 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
-## 27 October — B42 Somalia replacement source search (live candidate check pending)
+## 27 October — B42 Somalia RSS discovery, live candidate probe PASS
 
-Somalia failed production source floor 1/2 on 27 October. B42 tests 14 documented or plausible RSS endpoints for 11 distinct publisher families without production changes; uses original production `feedparser` semantics plus stronger fresh/news-link guard, pinned HTTPS, no-body artifacts and one request per URL. Root/alternate URLs do not count as extra publishers. Report: `B42_SOMALIA_FEED_DISCOVERY_2026-10-27.md`. Gate 6/8 and cutover HOLD until independently verified feeds are integrated and audited.
+Hosted [run 40464140654](https://github.com/4mghonly/AggregateIT/actions/runs/40464140654) passed **7/7 tests**. Of 14 HTTPS feed URLs probed, **11 were technically parseable** and **10 carried recent dated linked content**, corresponding to **9 different publisher families** (including existing Radio Ergo and repaired Goobjoog English). Top replacements: Shabelle, Puntland Post and Somali Dispatch; potential existing Goobjoog repair: `https://en.goobjoog.com/feed/`. SONNA Arabic/English remained empty, Goobjoog Somali was 404, and Dalsan was stale. Artifact `12716330716`. Candidate findings are not production approved, no sources added or auto-promoted; B41 Somalia source-floor remains OPEN until production re-audit. See `B42_SOMALIA_FEED_DISCOVERY_2026-10-27.md`.
 
 
 B41 post-run source audit detail: checked at 2026-10-27 06:17 UTC, Somalia s056 Radio Ergo OK; s057 SONNA zero entries; s058 Goobjoog HTTP 404; s094 Hiiraan Online no feed. Only 1 compatible Somalia source vs required 2. No repair or production source promotion has been performed. See `B40_B41_JOINT_PREFLIGHT_2026-10-27.md`.
