@@ -1,6 +1,8 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
-## 27 October — B38-B39 same-buffer V1/V2 replay and crash-safe no-send gate (hosted pending)
+## 27 October — B38-B39 live exact-buffer replay and durable no-send rehearsal PASSED
+
+Hosted [run 40455040595](https://github.com/4mghonly/AggregateIT/actions/runs/40455040595) **SUCCESS**, focused **10/10**, V2 regression **542/542**, English **153/153**, Arabic **55/55**. The single-capture actual V1 and V2 parser pair on BBC World / Al Jazeera yielded `shadow_status=COMPARED`, `parity_all=true`; the persisted ambiguous receipt survived reopening and blind retry was refused. Sanitized metadata artifact ID `12711188931`, retained for 2 days. Production `main`, Discord, workflows/schedules, secrets, database and LLM keys unchanged; no Discord send. **Operational evidence stays 6/8 (75%)**, as this does not compare full newsroom output or prove live canary/rollback. Report: `B38_B39_LIVE_REPLAY_DURABLE_NOPOST_2026-10-27.md`.
 
 Prepared one-feed-per-language original-byte V1/V2 replay with source-only mobile metrics, plus actual POSIX receipt-store close/reopen and no-retry tabletop. B38 uses BBC World / Al Jazeera; France24 not retried. New tests were authored first and held RED on absent modules. Single 15-minute GitHub Actions no-post workflow runs focused and full regressions plus live source captures, retaining metadata only. A successful parser or disk simulation cannot close the genuine full-editorial shadow or controlled canary. Evidence bar remains **6/8 (75%)** pending authenticated results. See `B38_B39_LIVE_REPLAY_DURABLE_NOPOST_2026-10-27.md`.
 

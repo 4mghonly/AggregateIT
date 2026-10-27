@@ -12,7 +12,7 @@ B39: Exercise the real local POSIX receipt-store code in a disposable directory.
 
 ## Test-driven verification
 
-Tests created before production modules (RED: missing modules). New B38 and B39 tests verify exact bytes, source mismatch HOLD, bounded transport attempts, invalid URL rejection, disk reopen idempotency and caller-flag no-release enforcement. Initial GitHub workflow run and final installed regression results **PENDING**.
+Tests created before production modules (RED: missing modules). New B38 and B39 tests verify exact bytes, source mismatch HOLD, bounded transport attempts, invalid URL rejection, disk reopen idempotency and caller-flag no-release enforcement. Hosted [run 40455040595](https://github.com/4mghonly/AggregateIT/actions/runs/40455040595) completed **SUCCESS** on `74e92d3375f71749de2f8469f834f9b0f312b147`. B38/B39 focused **10/10**, entire V2 **542/542**, English legacy **153/153**, Arabic legacy **55/55** passed. Live same-buffer source parser comparison reported `shadow_status=COMPARED` and `parity_all=true` for the two pinned publishers; local receipt-store crash marker persisted (`crash_marker_durable=true`). `can_release=false`. Aggregate metadata-only artifact ID `12711188931`, with 2-day retention. No original publisher XML was persisted.
 
 ## Exit conditions and holds
 
