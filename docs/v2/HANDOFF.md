@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B59–B62 verified together; production canary HOLD
+
+[GitHub Actions #40567211759](https://github.com/4mghonly/AggregateIT/actions/runs/40567211759) **SUCCESS**: 12/12 focused, 707/707 full V2, 153/153 English legacy, 55/55 Arabic legacy. B59 controlled English/Arabic translation counterexample PASS (not real publisher model semantics); B60 original five visual problems preserved and 4K bbox lint implemented (not visually resolved); B61 new week-lineage validator was provided 0/7 archived days per product (B47 historical held preview previously 1/7), preventing fabricated weekly completeness; B62 9 release-critical technical blockers still open. Paid calls 0, B58 staged Gemini/GPT-OSS configuration unchanged, main `ea52e14` protected, no Discord/model updates, D1 writes or canary. B59–B62 are **engineering gates implemented and tested**, not production acceptance. Reports `B59_SEMANTIC_REGRESSIONS_2026-10-27.md` through `B62_CANARY_HOLD_2026-10-27.md`.
+
+
 ## 27 October — B59–B62 consolidated no-post execution
 
 B59 adds source-authored negation/proposal/quantity semantic regression checks for English/Somali-to-Arabic, **not real publisher semantic verification**. B60 preserves 5 documented original EN/AR visual issues and introduces bounded 4K page text-geometry checks, without falsely clearing the real editorial defects. B61 checks genuine distinct UAE-local seven-day source lineage and refuses reuse/fabricated history; original weekly acceptance still 1/7 available, none loaded into the new offline checker. B62 joins existing disabled B58 Gemini/GPT-OSS selection to unverified gates and hard-HOLD pre-canary. New paid calls 0, model selections untouched, `main` and Discord untouched; legal review excluded from technical gate. Reports B59–B62 and hosted integrated CI.
