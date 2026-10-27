@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B55 authorized paid-model acceptance, $0.50 hard session ceiling
+
+User approved using existing OpenRouter `LLM_API_KEY` with models Qwen3.5 Flash primary, DeepSeek V4.1 Flash alternate provider, Gemini 3.1 Flash Lite independent comparison. New isolated path-triggered Action permits at most six text-only, synthetic EN/SO→AR test calls, 600 output tokens each, explicit conservative budget reservation never above USD 0.50; reports only sanitized status/cost. No publisher bytes, secrets, main edits, production model changes, Discord or database writes. Tests and live run pending. B53/54 original full PNG proof retained; true same-slot V1/V2 quality and B8 release HOLD. See `B55_CAPPED_MODEL_ACCEPTANCE_2026-10-27.md`.
+
+
 ## 27 October B53/B54 acceptance — verification PASS; release HOLD
 
 Run 40551560501 SUCCESS; 7/7 genuine archive tests, 18/18 B7, 9/9 A9, 677/677 V2, 153/153 English and 55/55 Arabic legacy. Original EN 2/2 4K PNG and AR 3/3 4K PNG checks with pinned hashes PASS. Sanitized archive 12754992971. Source Health Audit dependency remains FAILED: missing requests in production main. B54 records 11 critical blockers. Full original-source-matched V1/V2 quality, live B45 fallback/translation, rights, independent Discord, seven genuine weekly days and release still HOLD. Main unchanged; canary not authorized.
