@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October B53/B54 acceptance — verification PASS; release HOLD
+
+Run 40551560501 SUCCESS; 7/7 genuine archive tests, 18/18 B7, 9/9 A9, 677/677 V2, 153/153 English and 55/55 Arabic legacy. Original EN 2/2 4K PNG and AR 3/3 4K PNG checks with pinned hashes PASS. Sanitized archive 12754992971. Source Health Audit dependency remains FAILED: missing requests in production main. B54 records 11 critical blockers. Full original-source-matched V1/V2 quality, live B45 fallback/translation, rights, independent Discord, seven genuine weekly days and release still HOLD. Main unchanged; canary not authorized.
+
+
 ## 27 October — B53/B54 original full English+Arabic edition archives and hard release HOLD
 
 New genuine production evidence: English Gazette **two 3840×2160 PNGs** from `main` run #40497262560, archive #12731017257, SHA `0f1353b8…` (the earlier English engine archive alone omitted these). Arabic later **three 3840×2160 PNGs** from run #40517778731, archive #12741710341, SHA `3ba4943e…`. English Gazette health is **degraded, llm_ok=false**; later Arabic translated **2/8** with fallback `http_403`. Production-app delivery claims are not independent Discord proof. Both visual original baselines are now recoverable, but **neither is a full V2 same-source same-slot pair**; no automatic parity admission or cutover. One isolated path-triggered read-only Action now verifies actual artifact hashes and dimensions, runs B52 UTC regressions and complete suites, and emits explicit B54 blocking reasons. No model calls, Discord, main edits or databases. Run pending. Report `B53_B54_GENUINE_EDITION_ACCEPTANCE_2026-10-27.md`.

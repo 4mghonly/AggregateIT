@@ -18,3 +18,8 @@ Production Source Health Audit #40480137867 failed because `main` workflow insta
 - Changed tests: `tests/test_b6_b7_shadow.py`, `tests/test_v2_a9_shadow_readiness.py`
 - Source tests scheduled for normal future no-post verification only; no workflow was dispatched.
 - Planning 60% and formal 6/8 gates unchanged.
+
+
+## B52 verified in combined CI
+
+B7 18/18 and A9 9/9, complete V2 677/677 PASS in Actions 40551560501. UTC-equivalent comparison correction verified; actual run source attestation and canary remain HOLD.

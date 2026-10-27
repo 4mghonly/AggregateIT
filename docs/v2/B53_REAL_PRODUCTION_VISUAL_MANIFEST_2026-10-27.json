@@ -1,0 +1,45 @@
+{
+  "schema": "aggregateit-v2-b53-visual-originals/1",
+  "production_main_sha": "ea52e14bc7fd2973058fd659f0ff2e8d617111dc",
+  "verified_by_run_id": 40551560501,
+  "english": {
+    "run_id": 40497262560,
+    "artifact_id": 12731017257,
+    "zip_sha256": "0f1353b89266a0ba3171abfe6823db5cdcc64c493a9477c6c23baf430803f1c1",
+    "page_sha256": [
+      "b024bf5768bf0470c8f60e31f388c15c839483055d27289ec52e72a5a0d80601",
+      "518756c1bdf3acb2e15c56dfeb6e69e7f62eb207a5763da99ce207ab3926fa22"
+    ],
+    "size": [
+      3840,
+      2160
+    ],
+    "llm_ok": false
+  },
+  "arabic": {
+    "run_id": 40517778731,
+    "artifact_id": 12741710341,
+    "zip_sha256": "3ba4943ebeeaab828f8285d727a1787d6178000f8d8377004b9edf7a3f1ff1bd",
+    "page_sha256": [
+      "4c17fe5fec701ca62dac0bd480a6f768d0f68dee8920e5d77b5f5d5eab49aa9f",
+      "aa35313c342748aeaa4af2c76adcd1e429dbe295112f13c502510532ccda3aa3",
+      "e4839603c1bacd3a7594fcf73bc0e9e4acad73b6d8b2504bbd088d1eb2db32a6"
+    ],
+    "size": [
+      3840,
+      2160
+    ],
+    "foreign_requested": 8,
+    "foreign_translated": 2,
+    "fallback_http_403": true
+  },
+  "same_source_same_slot_v1_v2_available": false,
+  "seven_genuine_days_verified": false,
+  "live_translation_semantic_quality_verified": false,
+  "independent_discord_receipt_verified": false,
+  "source_rights_verified": false,
+  "production_audit_dependency_healthy": false,
+  "critical_blockers": 11,
+  "release_status": "HOLD",
+  "canary_authorized": false
+}

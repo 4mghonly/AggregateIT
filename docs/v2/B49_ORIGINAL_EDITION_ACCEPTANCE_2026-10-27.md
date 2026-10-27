@@ -24,3 +24,8 @@ Initial isolated run [40486148010](https://github.com/4mghonly/AggregateIT/actio
 - **B49 full editorial acceptance HOLD:** original V1 English final edition not archived here; neither product has an independently verifiable same-source/slot original V1 and new V2 complete editorial/model/translation/render/client-delivery pair. Authentic app receipts and raw article facts must be captured in a future authorized no-post full shadow with explicit publisher rights and bounded model route before canary.
 
 No Discord posts, model-paid calls, DB changes, production deployments or main writes occurred in these V2 experiments.
+
+
+## Amendment: original Gazette pages were located
+
+English run 40497262560 archive 12731017257 has two authentic 4K original Gazette PNGs; later Arabic run 40517778731 archive 12741710341 has three 4K pages with translation only 2/8, fallback HTTP 403. These are not same-slot or source-byte-comparable with V2. B53/B54 verified both archive SHA256 and pages in run 40551560501. Full B49 HOLD.

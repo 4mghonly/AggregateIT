@@ -17,3 +17,8 @@ Hosted test pending. No canary.
 - **B45 acceptance: HOLD.** A structural pass on synthetic text does not prove real-publisher translation, semantic accuracy, number/name preservation at scale, or independent primary-to-fallback failover. The free router was inconsistent; OpenRouter itself cautions that free tiers are rate limited and not production-reliability guarantees. Stop after these three materially different experiments. A newly configured, authorized, working independent fallback and sustained evaluation on rights-cleared source samples are required.
 
 Production main and live credentials unchanged.
+
+
+## 27 October B54 final live translation gate
+
+Three free-model experiments are exhausted. In newer Arabic production run 40517778731 only 2/8 foreign stories translated and fallback remained HTTP 403. Actual independent provider failover and source-semantic translation cannot be accepted; do not repeat the same probes. Requires separately authorized working fallback and rights-cleared evaluation corpus. B45 HOLD.
