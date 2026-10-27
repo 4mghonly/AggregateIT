@@ -41,6 +41,24 @@ class ShadowReadinessTests(unittest.TestCase):
         self.assertEqual(result['status'], 'offline_comparison_only')
         self.assertFalse(result['delivery_authorized'])
 
+
+    def test_utc_equivalent_windows_remain_held_without_attestation(self):
+        a = run('english', 'a'*40); b = run('english', 'b'*40)
+        b['window_start'] = '2026-10-24T02:00:00Z'
+        b['window_end'] = '2026-10-24T08:00:00+00:00'
+        result = classify_shadow_pair(a, b)
+        self.assertEqual(result['reason'], 'unattested_run_metrics')
+        self.assertFalse(result['delivery_authorized'])
+
+    def test_utc_equivalent_windows_with_caller_attestation_still_do_not_authorize_delivery(self):
+        a = run('english', 'a'*40); b = run('english', 'b'*40)
+        b['window_start'] = '2026-10-24T02:00:00Z'
+        b['window_end'] = '2026-10-24T08:00:00+00:00'
+        report = classify_shadow_pair(a, b, v1_attested=True, v2_attested=True)
+        self.assertTrue(report['comparable'])
+        self.assertEqual(report['metrics_authentication'], 'caller_attested_not_independently_proven')
+        self.assertFalse(report['delivery_authorized'])
+
     def test_different_product_is_not_comparable(self):
         result = classify_shadow_pair(run('english', 'a'*40), run('arabic', 'b'*40),v1_attested=True,v2_attested=True)
         self.assertEqual(result['reason'], 'different_product_or_window')

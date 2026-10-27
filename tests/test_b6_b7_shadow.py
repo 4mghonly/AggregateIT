@@ -90,6 +90,24 @@ class ScorecardTests(unittest.TestCase):
         self.assertEqual(result["factual_accuracy"],"not_measured")
         self.assertFalse(result["delivery_authorized"])
 
+
+    def test_same_utc_instants_with_different_offsets_are_comparable(self):
+        v1 = run(); v2 = copy.deepcopy(v1)
+        v2["window_start"] = "2026-10-23T02:00:00Z"
+        v2["window_end"] = "2026-10-23T08:00:00+00:00"
+        report = compare_runs(v1, v2)
+        self.assertTrue(report["comparable"])
+        self.assertFalse(report["delivery_authorized"])
+        self.assertEqual(report["status"], "offline_comparison_only")
+
+    def test_same_clock_hours_with_different_offsets_are_not_same_window(self):
+        v1 = run(); v2 = copy.deepcopy(v1)
+        v2["window_start"] = "2026-10-23T06:00:00Z"
+        v2["window_end"] = "2026-10-23T12:00:00Z"
+        result = compare_runs(v1, v2)
+        self.assertFalse(result["comparable"])
+        self.assertEqual(result["reason"], "different_product_or_window")
+
     def test_changed_window_not_comparable(self):
         v1=run();v2=copy.deepcopy(v1)
         v2["window_end"]="2026-10-23T18:00:00+04:00"

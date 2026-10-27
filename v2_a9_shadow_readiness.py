@@ -5,7 +5,7 @@ comparison remains offline and cannot authorize release even when comparable.
 """
 from __future__ import annotations
 
-from v2_shadow_scorecard import compare_runs, validate_run
+from v2_shadow_scorecard import _window_identity, compare_runs, validate_run
 
 
 def _held(reason: str) -> dict:
@@ -34,8 +34,7 @@ def classify_shadow_pair(v1: dict | None, v2: dict | None, *,
     if v2 is None:
         return _held('v2_candidate_missing')
     a, b = validate_run(v1), validate_run(v2)
-    if (a['product'], a['window_start'], a['window_end']) != (
-            b['product'], b['window_start'], b['window_end']):
+    if _window_identity(a) != _window_identity(b):
         return _held('different_product_or_window')
     if a['code_revision'] == b['code_revision']:
         return _held('revisions_not_distinct')

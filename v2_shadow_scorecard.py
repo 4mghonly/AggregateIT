@@ -5,6 +5,8 @@ No quality metric may claim independent-source trust or editorial truthfulness.
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from v2_evidence import _time
 
 METRIC_KEYS = frozenset({
@@ -58,10 +60,18 @@ def validate_run(row: dict) -> dict:
     return row
 
 
+def _window_identity(row: dict) -> tuple:
+    """Compare real UTC instants, not different spellings of the same slot."""
+    return (
+        row["product"],
+        datetime.fromisoformat(_time(row["window_start"])).astimezone(timezone.utc),
+        datetime.fromisoformat(_time(row["window_end"])).astimezone(timezone.utc),
+    )
+
+
 def compare_runs(v1: dict, v2: dict) -> dict:
     a, b = validate_run(v1), validate_run(v2)
-    if (a["product"], a["window_start"], a["window_end"]) != (
-            b["product"], b["window_start"], b["window_end"]):
+    if _window_identity(a) != _window_identity(b):
         return {"comparable": False, "reason": "different_product_or_window"}
     changes = {}
     for key in sorted(METRIC_KEYS):

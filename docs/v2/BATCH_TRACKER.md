@@ -1,5 +1,9 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — B52 timezone-equivalent same-slot V1/V2 metadata (isolated; hosted tests pending)
+
+Fixed UTC+04-vs-UTC false mismatch in B7 scorecard and A9 readiness via validated UTC instant comparison; added four regressions. Original run metrics remain unauthenticated without operator attestation; B45 independent fallback and semantic-quality verification, B49 original same-slot full editions, and B50 production canary still HOLD. Production audit missing `requests` on `main` was independently confirmed, but already corrected in V2 branch `audit.yml`; no main change. No CI dispatch, paid call, source fetch or Discord. See `B52_WINDOW_EQUIVALENCE_2026-10-27.md`. Full-suite rerun pending.
+
 ## 27 October — B45/B49 original evidence closeout: live acceptance HELD; stop repeated probes
 
 [Runs B45 #40485098814](https://github.com/4mghonly/AggregateIT/actions/runs/40485098814) / [#40485758097](https://github.com/4mghonly/AggregateIT/actions/runs/40485758097) / [#40486907517](https://github.com/4mghonly/AggregateIT/actions/runs/40486907517) proved **free route operational only intermittently** (first EN fail/SO pass, second EN pass/SO fail, named pinned free third BOTH fail), with **zero paid calls**. Actual production Arabic at 08:08 UTC: 3/8 foreign translated, fallback HTTP 403. Three materially different approaches attempted: stop repeated inference loops and HOLD B45 until authorized working independent provider/rights-cleared quality dataset.
