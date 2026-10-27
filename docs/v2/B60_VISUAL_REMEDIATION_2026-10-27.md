@@ -1,0 +1,3 @@
+# B60 — Genuine original visual defects and technical layout lint
+
+27 October 2026. Preserve all 5 previously observed defects from B57: English lead-title mismatch, English clipped chart labels, Arabic UAE-priority empty content, Arabic compact text and Arabic repeated sections. `v2_b60_original_edition_qa.py` adds five-page technical bounding-box clipping / font-size checks for 3840x2160 output; those checks cannot clear editorial coherence, geographic gaps or actual device readability. No source-synchronized V2 counterpart to original V1 edition is available. True image content and user acceptance remain **HOLD**, no false auto-pass.

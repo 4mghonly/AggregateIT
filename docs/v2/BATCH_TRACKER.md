@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — B59–B62 consolidated no-post execution
+
+B59 adds source-authored negation/proposal/quantity semantic regression checks for English/Somali-to-Arabic, **not real publisher semantic verification**. B60 preserves 5 documented original EN/AR visual issues and introduces bounded 4K page text-geometry checks, without falsely clearing the real editorial defects. B61 checks genuine distinct UAE-local seven-day source lineage and refuses reuse/fabricated history; original weekly acceptance still 1/7 available, none loaded into the new offline checker. B62 joins existing disabled B58 Gemini/GPT-OSS selection to unverified gates and hard-HOLD pre-canary. New paid calls 0, model selections untouched, `main` and Discord untouched; legal review excluded from technical gate. Reports B59–B62 and hosted integrated CI.
+
+
 ## 27 October — B55–B58 model testing closed with $0.50 cap respected, release HOLD
 
 Real isolated OpenRouter benchmarking B55: 6 requests, B56: 4, B57: 2. Total provider-reported $0.0024507; conservative cumulative reservation $0.101496 of approved $0.50. Gemini 3.1 Flash Lite and GPT OSS 120B each structurally passed synthetic EN/Somali→Arabic. B57 actual Arabic controller selected real GPT OSS on **simulated** primary failure, not actual primary outage; provider fallback path measured. Four PNG archived original V1 visual QA gaps remain plus B54 release blockers. B58 stages Gemini primary/GPT OSS fallback **disabled in V2 only**, no production secrets/model changes, and hard release HOLD. Full source-synchronized V1/V2 editions, publisher rights, full 7-day week, authentic translation and independent Discord verification still missing. Reports B55–B58.

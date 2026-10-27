@@ -1,0 +1,3 @@
+# B61 — Seven genuine day lineage
+
+27 October 2026. `v2_b61_week_lineage.py` detects duplicate UAE-local civil days including equivalent UTC times, rejects unbounded/unauthenticated source labels, rejects recycled edition digests and identifies missing days for English and Arabic over seven consecutive local dates. Even seven syntactically distinct held records do not prove independent off-host source authenticity, delivery or full weekly editorial quality. In this batch no seven-day real-source archive is available; 0/7 supplied to the checker rather than fabricating 6 missing days. B47's single historical observation remains 1/7; full weekly acceptance **HOLD**.
