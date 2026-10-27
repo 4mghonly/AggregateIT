@@ -17,7 +17,7 @@ The new `v2_b36_same_snapshot_scorecard.py` requires identical source rosters, r
 - Test-driven RED: forged live-claim test reproduced the prior measured-status defect.
 - Test-driven GREEN: 4 B27 evidence-integrity tests passed locally.
 - B36 snapshot scorecard: 7 additional focused tests passed locally using copies of its direct helper contracts.
-- GitHub hosted full installed regression: **pending at first commit**; use the isolated `v2-b36-offline-evidence.yml` workflow run for authoritative results.
+- GitHub hosted verification: [run 40451743278](https://github.com/4mghonly/AggregateIT/actions/runs/40451743278) completed SUCCESS. Focused **11/11**, full V2 **527/527**, legacy English **153/153**, legacy Arabic **55/55**. Trigger commit `ead4ef1ced6c1eeab0f6de72217abd00a75a1a1e`.
 
 ## Outstanding gates
 

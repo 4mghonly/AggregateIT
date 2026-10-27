@@ -1,0 +1,54 @@
+name: AggregateIT V2 B37 live-headline mobile QA (no post)
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b37-headline-mobile-qa.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b37-headline-qa
+  cancel-in-progress: true
+
+jobs:
+  live-source-private-chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Install isolated Python requirements
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi
+      - name: Install headless browser
+        run: |
+          npm install --no-save --package-lock=false playwright@1.64.0
+          npx playwright install --with-deps chromium
+      - name: Focused source-only headline renderer tests
+        run: python -B -m unittest discover -s tests -p test_v2_b37_mobile_headlines.py -v
+      - name: Full V2 regression
+        run: python -B -m unittest discover -s tests
+      - name: Genuine public RSS headline capture and private Chromium checks
+        run: node v2_b37_mobile_browser_qa.mjs
+      - name: Publish sanitized QA measurements only
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: v2-b37-mobile-metadata-only
+          path: reports/v2-b37/mobile-qa-metadata.json
+          retention-days: 2
+          if-no-files-found: warn

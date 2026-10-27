@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — B37 genuine RSS headline mobile QA, isolated run pending
+
+Prepared BBC World English + Al Jazeera Arabic single-fetch source-watch preview, with no-post Chromium QA at 320/390/768/1320 px. 5/5 focused renderer tests passed locally. Only sanitized QA counts and source hashes will be retained; source bytes, actual headline text and screenshot files remain ephemeral. This is not full editorial/page or Discord-device acceptance. B36 GitHub run 40451743278 passed 11/11 focused, 527/527 V2, 153/153 legacy English, 55/55 Arabic. Operational evidence bar **6/8**; genuine whole-system shadow and cutover HOLD. See `B37_GENUINE_RSS_HEADLINE_MOBILE_2026-10-27.md`.
+
+
 ## 27 October — B36 acceptance evidence integrity (offline; hosted verification pending)
 
 B36 prevents unverified caller-controlled live flags from promoting B27 to measured acceptance. Introduces an exact-source-byte, same-window offline V1/V2 metric scorecard that refuses mismatched capture bytes, source rosters, times and revisions. TDD RED reproduced the bug; 11/11 focused tests passed locally. Full hosted regression runs only through the isolated B36 workflow. No live source call, Discord delivery, release, or production changes. B35 France 24 403 unresolved. Operational evidence bar stays 6/8 (75%); genuine full shadow and controlled canary HOLD. See `B36_OFFLINE_EVIDENCE_ACCEPTANCE_2026-10-27.md`.
