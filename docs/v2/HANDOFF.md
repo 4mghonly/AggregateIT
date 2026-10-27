@@ -1,5 +1,16 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B47–B49 combined no-post closeout (engineering passes, release gate still HOLD)
+
+- **B47:** Real single-slot BBC (3 admitted) / Al Jazeera Arabic (1 admitted) source-backed held English (2 native 4K PNG) and Arabic (3 native 4K PNG) daily editions, plus weekly EN/AR RTL HTML and source-bound PDFs. Two distinct non-sendable Discord daily/weekly packages per language; weekly **1/7 actual days** only. PDF focused and full hosted run [40478842632](https://github.com/4mghonly/AggregateIT/actions/runs/40478842632) **651/651** V2. No finished weekly analytics or publisher-rights assurance.
+- **B48:** [Run 40477785524](https://github.com/4mghonly/AggregateIT/actions/runs/40477785524) **640/640** V2. Local durable send-attempt ambiguity survives reopen, blind retry denied. Production source/cron configuration read-only; Somalia remains below technical source floor. Free-tier D1 headroom not available: zero actual writes, no backup/deletion.
+- **B49:** Shared original public RSS byte buffers joined pinned original V1/V2 parsers, headline previews and held V2 B3/B4/native four-product generation. Genuine end-to-end legacy editorial/model/render/Discord receipts **not available**, so full B7 quality comparison **HOLD**.
+- **Combined final:** [Actions #40479327797](https://github.com/4mghonly/AggregateIT/actions/runs/40479327797) **SUCCESS**: **8/8 focused**, **653/653 full V2**, **153/153 English legacy**, **55/55 Arabic legacy**; parser and headline parity true, four V2 held products true, local B48 **8 active operational alerts**, `can_release=false`. Sanitized artifact `12722076127`.
+- No changes to `main`, schedules, Discord, secrets, deployments or production databases. No paid LLM inference. B45 live English/Somali→Arabic semantics and real fallback connectivity, complete 7-day products, B7 genuine same-slot delivery and B8 canary remain HOLD; production cutover not authorized. Formal evidence fraction **6/8** and prior rough readiness estimate **60%** remain unchanged.
+
+Reports: `B47_FOUR_PRODUCTS_2026-10-27.md`, `B48_OPERATIONS_2026-10-27.md`, `B49_SAME_SLOT_PARTIAL_SHADOW_2026-10-27.md`.
+
+
 ## 27 October — B47–B49 final combined verification planned
 
 Final same-public-RSS-byte runner reuses one capture per publisher across B47 genuine bilingual daily PNG + weekly HTML/PDF, B48 read-only production alert/receipt rehearsal and B49 actual V1/V2 parser/headline comparison. This avoids accidentally comparing different RSS responses as the same input. Unchanged B49 full-system V1-equivalent model/editorial/delivery evidence and B50 cutover remain **HOLD**. Single isolated CI run with full suite; no model, Discord, main or database writes. See `B49_SAME_SLOT_PARTIAL_SHADOW_2026-10-27.md`.

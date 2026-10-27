@@ -8,4 +8,12 @@ B49's full-system acceptance MUST remain **HOLD** until authentic V1 final edito
 
 No main writes, Discord sends, paid inference, source raw XML storage, database provisioning, deployment or canary. Single-run GitHub Actions path trigger; no recurring CI.
 
-Hosted acceptance: **PENDING**.
+Hosted **partial same-source shadow PASS**; true end-to-end B7 **HOLD**.
+
+## Hosted B49 exact-source findings and blockers
+
+- [Run 40478257774](https://github.com/4mghonly/AggregateIT/actions/runs/40478257774) **SUCCESS**, **646/646 V2**, **153/153 EN**, **55/55 AR**: identical genuine BBC World and Al Jazeera Arabic RSS bytes used by pinned V1/V2 parser and headline preview; both parser and headline identities matched, and the same source snapshot was joined to V2 source-backed held four-product previews. **No V1 full original newsroom/model/render/delivery same-slot proof**; status `HOLD_NO_FULL_V1_EDITORIAL_BASELINE`, `can_release=false`.
+- [Final combined run 40479327797](https://github.com/4mghonly/AggregateIT/actions/runs/40479327797) **SUCCESS**, **653/653 V2**, **153/153 EN**, **55/55 AR**, artifact `12722076127` metadata only (3 days): `parser_parity=true`, `headline_parity=true`, `four_v2_products=true`, `joined_b47_b48_b49=true`, **8 B48 operational alerts**, `v1_v2_full_editorial_compared=false`, `can_release=false`.
+
+**B49 status: exact-RSS-byte partial parser/source comparison PASS; full B7 same-window product-quality/cost/delivery acceptance HOLD.** Absent evidence includes authentic V1 full editorial/LLM/translation/graphic and delivery receipts, independent model quality/latency/cost evidence, rights/factual checks, complete seven-day source history and real client/rollback. Do not infer a product-quality percentage or authorization from parser agreement. Production `main` stays unchanged at `ea52e14bc7fd2973058fd659f0ff2e8d617111dc` (including its previously authorized source-audit automation).
+
