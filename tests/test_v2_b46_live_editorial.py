@@ -55,13 +55,21 @@ class B46LiveEditorialTests(unittest.TestCase):
     def test_identical_url_not_double_counted(self):
         r=compile_captured_articles([en(),en()],as_of=NOW,slot_id=SLOT)
         self.assertEqual(r['admitted_articles'],1)
-        self.assertEqual(r['held_reasons']['repeated_article_url'],1)
+        self.assertEqual(r['held_reasons']['repeated_canonical_article_url'],1)
+    def test_tracking_query_alias_does_not_double_count(self):
+        one=en();two=en()
+        two['article_url']=one['article_url']+'?utm_source=mail'
+        r=compile_captured_articles([one,two],as_of=NOW,slot_id=SLOT)
+        self.assertEqual(r['admitted_articles'],1)
+        self.assertEqual(r['held_reasons']['repeated_canonical_article_url'],1)
+
     def test_missing_prior_baseline_stays_unknown_not_new(self):
         r=compile_captured_articles([en()],as_of=NOW,slot_id=SLOT)
         s=r['products']['english']['newsroom']['stories'][0]
         self.assertEqual(s['change'],'unknown_no_baseline')
         r2=compile_captured_articles([en()],as_of=NOW,slot_id=SLOT,previous_versions={})
-        self.assertEqual(r2['products']['english']['newsroom']['stories'][0]['change'],'new')
+        self.assertEqual(r2['products']['english']['newsroom']['stories'][0]['change'],'unknown_no_baseline')
+        self.assertTrue(r2['unattested_previous_versions_ignored'])
         self.assertFalse(r2['prior_baseline_authenticated'])
     def test_stale_article_is_withheld(self):
         item=en();item['published_at']='2026-10-20T07:00:00+00:00'

@@ -48,3 +48,9 @@ This establishes a genuine article→excerpt→publisher assertion→per-article
 **Next B46 engineering stages:** (2) independently reviewed event identity and genuine previous-slot baseline, (3) source-backed analysis/Naysayer abstention or audited generation, (4) real market source provenance and TradingView scanner current compatibility, (5) broader geographic and language admission/translation and (6) real source-grounded daily/weekly product rendering, plus B49 shadow acceptance. Do not mark B46 overall complete.
 
 Production estimated readiness **60%** and formal evidence **6/8 (75%)** unchanged. No production/main modification, model call, webhook/Discord send, telemetry provisioning or paid API.
+
+## B46 stage-2 input integrity and delta control (offline)
+
+The first genuine-content result exposed a separate downstream risk: `plan_edition(previous_versions={})` can label events `new` solely because a caller provided an empty prior map. Until a genuine prior-slot journal with an independently retained authenticated receipt is integrated, B46 now **ignores arbitrary supplied previous_versions** and forces `unknown_no_baseline`, retaining an explicit audit flag. Also, repeated article links with UTM tracking differences are deduplicated by the existing canonical URL algorithm before constructing second observations. No publisher or model requests are needed to prove these guards; a separate path-triggered offline-only workflow runs focused and final regression tests.
+
+Stage-2 hosted verification: **PENDING**.

@@ -12,7 +12,7 @@ from datetime import datetime,timezone
 from hashlib import sha256
 from urllib.parse import urlsplit
 from v2_article_body_gate import extract_body,article_evidence
-from v2_evidence import _time,make_article,make_excerpt,make_claim,make_event
+from v2_evidence import _time,make_article,make_excerpt,make_claim,make_event,canonical_article_url
 from v2_evidence_ledger import EvidenceLedger
 from v2_editorial import plan_edition
 from v2_product_compiler import compile_daily
@@ -56,9 +56,11 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
     for item in captures:
         config=_verify_source_candidate(item)
         url=item['article_url']
-        if url in seen:
-            held['repeated_article_url']+=1;continue
-        seen.add(url)
+        # Different tracking links must not masquerade as independent stories.
+        canonical=canonical_article_url(url)
+        if canonical in seen:
+            held['repeated_canonical_article_url']+=1;continue
+        seen.add(canonical)
         pub=_stamp(item['published_at'])
         if not -300<=(now-pub).total_seconds()<=48*3600:
             held['stale_or_future_article']+=1;continue
@@ -96,7 +98,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
     products={}
     for product in ('english','arabic'):
         plan=plan_edition(ledger=ledger,annotations=annotations[product],product=product,
-                 slot_id=slot_id,as_of=as_of,previous_versions=previous_versions,
+                 slot_id=slot_id,as_of=as_of,previous_versions=None,
                  max_items=6)
         critic=build_report([],ledger=ledger,as_of=as_of,verified_families={},
                     verified_languages={},product=product,cadence='daily',slot_id=slot_id)
@@ -108,6 +110,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             'admitted_articles':len(accepted),'receipts':accepted,'held_reasons':dict(held),
             'ledger_counters':ledger.counters(),'products':products,
             'previous_versions_present':previous_versions is not None,
+            'unattested_previous_versions_ignored':previous_versions is not None,
             'prior_baseline_authenticated':False,
             'headline_semantic_alignment_verified':False,
             'publisher_independence_verified':False,

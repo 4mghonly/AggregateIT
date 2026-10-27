@@ -1,0 +1,39 @@
+name: AggregateIT V2 B46 delta-integrity closure (offline only)
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b46-baseline-offline.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-and-delta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      ARABIC_LLM_API_KEY: ''
+      ARABIC_LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install isolated tests
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
+      - name: Focused stage-2 integrity tests
+        run: python -B -m unittest discover -s tests -p 'test_v2_b46_*.py' -v
+      - name: V2 final regression
+        run: python -B -m unittest discover -s tests
+      - name: Legacy English regression
+        run: python -B tests.py
+      - name: Legacy Arabic regression
+        run: python -B -m unittest arabic_newsletter.test_arabic
