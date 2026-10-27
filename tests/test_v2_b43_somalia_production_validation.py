@@ -68,4 +68,39 @@ class Tests(unittest.TestCase):
     def test_refuse_prod_enablement_and_insecure_url(self):
         with self.assertRaises(ValueError): validate_candidate({**_CANDIDATES[1],"enabled":True})
         with self.assertRaises(ValueError): validate_candidate({**_CANDIDATES[1],"feed":"http://example.org/feed/"})
+    def test_real_translation_fallback_controlled_primary_failure(self):
+        import arabic_live_v2 as live
+        from unittest.mock import patch
+        item={"language":"en","title":"Somalia officials met on 27 October",
+              "summary":"The meeting involved 12 delegates.","source":"fixture"}
+        response={"items":[{"index":0,"title_ar":"اجتمع مسؤولون صوماليون يوم 27 أكتوبر",
+                          "summary_ar":"ضم الاجتماع 12 مندوباً."}]}
+        calls=[]
+        def call(route,*args,**kwargs):
+            calls.append(route["model"])
+            if route["model"]=="fixture-primary":
+                raise RuntimeError("controlled_primary_failure")
+            return response
+        def lookup(prefix):
+            return {"model":"fixture-primary" if prefix=="ARABIC_LLM_" else "fixture-fallback"}
+        with (patch.object(live,"_route",side_effect=lookup),
+              patch.object(live,"_route_call",side_effect=call)):
+            translated,health,selected=live.translate_items_with_failover([item])
+        self.assertEqual(calls,["fixture-primary","fixture-fallback"])
+        self.assertEqual(selected,"fallback")
+        self.assertEqual(len(translated),1)
+        self.assertEqual(translated[0]["title_ar"],response["items"][0]["title_ar"])
+        self.assertFalse(health[0]["ok"])
+        self.assertTrue(health[-1]["ok"])
+
+    def test_both_translation_routes_fail_closed_without_arabic_invention(self):
+        import arabic_live_v2 as live
+        from unittest.mock import patch
+        item={"language":"so","title":"Wasiirka arrimaha dibadda",
+              "summary":"Warbixin ku saabsan gobolka.","source":"fixture"}
+        with (patch.object(live,"_route",side_effect=lambda prefix: {"model":prefix}),
+              patch.object(live,"_route_call",side_effect=RuntimeError("no_model_result"))):
+            with self.assertRaisesRegex(RuntimeError,"Both translation routes failed"):
+                live.translate_items_with_failover([item])
+
 if __name__=="__main__":unittest.main()

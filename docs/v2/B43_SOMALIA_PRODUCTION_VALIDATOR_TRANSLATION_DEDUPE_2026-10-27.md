@@ -26,4 +26,14 @@ Actual collected article headlines are compared using production _dedupe_key plu
 - Previous B42 run validated candidate technical RSS feeds but did not execute the actual production validator. This run provides a separate qualification pass.
 - B41 production Somalia 2-source minimum remains a HOLD until validated replacements are actually integrated, re-audited and translated.
 
-**Hosted B43 run status: PENDING.**
+## Initial hosted live validation — PASS
+
+[GitHub Actions #40465567248](https://github.com/4mghonly/AggregateIT/actions/runs/40465567248): **8/8 focused tests passed**. The unchanged actual production validator `arabic_source_audit.probe` and RSS collector succeeded on **4/4 candidates** (10 entries each). Recent 72h collector items: Shabelle **10**, Puntland Post **10**, Somali Dispatch **4**, Goobjoog English **10**. Language classifier `langdetect` classified Somali/Somali/English/English, consistent with declarations but not publisher-authenticated.
+
+Among **34 recent stories**, the existing deduplication key plus 0.94 near-title threshold found **0 same-link or near-identical duplicate pairs**. Semantically equivalent paraphrases and cross-language duplicate reporting are not detectable by this test.
+
+The actual production translator normalizer passed controlled Arabic-output/number-preservation/rejection tests. No model call was made. Two new focused tests also exercise the actual production primary-to-fallback control flow under simulated primary failure, and fail-closed behavior when both routes fail. This does **not** validate live primary/fallback connectivity or real English/Somali→Arabic semantic translation quality.
+
+Initial sanitized measurement artifact `12716750335` (3-day retention). New source registration/enablement remains disabled, production unchanged.
+
+**Final full regression: pending corrected hosted run.**
