@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B46 phase 1 publisher article → evidence → editorial integration
+
+B46 stage 1 reuses real V2 B3/B4 source→excerpt→attributed claim→per-article event→EN/AR daily compiler. A bounded pinned-HTTPS runner checks authentic BBC and Al Jazeera article containers and publishes hashes/counts only, holding headline/region ambiguous or missing text. Cross-language semantic grouping, actual provider models, TradingView verified values and Naysayer substantive analysis remain separately unproven. B45 live English/Somali→Arabic quality/fallback tests remain open. No prod/main/Discord/DB changes. Report: `B46_REAL_ARTICLE_EDITORIAL_2026-10-27.md`. Hosted CI pending.
+
+
 ## 27 October — B44/B45 hosted verified; live translation quality HOLD
 
 [Actions #40468118638](https://github.com/4mghonly/AggregateIT/actions/runs/40468118638) **SUCCESS**, 11/11 focused, V2 **589/589**, English V1 **153/153**, Arabic V1 **55/55**. Four Somalia candidates staged disabled in V2 unified registry; latest read-only collector fetched 10/10/4/10 fresh items (Shabelle/Puntland/Somali Dispatch/Goobjoog English). Current production audit still Somalia 1/2; four staged families are a hypothetical improvement, not activated or owner-verified independent. B45 prepared eight genuine source-linked foreign-language items but no model call/translation; source-bound Arabic QA safety assertions passed, live quality **HOLD**. Receipt artifact 12717417143. Production release readiness 60% estimate and evidence gates 6/8 remain unchanged. See `B44_B45_STAGE_TRANSLATION_2026-10-27.md`.
