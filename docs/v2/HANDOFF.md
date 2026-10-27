@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B40 stage-separated live/parser and synthetic native/packet shadow
+
+B40 performs real-source same-byte V1/V2 parser comparison (B38) and separately drives the existing B3/B4 native English (2) and Arabic (3) 4K renderers and Discord packaging from deterministic **synthetic** evidence. The tracks do not share an article corpus; no complete V1 editorial/model/translation/native/delivery delta is justified. Stage audit rejects forged sendable manifests, wrong destinations, checksum mismatches and self-reported promotion. Hosted no-post workflow pending. **Full-shadow HOLD; overall evidence 6/8 (75%)**. See `B40_STAGE_SHADOW_2026-10-27.md`.
+
+
 ## 27 October — B38-B39 live exact-buffer replay and durable no-send rehearsal PASSED
 
 Hosted [run 40455040595](https://github.com/4mghonly/AggregateIT/actions/runs/40455040595) **SUCCESS**, focused **10/10**, V2 regression **542/542**, English **153/153**, Arabic **55/55**. The single-capture actual V1 and V2 parser pair on BBC World / Al Jazeera yielded `shadow_status=COMPARED`, `parity_all=true`; the persisted ambiguous receipt survived reopening and blind retry was refused. Sanitized metadata artifact ID `12711188931`, retained for 2 days. Production `main`, Discord, workflows/schedules, secrets, database and LLM keys unchanged; no Discord send. **Operational evidence stays 6/8 (75%)**, as this does not compare full newsroom output or prove live canary/rollback. Report: `B38_B39_LIVE_REPLAY_DURABLE_NOPOST_2026-10-27.md`.
