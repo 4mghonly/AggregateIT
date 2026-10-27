@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — B57 actual fallback controller and full edition visual quality check
+
+Gemini 3.1 Flash Lite and OpenAI gpt-oss-120b both passed separate paid synthetic EN/SO translation benchmarks; B55+B56 total reported $0.0023537 and conservative reserved $0.074446, within one $0.50 approval. B57 exercises unmodified Arabic translation controller under **injected primary failure** with real GPT-OSS fallback (2 calls maximum), accounting for preceding reserve. No production credential or code changes. Separately visually inspected authentic EN (2) + AR (3) original PNGs: English lead title/editorial mismatch and chart labels clipping; Arabic UAE empty priority panel, dense content and repeated topic panels. These are release QA blockers, not V2 parity. B54 canary HOLD. `B57_FALLBACK_AND_VISUAL_2026-10-27.md`.
+
+
 ## 27 October — Paid route B55 and B56 follow-up, single shared $0.50 approval
 
 B55 [run 40557761674](https://github.com/4mghonly/AggregateIT/actions/runs/40557761674) PASS: 682/682 V2, 153 EN and 55 AR; 6 paid model calls at $0.0013859 provider-reported, $0.0323148 conservative reserved. Gemini 3.1 Flash Lite passed both synthetic language structural checks; Qwen3.5 Flash and DeepSeek V4.1 Flash HOLD_ValueError. B56 now tests different gpt-oss-120b and Qwen3.8 Flash models, counting B55 reservation toward the SAME $0.50 cap. No real source text, production, secrets, Discord or canary. Reports B55_CAPPED_MODEL_ACCEPTANCE_2026-10-27.md and B56_SECOND_PROVIDER_2026-10-27.md.
