@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — B45 bounded live FREE-route probe started
+
+A one-shot path-triggered isolated V2 workflow tests original synthetic English and Somali headlines with actual production Arabic normalizer against configured FREE-ONLY OpenRouter routes. Exactly 2 primary and at most 1 free fallback calls, up to 400 tokens per call; paid GLM/nonfree configured routes skipped. No publisher texts, paid API, production changes or Discord. Real model connectivity ≠ factual translation quality or actual paid fallback resilience. Hosted evidence pending. Report: `B45_FREE_LIVE_PROBE_2026-10-27.md`.
+
+
 ## 27 October — B47–B49 combined no-post closeout (engineering passes, release gate still HOLD)
 
 - **B47:** Real single-slot BBC (3 admitted) / Al Jazeera Arabic (1 admitted) source-backed held English (2 native 4K PNG) and Arabic (3 native 4K PNG) daily editions, plus weekly EN/AR RTL HTML and source-bound PDFs. Two distinct non-sendable Discord daily/weekly packages per language; weekly **1/7 actual days** only. PDF focused and full hosted run [40478842632](https://github.com/4mghonly/AggregateIT/actions/runs/40478842632) **651/651** V2. No finished weekly analytics or publisher-rights assurance.

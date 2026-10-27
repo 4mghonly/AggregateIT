@@ -1,0 +1,41 @@
+name: AggregateIT V2 B45 FREE-only live provider translation diagnostic
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths: ['.github/workflows/v2-b45-free-live-probe.yml']
+permissions:
+  contents: read
+jobs:
+  free-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      ARABIC_LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      ARABIC_LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+      ARABIC_LLM_MODEL: ${{ secrets.LLM_MODEL }}
+      ARABIC_LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
+      ARABIC_LLM_FALLBACK_BASE_URL: ${{ secrets.LLM_FALLBACK_BASE_URL }}
+      ARABIC_LLM_FALLBACK_MODEL: ${{ secrets.LLM_FALLBACK_MODEL }}
+    steps:
+      - uses: actions/checkout@v5
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v6
+        with: {python-version: '3.12'}
+      - name: Install isolated runtime
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi
+      - name: Focused no-network free route gating and fixtures
+        run: python -B -m unittest discover -s tests -p test_v2_b45_free_live_models.py -v
+      - name: At most 3 FREE requests, no publisher data or Discord
+        run: python -B v2_b45_free_live_models.py --output reports/b45-free/diagnostic.json
+      - name: Archive sanitized route status only
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: aggregateit-v2-b45-free-route-diagnostic
+          path: reports/b45-free/diagnostic.json
+          retention-days: 3
+          if-no-files-found: warn
