@@ -17,6 +17,7 @@ from v2_evidence_ledger import EvidenceLedger
 from v2_editorial import plan_edition
 from v2_product_compiler import compile_daily
 from v2_naysayer import build_report
+from v2_b46_delta_identity import versions_from_signed_journal,review_only_cross_language_pairs
 
 ALLOWED={
     "english":{"source_id":"en-001","hosts":frozenset({"www.bbc.com","www.bbc.co.uk"}),"language":"en"},
@@ -44,12 +45,13 @@ def _verify_source_candidate(item):
     return allowed
 
 def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
-                              previous_versions:dict|None=None)->dict:
+                              previous_versions:dict|None=None, prior_snapshot:dict|None=None)->dict:
     now=_stamp(as_of);_stamp(slot_id)
     if not isinstance(captures,list) or len(captures)>20:
         raise ValueError('invalid_article_capture_batch')
     if previous_versions is not None and not isinstance(previous_versions,dict):
         raise ValueError('invalid_previous_versions')
+    operator_prior=versions_from_signed_journal(prior_snapshot,as_of=as_of) if prior_snapshot is not None else None
     ledger=EvidenceLedger(max_observations=25)
     annotations={'english':[],'arabic':[]}
     accepted=[];held=Counter();seen=set()
@@ -98,7 +100,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
     products={}
     for product in ('english','arabic'):
         plan=plan_edition(ledger=ledger,annotations=annotations[product],product=product,
-                 slot_id=slot_id,as_of=as_of,previous_versions=None,
+                 slot_id=slot_id,as_of=as_of,previous_versions=operator_prior['versions'] if operator_prior is not None else None,
                  max_items=6)
         critic=build_report([],ledger=ledger,as_of=as_of,verified_families={},
                     verified_languages={},product=product,cadence='daily',slot_id=slot_id)
@@ -106,12 +108,17 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
         products[product]={'story_count':len(daily['stories']),'held_reasons':plan['held_reasons'],
             'represented_regions':plan['represented_regions'],
             'newsroom':daily,'critique':critic,'no_publication_authority':True}
+    cross_language=review_only_cross_language_pairs(products)
     return {'schema':'aggregateit-v2-b46-article-editorial/1','captured_article_count':len(captures),
             'admitted_articles':len(accepted),'receipts':accepted,'held_reasons':dict(held),
             'ledger_counters':ledger.counters(),'products':products,
             'previous_versions_present':previous_versions is not None,
             'unattested_previous_versions_ignored':previous_versions is not None,
-            'prior_baseline_authenticated':False,
+            'prior_baseline_authenticated':operator_prior is not None,
+            'operator_baseline_hmac_verified':operator_prior is not None,
+            'prior_baseline_off_host_retention_verified':False,
+            'baseline_anchor_sha256':operator_prior['prior_anchor_sha256'] if operator_prior else None,
+            'cross_language_review':cross_language,
             'headline_semantic_alignment_verified':False,
             'publisher_independence_verified':False,
             'source_story_factual_accuracy_verified':False,
@@ -137,5 +144,9 @@ def metrics_only(result):
                 'market_status':r['newsroom']['market_data_status'],
                 'naysayer_status':r['newsroom']['naysayer_status']}
                 for product,r in result['products'].items()},
+            'operator_baseline_hmac_verified':result['operator_baseline_hmac_verified'],
+            'prior_baseline_off_host_retention_verified':False,
+            'cross_language_review_candidate_count':result['cross_language_review']['candidate_count'],
+            'cross_language_automatic_merges':0,
             'real_model_translation_pending':True,
             'model_called':False,'discord_sent':False,'can_release':False}

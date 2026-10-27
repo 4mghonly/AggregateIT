@@ -1,0 +1,43 @@
+name: AggregateIT V2 B46 signed delta + bilingual review (no post)
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b46-delta-review.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b46-delta-review
+  cancel-in-progress: true
+
+jobs:
+  signed-prior-and-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      ARABIC_LLM_API_KEY: ''
+      ARABIC_LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install project test dependencies
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
+      - name: Stage 3 focused delta and cross-language identity tests
+        run: python -B -m unittest discover -s tests -p 'test_v2_b46_*.py' -v
+      - name: Final V2 regression
+        run: python -B -m unittest discover -s tests
+      - name: Legacy English regression
+        run: python -B tests.py
+      - name: Legacy Arabic regression
+        run: python -B -m unittest arabic_newsletter.test_arabic

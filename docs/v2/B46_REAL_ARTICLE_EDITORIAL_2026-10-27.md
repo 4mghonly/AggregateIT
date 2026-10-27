@@ -67,3 +67,7 @@ The first B46 stage-2 [Actions #40472537227](https://github.com/4mghonly/Aggrega
 
 **Open B46 scope:** independent same-event multilingual identity + prior-briefing authenticated change tracking, source-grounded candidate Naysayer/analysis, live market observation/TradingView compatibility, geographic completeness, and genuine final daily/weekly renders. **B45 live Somali/English→Arabic semantic translation, provider connectivity and fallback remain HOLD**. Production `main`, schedules and Discord unchanged. Evidence milestones 6/8, planning readiness estimate 60% unchanged.
 
+
+## B46 stage 3 — Operator-signed prior-event comparison and multilingual candidate queue
+
+Uses `EvidenceJournal.replay` to reconstruct the actual earlier B3 graph and verifies an HMAC checkpoint with `v2_evidence_anchor.verify_anchor`. Only a digest-verified, operator-signed journal with a bounded prior issue time can supply event-version comparisons. Arbitrary `previous_versions` maps remain ignored. This permits *operator-checkpoint-correlated* `new` / `updated` labels in a held edition, but it does **not** prove external/off-host anchor retention or that any claim was factual; no authenticated production previous-slot journal exists yet. The new region-matched cross-language queue contains only evidence IDs and proposed pairs and **never automatically merges** English and Arabic events. No model or network calls; the new CI is offline-only. Stage 3 hosted tests pending.

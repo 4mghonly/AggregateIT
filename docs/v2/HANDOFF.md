@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B46 stage 3 operator-HMAC previous-event and multilingual review candidates
+
+Added HMAC-verified B3 prior-event journal replay (existing `v2_evidence_anchor`) and strict bounded prior-date validation to the held daily compiler. Arbitrary maps still ignored. Cross-language potential matches are metadata-only, same-region **review candidates**, never automatically merged or asserted to describe the same incident. Offline-only full-suite CI pending. This is operator attestation, not independent off-host storage or publisher truth. B45 provider translation still blocked, B46 other analysis/market/render gates open. See `B46_REAL_ARTICLE_EDITORIAL_2026-10-27.md`.
+
+
 ## 27 October — B46 partial engineering closure: publisher evidence + safe delta
 
 **Genuine source integration:** [Actions #40471907986](https://github.com/4mghonly/AggregateIT/actions/runs/40471907986) PASS. After an initial zero-admission diagnosis (`no_grounded_region`), the conservative English/Arabic subject-country lexical prefilter and actual article-body matcher admitted **2 BBC English + 1 Al Jazeera Arabic** publisher article bodies into B3 source→excerpt→claim→per-article event and B4 independent no-post English/Arabic daily compiler. Arabic correctly held five non-explicit-topic articles; model/market/Naysayer factual analysis remained withheld. Original publisher content never uploaded, metadata-only artifact `12719905376`.
