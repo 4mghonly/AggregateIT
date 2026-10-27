@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B42 Somalia replacement source search (live candidate check pending)
+
+Somalia failed production source floor 1/2 on 27 October. B42 tests 14 documented or plausible RSS endpoints for 11 distinct publisher families without production changes; uses original production `feedparser` semantics plus stronger fresh/news-link guard, pinned HTTPS, no-body artifacts and one request per URL. Root/alternate URLs do not count as extra publishers. Report: `B42_SOMALIA_FEED_DISCOVERY_2026-10-27.md`. Gate 6/8 and cutover HOLD until independently verified feeds are integrated and audited.
+
+
 B41 post-run source audit detail: checked at 2026-10-27 06:17 UTC, Somalia s056 Radio Ergo OK; s057 SONNA zero entries; s058 Goobjoog HTTP 404; s094 Hiiraan Online no feed. Only 1 compatible Somalia source vs required 2. No repair or production source promotion has been performed. See `B40_B41_JOINT_PREFLIGHT_2026-10-27.md`.
 
 
