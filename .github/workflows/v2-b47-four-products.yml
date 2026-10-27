@@ -1,0 +1,52 @@
+name: AggregateIT V2 B47 four genuine held products no-post
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b47-four-products.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b47-four-products
+  cancel-in-progress: true
+
+jobs:
+  genuine-bilingual-privately:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      ARABIC_LLM_API_KEY: ''
+      ARABIC_LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install isolated runtime
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
+      - name: B47 focused product integration
+        run: python -B -m unittest discover -s tests -p 'test_v2_b47_*.py' -v
+      - name: Full V2 and legacy regression at closure
+        run: |
+          python -B -m unittest discover -s tests
+          python -B tests.py
+          python -B -m unittest arabic_newsletter.test_arabic
+      - name: Genuine publisher article-to-four-held-product rehearsal
+        run: python -B v2_b46_live_editorial_runner.py --four-products --output reports/b47/sanitized.json
+      - name: Archive counts and hashes only
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: aggregateit-v2-b47-four-product-metadata
+          path: reports/b47/sanitized.json
+          retention-days: 3
+          if-no-files-found: warn

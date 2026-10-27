@@ -15,7 +15,7 @@ FEEDS=(
     ('english','https://feeds.bbci.co.uk/news/world/rss.xml'),
     ('arabic','https://www.aljazeera.net/aljazeerarss/ar/all.xml'),
 )
-def run(*,render_native=False):
+def run(*,render_native=False,render_four_products=False):
     at=datetime.now(timezone.utc)
     slot=at.isoformat()
     observed=at.isoformat()
@@ -88,9 +88,21 @@ def run(*,render_native=False):
         else:
             native={"status":"HOLD_MISSING_SOURCE_BACKED_LANGUAGE"}
 
+    four_products={"status":"NOT_REQUESTED"}
+    if render_four_products:
+        if all(result["products"][p]["story_count"]>0 for p in ("english","arabic")):
+            try:
+                from tempfile import TemporaryDirectory
+                from v2_b47_four_product_held import compose_held_products
+                with TemporaryDirectory(prefix="v2-b47-four-products-") as temp:
+                    four_products=compose_held_products(result,output_dir=Path(temp)/"native",as_of=observed)
+            except Exception as exc:
+                four_products={"status":"HOLD_FOUR_PRODUCT_INTEGRATION","error_class":type(exc).__name__}
+        else:
+            four_products={"status":"HOLD_MISSING_GENUINE_BILINGUAL_EVIDENCE"}
     return {'schema':'aggregateit-v2-b46-live-chain/1',
         'observed_at':observed,'source_attempts':count,
-        'transport_failures':reasons,'editorial':receipt,'native':native,
+        'transport_failures':reasons,'editorial':receipt,'native':native,'four_products':four_products,
         'b45_provider_fallback_connectivity':'NOT_RUN_NO_CREDENTIALS',
         'b45_english_to_arabic_semantic_test':'NOT_RUN',
         'b45_somali_to_arabic_semantic_test':'NOT_RUN',
@@ -100,8 +112,8 @@ def run(*,render_native=False):
         'can_release':False}
 if __name__=='__main__':
     import argparse
-    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');args=a.parse_args()
-    result=run(render_native=args.render_held)
+    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');args=a.parse_args()
+    result=run(render_native=args.render_held,render_four_products=args.four_products)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print(json.dumps({'source_attempts':result['source_attempts'],
@@ -111,4 +123,6 @@ if __name__=='__main__':
                       'products':{p:r['story_count'] for p,r in result['editorial']['products'].items()},
                       'native_status':result['native']['status'],
                       'native_pages':len(result['native'].get('native_pages',[])),
+                      'four_products':result['four_products'].get('schema',result['four_products'].get('status')),
+                      'weekly_days':{k:v['days_with_real_daily_snapshots'] for k,v in result['four_products'].get('weekly',{}).items()},
                       'can_release':False},ensure_ascii=False))
