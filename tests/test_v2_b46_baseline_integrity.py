@@ -5,7 +5,17 @@ TDD target: no caller-supplied previous-version map can generate a false
 """
 import unittest
 from v2_b46_live_editorial import compile_captured_articles
-from tests.test_v2_b46_live_editorial import en,NOW,SLOT
+NOW="2026-10-27T08:00:00+00:00"
+SLOT="2026-10-27T12:00:00+04:00"
+
+def en():
+    para=("Officials in Somalia said their security teams met with regional representatives "
+          "to discuss the security situation and review the public statements about new measures.")
+    return {"product":"english","source_id":"en-001",
+            "article_url":"https://www.bbc.com/news/articles/c123-example",
+            "title":"Somalia security officials outline latest measures",
+            "published_at":"2026-10-27T07:00:00+00:00",
+            "html_bytes":("<article><p>"+para+"</p><p>"+para+"</p></article>").encode("utf8")}
 
 class BaselineAndUrlTests(unittest.TestCase):
     def test_untrusted_previously_seen_versions_never_promote_new_status(self):

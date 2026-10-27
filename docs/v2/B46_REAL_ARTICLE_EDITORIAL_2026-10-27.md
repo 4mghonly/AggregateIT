@@ -54,3 +54,7 @@ Production estimated readiness **60%** and formal evidence **6/8 (75%)** unchang
 The first genuine-content result exposed a separate downstream risk: `plan_edition(previous_versions={})` can label events `new` solely because a caller provided an empty prior map. Until a genuine prior-slot journal with an independently retained authenticated receipt is integrated, B46 now **ignores arbitrary supplied previous_versions** and forces `unknown_no_baseline`, retaining an explicit audit flag. Also, repeated article links with UTM tracking differences are deduplicated by the existing canonical URL algorithm before constructing second observations. No publisher or model requests are needed to prove these guards; a separate path-triggered offline-only workflow runs focused and final regression tests.
 
 Stage-2 hosted verification: **PENDING**.
+
+### Test fixture import repair
+
+The first B46 stage-2 [Actions #40472537227](https://github.com/4mghonly/AggregateIT/actions/runs/40472537227) failed before the full suite because a new test imported another test file as a Python package (`from tests.test_v2_b46_live_editorial`), which the repository's unittest discovery path does not support. The stage-2 regression now owns its own tiny synthetic publisher HTML fixture, eliminating cross-test import dependence. Core B46 business logic did not fail; second isolated offline run is pending.

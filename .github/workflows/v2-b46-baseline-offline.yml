@@ -1,4 +1,5 @@
 name: AggregateIT V2 B46 delta-integrity closure (offline only)
+# Isolated test fixtures remove cross-test import coupling.
 
 on:
   push:
