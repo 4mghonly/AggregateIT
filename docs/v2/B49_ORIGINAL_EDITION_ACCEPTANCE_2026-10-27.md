@@ -9,3 +9,7 @@ English ZIP SHA256 `3ed412b1f36954487ffe7527033b908e8e422eb11a368c0e07d17a360c75
 An isolated Action with `actions: read` only verifies both original ZIPs live by id, checks exact PNG dimensions and digest, rejects ZIP traversal and oversized archives and emits sanitized metadata. No original image, raw article/body, message id or credentials are uploaded. The full B7/B49 acceptance remains **HOLD**; no canary.
 
 Hosted acceptance PENDING.
+
+## Dependency rehearsal correction
+
+Initial isolated run [40486148010](https://github.com/4mghonly/AggregateIT/actions/runs/40486148010) passed the focused archive tests but the full project suite hit import errors because optional existing V2 dependencies (PyYAML, BeautifulSoup, Arabic reshaper, bidi and langdetect) were missing from the isolated job. Corrected the workflow-only dependency install; business logic and original archived artifacts unchanged. Rerun pending.
