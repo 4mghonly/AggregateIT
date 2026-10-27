@@ -19,7 +19,7 @@ B40 begins from genuine BBC World and Al Jazeera Arabic identical-buffer parser 
 
 ## Acceptance state
 
-B40 stage-specific results and hosted regression: **PENDING isolated GitHub Actions run**.
+Hosted verification **PASS**: [GitHub Actions #40458468444](https://github.com/4mghonly/AggregateIT/actions/runs/40458468444) on commit `d13a73005bff6869472930187691db2662baf579`. Focused B40 **8/8**, full V2 **550/550**, English legacy **153/153**, Arabic legacy **55/55**, all passed. Real two-feed parser parity was `true`; five native 3840×2160 PNGs were generated and packaged in two isolated synthetic Discord manifests; combined audit returned `HOLD_FULL_SYSTEM_COMPARISON`, `can_release=false`. Artifact `12713152892` contains only metadata/checksums (2-day retention).
 
 Genuine final V1/V2 editorial + translation + native page comparison: **HOLD**, not verified by this stage-specific rehearsal. Real Discord-client delivery/rollback: **HOLD** for B41. France 24 B34 24-vs-23 discrepancy still unresolved and not reprobed. User-approved legal-rights exclusion remains AggregateIT-only.
 
