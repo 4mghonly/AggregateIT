@@ -26,16 +26,16 @@ def evaluate_private_acceptance(*, admission: dict, source_watch: dict,
         'packet_destinations_isolated': packet_rehearsal.get('independent_destination_keys') is True,
         'rollback_tabletop': rollback.get('rollback_acceptance') == 'TABLETOP_ONLY',
     }
-    live = (parser_shadow.get('live_parser_parity_proven') is True
-            and english_mobile.get('real_device_verified') is True
-            and arabic_mobile.get('real_device_verified') is True)
-    if all(checks.values()) and live:
-        state = 'PRIVATE_ACCEPTANCE_MEASURED'
-    elif all(checks.values()):
-        state = 'PARTIAL_OFFLINE'
-    else:
-        state = 'HOLD'
+    # These booleans are caller assertions. Independent browser and parser
+    # evidence cannot be authenticated by this pure offline evaluator.
+    live_claimed = (parser_shadow.get('live_parser_parity_proven') is True
+                    and english_mobile.get('real_device_verified') is True
+                    and arabic_mobile.get('real_device_verified') is True)
+    state = 'PARTIAL_OFFLINE' if all(checks.values()) else 'HOLD'
     return {'schema': 'aggregateit-v2-b27-private-acceptance/1',
             'status': state, 'checks': checks, 'unmet': [k for k, ok in checks.items() if not ok],
-            'live_comparison_verified': live, 'delivery_authorized': False,
+            'live_comparison_verified': False,
+            'live_claim_flags_present': live_claimed,
+            'external_evidence_status': 'NOT_INDEPENDENTLY_VERIFIED',
+            'delivery_authorized': False,
             'production_cutover': False, 'discord_sent': False}

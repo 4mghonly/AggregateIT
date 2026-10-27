@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — B36 acceptance evidence integrity (offline; hosted verification pending)
+
+B36 prevents unverified caller-controlled live flags from promoting B27 to measured acceptance. Introduces an exact-source-byte, same-window offline V1/V2 metric scorecard that refuses mismatched capture bytes, source rosters, times and revisions. TDD RED reproduced the bug; 11/11 focused tests passed locally. Full hosted regression runs only through the isolated B36 workflow. No live source call, Discord delivery, release, or production changes. B35 France 24 403 unresolved. Operational evidence bar stays 6/8 (75%); genuine full shadow and controlled canary HOLD. See `B36_OFFLINE_EVIDENCE_ACCEPTANCE_2026-10-27.md`.
+
+
 ### 26 October — B35 France 24 Arabic diagnostic closed, source access blocked
 
 B35 initial [run 40391914604](https://github.com/4mghonly/AggregateIT/actions/runs/40391914604) failed 1/6 synthetic test before network; the branch-only duplicate-link classifier was corrected at `b165642f`. Corrected [run 40392140574](https://github.com/4mghonly/AggregateIT/actions/runs/40392140574) passed **6/6** focused and **516/516** V2 regression tests, but the single permitted France 24 Arabic HTTPS request returned **HTTP 403**. No live source bytes or sanitized comparison artifact were obtained; no bypass or subsequent fetch. B34 historical one V1-only item stays **unresolved**. B35 diagnostic gates **2/3**; operational evidence **6/8 (75%)**, parser parity HOLD; production `main`, V1/V2 parser, Discord, schedules, models, databases unchanged. See `B35_FRANCE24_DIAGNOSIS_2026-10-26.md`.

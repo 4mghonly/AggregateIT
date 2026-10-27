@@ -1,0 +1,41 @@
+name: AggregateIT V2 B36 offline evidence gate (no post)
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b36-offline-evidence.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b36-offline
+  cancel-in-progress: true
+
+jobs:
+  no-post-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install isolated test requirements
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi
+      - name: B36 claim-integrity focused tests
+        run: python -B -m unittest discover -s tests -p 'test_v2_b36_*.py' -v
+      - name: V2 installed regression
+        run: python -B -m unittest discover -s tests
+      - name: V1 English legacy regression
+        run: python -B tests.py
+      - name: Arabic legacy regression
+        run: python -B -m unittest arabic_newsletter.test_arabic
