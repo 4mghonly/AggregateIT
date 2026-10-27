@@ -31,6 +31,14 @@ _COUNTRIES=(
  ('afghanistan','AF',r'\bAfghanistan|\bAfghan\b',r'أفغانستان|أفغاني(?:ة|ين)?'),
  ('turkey','TR',r'\bTurk(?:ey|ish|iye)\b',r'تركيا|تركي(?:ة|ين)?'),
  ('egypt','EG',r'\bEgypt(?:ian)?\b',r'مصر|مصري(?:ة|ين)?'),
+
+ ('palestine_israel','IL',r'\bIsrael(?:i|is)?\b',r'إسرائيل|إسرائيلي(?:ة|ون|ين)?|تل أبيب'),
+ ('palestine_israel','PS',r'\bPalestin(?:e|ian)\b|\bGaza\b|\bWest Bank\b',r'فلسطين|فلسطيني(?:ة|ون|ين)?|غزة|الضفة الغربية'),
+ ('levant','LB',r'\bLeban(?:on|ese)\b',r'لبنان|لبناني(?:ة|ون|ين)?|بيروت'),
+ ('levant','SY',r'\bSyria(?:n)?\b',r'سوريا|سوري(?:ة|ون|ين)?|دمشق'),
+ ('gcc','SA',r'\bSaudi(?: Arabia|an)?\b',r'السعودية|سعودي(?:ة|ون|ين)?|الرياض'),
+ ('gcc','QA',r'\bQatar(?:i)?\b',r'قطر|قطري(?:ة|ون|ين)?|الدوحة'),
+ ('oman','OM',r'\bOman(?:i)?\b',r'سلطنة عمان|عُمان|العماني|مسقط'),
 )
 
 class _ArticleParser(HTMLParser):
@@ -83,15 +91,28 @@ def extract_body(html_bytes:bytes,*,source_url:str,language:str)->dict:
             'html_sha256':sha256(html_bytes).hexdigest(),'html_bytes':len(html_bytes),
             'article_authorized_for_publication':False}
 
+def headline_geography_candidates(headline:str,*,language:str)->list[tuple[str,str]]:
+    """Conservative headline prefilter, NOT source truth or final classifier.
+
+    Returns every country explicitly named in the headline. Multiple countries
+    remain ambiguous and cannot be auto-merged or admitted.
+    """
+    if not isinstance(headline,str) or language not in ('en','ar'):
+        raise ValueError('invalid_geography_prefilter')
+    idx=2 if language=='en' else 3
+    return [(region,country) for region,country,*patterns in _COUNTRIES
+            if re.search(patterns[idx-2],headline,re.I)]
+
+
 def classify_geography(headline:str,body:str,*,language:str)->dict:
     if not all(isinstance(v,str) and v for v in (headline,body)) or language not in ('en','ar'):
         raise ValueError('no_grounded_region')
-    idx=2 if language=='en' else 3
-    matches=[(reg,ctry) for reg,ctry,*patterns in _COUNTRIES if re.search(patterns[idx-2],headline,re.I)]
+    matches=headline_geography_candidates(headline,language=language)
     if not matches:raise ValueError('no_grounded_region')
     if len(matches)!=1:raise ValueError('ambiguous_geography')
     region,country=matches[0]
-    region_rule=next(x for x in _COUNTRIES if x[0]==region)
+    region_rule=next(x for x in _COUNTRIES if x[0]==region and x[1]==country)
+    idx=2 if language=='en' else 3
     if not re.search(region_rule[idx],body,re.I):raise ValueError('country_not_supported_by_article_body')
     if language=='en':
         if re.search(r'\b(?:attack|shoot|kill|killed|dead|gunmen|security|military)\b',headline,re.I):topic='security'
@@ -114,7 +135,7 @@ def article_evidence(body:dict,*,headline:str,published_at:str)->dict:
     except (ValueError,AttributeError):raise ValueError('publication_timestamp_required') from None
     if stamp.utcoffset() is None:raise ValueError('publication_timestamp_required')
     geo=classify_geography(headline,body['original_text'],language=body['original_language'])
-    rule=next(x for x in _COUNTRIES if x[0]==geo['region'])
+    rule=next(x for x in _COUNTRIES if x[0]==geo['region'] and x[1]==geo['subject_country'])
     geography_pattern=rule[2] if body['original_language']=='en' else rule[3]
     for paragraph in body['paragraphs']:
         if len(paragraph)<60 or not re.search(geography_pattern,paragraph,re.I):

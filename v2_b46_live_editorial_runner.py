@@ -9,6 +9,7 @@ from pathlib import Path
 from v2_feed_items import extract_candidates
 from v2_secure_transport import pinned_https_fetch
 from v2_b46_live_editorial import compile_captured_articles,metrics_only,ALLOWED
+from v2_article_body_gate import extract_body, article_evidence, headline_geography_candidates
 
 FEEDS=(
     ('english','https://feeds.bbci.co.uk/news/world/rss.xml'),
@@ -21,7 +22,9 @@ def run():
     captures=[];reasons={};count={}
     for product,feed in FEEDS:
         count[product]={'feed_attempted':True,'feed_ok':False,'article_attempts':0,
-                        'article_http_ok':0,'capture_successes':0}
+                        'article_http_ok':0,'capture_successes':0,
+                        'headlines_with_one_supported_country':0,'headline_country_unclassified':0,
+                        'article_evidence_eligible':0,'body_gate_rejections':{}}
         try:
             response=pinned_https_fetch(feed,timeout=8,max_bytes=1_000_000,max_redirects=1,
                 headers={'Accept':'application/rss+xml, application/xml, text/xml'})
@@ -30,9 +33,20 @@ def run():
             count[product]['feed_ok']=True
         except Exception as exc:
             reasons[product+'-feed']=type(exc).__name__;continue
-        # Use at most 6 attempts per publisher; bounded one pass and no retries.
-        for candidate in parsed['items'][:6]:
-            if count[product]['capture_successes']>=3:break
+        # Target explicitly named regions instead of blindly choosing the first
+        # three global stories. The same headline + article-body gate still
+        # makes the final decision; unsupported or multiple countries HOLD.
+        eligible_headlines=[]
+        for item in parsed['items']:
+            country_matches=headline_geography_candidates(item['title'],language=ALLOWED[product]['language'])
+            if len(country_matches)==1:
+                eligible_headlines.append(item)
+                count[product]['headlines_with_one_supported_country']+=1
+            else:
+                count[product]['headline_country_unclassified']+=1
+        for candidate in eligible_headlines:
+            if count[product]['article_attempts']>=6 or count[product]['article_evidence_eligible']>=3:
+                break
             url=candidate['article_url']
             from urllib.parse import urlsplit
             if urlsplit(url).hostname not in ALLOWED[product]['hosts']:
@@ -42,11 +56,20 @@ def run():
                 page=pinned_https_fetch(url,timeout=8,max_bytes=850000,max_redirects=1,
                      headers={'Accept':'text/html'})
                 count[product]['article_http_ok']+=1
-                captures.append({'product':product,
+                capture={'product':product,
                       'source_id':ALLOWED[product]['source_id'],
                       'article_url':url,'title':candidate['title'],
-                      'published_at':candidate['published_at'],'html_bytes':page['body']})
+                      'published_at':candidate['published_at'],'html_bytes':page['body']}
+                try:
+                    body=extract_body(page['body'],source_url=url,language=ALLOWED[product]['language'])
+                    article_evidence(body,headline=candidate['title'],published_at=candidate['published_at'])
+                except ValueError as exc:
+                    code=str(exc)[:80]
+                    count[product]['body_gate_rejections'][code]=count[product]['body_gate_rejections'].get(code,0)+1
+                    continue
+                captures.append(capture)
                 count[product]['capture_successes']+=1
+                count[product]['article_evidence_eligible']+=1
             except Exception as exc:
                 reasons[product+'-article-'+str(count[product]['article_attempts'])]=type(exc).__name__
     # Independent pre-admission failures should not be interpreted as factual reliability.
