@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B38-B39 same-buffer V1/V2 replay and crash-safe no-send gate (hosted pending)
+
+Prepared one-feed-per-language original-byte V1/V2 replay with source-only mobile metrics, plus actual POSIX receipt-store close/reopen and no-retry tabletop. B38 uses BBC World / Al Jazeera; France24 not retried. New tests were authored first and held RED on absent modules. Single 15-minute GitHub Actions no-post workflow runs focused and full regressions plus live source captures, retaining metadata only. A successful parser or disk simulation cannot close the genuine full-editorial shadow or controlled canary. Evidence bar remains **6/8 (75%)** pending authenticated results. See `B38_B39_LIVE_REPLAY_DURABLE_NOPOST_2026-10-27.md`.
+
+
 ## 27 October — B37 genuine RSS headline mobile QA, hosted PASS
 
 Hosted [run 40452327376](https://github.com/4mghonly/AggregateIT/actions/runs/40452327376) succeeded. **6 English BBC World + 6 Arabic Al Jazeera real RSS titles**, **8/8 Chromium viewports** (320/390/768/1320 across both languages) passed; **5/5 B37 focus** and **532/532 V2 regression** pass. Source titles/bytes/screenshots remain ephemeral, only counts and SHA-256 retained in artifact 12710644338 (2 days). This is headline-card responsive Chromium QA, **not** full private newsletter or physical Discord client verification. B36 run 40451743278 passed 11/11 focus, 527/527 V2, legacy English 153/153, Arabic 55/55. France24 24-vs-23 HOLD; authentic full-system V1/V2 and canary/rollback HOLD. **Evidence bar 6/8 (75%) unchanged.** See `B37_GENUINE_RSS_HEADLINE_MOBILE_2026-10-27.md`.

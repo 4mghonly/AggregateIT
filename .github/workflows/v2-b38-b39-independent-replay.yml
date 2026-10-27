@@ -1,0 +1,51 @@
+name: AggregateIT V2 B38-B39 independent no-post replay
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b38-b39-independent-replay.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b38-b39-replay
+  cancel-in-progress: true
+
+jobs:
+  source-replay-and-durable-failure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install isolated test dependencies
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi
+      - name: B38 and B39 focused regression
+        run: python -B -m unittest discover -s tests -p 'test_v2_b3[89]_*.py' -v
+      - name: Full V2 Python regression
+        run: python -B -m unittest discover -s tests
+      - name: English V1 regression
+        run: python -B tests.py
+      - name: Arabic V1 regression
+        run: python -B -m unittest arabic_newsletter.test_arabic
+      - name: Same-buffer bilingual live comparison and durable no-send simulation
+        run: python -B v2_b38_b39_runner.py --output reports/b38-b39/metadata.json
+      - name: Archive aggregate metrics, never publisher feed bytes
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: v2-b38-b39-comparison-metadata
+          path: reports/b38-b39/metadata.json
+          retention-days: 2
+          if-no-files-found: warn
