@@ -21,7 +21,9 @@ No model/translation execution; no genuine article-body-to-full-native V1/V2 com
 
 B40 and B41 focused tests authored first; one isolated Actions run with a max runtime of 18 minutes, full installed regression once, no secrets, no Discord, no paid inference, no production/main writes. No publisher feed originals saved. Tests and run observations will be added after completion.
 
-Status: **PENDING hosted verification**.
+Status: **B40/B41 no-post preflight executed successfully; live full-system/canary gates remain HOLD**.
+
+Corrected hosted run [#40461615674](https://github.com/4mghonly/AggregateIT/actions/runs/40461615674) **SUCCESS** on `78e78e104a4a4b38bf9363b4a1ac7537fdbf12e2`: focused **19/19**, V2 **561/561**, legacy English **153/153**, legacy Arabic **55/55**. BBC World EN and Al Jazeera AR true identical-input candidate+held headline previews both returned `COMPARED` and `parity=true`; this is source-only preview agreement, not native Gazette or LLM equality. B41 production baseline pin `ea52e14bc7fd2973058fd659f0ff2e8d617111dc`; its findings: `production_audit_can_advance_main_during_canary` and `production_source_floor_below_two_somalia`. Release status remained `can_release=false`. Sanitized artifact `12714647105`, 2-day retention. Neither workflow, production branch, database, LLM nor Discord was changed. The original failed test-only run is retained in history.
 
 ## Verification correction and production source-floor finding
 
@@ -29,4 +31,4 @@ Initial [Actions run 40461369606](https://github.com/4mghonly/AggregateIT/action
 
 The separately checked current production [Arabic Source Audit #40460139191](https://github.com/4mghonly/AggregateIT/actions/runs/40460139191) returned **FAILURE** with `somalia: 1` compatible source where the workflow requires at least **2**. This is a live source-coverage issue to resolve before cutover. The B41 preflight now reads the checked-out production audit record, reports underfloor regions, and keeps release on HOLD. No production files were changed here.
 
-Corrected one-shot hosted CI: **pending**.
+Corrected one-shot hosted CI: **PASS** (run 40461615674).

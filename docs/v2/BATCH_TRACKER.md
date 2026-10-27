@@ -1,5 +1,12 @@
 # AggregateIT V2 — Batch Tracker
 
+## 27 October — B40/B41 measured same-byte preview and production preflight
+
+Corrected hosted run [#40461615674](https://github.com/4mghonly/AggregateIT/actions/runs/40461615674) **SUCCESS** on `78e78e104a4a4b38bf9363b4a1ac7537fdbf12e2`: focused **19/19**, V2 **561/561**, legacy English **153/153**, legacy Arabic **55/55**. BBC World EN and Al Jazeera AR true identical-input candidate+held headline previews both returned `COMPARED` and `parity=true`; this is source-only preview agreement, not native Gazette or LLM equality. B41 production baseline pin `ea52e14bc7fd2973058fd659f0ff2e8d617111dc`; its findings: `production_audit_can_advance_main_during_canary` and `production_source_floor_below_two_somalia`. Release status remained `can_release=false`. Sanitized artifact `12714647105`, 2-day retention. Neither workflow, production branch, database, LLM nor Discord was changed. The original failed test-only run is retained in history.
+
+B40 full-native/news/editorial/model comparison and B41 real canary/rollback remain HOLD. **Evidence 6/8 (75%); estimated release readiness 60% unchanged pending live acceptance.** See `B40_B41_JOINT_PREFLIGHT_2026-10-27.md`.
+
+
 ## 27 October — B40/B41 joint live preview and current-main cutover preflight
 
 B40 uses original V1 and V2 parsers on the same real RSS bytes and compares V1/V2 source-only headline preview admission and hashes; it cannot establish true model, editorial or native-page equivalence. B41 separately checks actual production `main` workflow/legacy parser snapshots and tests simulated rollback policy without sending. Main advanced via the scheduled Arabic audit, and the B41 report records that mutation path. Isolated no-secret one-shot workflow scheduled for full regression. **Operational gates remain 6/8, production cutover HOLD.** See `B40_B41_JOINT_PREFLIGHT_2026-10-27.md`.
