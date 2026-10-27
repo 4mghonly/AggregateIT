@@ -1,0 +1,79 @@
+{
+  "schema": "aggregateit-v2-b49-real-original-artifact-inventory/1",
+  "review_date": "2026-10-27",
+  "source_repository": "4mghonly/AggregateIT",
+  "production_main_sha": "ea52e14bc7fd2973058fd659f0ff2e8d617111dc",
+  "original_english": {
+    "run_id": 40478745761,
+    "artifact_id": 12722141477,
+    "zip_sha256": "3ed412b1f36954487ffe7527033b908e8e422eb11a368c0e07d17a360c75fa7a",
+    "run_at_utc": "2026-10-27T09:11:36.793924+00:00",
+    "health": "YELLOW",
+    "degraded_llm_failure_count": 1,
+    "full_native_edition_retained": false,
+    "independent_discord_receipt_verified": false
+  },
+  "original_arabic": {
+    "run_id": 40471115356,
+    "artifact_id": 12719355267,
+    "zip_sha256": "ca471d873f74e77de4c41a3a64e56571f6e5acb8f5c78b3331af188f0f12516c",
+    "window_start": "2026-10-27T06:08:09+04:00",
+    "window_end": "2026-10-27T12:08:09+04:00",
+    "source_events": 13,
+    "source_inputs": 71,
+    "foreign_requested": 8,
+    "foreign_translated": 3,
+    "fallback_http_403": true,
+    "app_claimed_delivery_confirmed": true,
+    "independent_discord_receipt_verified": false,
+    "pages": [
+      {
+        "page": "arabic-p1.png",
+        "sha256": "3c5dc67c62c9d462e242d10b1e8a6d7bebd8011d85507c3448450cfa50fb5840",
+        "size": [
+          3840,
+          2160
+        ]
+      },
+      {
+        "page": "arabic-p2.png",
+        "sha256": "7d42fd6f4cb4a5e4a414cfc00d9e4f9d0ea15114d308cd16e7bf7b2b9cfced44",
+        "size": [
+          3840,
+          2160
+        ]
+      },
+      {
+        "page": "arabic-p3.png",
+        "sha256": "62bb44cba9eb01517ad924a8ef95a80f49706f9b9332458d8e48b9fd70ab4f3f",
+        "size": [
+          3840,
+          2160
+        ]
+      }
+    ]
+  },
+  "v2_shadow": {
+    "run_id": 40479327797,
+    "observed_at_utc": "2026-10-27T09:15:59.555886+00:00",
+    "partial_parser_and_headline_parity": true,
+    "v2_four_products_held": true,
+    "full_english_original_same_slot_available": false,
+    "full_arabic_original_same_raw_capture_available": false
+  },
+  "translation_test_runs": [
+    40485098814,
+    40485758097,
+    40486907517
+  ],
+  "acceptance": {
+    "source_same_byte_complete_pair": false,
+    "live_translation_reliable": false,
+    "independent_fallback_reachable": false,
+    "full_original_v1_v2_editorial_comparison": false,
+    "source_rights_verified": false,
+    "independent_discord_client_receipts": false,
+    "canary_authorized": false,
+    "can_release": false
+  }
+}

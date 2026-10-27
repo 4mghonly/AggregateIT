@@ -1,5 +1,12 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B45/B49 original evidence closeout: live acceptance HELD; stop repeated probes
+
+[Runs B45 #40485098814](https://github.com/4mghonly/AggregateIT/actions/runs/40485098814) / [#40485758097](https://github.com/4mghonly/AggregateIT/actions/runs/40485758097) / [#40486907517](https://github.com/4mghonly/AggregateIT/actions/runs/40486907517) proved **free route operational only intermittently** (first EN fail/SO pass, second EN pass/SO fail, named pinned free third BOTH fail), with **zero paid calls**. Actual production Arabic at 08:08 UTC: 3/8 foreign translated, fallback HTTP 403. Three materially different approaches attempted: stop repeated inference loops and HOLD B45 until authorized working independent provider/rights-cleared quality dataset.
+
+[Archived actual production editions reader #40486417885](https://github.com/4mghonly/AggregateIT/actions/runs/40486417885) **SUCCESS 662/662 V2 + 153/153 EN legacy + 55/55 AR legacy**. Original Arabic V1 has 3 actual 4K PNGs, application-claimed delivery; original English V1 artifact has engine metadata but no completed native pages; neither has matching original source bytes/slot for B49. Complete genuine B7 V1/V2 editorial/model/render/Discord comparison still HOLD. Production Source Health Audit #40480137867 separately FAILED due missing `requests` dependency in audit runner, main unchanged. Immutable sanitized manifest `B49_REAL_PRODUCTION_ORIGINAL_MANIFEST_2026-10-27.json`. No source/secret/DB/prod/Discord changes. Planning estimate 60%, formal gates 6/8 unchanged. B50 canary NOT authorized.
+
+
 ## 27 October — B45 final independently pinned zero-price second model experiment
 
 Two free-router live experiments gave inconsistent EN/Somali results. Existing fallback GLM returned HTTP 403 in production and was not invoked. One final materially different V2-only experiment pins OpenRouter's confirmed $0 `nvidia/nemotron-3.5-lightning:free` (same OpenRouter account; not independent fallback). Two synthetic EN/SO calls maximum. Pending. No source originals/paid calls/Discord. Source: `B45_NAMED_FREE_MODEL_2026-10-27.md`.
