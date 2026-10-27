@@ -15,7 +15,7 @@ FEEDS=(
     ('english','https://feeds.bbci.co.uk/news/world/rss.xml'),
     ('arabic','https://www.aljazeera.net/aljazeerarss/ar/all.xml'),
 )
-def run():
+def run(*,render_native=False):
     at=datetime.now(timezone.utc)
     slot=at.isoformat()
     observed=at.isoformat()
@@ -75,9 +75,22 @@ def run():
     # Independent pre-admission failures should not be interpreted as factual reliability.
     result=compile_captured_articles(captures,as_of=observed,slot_id=slot)
     receipt=metrics_only(result)
+    native={"status":"NOT_REQUESTED"}
+    if render_native:
+        if all(result["products"][p]["story_count"]>0 for p in ("english","arabic")):
+            try:
+                from tempfile import TemporaryDirectory
+                from v2_b46_native_held import render_genuine_held
+                with TemporaryDirectory(prefix="v2-b46-source-native-") as temp:
+                    native=render_genuine_held(result,output_dir=Path(temp)/"native")
+            except Exception as exc:
+                native={"status":"HOLD_NATIVE_RENDER_ERROR","error_class":type(exc).__name__}
+        else:
+            native={"status":"HOLD_MISSING_SOURCE_BACKED_LANGUAGE"}
+
     return {'schema':'aggregateit-v2-b46-live-chain/1',
         'observed_at':observed,'source_attempts':count,
-        'transport_failures':reasons,'editorial':receipt,
+        'transport_failures':reasons,'editorial':receipt,'native':native,
         'b45_provider_fallback_connectivity':'NOT_RUN_NO_CREDENTIALS',
         'b45_english_to_arabic_semantic_test':'NOT_RUN',
         'b45_somali_to_arabic_semantic_test':'NOT_RUN',
@@ -87,8 +100,8 @@ def run():
         'can_release':False}
 if __name__=='__main__':
     import argparse
-    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);args=a.parse_args()
-    result=run()
+    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');args=a.parse_args()
+    result=run(render_native=args.render_held)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print(json.dumps({'source_attempts':result['source_attempts'],
@@ -96,4 +109,6 @@ if __name__=='__main__':
                       'held_reasons':result['editorial']['held_reasons'],
                       'editorial_held':{p:r['held_reasons'] for p,r in result['editorial']['products'].items()},
                       'products':{p:r['story_count'] for p,r in result['editorial']['products'].items()},
+                      'native_status':result['native']['status'],
+                      'native_pages':len(result['native'].get('native_pages',[])),
                       'can_release':False},ensure_ascii=False))

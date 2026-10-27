@@ -1,0 +1,53 @@
+name: AggregateIT V2 B46 authentic held native pages (no post)
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b46-native-held-live.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b46-native-held
+  cancel-in-progress: true
+
+jobs:
+  isolated-english-arabic-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      ARABIC_LLM_API_KEY: ''
+      ARABIC_LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install isolated runtime
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
+      - name: B46 native output integrity tests
+        run: python -B -m unittest discover -s tests -p 'test_v2_b46_*.py' -v
+      - name: Final V2 regression
+        run: python -B -m unittest discover -s tests
+      - name: English legacy
+        run: python -B tests.py
+      - name: Arabic legacy
+        run: python -B -m unittest arabic_newsletter.test_arabic
+      - name: Live BBC Al Jazeera publisher evidence through held native 4K renderers
+        run: python -B v2_b46_live_editorial_runner.py --render-held --output reports/b46-native/metadata.json
+      - name: Preserve sanitized receipts only not source text or PNG files
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: v2-b46-real-source-native-receipts
+          path: reports/b46-native/metadata.json
+          retention-days: 3
+          if-no-files-found: warn

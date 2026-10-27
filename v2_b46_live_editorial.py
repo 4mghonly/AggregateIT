@@ -107,7 +107,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
         daily=compile_daily(editorial_plan=plan,critic_report=critic,market_observations=[])
         products[product]={'story_count':len(daily['stories']),'held_reasons':plan['held_reasons'],
             'represented_regions':plan['represented_regions'],
-            'newsroom':daily,'critique':critic,'no_publication_authority':True}
+            'newsroom':daily,'critique':critic,'editorial_plan':plan,'no_publication_authority':True}
     cross_language=review_only_cross_language_pairs(products)
     return {'schema':'aggregateit-v2-b46-article-editorial/1','captured_article_count':len(captures),
             'admitted_articles':len(accepted),'receipts':accepted,'held_reasons':dict(held),
