@@ -44,5 +44,16 @@
       "publisher_family": "goobjoog",
       "enabled": false
     }
-  ]
+  ],
+  "qualification": {
+    "audit": "PASS_ON_ISOLATED_GITHUB_RUN_40465932734",
+    "production_collector": "PASS",
+    "headline_language": "HEURISTIC_ONLY",
+    "production_translation_contract": "PASS_WITH_MOCK_FAILOVER",
+    "live_translation": "NOT_TESTED",
+    "duplicate_check": "34_RECENT_ZERO_EXACT_OR_NEAR_TITLE",
+    "semantic_duplicate_check": "NOT_TESTED",
+    "production_registration": "NOT_PERFORMED",
+    "can_release": false
+  }
 }

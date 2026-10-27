@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B43 production-validator and translation/deduplication test COMPLETED
+
+[Actions #40465932734](https://github.com/4mghonly/AggregateIT/actions/runs/40465932734) **SUCCESS**; B43 focused 10/10, full V2 578/578, legacy English 153/153, legacy Arabic 55/55. Shabelle, Puntland Post, Somali Dispatch and Goobjoog English all pass unchanged production source audit and collector. 34 recent items, zero identical-link/near-identical headline duplicates (semantic or multilingual paraphrases not checked). Headline language detector suggests Somali/Somali/English/English; actual model translation **not tested**. Production translator numerical/Arabic guards and mocked primary→fallback/fail-closed pass. All four remain disabled V2 candidates, **no prod audit floor claim**; no main, webhooks, LLM or DB writes. See `B43_SOMALIA_PRODUCTION_VALIDATOR_TRANSLATION_DEDUPE_2026-10-27.md`.
+
+
 ## 27 October — B43 actual production validator on four Somalia sources
 
 B43 runs unchanged `arabic_source_audit.probe` for Shabelle, Puntland Post, Somali Dispatch and Goobjoog English; feeds are replayed into actual `arabic_newsletter.collect.collect_source` from the same in-memory network response. The production translation normalizer and dedupe keys are tested, with script/language heuristics and cross-source lexical duplicates measured. **No real LLM translation or model fallback**, so translation QA is partial. Four disabled candidates staged in `config/v2/somalia_b43_disabled_candidates.json`. No production source activation, webhook delivery or DB changes. See `B43_SOMALIA_PRODUCTION_VALIDATOR_TRANSLATION_DEDUPE_2026-10-27.md`; hosted run pending.

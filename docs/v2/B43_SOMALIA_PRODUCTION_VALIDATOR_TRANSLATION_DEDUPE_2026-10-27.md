@@ -36,4 +36,18 @@ The actual production translator normalizer passed controlled Arabic-output/numb
 
 Initial sanitized measurement artifact `12716750335` (3-day retention). New source registration/enablement remains disabled, production unchanged.
 
-**Final full regression: pending corrected hosted run.**
+## Final hosted acceptance — verified
+
+[Run #40465932734](https://github.com/4mghonly/AggregateIT/actions/runs/40465932734) completed **SUCCESS** on commit `a25ad0244bec7e6bb78c9c1fc43984f3d4ea4efe`. Focused **10/10 PASS**, full V2 **578/578 PASS**, English legacy **153/153 PASS**, Arabic legacy **55/55 PASS**. The second live measurement again confirmed all four sources compatible with the unchanged production `arabic_source_audit.probe` and real `arabic_newsletter.collect.collect_source`.
+
+Measured 72h item counts again: Shabelle 10, Puntland Post 10, Somali Dispatch 4, Goobjoog English 10. `langdetect` heuristic classified Shabelle/Puntland `so`, Somali Dispatch/Goobjoog English `en`; no candidate metadata mismatch detected. Cross-source and within-source lexical duplication **0 pairs / 34 recent articles**. The production translator normalizer contracts and simulated primary failure → fallback successful result and both routes failure→no fabricated Arabic behavior passed (no live LLM credentials used).
+
+Sanitized artifact ID `12716696263` (3 days). Earlier run artifact `12716750335` also records the initial 8-test pass.
+
+### Recommendation and explicit holds
+
+All four can be **recommended for staging** on the isolated V2 branch as disabled candidates. Two have Somali-language headlines, and two English; either requires confirmed real translation before a fully Arabic product can be approved. No actual live Arabic translation, semantic duplicate resolution, publisher factual verification, model fallback connectivity or Discord delivery was completed. The B41 production Somalia source minimum is *not* closed because no production registry was changed or re-audited.
+
+Suggested rollout (separately authorized after translation acceptance): Shabelle + Somali Dispatch first to maximize language diversity, Puntland Post as additional geographically relevant outlet, and Goobjoog English as replacement for its currently failing Somali feed, keeping one logical publisher-family identity. Validate final editorial relevance and actual LLM translation quality before enabling, then run the complete production source audit and confirm 2+ distinct compatible Somalia publishers.
+
+Production estimated readiness **60%**, formal evidence gates **6/8** remain unchanged.
