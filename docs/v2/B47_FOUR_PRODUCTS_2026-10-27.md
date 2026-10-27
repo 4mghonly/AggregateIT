@@ -7,3 +7,9 @@ Implemented direct **one-slot** integration of V2 B46 actual publisher HTML evid
 B47 acceptance requires 7 real daily snapshots, verified source/body/publisher rights and analysis, actual weekly PDF and client/mobile visual QA. All four are strictly unsendable; no main/workflow/Discord/DB/LLM changes.
 
 Hosted verification: **PENDING**.
+
+## B47 real weekly PDF held prototype
+
+Two additional source-linked weekly PDF previews now use ReportLab and embedded Arabic-capable DejaVu fonts, respecting RTL shaping and page boundaries. The existing `v2_weekly_discord.bundle_weekly_pdf` packages each as a **non-sendable** single PDF attachment, preserving English/Arabic destination isolation. Each PDF is explicitly labeled **incomplete evidence / do not publish** whenever only one genuine daily snapshot exists; no market or analytical claims are invented. PDF bytes remain in memory and temporary output, with only hash, page counts and status returned.
+
+Live hosted tests and source rehearsal **PENDING**.

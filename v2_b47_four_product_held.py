@@ -13,6 +13,8 @@ from v2_b46_native_held import render_genuine_held
 from v2_discord_edition import prepare_discord_edition
 from v2_weekly_rollup import rollup_week
 from v2_weekly_layout import render_weekly_html, AR_REGIONS
+from v2_b47_weekly_pdf_preview import generate_held_weekly_pdf
+from v2_weekly_discord import bundle_weekly_pdf
 
 def compose_held_products(editorial:dict, *, output_dir:Path, as_of:str)->dict:
     if (not isinstance(editorial,dict)
@@ -71,6 +73,12 @@ def compose_held_products(editorial:dict, *, output_dir:Path, as_of:str)->dict:
         if not (f'lang="{"en" if product=="english" else "ar"}"' in html
                and f'dir="{"ltr" if product=="english" else "rtl"}"' in html):
             raise ValueError('wrong_weekly_page_language')
+        pdf=generate_held_weekly_pdf(report)
+        weekly_packet=bundle_weekly_pdf(report,pdf['bytes'])
+        if (weekly_packet['can_send'] is not False
+            or weekly_packet['destination_key']!=packet['destination_key']
+            or weekly_packet['message_count']!=1):
+            raise ValueError('wrong_weekly_delivery_route')
         weekly[product]={'schema':report['schema'],
             'source_bound_event_count':report['unique_events'],
             'days_with_real_daily_snapshots':report['days_with_snapshots'],
@@ -79,14 +87,16 @@ def compose_held_products(editorial:dict, *, output_dir:Path, as_of:str)->dict:
             'html_sha256':sha256(html.encode('utf8')).hexdigest(),
             'html_bytes':len(html.encode('utf8')),
             'html_accessible_in_memory_only':True,
-            'pdf_rendered':False,'discord_packet_prepared':False,
+            'pdf_rendered':True,'pdf_sha256':sha256(pdf['bytes']).hexdigest(),
+            'pdf_page_count':pdf['pages'],
+            'discord_packet_prepared':True, 'discord_packet_send_authorized':False,
             'market_values_verified':False,'naysayer_status':report['naysayer_status'],
             'can_release':False}
     return {'schema':'aggregateit-v2-b47-four-product-held/1','daily':daily,'weekly':weekly,
         'formats_tested':['english_daily_2png','arabic_daily_3png',
                           'english_weekly_html','arabic_weekly_html'],
         'real_7_day_reporting_verified':all(r['complete_seven_day_history'] for r in weekly.values()),
-        'weekly_pdf_produced':False,'weekly_discord_send_ready':False,
+        'weekly_pdf_produced':True,'weekly_discord_send_ready':False,
         'independent_story_factuality_verified':False,
         'live_translation_performed':False,
         'publisher_republication_rights_verified':False,

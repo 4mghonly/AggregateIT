@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B47 weekly partial source PDF added
+
+Two source-excerpt-linked reportlab weekly PDF previews with embedded Arabic-capable font are generated only in held mode and passed through the existing safe weekly Discord attachment packager. They clearly retain partial-week status, are never sent and are not represented as complete weekly products. New focused + full tests and live genuine-source rehearsal pending. `docs/v2/B47_FOUR_PRODUCTS_2026-10-27.md`.
+
+
 ## 27 October — B49 genuine same-feed-byte V1/V2 partial shadow (hosted pending)
 
 A one-shot bilingual capture now passes original identical RSS bytes to actual pinned V1/V2 parsers, V1/V2 headline previews and V2 B3/B4 held four-product rendering, with digest equality checked. This improves source comparison provenance but cannot supply unavailable full V1 editorial/model/native/Discord receipts; B7/B49 full-system acceptance stays HOLD. No main change, model usage, external sender or CI dispatch. See `B49_SAME_SLOT_PARTIAL_SHADOW_2026-10-27.md`.

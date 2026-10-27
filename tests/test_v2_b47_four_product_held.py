@@ -49,7 +49,9 @@ class B47HeldTests(unittest.TestCase):
         self.assertEqual(record['daily']['arabic']['destination_key'],'discord_webhook_arabic')
         self.assertEqual(record['weekly']['english']['days_with_real_daily_snapshots'],1)
         self.assertFalse(record['real_7_day_reporting_verified'])
-        self.assertFalse(record['weekly_pdf_produced'])
+        self.assertTrue(record['weekly_pdf_produced'])
+        self.assertTrue(record['weekly']['arabic']['discord_packet_prepared'])
+        self.assertFalse(record['weekly']['arabic']['complete_seven_day_history'])
         self.assertFalse(record['can_release'])
     def test_missing_arabic_cannot_be_faked_by_weekly_fixtures(self):
         editorial=capture_bilingual();editorial['products']['arabic']['story_count']=0

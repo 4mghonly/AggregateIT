@@ -1,0 +1,52 @@
+name: AggregateIT V2 B47 weekly source-bound PDF and RTL quality NO POST
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b47-weekly-pdf.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b47-weekly-pdf
+  cancel-in-progress: true
+
+jobs:
+  isolated-weekly-pdf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      ARABIC_LLM_API_KEY: ''
+      ARABIC_LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install isolated runtime and PDF libraries
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
+      - name: Focused weekly PDF and original B47 contracts
+        run: python -B -m unittest discover -s tests -p 'test_v2_b47_*.py' -v
+      - name: Full V2 and legacy regression
+        run: |
+          python -B -m unittest discover -s tests
+          python -B tests.py
+          python -B -m unittest arabic_newsletter.test_arabic
+      - name: Actual-source daily PNG and held weekly PDF package QA
+        run: python -B v2_b46_live_editorial_runner.py --four-products --output reports/b47-pdf/metadata.json
+      - name: Upload status hashes only
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: aggregateit-v2-b47-weekly-pdf-metadata
+          path: reports/b47-pdf/metadata.json
+          retention-days: 3
+          if-no-files-found: warn
