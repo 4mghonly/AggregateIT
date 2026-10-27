@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 27 October — B48 genuine-source operational preflight (CI pending)
+
+B48 consumes live B47 four held products and a read-only main checkout, produces explicit product/source/translation/weekly completeness alerts, verifies actual B39 local receipt persistence on interrupted send, and holds any telemetry writes when account free-tier headroom is unknown. No live Discord API, rollout, backup, retention delete or paid models. This is a rehearsal, not operational monitoring running in production. Evidence remains 6/8. Report: `B48_OPERATIONS_2026-10-27.md`.
+
+
 ## 27 October — B47 genuine four-product held flow (pending hosted verification)
 
 B47 connects actual B46 publisher-body evidence and full EN/AR source plans to existing 2+3 native PNG renderers, separately prepared non-sendable daily Discord packets and source-bound 7-day EN/AR weekly HTML from the available snapshot. Seven-day completeness is **FALSE** when only one real observation day exists; no fake daily history or weekly PDF. Stage QA includes output hashes, source-language and destination checks. No model calls, rights claims or Discord. Evidence 6/8, cutover HOLD. Report `B47_FOUR_PRODUCTS_2026-10-27.md`.

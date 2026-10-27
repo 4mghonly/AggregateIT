@@ -1,0 +1,57 @@
+name: AggregateIT V2 B48 no-post operations and recovery rehearsal
+
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b48-ops-rehearsal.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggregateit-v2-b48-ops-rehearsal
+  cancel-in-progress: true
+
+jobs:
+  isolated-operational-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 23
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      ARABIC_LLM_API_KEY: ''
+      ARABIC_LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          path: production-baseline
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install no-post isolated dependencies
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
+      - name: B48 focused TDD regression
+        run: python -B -m unittest discover -s tests -p test_v2_b48_operations_readiness.py -v
+      - name: Single V2 and legacy closure regression
+        run: |
+          python -B -m unittest discover -s tests
+          python -B tests.py
+          python -B -m unittest arabic_newsletter.test_arabic
+      - name: Live-source held product, main snapshot, durable crash/reopen and alarms
+        run: python -B v2_b48_ops_runner.py --baseline production-baseline --candidate . --output reports/b48/metadata.json
+      - name: Upload sanitized status only
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: aggregateit-v2-b48-recovery-and-alerts
+          path: reports/b48/metadata.json
+          retention-days: 3
+          if-no-files-found: warn
