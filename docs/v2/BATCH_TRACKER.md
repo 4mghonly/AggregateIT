@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B76 weekly source-snapshot replay guard
+
+B61 seven-day lineage previously required distinct edition digests but allowed the same original source snapshot digest on seven dates. B76 now refuses repeated source snapshot hashes within each language, records reused_identical_source_snapshot_digest, and includes 2 tests (replayed vs distinct). Integrated no-post CI #40723404157 started. This is structural evidence hardening only; genuine seven-day source/edition capture remains outstanding and release stays HOLD.
+
+
 ## 28 October — B75 two-run live source stability assessment
 
 Two actual hosted source audits compared: #40718530045 = 111/114; #40721348016 = 110/114. Persistent: Naked Capitalism (403), The Independent (429). Recovered once: IntelNews (429 -> OK). New failures: France 24 (403), Mish Talk (429). Implemented v2_source_audit_diff.py and 3 focused regressions, wired into hosted no-post suite; run #40721883800 pending at publication. No premature deletion or production mutation. Remaining source quality includes genuine freshness, translation, V1/V2 parity and seven-day evidence.
