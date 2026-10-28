@@ -7,6 +7,8 @@ on:
       - '.github/workflows/v2-b80-b83-live-acceptance.yml'
       - 'v2_b49_single_slot_shadow.py'
       - 'v2_b46_live_editorial_runner.py'
+      - 'v2_b87_topic_bridge.py'
+      - 'v2_b46_live_editorial.py'
       - 'v2_article_body_gate.py'
       - 'tests/test_v2_b87_arabic_topic.py'
       - 'v2_b86_visual_archive.py'
