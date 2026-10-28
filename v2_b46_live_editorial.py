@@ -12,6 +12,7 @@ from datetime import datetime,timezone
 from hashlib import sha256
 from urllib.parse import urlsplit
 from v2_article_body_gate import extract_body,article_evidence
+from v2_b87_topic_bridge import editorial_topic
 from v2_evidence import _time,make_article,make_excerpt,make_claim,make_event,canonical_article_url
 from v2_evidence_ledger import EvidenceLedger
 from v2_editorial import plan_edition
@@ -89,7 +90,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
         annotations[item['product']].append({
             'event_id':event['event_id'],'region':source_quote['region'],
             'subject_country':source_quote['subject_country'],
-            'topic':source_quote['topic_english' if item['product']=='english' else 'topic_arabic'],
+            'topic':editorial_topic(item['product'],source_quote['topic_english' if item['product']=='english' else 'topic_arabic']),
             'priority':50
         })
         accepted.append({'source_id':item['source_id'],'product':item['product'],
