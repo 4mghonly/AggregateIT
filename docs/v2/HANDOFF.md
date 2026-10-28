@@ -1,4 +1,9 @@
 
+## B94 — bounded daily evidence ledger
+
+B91-B93 hosted #40759347125 SUCCESS: Arabic 3/17 regions represented; one observed day, no seven-day proof. Implemented B94 SQLite daily no-post evidence receipt per UTC day and language, UPSERT preventing repeated same-day runs from inflating seven-day counts, 30-day cleanup, seven-day positive-story counters, and fail-closed timestamp and receipt validation. This workflow's SQLite is ephemeral per CI run and artifact-only; persistence across runs is NOT yet connected and no seven-day historical evidence is claimed. Commits 6b9dd6c, 12bf665, 0c9c905; hosted #40762044519 pending. Production, V1 and Drive remain untouched.
+
+
 ## B91–B93 — coverage and release evidence audit (2026-10-28)
 
 B88–B90 hosted #40758940350 SUCCESS: five valid 4K pages; three EN stories (one represented region, palestine_israel), three AR stories (egypt/gcc/levant); 7-day evidence and full parity not met. Implemented B91 target-region gap report against editorial AR_REGIONS, B92 distinct-date evidence counting (one run/day cannot fake a week), and B93 explicit release hold gates for visual QA, live fallback, full parity and delivery. Focused tests and hosted CI integration. Commits 690cf81, 3c5c0be, c58ca55; run #40759347125 pending. No production modification or Discord posts. Drive authentication deferred.
