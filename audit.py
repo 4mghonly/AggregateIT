@@ -157,6 +157,9 @@ async def main():
         "schema": "aggregateit-v2-source-audit-summary/1",
         "total": len(RESULTS), "passed": len(RESULTS) - len(bad),
         "failed": len(bad),
+        "rss_fresh_48h": sum(r.get("fresh_48h_items", 0) > 0 for r in RESULTS if r["kind"] == "RSS"),
+        "rss_stale_or_undated": sorted(r["name"] for r in RESULTS if r["kind"] == "RSS" and r.get("ok") and r.get("fresh_48h_items", 0) == 0),
+        "rss_with_parse_warnings": sorted(r["name"] for r in RESULTS if r["kind"] == "RSS" and r.get("feed_parse_warning")),
         "failure_categories": {
             "rate_limited": sorted(r["name"] for r in bad if r.get("http") == 429),
             "access_denied": sorted(r["name"] for r in bad if r.get("http") == 403),
