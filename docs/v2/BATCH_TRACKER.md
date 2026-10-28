@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B75 two-run live source stability assessment
+
+Two actual hosted source audits compared: #40718530045 = 111/114; #40721348016 = 110/114. Persistent: Naked Capitalism (403), The Independent (429). Recovered once: IntelNews (429 -> OK). New failures: France 24 (403), Mish Talk (429). Implemented v2_source_audit_diff.py and 3 focused regressions, wired into hosted no-post suite; run #40721883800 pending at publication. No premature deletion or production mutation. Remaining source quality includes genuine freshness, translation, V1/V2 parity and seven-day evidence.
+
+
 ## 28 October — B74 exact hosted source audit failure review
 
 Actual GitHub Actions #40718530045 logs inspected: 114 checked, 111 passed, 3 failed. IntelNews 429, The Independent Breaking 429, Naked Capitalism 403. Source audit now emits a machine-readable categorical summary and retains it in no-post CI artifact; hosted verification of this change pending. No production source disable/replace based on one audit. See B74_HOSTED_SOURCE_FAILURE_EVIDENCE_2026-10-28.md.
