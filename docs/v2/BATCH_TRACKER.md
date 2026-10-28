@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B66–B71 verification and evidence hardening
+
+Hosted [CI #40714436511](https://github.com/4mghonly/AggregateIT/actions/runs/40714436511) succeeded, including focused gates, full V2 and both legacy regressions, held pre-canary. Additional branch-only hardening prevents duplicated translation review counts and rejects malformed visual page inputs or unbounded delivery receipts; three additional focused regressions added. New hosted verification pending. V1 remains live; V2 replacement is conditional on authentic evidence and reversible cutover. No Discord send, paid call or production change.
+
+
 ## 28 October — B66–B71 consolidated offline gates (hosted pending)
 
 Published evidence intake validators for Somalia distinct compatible publishers, authentic translation review provenance, five visual defect closures, seven-day genuine lineage, same-slot source digest comparison, and independent model/Discord receipts. Nine focused tests added; no authentic evidence supplied, so no real-world release criteria admitted. Hosted CI pending. All production actions HOLD. See B66_B71_OFFLINE_EVIDENCE_2026-10-28.md.
