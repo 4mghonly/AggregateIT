@@ -1,5 +1,9 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 28 October — B80–B83 combined genuine publisher acceptance run
+
+A no-post isolated hosted workflow now executes B46 authentic BBC World + Al Jazeera Arabic RSS and bounded publisher article-body captures, source-geography/attribution gates, held 2-page English + 3-page Arabic 4K rendering and weekly previews if both languages admit real articles, followed by B49 exact-source-byte V1/V2 parser/headline/newsroom shadow. Run #40733805528 initiated. Artifacts are sanitized metrics only; article bytes and model translations are not persisted. This is a genuine attempt at B80/B82/B83, but does NOT by itself establish Arabic live model translation fidelity, visual inspection of actual image pixels, or full V1 editorial/render/delivery parity. Release remains HOLD, no production or Discord changes.
+
 ## 28 October — B73 independent Somalia publisher evidence
 
 Shabelle Media's own Somali and English pages show 27–28 October reporting; Somali Dispatch publisher identity exists but live feed compatibility is unverified. Distinct the-somali-dispatch domain flagged to prevent conflation. Source-quality evidence logged in B73_REAL_SOURCE_QUALITY_EVIDENCE_2026-10-28.md. This is genuine website observation, **not** V2 RSS compatibility or release acceptance. Hosted prior run #40715362839 succeeded. All release gates stay HOLD.
