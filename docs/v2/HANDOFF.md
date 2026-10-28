@@ -1,3 +1,8 @@
+
+## 2026-10-28 — User sequencing decision
+
+Defer Google Drive authentication, service-account setup, persistent SQLite cross-run restoration and Drive write-back until final deployment. Continue remaining V2 scope using isolated local/CI SQLite snapshots; do not gate editorial, rendering, source, or release-evidence development on Drive credentials. Maintain zero-cost and V1/main isolation. Release remains HOLD pending independent acceptance gates; no production sends or cutover authorized.
+
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
 ## 28 October — B85 SQLite engine bridge
