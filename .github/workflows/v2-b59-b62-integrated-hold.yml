@@ -9,6 +9,8 @@ on:
       - 'tests/test_v2_b63_geometry_evidence.py'
       - 'tests/test_v2_b35_france24_diagnostic.py'
       - 'v2_b66_b71_evidence.py'
+      - 'v2_source_audit_diff.py'
+      - 'tests/test_v2_source_audit_diff.py'
       - 'docs/v2/HANDOFF.md'
       - 'docs/v2/BATCH_TRACKER.md'
       - 'tests/test_v2_b66_b71_evidence.py'
@@ -51,6 +53,7 @@ jobs:
           python -B -m unittest discover -s tests -p test_v2_b63_geometry_evidence.py -v
           python -B -m unittest discover -s tests -p test_v2_b64_b65_release_evidence.py -v
           python -B -m unittest discover -s tests -p test_v2_b66_b71_evidence.py -v
+          python -B -m unittest discover -s tests -p test_v2_source_audit_diff.py -v
       - name: One final V2 and legacy regression
         run: |
           python -B -m unittest discover -s tests
