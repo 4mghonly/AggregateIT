@@ -63,11 +63,11 @@ def run_one_slot(*,production_baseline=None,candidate_root=None):
             response=pinned_https_fetch(url,timeout=9,max_bytes=MAX_BYTES,max_redirects=1,
                 headers={'Accept':'application/rss+xml, application/atom+xml, application/xml, text/xml'})
             raw=response['body']
-            packets[product]={'feed_url':url,'body':raw}
             parser[product]=compare_captured_headlines(raw,product=product,
                                      feed_url=url,observed_at=at)
             previews[product]=compare_previews(raw,product=product,
                                      feed_url=url,observed_at=at)
+            packets[product]={'feed_url':url,'body':raw}
         except Exception as exc:
             failures[label]=type(exc).__name__
     if len(packets)!=2:
