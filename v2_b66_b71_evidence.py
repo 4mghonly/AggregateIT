@@ -31,14 +31,18 @@ def b66_sources(rows):
 def b67_translation(rows):
     """Only evidence-bound human-readable review records; no automatic quality approval."""
     if not isinstance(rows,list) or len(rows)>100:raise ValueError("invalid_translation_rows")
-    accepted=0;issues=[]
+    accepted=0;issues=[];seen=set()
     for row in rows:
         if not isinstance(row,dict):raise ValueError("invalid_translation_receipt")
         if (row.get("original_language") in ("en","so")
             and _digest(row.get("original_sha256")) and _digest(row.get("arabic_sha256"))
             and row.get("numbers_preserved") is True and row.get("negation_preserved") is True
             and row.get("attribution_preserved") is True and row.get("review_provenance")=="independent"):
-            accepted+=1
+            key=(row["original_sha256"],row["arabic_sha256"])
+            if key in seen:issues.append("duplicate_translation_review")
+            else:
+                seen.add(key)
+                accepted+=1
         else:issues.append("missing_independent_semantic_evidence")
     return {"reviewed_rows":accepted,"issues":issues,
             "publisher_story_semantic_fidelity_verified":False,"can_release":False}
@@ -46,6 +50,8 @@ def b67_translation(rows):
 def b68_visual(pages, reviewed_defects):
     """Technical defect register; cannot replace image and phone review."""
     if not isinstance(reviewed_defects,dict):raise ValueError("missing_defect_register")
+    if not isinstance(pages,list) or len(pages)>10 or any(not isinstance(p,dict) for p in pages):
+        raise ValueError("invalid_visual_pages")
     outstanding=[key for key in KNOWN_DEFECTS if reviewed_defects.get(key)!="resolved_with_source_synced_visual_receipt"]
     return {"pages_present":len(pages) if isinstance(pages,list) else 0,
             "outstanding_defects":outstanding,
@@ -75,7 +81,8 @@ def b70_parity(pairs):
 
 def b71_delivery(model_receipts, discord_receipts):
     """Model/Discord self assertions never become independent client proof."""
-    if not isinstance(model_receipts,list) or not isinstance(discord_receipts,list):
+    if (not isinstance(model_receipts,list) or not isinstance(discord_receipts,list)
+        or len(model_receipts)>100 or len(discord_receipts)>100):
         raise ValueError("invalid_delivery_receipts")
     return {"model_receipts_supplied":len(model_receipts),
             "discord_receipts_supplied":len(discord_receipts),
