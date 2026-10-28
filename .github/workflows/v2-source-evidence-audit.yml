@@ -1,8 +1,12 @@
 name: V2 independent source evidence (NO POST)
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '17 3 * * *'
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-source-evidence-audit.yml'
+      - 'audit.py'
+      - 'config/sources.json'
 permissions:
   contents: read
 concurrency:
