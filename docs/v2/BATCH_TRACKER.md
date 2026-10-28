@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B74 exact hosted source audit failure review
+
+Actual GitHub Actions #40718530045 logs inspected: 114 checked, 111 passed, 3 failed. IntelNews 429, The Independent Breaking 429, Naked Capitalism 403. Source audit now emits a machine-readable categorical summary and retains it in no-post CI artifact; hosted verification of this change pending. No production source disable/replace based on one audit. See B74_HOSTED_SOURCE_FAILURE_EVIDENCE_2026-10-28.md.
+
+
 ## 28 October — Live source audit hosted evidence
 
 New isolated source-audit workflow on V2 branch completed successfully: [run #40718530045](https://github.com/4mghonly/AggregateIT/actions/runs/40718530045), commit a11be014. All steps including actual audit.py execution and artifact upload succeeded. Artifact ID 12828769840, SHA256 1cc526c9ecdf40887d65ddba5cea14b2f7ec7cd44967ac4f72b06cd2d0da89bc, retained 7 days. **Run success is not evidence that every individual source passed**; per-source statuses require artifact review. No posting, model calls or production cutover.
