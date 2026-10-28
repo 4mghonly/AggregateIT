@@ -1,0 +1,56 @@
+name: V2 B80-B83 real publisher editorial and shadow (NO POST)
+on:
+  workflow_dispatch:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-b80-b83-live-acceptance.yml'
+permissions:
+  contents: read
+concurrency:
+  group: aggregateit-v2-b80-b83-live-acceptance
+  cancel-in-progress: false
+jobs:
+  live-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      LLM_API_KEY: ''
+      LLM_FALLBACK_API_KEY: ''
+      ARABIC_LLM_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: rebuild/aggregateit-v2
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install pinned project and rendering dependencies
+        run: python -m pip install -r requirements.txt feedparser pillow reportlab
+      - name: B80/B81 original publisher article and editorial evidence
+        run: python -B v2_b46_live_editorial_runner.py --output b80_b81_live_editorial.json --render-held --four-products
+      - name: B83 same-source-byte V1/V2 parser and held newsroom comparison
+        run: |
+          python -B - <<'PY'
+          import json
+          from pathlib import Path
+          from v2_b49_single_slot_shadow import run_one_slot
+          result=run_one_slot()
+          Path('b83_same_slot_shadow.json').write_text(json.dumps(result,indent=2,ensure_ascii=False)+'\n',encoding='utf8')
+          print(json.dumps({'status':result['status'],'rows':result.get('rows',[]),
+            'failures':result.get('failures',{}),'can_release':False},ensure_ascii=False))
+          PY
+      - name: Archive no-post real capture receipts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: aggregateit-v2-b80-b83-real-acceptance
+          path: |
+            b80_b81_live_editorial.json
+            b83_same_slot_shadow.json
+          retention-days: 7
+          if-no-files-found: warn
