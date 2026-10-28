@@ -17,7 +17,8 @@ def b66_sources(rows):
         publisher=row.get("publisher")
         if not isinstance(publisher,str) or not publisher.strip():raise ValueError("missing_publisher")
         if (row.get("http_status")==200 and row.get("parse_compatible") is True
-            and row.get("fresh_items",0)>0 and row.get("observed_from_live_fetch") is True
+            and type(row.get("fresh_items")) is int and row["fresh_items"]>0
+            and row.get("observed_from_live_fetch") is True
             and _digest(row.get("response_sha256"))):
             accepted.add(publisher.strip().casefold())
         else:issues.append(publisher)
