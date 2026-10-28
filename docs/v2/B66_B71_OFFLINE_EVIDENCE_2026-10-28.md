@@ -1,0 +1,5 @@
+# B66–B71 consolidated offline evidence gates
+
+B66 adds distinct publisher live-observation receipt screening; no real source observations were supplied, so the two-source floor is not accepted. B67 accepts provenance-bound translation-review metadata but does not claim genuine publisher semantic quality. B68 tracks five outstanding original visual/editorial defects; no corrected V2 page images or physical-device reviews were supplied. B69 uses B61's real seven-day lineage validator and reports missing days without fabricating history. B70 screens source-matched same-slot V1/V2 digest pairs; full model, editorial, render and delivery parity remains unverified. B71 records model and Discord receipt counts without treating caller claims as independent verification.
+
+The consolidated runner is **zero-cost, offline, no-post, fail-closed**. It is preparation and technical validation, not fulfillment of real-world evidence requirements. All six batches are implemented as evidence gates; real-world acceptance remains pending. Production and B72 canary remain HOLD.
