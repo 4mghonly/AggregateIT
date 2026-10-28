@@ -22,3 +22,7 @@ B82 native page generation: **5 genuine source-backed held pages rendered**, but
 B83 same-byte parser comparison: **not yet accepted**, initial run crashed and fix under hosted retest. Full V1 editorial/model/render/delivery parity remains missing.
 
 Production release remains HOLD. V1, Discord, production secrets and database unchanged.
+
+## Second hosted run #40733983884 — workflow SUCCESS, acceptance HOLD
+
+B80 article-backed counts reproduced (3 English, 1 Arabic) and five held 4K pages generated. B83 now safely returned `HOLD_SOURCE_CAPTURE_FAILED` rather than crashing. Failure evidence identified `ModuleNotFoundError` in legacy Arabic parser. Investigation of `arabic_newsletter/collect.py` shows a direct `bs4.BeautifulSoup` import absent from the hosted install command. Added `beautifulsoup4` to isolated workflow dependencies; third live run #40734126557 initiated. No parser semantics weakened to bypass this requirement.
