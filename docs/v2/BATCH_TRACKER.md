@@ -1,4 +1,9 @@
 
+## B87 continuation — taxonomy mismatch root cause
+
+Hosted #40757247178 SUCCESS as workflow, but 3 Arabic article captures were admitted then all three excluded by editorial `topic_excluded_by_product`: classifier emitted `geopolitics`, Arabic editorial allowed `political_stability` instead. Added explicit classifier-to-editorial topic adapter, regression test and wired it to article compiler. Commits c4a9d4b, 340d299, 20ee58e, 1a8991d. Hosted #40757867630 queued. No claim of rendered pages or visual approval until live receipt proves them. Release HOLD; no V1 or production changes.
+
+
 ## B86/B87 live continuation (2026-10-28)
 
 B86 workflow #40756527408 completed SUCCESS, including visual-archive unit checks, but live Al Jazeera Arabic had 0 eligible captures (6/6 rejected `arabic_topic_without_explicit_trigger`), so no native PNG pages were generated on that run; independent visual review still pending. B87 adds regression tests and explicit Arabic geopolitical/economic event triggers while retaining country-in-headline-and-body gate. Commits 311dc0f, bf2f10d, 52c1c3c. Hosted #40757247178 running. Release HOLD, no production posts, Drive auth deferred.
