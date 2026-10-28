@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B64/B65 reconstructed publication (hosted validation pending)
+
+B64: independent production audit #40659308048 succeeded on main commit 6e6094d; isolated verifier now checks exact run, commit, main branch, dependency install, audit execution and artifact upload. B62 audit condition can be cleared with a matching receipt; all other gates stay HOLD. B65: Shabelle Media (Somali) and Somali Dispatch (English) are disabled candidates, not accepted live coverage. Eight new focused fail-closed tests. No production activation, paid model calls, Discord, DB writes or canary. See B64_B65_AUDIT_RECONCILIATION_SOMALIA_2026-10-28.md. Hosted no-post CI pending.
+
+
 ## 28 October — B63 geometry evidence guard (local; hosted pending)
 
 The B60 five-page geometry check falsely accepted non-hex digest strings,
