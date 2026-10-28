@@ -11,9 +11,14 @@ class EvidenceTests(unittest.TestCase):
     def test_b66_two_independent_sources_do_not_activate(self):
         a={"publisher":"A","http_status":200,"parse_compatible":True,"fresh_items":1,
            "observed_from_live_fetch":True,"response_sha256":"a"*64}
-        b=dict(a,publisher="B")
+        b=dict(a,publisher="B",response_sha256="b"*64)
         result=b66_sources([a,b]);self.assertTrue(result["technical_floor_met"])
         self.assertFalse(result["activation_allowed"])
+    def test_b66_replayed_identical_response_not_independent(self):
+        a={"publisher":"A","http_status":200,"parse_compatible":True,"fresh_items":1,
+           "observed_from_live_fetch":True,"response_sha256":"a"*64}
+        b=dict(a,publisher="B")
+        self.assertEqual(b66_sources([a,b])["compatible_distinct_sources"],1)
     def test_b67_no_unverified_semantic_acceptance(self):
         self.assertFalse(b67_translation([{"original_language":"so"}])["publisher_story_semantic_fidelity_verified"])
     def test_b68_unreviewed_visuals_held(self):
