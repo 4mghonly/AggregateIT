@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B78 real RSS freshness review
+
+Hosted B77 run #40730016174 PASS. Actual audit: 112/114 endpoint OK; 84 RSS feeds with >=1 dated item in last 48h; 12 accessible RSS feeds stale or undated; Roll Call parse warning; Independent 429 and Naked Capitalism 403. Added review-only slow-cadence/general-stale categorization and artifact audit_freshness_review.json. Source evidence report: B78_LIVE_RSS_FRESHNESS_2026-10-28.md. Follow-up hosted workflow #40731090212 in progress at publication. No source disable or production changes; editorial acceptance still pending.
+
+
 ## 28 October — B77 live RSS freshness evidence
 
 Enhanced read-only publisher audit to distinguish HTTP success from freshness: per-feed dated, undated, fresh-in-48h, future-dated exclusion, and parse warnings; summary enumerates successful but stale/undated sources. Added two unit tests and hosted test step before source audit; CI #40730016174 pending. No changes to production or source enablement. This is feed-level freshness, not story semantic accuracy or seven-day editorial lineage.
