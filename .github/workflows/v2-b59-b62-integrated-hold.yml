@@ -10,6 +10,8 @@ on:
       - 'tests/test_v2_b35_france24_diagnostic.py'
       - 'v2_b66_b71_evidence.py'
       - 'v2_source_audit_diff.py'
+      - 'v2_acceptance_inventory.py'
+      - 'tests/test_v2_acceptance_inventory.py'
       - 'v2_b61_week_lineage.py'
       - 'tests/test_v2_b76_week_source_replay.py'
       - 'tests/test_v2_source_audit_diff.py'
@@ -56,6 +58,7 @@ jobs:
           python -B -m unittest discover -s tests -p test_v2_b64_b65_release_evidence.py -v
           python -B -m unittest discover -s tests -p test_v2_b66_b71_evidence.py -v
           python -B -m unittest discover -s tests -p test_v2_source_audit_diff.py -v
+          python -B -m unittest discover -s tests -p test_v2_acceptance_inventory.py -v
           python -B -m unittest discover -s tests -p test_v2_b76_week_source_replay.py -v
       - name: One final V2 and legacy regression
         run: |
