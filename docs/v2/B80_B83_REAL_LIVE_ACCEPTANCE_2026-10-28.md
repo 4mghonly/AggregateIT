@@ -26,3 +26,7 @@ Production release remains HOLD. V1, Discord, production secrets and database un
 ## Second hosted run #40733983884 — workflow SUCCESS, acceptance HOLD
 
 B80 article-backed counts reproduced (3 English, 1 Arabic) and five held 4K pages generated. B83 now safely returned `HOLD_SOURCE_CAPTURE_FAILED` rather than crashing. Failure evidence identified `ModuleNotFoundError` in legacy Arabic parser. Investigation of `arabic_newsletter/collect.py` shows a direct `bs4.BeautifulSoup` import absent from the hosted install command. Added `beautifulsoup4` to isolated workflow dependencies; third live run #40734126557 initiated. No parser semantics weakened to bypass this requirement.
+
+## Third hosted run #40734126557 — exact-source-byte parser/headline parity PASS
+
+After adding `beautifulsoup4` (required by legacy Arabic collector), B83 completed without exception. Actual V1/V2 same-input rows: English parser parity true, headline identity parity true, V1-only 0, V2-only 0, 3 V2 editorial stories; Arabic parser parity true, headline identity parity true, V1-only 0, V2-only 0, 1 V2 editorial story. Both source hashes joined correctly. Full comparison status explicitly `HOLD_MISSING_V1_FULL_SYSTEM_EVIDENCE`, as no full legacy editorial/render/model/delivery replay was performed. B80 source captures and B82 five held pages reproduced. Four-product integration still `HOLD_FOUR_PRODUCT_INTEGRATION`; Arabic translation not run. This is a **partial real acceptance result**, not a production pass.
