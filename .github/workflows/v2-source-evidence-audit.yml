@@ -47,5 +47,6 @@ jobs:
           path: |
             audit_report.json
             audit_summary.json
+            audit_freshness_review.json
           retention-days: 7
           if-no-files-found: warn
