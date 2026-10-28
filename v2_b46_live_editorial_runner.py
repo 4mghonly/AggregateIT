@@ -17,7 +17,7 @@ FEEDS=(
     ('arabic','https://www.aljazeera.net/aljazeerarss/ar/all.xml'),
 )
 def run(*,render_native=False,render_four_products=False,
-        rss_snapshots=None,observed_at=None):
+        rss_snapshots=None,observed_at=None,visual_archive_dir=None):
     if rss_snapshots is not None:
         if not isinstance(rss_snapshots,dict) or set(rss_snapshots)!={'english','arabic'}:
             raise ValueError('incomplete_shared_rss_snapshots')
@@ -115,7 +115,11 @@ def run(*,render_native=False,render_four_products=False,
                 from tempfile import TemporaryDirectory
                 from v2_b47_four_product_held import compose_held_products
                 with TemporaryDirectory(prefix="v2-b47-four-products-") as temp:
-                    four_products=compose_held_products(result,output_dir=Path(temp)/"native",as_of=observed)
+                    output=Path(visual_archive_dir) if visual_archive_dir is not None else Path(temp)/"native"
+                    four_products=compose_held_products(result,output_dir=output,as_of=observed)
+                    if visual_archive_dir is not None:
+                        from v2_b86_visual_archive import validate_page_archive
+                        four_products['visual_archive']=validate_page_archive(output)
             except Exception as exc:
                 four_products={"status":"HOLD_FOUR_PRODUCT_INTEGRATION","error_class":type(exc).__name__}
         else:
@@ -134,8 +138,8 @@ def run(*,render_native=False,render_four_products=False,
         'can_release':False}
 if __name__=='__main__':
     import argparse
-    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');args=a.parse_args()
-    result=run(render_native=args.render_held,render_four_products=args.four_products)
+    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');a.add_argument('--visual-archive-dir',type=Path);args=a.parse_args()
+    result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print(json.dumps({'source_attempts':result['source_attempts'],
