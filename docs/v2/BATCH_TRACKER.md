@@ -1,4 +1,9 @@
 
+## B95–B100 checkpoint
+
+B95-B97 hosted #40763482421 SUCCESS (contract/tests only). B98-B100 readiness gate module and tests added, hosted #40763695123 in progress. Current scope is partial: B95 receipt format/consolidation implemented, but cross-run GitHub artifact retrieval NOT wired; B96 distinct-day checks implemented, but genuine 7-day history NOT collected; B97 new publishers NOT onboarded. B98 reports source health but actual fallback feed routing NOT implemented; B99 4K technical page check only, independent visual QA NOT done; B100 LLM primary/fallback live test NOT done. Release HOLD. No changes to production, main, V1, Discord, Drive or paid resources.
+
+
 ## B95–B97 checkpoint
 
 B94 hosted #40762044519 SUCCESS. Added B95-B97 per-day JSON history receipt contract, bounded 30-day local receipt consolidation, duplicate-date conflict rejection, strict digest format, seven-day bilingual story-count check and explicit unverified source redundancy. Tests and workflow integrated; hosted #40763482421 in progress. IMPORTANT: this does NOT yet fetch previous GitHub run artifacts automatically and does NOT establish genuine seven-day history; artifact restore remains to implement. B97 additional publishers not yet validated; source expansion held. No production, main, V1, Discord, paid services or Google Drive changes.
