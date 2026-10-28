@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B73 independent Somalia publisher evidence
+
+Shabelle Media's own Somali and English pages show 27–28 October reporting; Somali Dispatch publisher identity exists but live feed compatibility is unverified. Distinct the-somali-dispatch domain flagged to prevent conflation. Source-quality evidence logged in B73_REAL_SOURCE_QUALITY_EVIDENCE_2026-10-28.md. This is genuine website observation, **not** V2 RSS compatibility or release acceptance. Hosted prior run #40715362839 succeeded. All release gates stay HOLD.
+
+
 ## 28 October — B66–B71 verification and evidence hardening
 
 Hosted [CI #40714436511](https://github.com/4mghonly/AggregateIT/actions/runs/40714436511) succeeded, including focused gates, full V2 and both legacy regressions, held pre-canary. Additional branch-only hardening prevents duplicated translation review counts and rejects malformed visual page inputs or unbounded delivery receipts; three additional focused regressions added. New hosted verification pending. V1 remains live; V2 replacement is conditional on authentic evidence and reversible cutover. No Discord send, paid call or production change.
