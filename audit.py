@@ -129,6 +129,21 @@ async def main():
     print("FAILED SOURCES:")
     for r in bad: print(" -", r["kind"], "|", r["name"], "|", r.get("url", ""), "|", r.get("err", ""))
     with open("audit_report.json", "w") as f: json.dump(RESULTS, f, indent=2)
+    summary = {
+        "schema": "aggregateit-v2-source-audit-summary/1",
+        "total": len(RESULTS), "passed": len(RESULTS) - len(bad),
+        "failed": len(bad),
+        "failure_categories": {
+            "rate_limited": sorted(r["name"] for r in bad if r.get("http") == 429),
+            "access_denied": sorted(r["name"] for r in bad if r.get("http") == 403),
+            "other": sorted(r["name"] for r in bad if r.get("http") not in (403, 429)),
+        },
+        "release_accepted": False,
+        "production_sources_modified": False,
+    }
+    with open("audit_summary.json", "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+    print("SOURCE_AUDIT_SUMMARY " + json.dumps(summary, sort_keys=True))
 
 # ---- Update C: per-source health + auto-mute ----
 import time as _time
