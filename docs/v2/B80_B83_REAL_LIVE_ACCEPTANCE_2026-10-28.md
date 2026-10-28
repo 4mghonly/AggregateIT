@@ -34,3 +34,7 @@ After adding `beautifulsoup4` (required by legacy Arabic collector), B83 complet
 ## Fourth hosted run #40734320042 — diagnostic
 
 Real article counts, five native pages, and exact-input bilingual parser/headline parity all reproduced successfully. Four-product integration still held with `ModuleNotFoundError`. Inspection of `v2_b47_weekly_pdf_preview.py` identified imports `arabic_reshaper` and `bidi.algorithm` not in the isolated workflow installation. Added `arabic-reshaper` and `python-bidi` to that workflow only; fifth run #40734476003 started. No changes to production or translation semantics.
+
+## Fifth hosted run #40734476003 — B80/B82/B83 technical integration PASS
+
+Workflow **SUCCESS**. Source-backed original articles: 3 English, 1 Arabic. Five native 4K held pages generated. Full B47 four-product held package now successfully returned schema `aggregateit-v2-b47-four-product-held/1` after installing `arabic-reshaper` and `python-bidi` in isolated workflow. English weekly real daily snapshot days: 1; Arabic weekly: 1; neither represents seven-day coverage. B83 source-byte-joined English and Arabic parser parity true and headline identity parity true, with zero V1-only/V2-only items. No model translations, full V1 render parity or independent Discord receipt. This closes **technical live pipeline execution** for B80/B82 and parser-level B83, not editorial/visual/translation production acceptance. No main changes, production calls or posts.
