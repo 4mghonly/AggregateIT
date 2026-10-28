@@ -1,4 +1,9 @@
 
+## B88–B90 — evidence-gated acceptance synthesis (2026-10-28)
+
+Implemented `v2_b88_b90_acceptance.py`, focused tests and hosted workflow integration. B88 validates exactly five source-backed 4K PNG archive receipts but explicitly does NOT assert independent readability, clipping or RTL visual review. B89 summarizes English/Arabic eligible articles, selected stories, represented regions and source rejections; no claim of source redundancy. B90 records parser/headline parity separately from unavailable full V1/V2 editorial/render/model/Discord parity. All acceptance outputs are no-post, can_release false. Commits ea7fe24, 4fb476f, 68468e5. Hosted run #40758940350 started, outcome pending. Drive SQLite sync deferred to final deployment.
+
+
 ## B87 continuation — taxonomy mismatch root cause
 
 Hosted #40757247178 SUCCESS as workflow, but 3 Arabic article captures were admitted then all three excluded by editorial `topic_excluded_by_product`: classifier emitted `geopolitics`, Arabic editorial allowed `political_stability` instead. Added explicit classifier-to-editorial topic adapter, regression test and wired it to article compiler. Commits c4a9d4b, 340d299, 20ee58e, 1a8991d. Hosted #40757867630 queued. No claim of rendered pages or visual approval until live receipt proves them. Release HOLD; no V1 or production changes.
