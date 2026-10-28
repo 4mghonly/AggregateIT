@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B77 live RSS freshness evidence
+
+Enhanced read-only publisher audit to distinguish HTTP success from freshness: per-feed dated, undated, fresh-in-48h, future-dated exclusion, and parse warnings; summary enumerates successful but stale/undated sources. Added two unit tests and hosted test step before source audit; CI #40730016174 pending. No changes to production or source enablement. This is feed-level freshness, not story semantic accuracy or seven-day editorial lineage.
+
+
 ## 28 October — B76 weekly source-snapshot replay guard
 
 B61 seven-day lineage previously required distinct edition digests but allowed the same original source snapshot digest on seven dates. B76 now refuses repeated source snapshot hashes within each language, records reused_identical_source_snapshot_digest, and includes 2 tests (replayed vs distinct). Integrated no-post CI #40723404157 started. This is structural evidence hardening only; genuine seven-day source/edition capture remains outstanding and release stays HOLD.
