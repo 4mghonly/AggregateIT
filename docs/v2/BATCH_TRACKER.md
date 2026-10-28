@@ -1,5 +1,10 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B79 acceptance evaluation closeout (release HOLD)
+
+Nine-gate independent-evidence inventory implemented with four regressions and hosted CI #40731807495 initiated. Acceptance closeout report B79_ACCEPTANCE_CLOSEOUT_2026-10-28.md records observed source audits, previous visual defects and all missing production-equivalent receipts. Engineering evaluation completed; production acceptance NOT achieved. V1 unchanged. No canary, Discord, paid calls or secrets changes.
+
+
 ## 28 October — B78 real RSS freshness review
 
 Hosted B77 run #40730016174 PASS. Actual audit: 112/114 endpoint OK; 84 RSS feeds with >=1 dated item in last 48h; 12 accessible RSS feeds stale or undated; Roll Call parse warning; Independent 429 and Naked Capitalism 403. Added review-only slow-cadence/general-stale categorization and artifact audit_freshness_review.json. Source evidence report: B78_LIVE_RSS_FRESHNESS_2026-10-28.md. Follow-up hosted workflow #40731090212 in progress at publication. No source disable or production changes; editorial acceptance still pending.
