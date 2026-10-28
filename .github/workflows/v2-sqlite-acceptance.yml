@@ -1,0 +1,56 @@
+name: V2 isolated SQLite acceptance store (zero-cost)
+on:
+  workflow_dispatch:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - 'v2_sqlite_store.py'
+      - 'tests/test_v2_sqlite_store.py'
+      - '.github/workflows/v2-sqlite-acceptance.yml'
+permissions:
+  contents: read
+concurrency:
+  group: aggregateit-v2-sqlite-acceptance
+  cancel-in-progress: false
+jobs:
+  sqlite-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      LLM_API_KEY: ''
+      LLM_FALLBACK_API_KEY: ''
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: rebuild/aggregateit-v2
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test bounded store
+        run: python -B -m unittest discover -s tests -p test_v2_sqlite_store.py -v
+      - name: Create and validate empty isolated SQLite acceptance DB
+        run: |
+          python -B - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          from v2_sqlite_store import Store,MAX_DB_BYTES
+          p=Path('v2-acceptance.sqlite')
+          with Store(p) as db:
+              removed=db.cleanup()
+              summary={'schema':'aggregateit-v2-sqlite-acceptance/1','tables':{t:db.count(t) for t in ('articles','source_health','edition_evidence')},'retention_cleanup':removed,'max_bytes':MAX_DB_BYTES,'database_bytes':db.size_bytes(),'contains_production_data':False,'production_changed':False}
+          summary['sha256']=hashlib.sha256(p.read_bytes()).hexdigest()
+          Path('v2-sqlite-receipt.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print(json.dumps(summary))
+          PY
+      - name: Upload expiring non-production snapshot
+        uses: actions/upload-artifact@v6
+        with:
+          name: aggregateit-v2-empty-sqlite-test
+          path: |
+            v2-acceptance.sqlite
+            v2-sqlite-receipt.json
+          retention-days: 7
+          if-no-files-found: error
