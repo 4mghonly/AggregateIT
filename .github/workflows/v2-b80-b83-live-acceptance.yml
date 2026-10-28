@@ -5,6 +5,7 @@ on:
     branches: ['rebuild/aggregateit-v2']
     paths:
       - '.github/workflows/v2-b80-b83-live-acceptance.yml'
+      - 'v2_b49_single_slot_shadow.py'
 permissions:
   contents: read
 concurrency:
