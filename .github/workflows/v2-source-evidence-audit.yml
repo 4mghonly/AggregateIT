@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/v2-source-evidence-audit.yml'
       - 'audit.py'
+      - 'tests/test_v2_source_audit_summary.py'
       - 'config/sources.json'
 permissions:
   contents: read
@@ -40,6 +41,8 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: aggregateit-v2-source-audit
-          path: audit_report.json
+          path: |
+            audit_report.json
+            audit_summary.json
           retention-days: 7
           if-no-files-found: warn
