@@ -1,4 +1,9 @@
 
+## B95–B97 checkpoint
+
+B94 hosted #40762044519 SUCCESS. Added B95-B97 per-day JSON history receipt contract, bounded 30-day local receipt consolidation, duplicate-date conflict rejection, strict digest format, seven-day bilingual story-count check and explicit unverified source redundancy. Tests and workflow integrated; hosted #40763482421 in progress. IMPORTANT: this does NOT yet fetch previous GitHub run artifacts automatically and does NOT establish genuine seven-day history; artifact restore remains to implement. B97 additional publishers not yet validated; source expansion held. No production, main, V1, Discord, paid services or Google Drive changes.
+
+
 ## B94 — bounded daily evidence ledger
 
 B91-B93 hosted #40759347125 SUCCESS: Arabic 3/17 regions represented; one observed day, no seven-day proof. Implemented B94 SQLite daily no-post evidence receipt per UTC day and language, UPSERT preventing repeated same-day runs from inflating seven-day counts, 30-day cleanup, seven-day positive-story counters, and fail-closed timestamp and receipt validation. This workflow's SQLite is ephemeral per CI run and artifact-only; persistence across runs is NOT yet connected and no seven-day historical evidence is claimed. Commits 6b9dd6c, 12bf665, 0c9c905; hosted #40762044519 pending. Production, V1 and Drive remain untouched.
