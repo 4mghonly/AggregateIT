@@ -146,5 +146,6 @@ if __name__=='__main__':
                       'native_status':result['native']['status'],
                       'native_pages':len(result['native'].get('native_pages',[])),
                       'four_products':result['four_products'].get('schema',result['four_products'].get('status')),
+                      'four_product_error_class':result['four_products'].get('error_class'),
                       'weekly_days':{k:v['days_with_real_daily_snapshots'] for k,v in result['four_products'].get('weekly',{}).items()},
                       'can_release':False},ensure_ascii=False))
