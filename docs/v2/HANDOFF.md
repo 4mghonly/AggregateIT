@@ -1,5 +1,9 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 28 October — B80–B83 live technical pipeline verified (#40734476003)
+
+Real BBC/Al Jazeera publisher article capture: EN 3, AR 1; five held 4K pages; four-product B47 daily+weekly held integration PASS; weekly independent observed days EN 1, AR 1; exact-input V1/V2 parser and headline identity parity PASS both languages, 0 unmatched items. Isolated CI dependencies corrected (BeautifulSoup, arabic-reshaper, python-bidi). Actual rendered pixels not reviewed, live model translation not performed, complete V1 editorial/render/delivery parity absent. Production release HOLD. Full evidence: docs/v2/B80_B83_REAL_LIVE_ACCEPTANCE_2026-10-28.md.
+
 ## 28 October — B80–B83 combined genuine publisher acceptance run
 
 A no-post isolated hosted workflow now executes B46 authentic BBC World + Al Jazeera Arabic RSS and bounded publisher article-body captures, source-geography/attribution gates, held 2-page English + 3-page Arabic 4K rendering and weekly previews if both languages admit real articles, followed by B49 exact-source-byte V1/V2 parser/headline/newsroom shadow. Run #40733805528 initiated. Artifacts are sanitized metrics only; article bytes and model translations are not persisted. This is a genuine attempt at B80/B82/B83, but does NOT by itself establish Arabic live model translation fidelity, visual inspection of actual image pixels, or full V1 editorial/render/delivery parity. Release remains HOLD, no production or Discord changes.
