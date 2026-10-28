@@ -30,3 +30,7 @@ B80 article-backed counts reproduced (3 English, 1 Arabic) and five held 4K page
 ## Third hosted run #40734126557 — exact-source-byte parser/headline parity PASS
 
 After adding `beautifulsoup4` (required by legacy Arabic collector), B83 completed without exception. Actual V1/V2 same-input rows: English parser parity true, headline identity parity true, V1-only 0, V2-only 0, 3 V2 editorial stories; Arabic parser parity true, headline identity parity true, V1-only 0, V2-only 0, 1 V2 editorial story. Both source hashes joined correctly. Full comparison status explicitly `HOLD_MISSING_V1_FULL_SYSTEM_EVIDENCE`, as no full legacy editorial/render/model/delivery replay was performed. B80 source captures and B82 five held pages reproduced. Four-product integration still `HOLD_FOUR_PRODUCT_INTEGRATION`; Arabic translation not run. This is a **partial real acceptance result**, not a production pass.
+
+## Fourth hosted run #40734320042 — diagnostic
+
+Real article counts, five native pages, and exact-input bilingual parser/headline parity all reproduced successfully. Four-product integration still held with `ModuleNotFoundError`. Inspection of `v2_b47_weekly_pdf_preview.py` identified imports `arabic_reshaper` and `bidi.algorithm` not in the isolated workflow installation. Added `arabic-reshaper` and `python-bidi` to that workflow only; fifth run #40734476003 started. No changes to production or translation semantics.
