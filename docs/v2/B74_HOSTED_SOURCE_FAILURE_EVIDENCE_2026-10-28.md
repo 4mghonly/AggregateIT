@@ -23,3 +23,13 @@ B74 engineering improvement: `audit.py` now emits `audit_summary.json` with rate
 - Add freshness and independent publisher evidence beyond the HTTP-only audit.
 - Capture real synchronized editions, original-to-Arabic semantic checks, and visual QA.
 - Keep production release HOLD pending genuine acceptance.
+
+## Second independent hosted observation — 15:59 UTC
+
+[Run #40721348016](https://github.com/4mghonly/AggregateIT/actions/runs/40721348016), artifact 12831295900: **114 checked, 110 OK, 4 failed**. The new structured summary was emitted and captured from actual job logs:
+
+- HTTP 403: France 24; Naked Capitalism.
+- HTTP 429: Mish Talk - Global Econ Trends; The Independent - Breaking.
+- IntelNews recovered on this run; France 24 and Mish Talk newly failed.
+
+**Interpretation:** failures are intermittent/provider-specific, not a fixed permanent dead-source list. Two consecutive independent runs disagree. Avoid blanket source deletion or claims of permanent recovery. Need time-windowed health scoring and rate-limit-aware fallback before considering source substitutions. No production changes.
