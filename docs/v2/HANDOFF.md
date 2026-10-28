@@ -1,5 +1,18 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 28 October — B63 local geometry metadata hardening; hosted verification pending
+
+B60 technical geometry lint previously accepted non-hex 64-character digests,
+`NaN` coordinates and an empty text-box page without violations. B63 adds
+failing-first tests for these cases and rejects malformed metadata without
+altering the existing fail-closed release status. Focused B63 4/4 and B59–B62
+12/12 pass locally. The no-post integration workflow now includes B63 and will
+run full V2/legacy suites when the development-branch change is published.
+Fresh local installed-dependency regressions: 711/711 V2, 153/153 English
+legacy and 55/55 Arabic legacy. Hosted B63 verification is pending.
+This is **not** real-image visual or same-source editorial acceptance; all nine
+B62 pre-canary blockers remain. See `B63_GEOMETRY_EVIDENCE_2026-10-28.md`.
+
 ## 27 October — B59–B62 verified together; production canary HOLD
 
 [GitHub Actions #40567211759](https://github.com/4mghonly/AggregateIT/actions/runs/40567211759) **SUCCESS**: 12/12 focused, 707/707 full V2, 153/153 English legacy, 55/55 Arabic legacy. B59 controlled English/Arabic translation counterexample PASS (not real publisher model semantics); B60 original five visual problems preserved and 4K bbox lint implemented (not visually resolved); B61 new week-lineage validator was provided 0/7 archived days per product (B47 historical held preview previously 1/7), preventing fabricated weekly completeness; B62 9 release-critical technical blockers still open. Paid calls 0, B58 staged Gemini/GPT-OSS configuration unchanged, main `ea52e14` protected, no Discord/model updates, D1 writes or canary. B59–B62 are **engineering gates implemented and tested**, not production acceptance. Reports `B59_SEMANTIC_REGRESSIONS_2026-10-27.md` through `B62_CANARY_HOLD_2026-10-27.md`.

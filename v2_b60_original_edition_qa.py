@@ -1,6 +1,8 @@
 """B60 original visual defect register + strict geometry checks, no false V2 clearance."""
 from __future__ import annotations
 from hashlib import sha256
+from math import isfinite
+from re import fullmatch
 
 KNOWN_DEFECTS={
  "en_title_lead_mismatch":"English original headline unrelated to nearby market lead",
@@ -16,16 +18,19 @@ def inspect_layout_geometry(pages):
     for p in pages:
         if not isinstance(p,dict) or not isinstance(p.get("boxes"),list):
             raise ValueError("missing_layout_geometry")
+        if not p["boxes"]:
+            raise ValueError("missing_page_text_geometry")
         pair=(p.get("product"),p.get("page"))
         if pair not in expect or pair in seen:raise ValueError("invalid_page_manifest")
         seen.add(pair)
         if p.get("width")!=3840 or p.get("height")!=2160:
             violations.append("wrong_4k_dimensions");continue
-        if not isinstance(p.get("sha256"),str) or len(p["sha256"])!=64:
+        if not isinstance(p.get("sha256"),str) or not fullmatch(r"[0-9a-f]{64}",p["sha256"]):
             raise ValueError("page_digest_missing")
         for box in p["boxes"]:
             if (not isinstance(box,dict) or
-                any(type(box.get(k)) not in (float,int) for k in ("x","y","w","h","font_px"))):
+                any(type(box.get(k)) not in (float,int) or not isfinite(box[k])
+                    for k in ("x","y","w","h","font_px"))):
                 raise ValueError("invalid_text_geometry")
             x,y,w,h=tuple(box[k] for k in ("x","y","w","h"))
             if w<=0 or h<=0 or x<0 or y<0 or x+w>3840 or y+h>2160:

@@ -1,10 +1,12 @@
-name: AggregateIT V2 B59-B62 integrated zero-cost release readiness (NO POST)
+name: AggregateIT V2 B59-B63 integrated zero-cost release readiness (NO POST)
 
 on:
   push:
     branches: ['rebuild/aggregateit-v2']
     paths:
       - '.github/workflows/v2-b59-b62-integrated-hold.yml'
+      - 'v2_b60_original_edition_qa.py'
+      - 'tests/test_v2_b63_geometry_evidence.py'
 
 permissions:
   contents: read
@@ -35,8 +37,10 @@ jobs:
           python-version: '3.12'
       - name: Install installed project test dependencies
         run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
-      - name: Focused B59-B62 gates
-        run: python -B -m unittest discover -s tests -p test_v2_b59_b62_gate.py -v
+      - name: Focused B59-B63 gates
+        run: |
+          python -B -m unittest discover -s tests -p test_v2_b59_b62_gate.py -v
+          python -B -m unittest discover -s tests -p test_v2_b63_geometry_evidence.py -v
       - name: One final V2 and legacy regression
         run: |
           python -B -m unittest discover -s tests

@@ -1,5 +1,16 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B63 geometry evidence guard (local; hosted pending)
+
+The B60 five-page geometry check falsely accepted non-hex digest strings,
+non-finite coordinates and pages without text boxes. B63 rejects these input
+classes with four new failing-first regression tests. Local B63 4/4 and B59–B62
+12/12 pass. Fresh local full regressions pass 711/711 V2, 153/153 English legacy
+and 55/55 Arabic legacy. Hosted CI has not run. The B59–B63 no-post CI workflow
+is prepared to repeat the suites on development-branch publication. B62's nine
+technical release blockers stay **HOLD**. No production
+or Discord action. See `B63_GEOMETRY_EVIDENCE_2026-10-28.md`.
+
 ## 27 October — B59–B62 verified together; production canary HOLD
 
 [GitHub Actions #40567211759](https://github.com/4mghonly/AggregateIT/actions/runs/40567211759) **SUCCESS**: 12/12 focused, 707/707 full V2, 153/153 English legacy, 55/55 Arabic legacy. B59 controlled English/Arabic translation counterexample PASS (not real publisher model semantics); B60 original five visual problems preserved and 4K bbox lint implemented (not visually resolved); B61 new week-lineage validator was provided 0/7 archived days per product (B47 historical held preview previously 1/7), preventing fabricated weekly completeness; B62 9 release-critical technical blockers still open. Paid calls 0, B58 staged Gemini/GPT-OSS configuration unchanged, main `ea52e14` protected, no Discord/model updates, D1 writes or canary. B59–B62 are **engineering gates implemented and tested**, not production acceptance. Reports `B59_SEMANTIC_REGRESSIONS_2026-10-27.md` through `B62_CANARY_HOLD_2026-10-27.md`.
