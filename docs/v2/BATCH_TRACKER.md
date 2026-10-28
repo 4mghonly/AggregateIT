@@ -1,5 +1,9 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B80–B83 combined genuine publisher acceptance run
+
+A no-post isolated hosted workflow now executes B46 authentic BBC World + Al Jazeera Arabic RSS and bounded publisher article-body captures, source-geography/attribution gates, held 2-page English + 3-page Arabic 4K rendering and weekly previews if both languages admit real articles, followed by B49 exact-source-byte V1/V2 parser/headline/newsroom shadow. Run #40733805528 initiated. Artifacts are sanitized metrics only; article bytes and model translations are not persisted. This is a genuine attempt at B80/B82/B83, but does NOT by itself establish Arabic live model translation fidelity, visual inspection of actual image pixels, or full V1 editorial/render/delivery parity. Release remains HOLD, no production or Discord changes.
+
 ## 28 October — B79 acceptance evaluation closeout (release HOLD)
 
 Nine-gate independent-evidence inventory implemented with four regressions and hosted CI #40731807495 initiated. Acceptance closeout report B79_ACCEPTANCE_CLOSEOUT_2026-10-28.md records observed source audits, previous visual defects and all missing production-equivalent receipts. Engineering evaluation completed; production acceptance NOT achieved. V1 unchanged. No canary, Discord, paid calls or secrets changes.
