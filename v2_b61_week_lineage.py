@@ -18,6 +18,7 @@ def evaluate_week_lineage(records, *,as_of:str):
     if not isinstance(records,list) or len(records)>40:
         raise ValueError("invalid_week_input")
     seen=set(); days={"english":set(),"arabic":set()}
+    source_digests={"english":set(),"arabic":set()}
     content_digests={"english":set(),"arabic":set()}
     issues=[]
     for row in records:
@@ -36,6 +37,9 @@ def evaluate_week_lineage(records, *,as_of:str):
         seen.add((name,d))
         if digest in content_digests[name]:
             issues.append("reused_identical_edition_digest")
+        if src in source_digests[name]:
+            issues.append("reused_identical_source_snapshot_digest")
+        source_digests[name].add(src)
         content_digests[name].add(digest);days[name].add(d)
     counts={name:len(s) for name,s in days.items()}
     structural_complete=all(n==7 for n in counts.values()) and not issues
