@@ -76,6 +76,16 @@ def run_one_slot(*,production_baseline=None,candidate_root=None):
                 'failures':failures,
                 'source_count':len(packets),'can_release':False,
                 'discord_sent':False}
+    # The live newsroom feed contract may differ from the B38 source list.
+    # A partial packet must remain a documented HOLD, never crash on a missing key.
+    from v2_b46_live_editorial_runner import FEEDS
+    expected={p:url for p,url in FEEDS}
+    if any(p not in packets or packets[p]['feed_url']!=url for p,url in expected.items()):
+        return {'schema':'aggregateit-v2-b49-single-slot-preflight/1',
+                'status':'HOLD_SHARED_FEED_CONTRACT_MISMATCH',
+                'source_count':len(packets),'failures':failures,
+                'expected_feed_urls':expected,
+                'can_release':False,'discord_sent':False}
     newsroom=run(render_four_products=True,rss_snapshots=packets,observed_at=at)
     rows=[]
     for product,_,_ in SOURCES:
