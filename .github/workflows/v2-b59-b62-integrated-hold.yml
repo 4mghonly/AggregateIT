@@ -1,4 +1,4 @@
-name: AggregateIT V2 B59-B65 integrated zero-cost release readiness (NO POST)
+name: AggregateIT V2 B59-B71 integrated zero-cost release readiness (NO POST)
 
 on:
   push:
@@ -8,6 +8,8 @@ on:
       - 'v2_b60_original_edition_qa.py'
       - 'tests/test_v2_b63_geometry_evidence.py'
       - 'tests/test_v2_b35_france24_diagnostic.py'
+      - 'v2_b66_b71_evidence.py'
+      - 'tests/test_v2_b66_b71_evidence.py'
       - 'v2_b64_b65_release_evidence.py'
       - 'tests/test_v2_b64_b65_release_evidence.py'
       - 'docs/v2/B64_B65_AUDIT_RECONCILIATION_SOMALIA_2026-10-28.md'
@@ -41,11 +43,12 @@ jobs:
           python-version: '3.12'
       - name: Install installed project test dependencies
         run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
-      - name: Focused B59-B65 gates
+      - name: Focused B59-B71 gates
         run: |
           python -B -m unittest discover -s tests -p test_v2_b59_b62_gate.py -v
           python -B -m unittest discover -s tests -p test_v2_b63_geometry_evidence.py -v
           python -B -m unittest discover -s tests -p test_v2_b64_b65_release_evidence.py -v
+          python -B -m unittest discover -s tests -p test_v2_b66_b71_evidence.py -v
       - name: One final V2 and legacy regression
         run: |
           python -B -m unittest discover -s tests
