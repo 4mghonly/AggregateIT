@@ -120,6 +120,7 @@ def classify_geography(headline:str,body:str,*,language:str)->dict:
     else:
         if re.search(r'هجوم|قتلى|قتل|إصابة|أمني|عسكري|رصاص|كنيسة',headline):topic='security'
         elif re.search(r'دبلوماس|مباحثات|وزير|زيارة رسمية',headline):topic='diplomacy'
+        elif re.search(r'اتفاق|اقتصاد|عقوب|مفاوض|محادثات|قمة|حكوم|رئيس|برلمان|انتخاب|تجارة|سياس|قرار|حدود|هدنة|وقف إطلاق النار',headline):topic='geopolitics'
         else:raise ValueError('arabic_topic_without_explicit_trigger')
     return {'region':region,'subject_country':country,
             'topic_english':topic if language=='en' else None,
