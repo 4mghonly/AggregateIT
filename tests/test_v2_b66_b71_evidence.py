@@ -21,6 +21,17 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(b66_sources([a,b])["compatible_distinct_sources"],1)
     def test_b67_no_unverified_semantic_acceptance(self):
         self.assertFalse(b67_translation([{"original_language":"so"}])["publisher_story_semantic_fidelity_verified"])
+    def test_b67_duplicate_evidence_not_double_counted(self):
+        row={"original_language":"so","original_sha256":"a"*64,"arabic_sha256":"b"*64,
+             "numbers_preserved":True,"negation_preserved":True,
+             "attribution_preserved":True,"review_provenance":"independent"}
+        r=b67_translation([row,row])
+        self.assertEqual(r["reviewed_rows"],1)
+        self.assertIn("duplicate_translation_review",r["issues"])
+    def test_b68_invalid_pages_rejected(self):
+        with self.assertRaises(ValueError):b68_visual(["not a page"],{})
+    def test_b71_unbounded_receipts_rejected(self):
+        with self.assertRaises(ValueError):b71_delivery([{}]*101,[])
     def test_b68_unreviewed_visuals_held(self):
         self.assertEqual(len(b68_visual([],{})["outstanding_defects"]),5)
     def test_b69_empty_week_missing_seven_each(self):
