@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 28 October — B73 independent Somalia publisher evidence
+
+Shabelle Media's own Somali and English pages show 27–28 October reporting; Somali Dispatch publisher identity exists but live feed compatibility is unverified. Distinct the-somali-dispatch domain flagged to prevent conflation. Source-quality evidence logged in B73_REAL_SOURCE_QUALITY_EVIDENCE_2026-10-28.md. This is genuine website observation, **not** V2 RSS compatibility or release acceptance. Hosted prior run #40715362839 succeeded. All release gates stay HOLD.
+
+
 ## V2 replaces V1 — migration execution policy (28 October)
 
 Target: preserve existing V1 production behavior while V2 demonstrates equal or better same-source editorial, translation, visual and delivery quality. V2 stays isolated on rebuild/aggregateit-v2 until acceptance evidence exists. Execute source qualification, real-week capture, same-slot comparison, model failover checks and independent delivery receipts in substantial batches. Never equate a passing offline evidence schema with accepted live evidence. At cutover, use an explicit reversible traffic switch with a monitored rollback path; retain V1 until V2 proves delivery reliability. No current production cutover authorization is implied by branch-write permission.
