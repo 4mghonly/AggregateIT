@@ -1,5 +1,9 @@
 # AggregateIT V2 — Batch Tracker
 
+## 28 October — B85 SQLite engine bridge
+
+Added v2_sqlite_engine_bridge.py and focused tests. Live B80-B83 no-post workflow now writes sanitized per-language source-health and edition-evidence rows into v2-engine-evidence.sqlite and includes it in seven-day artifacts. Hosted run #40753625328 started, completion pending. Cross-run restoration and long-term private backups NOT implemented; do not claim persistent multi-run database. No V1/main, Discord or paid-service changes.
+
 ## 28 October — B84 zero-cost SQLite foundation
 
 Isolated SQLite evidence store, retention/size bounds, four focused tests and no-post hosted workflow implemented. Hosted #40750942504 SUCCESS. Empty SQLite snapshot archived as 7-day GitHub Actions artifact. Durable multi-run restore, dedicated private backup repo and actual newsletter-pipeline DB integration NOT YET implemented. V1/main unchanged; no paid service or production cutover. See docs/v2/B84_SQLITE_ZERO_COST_SETUP_2026-10-28.md.
