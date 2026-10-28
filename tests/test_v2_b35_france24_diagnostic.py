@@ -1,4 +1,5 @@
 """B35 pure synthetic France24 parser-difference diagnostic tests."""
+from datetime import datetime
 import json
 import socket
 from pathlib import Path
@@ -58,16 +59,26 @@ class ParserDiagnosticTests(unittest.TestCase):
             diagnose_bytes(NORMAL, observed_at="2026-10-26T06:00:00")
 
     def test_single_fetch_and_metadata_only_artifact(self):
+        # Keep the CLI's wall clock aligned with its fixed synthetic feed date.
+        # Otherwise this fixture becomes stale once 72 real hours have elapsed.
+        class FixedDiagnosticClock(datetime):
+            @classmethod
+            def now(cls, tz=None):
+                observed = datetime.fromisoformat(OBSERVED)
+                return observed.astimezone(tz) if tz else observed
+
         with TemporaryDirectory() as d:
             out = Path(d) / "receipt.json"
             packet = {"status": 200, "final_url": SOURCE,
                       "content_type": "application/rss+xml", "body": DUPLICATE}
-            with patch("v2_b35_france24_diagnostic.pinned_https_fetch", return_value=packet) as fetch:
-                with patch("sys.argv", ["diagnostic", "--output", str(out)]):
-                    self.assertEqual(main(), 0)
+            with (patch("v2_b35_france24_diagnostic.pinned_https_fetch", return_value=packet) as fetch,
+                  patch("v2_b35_france24_diagnostic.datetime", FixedDiagnosticClock),
+                  patch("sys.argv", ["diagnostic", "--output", str(out)])):
+                self.assertEqual(main(), 0)
             self.assertEqual(fetch.call_count, 1)
             data = json.loads(out.read_text(encoding="utf8"))
             self.assertEqual(data["v1_only"], 1)
+            self.assertEqual(data["observed_at"], OBSERVED)
             self.assertEqual(data["http_status"], 200)
             self.assertNotIn("regional report", out.read_text(encoding="utf8"))
             self.assertTrue(data["no_raw_feed_artifact"])

@@ -7,6 +7,7 @@ on:
       - '.github/workflows/v2-b59-b62-integrated-hold.yml'
       - 'v2_b60_original_edition_qa.py'
       - 'tests/test_v2_b63_geometry_evidence.py'
+      - 'tests/test_v2_b35_france24_diagnostic.py'
 
 permissions:
   contents: read
