@@ -1,4 +1,9 @@
 
+## B91–B93 — coverage and release evidence audit (2026-10-28)
+
+B88–B90 hosted #40758940350 SUCCESS: five valid 4K pages; three EN stories (one represented region, palestine_israel), three AR stories (egypt/gcc/levant); 7-day evidence and full parity not met. Implemented B91 target-region gap report against editorial AR_REGIONS, B92 distinct-date evidence counting (one run/day cannot fake a week), and B93 explicit release hold gates for visual QA, live fallback, full parity and delivery. Focused tests and hosted CI integration. Commits 690cf81, 3c5c0be, c58ca55; run #40759347125 pending. No production modification or Discord posts. Drive authentication deferred.
+
+
 ## B88–B90 — evidence-gated acceptance synthesis (2026-10-28)
 
 Implemented `v2_b88_b90_acceptance.py`, focused tests and hosted workflow integration. B88 validates exactly five source-backed 4K PNG archive receipts but explicitly does NOT assert independent readability, clipping or RTL visual review. B89 summarizes English/Arabic eligible articles, selected stories, represented regions and source rejections; no claim of source redundancy. B90 records parser/headline parity separately from unavailable full V1/V2 editorial/render/model/Discord parity. All acceptance outputs are no-post, can_release false. Commits ea7fe24, 4fb476f, 68468e5. Hosted run #40758940350 started, outcome pending. Drive SQLite sync deferred to final deployment.
