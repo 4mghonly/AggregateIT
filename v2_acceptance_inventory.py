@@ -8,6 +8,8 @@ EVIDENCE_SCHEMA="aggregateit-v2-independent-acceptance/1"
 def assess(evidence):
     if not isinstance(evidence,dict) or evidence.get("schema")!=EVIDENCE_SCHEMA:
         raise ValueError("invalid_acceptance_evidence")
+    if not isinstance(evidence.get("checks",{}),dict):
+        raise ValueError("invalid_acceptance_checks")
     checks={}
     details={}
     for key in RELEASE_ITEMS:
