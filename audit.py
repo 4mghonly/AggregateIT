@@ -171,6 +171,25 @@ async def main():
     with open("audit_summary.json", "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
     print("SOURCE_AUDIT_SUMMARY " + json.dumps(summary, sort_keys=True))
+    # Track freshness without conflating slow-publishing institutional feeds
+    # with genuinely broken feeds. These are review classifications only.
+    slow_publishers = {
+        "Abu Dhabi Media Office Government", "Federal Reserve",
+        "European Central Bank", "ECB USD Exchange Rate",
+        "ECB Market Information", "Bellingcat (OSINT)",
+    }
+    freshness_review = {
+        "schema": "aggregateit-v2-source-freshness-review/1",
+        "slow_cadence_review": sorted(n for n in summary["rss_stale_or_undated"]
+                                      if n in slow_publishers),
+        "general_feed_stale_review": sorted(n for n in summary["rss_stale_or_undated"]
+                                            if n not in slow_publishers),
+        "parser_warning_review": summary["rss_with_parse_warnings"],
+        "automatic_disable": False, "release_accepted": False,
+    }
+    with open("audit_freshness_review.json", "w", encoding="utf-8") as f:
+        json.dump(freshness_review, f, indent=2)
+    print("SOURCE_FRESHNESS_REVIEW " + json.dumps(freshness_review, sort_keys=True))
 
 # ---- Update C: per-source health + auto-mute ----
 import time as _time
