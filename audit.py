@@ -36,6 +36,29 @@ def _rss_entry_count(text):
     return len(feedparser.parse(text).entries)
 
 
+def _rss_freshness(text, *, now=None, hours=48):
+    """Freshness is separately observed; missing dates never count as fresh."""
+    from calendar import timegm
+    now = _time.time() if now is None else now
+    try:
+        import feedparser
+    except ModuleNotFoundError:
+        raise RuntimeError("missing_feedparser_dependency") from None
+    parsed = feedparser.parse(text)
+    dated = fresh = undated = 0
+    for item in parsed.entries:
+        stamp = item.get("published_parsed") or item.get("updated_parsed")
+        if not stamp:
+            undated += 1
+            continue
+        dated += 1
+        age = now - timegm(stamp)
+        if -300 <= age <= hours * 3600:
+            fresh += 1
+    return {"dated_items": dated, "fresh_48h_items": fresh,
+            "undated_items": undated, "feed_parse_warning": bool(parsed.bozo)}
+
+
 async def get(session, url, sem):
     if http_backoff.blocked(url): return 429,""
     async with sem:
@@ -47,8 +70,9 @@ async def check_rss(session, src, sem):
     try:
         status, txt = await get(session, src["_url"], sem)
         n = _rss_entry_count(txt) if txt else 0
+        freshness = _rss_freshness(txt) if txt else {"dated_items": 0, "fresh_48h_items": 0, "undated_items": 0, "feed_parse_warning": False}
         RESULTS.append({"kind": "RSS", "name": src.get("Source_name", "?"), "url": src["_url"],
-                        "http": status, "items": n, "ok": status == 200 and n > 0})
+                        "http": status, "items": n, "ok": status == 200 and n > 0, **freshness})
     except Exception as e:
         RESULTS.append({"kind": "RSS", "name": src.get("Source_name", "?"), "url": src["_url"],
                         "http": "ERR", "items": 0, "ok": False, "err": str(e)[:80]})
