@@ -1,4 +1,9 @@
 
+## B86/B87 live continuation (2026-10-28)
+
+B86 workflow #40756527408 completed SUCCESS, including visual-archive unit checks, but live Al Jazeera Arabic had 0 eligible captures (6/6 rejected `arabic_topic_without_explicit_trigger`), so no native PNG pages were generated on that run; independent visual review still pending. B87 adds regression tests and explicit Arabic geopolitical/economic event triggers while retaining country-in-headline-and-body gate. Commits 311dc0f, bf2f10d, 52c1c3c. Hosted #40757247178 running. Release HOLD, no production posts, Drive auth deferred.
+
+
 ## B86 — held real-source visual archive (2026-10-28)
 
 Added fail-closed five-page 4K PNG archive validator, tests, optional retained output directory in live editorial runner, and workflow artifact upload. Commits 5bc7fc0, 4e8d0ab, 40e70b5, cc5811c. Hosted run #40756162876 initiated; status/visual review not yet verified. Artifact images are for independent inspection only; do not assert pixel QA passed or release authorized. Drive SQLite sync remains deferred to final deployment.
