@@ -1,5 +1,9 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 28 October — B84 zero-cost SQLite foundation
+
+Isolated SQLite evidence store, retention/size bounds, four focused tests and no-post hosted workflow implemented. Hosted #40750942504 SUCCESS. Empty SQLite snapshot archived as 7-day GitHub Actions artifact. Durable multi-run restore, dedicated private backup repo and actual newsletter-pipeline DB integration NOT YET implemented. V1/main unchanged; no paid service or production cutover. See docs/v2/B84_SQLITE_ZERO_COST_SETUP_2026-10-28.md.
+
 ## 28 October — B80–B83 live technical pipeline verified (#40734476003)
 
 Real BBC/Al Jazeera publisher article capture: EN 3, AR 1; five held 4K pages; four-product B47 daily+weekly held integration PASS; weekly independent observed days EN 1, AR 1; exact-input V1/V2 parser and headline identity parity PASS both languages, 0 unmatched items. Isolated CI dependencies corrected (BeautifulSoup, arabic-reshaper, python-bidi). Actual rendered pixels not reviewed, live model translation not performed, complete V1 editorial/render/delivery parity absent. Production release HOLD. Full evidence: docs/v2/B80_B83_REAL_LIVE_ACCEPTANCE_2026-10-28.md.
