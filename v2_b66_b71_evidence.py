@@ -1,7 +1,5 @@
 """B66-B71 offline evidence intake: reject fabricated production acceptance."""
 from __future__ import annotations
-from datetime import datetime
-from hashlib import sha256
 from v2_b61_week_lineage import evaluate_week_lineage
 from v2_b60_original_edition_qa import KNOWN_DEFECTS
 
@@ -11,7 +9,7 @@ def _digest(value):
 def b66_sources(rows):
     """At least two distinct compatible, independently observed source receipts."""
     if not isinstance(rows,list) or len(rows)>20: raise ValueError("invalid_sources")
-    accepted=set();issues=[]
+    accepted=set();issues=[];digests=set()
     for row in rows:
         if not isinstance(row,dict):raise ValueError("invalid_source_receipt")
         publisher=row.get("publisher")
@@ -20,7 +18,11 @@ def b66_sources(rows):
             and type(row.get("fresh_items")) is int and row["fresh_items"]>0
             and row.get("observed_from_live_fetch") is True
             and _digest(row.get("response_sha256"))):
-            accepted.add(publisher.strip().casefold())
+            if row["response_sha256"] in digests:
+                issues.append("duplicate_response_digest")
+            else:
+                accepted.add(publisher.strip().casefold())
+                digests.add(row["response_sha256"])
         else:issues.append(publisher)
     return {"compatible_distinct_sources":len(accepted),"unqualified":issues,
             "technical_floor_met":len(accepted)>=2,"activation_allowed":False,
