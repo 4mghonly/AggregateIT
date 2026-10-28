@@ -1,5 +1,10 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## 28 October — B66–B71 consolidated offline evidence intake
+
+Implemented B66 source floor, B67 translation provenance, B68 visual defect register, B69 B61-backed seven-day lineage, B70 source-bound V1/V2 pairs and B71 model/Discord receipt intake. Nine focused tests and hosted no-post workflow added. This does not manufacture real source, weekly, model or client evidence. B72 and all production actions remain HOLD. See B66_B71_OFFLINE_EVIDENCE_2026-10-28.md.
+
+
 ## 28 October — B63 local geometry metadata hardening; hosted verification pending
 
 B60 technical geometry lint previously accepted non-hex 64-character digests,
