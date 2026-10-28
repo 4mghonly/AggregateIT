@@ -1,4 +1,9 @@
 
+## B86 — held real-source visual archive (2026-10-28)
+
+Added fail-closed five-page 4K PNG archive validator, tests, optional retained output directory in live editorial runner, and workflow artifact upload. Commits 5bc7fc0, 4e8d0ab, 40e70b5, cc5811c. Hosted run #40756162876 initiated; status/visual review not yet verified. Artifact images are for independent inspection only; do not assert pixel QA passed or release authorized. Drive SQLite sync remains deferred to final deployment.
+
+
 ## 2026-10-28 — User sequencing decision
 
 Defer Google Drive authentication, service-account setup, persistent SQLite cross-run restoration and Drive write-back until final deployment. Continue remaining V2 scope using isolated local/CI SQLite snapshots; do not gate editorial, rendering, source, or release-evidence development on Drive credentials. Maintain zero-cost and V1/main isolation. Release remains HOLD pending independent acceptance gates; no production sends or cutover authorized.
