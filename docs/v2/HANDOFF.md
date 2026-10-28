@@ -1,5 +1,12 @@
 # AggregateIT V2 — B0 Handoff and B1 Partial Reliability Checkpoint
 
+## V2 replaces V1 — migration execution policy (28 October)
+
+Target: preserve existing V1 production behavior while V2 demonstrates equal or better same-source editorial, translation, visual and delivery quality. V2 stays isolated on rebuild/aggregateit-v2 until acceptance evidence exists. Execute source qualification, real-week capture, same-slot comparison, model failover checks and independent delivery receipts in substantial batches. Never equate a passing offline evidence schema with accepted live evidence. At cutover, use an explicit reversible traffic switch with a monitored rollback path; retain V1 until V2 proves delivery reliability. No current production cutover authorization is implied by branch-write permission.
+
+Latest verified hosted B66–B71 run: https://github.com/4mghonly/AggregateIT/actions/runs/40712639529 — success. B66 source-body digest uniqueness hardened in subsequent commit, hosted verification to follow.
+
+
 ## 28 October — B66–B71 consolidated offline evidence intake
 
 Implemented B66 source floor, B67 translation provenance, B68 visual defect register, B69 B61-backed seven-day lineage, B70 source-bound V1/V2 pairs and B71 model/Discord receipt intake. Nine focused tests and hosted no-post workflow added. This does not manufacture real source, weekly, model or client evidence. B72 and all production actions remain HOLD. See B66_B71_OFFLINE_EVIDENCE_2026-10-28.md.
