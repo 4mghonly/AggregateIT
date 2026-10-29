@@ -9,6 +9,8 @@ on:
       - 'v2_b46_live_editorial_runner.py'
       - 'v2_b98_b100_readiness.py'
       - 'tests/test_v2_b98_b100_readiness.py'
+      - 'v2_b97_live_source_probe.py'
+      - 'tests/test_v2_b97_live_source_probe.py'
       - 'v2_b98_editorial_adapter.py'
       - 'tests/test_v2_b98_editorial_adapter.py'
       - 'v2_b98_independent_fallback.py'
@@ -77,6 +79,10 @@ jobs:
         run: python -B -m unittest discover -s tests -p test_v2_b94_daily_evidence.py -v
       - name: Test B95-B97 historical receipt contract
         run: python -B -m unittest discover -s tests -p test_v2_b95_b97_history.py -v
+      - name: Test B97 real candidate source probe guards
+        run: python -B -m unittest discover -s tests -p test_v2_b97_live_source_probe.py -v
+      - name: Probe two secondary publisher feed candidates (NO ADMISSION)
+        run: python -B v2_b97_live_source_probe.py > b97_live_source_probe.json
       - name: Test B98 editorial identity-safe fallback adapter
         run: python -B -m unittest discover -s tests -p test_v2_b98_editorial_adapter.py -v
       - name: Test B98 independent publisher failure recovery
@@ -149,6 +155,7 @@ jobs:
             b94_daily_evidence.json
             b94-daily-evidence.sqlite
             b95_b97_history.json
+            b97_live_source_probe.json
             b98_b100_readiness.json
             b99_pixel_qa.json
             b95-history/*.json
