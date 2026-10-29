@@ -24,14 +24,36 @@ ALLOWED={
     "english":{"source_id":"en-001","hosts":frozenset({"www.bbc.com","www.bbc.co.uk"}),"language":"en"},
     "arabic":{"source_id":"ar-s003","hosts":frozenset({"www.aljazeera.net"}),"language":"ar"}
 }
+# Independent source identities shared by the live collector and evidence compiler.
+# Fallback is activated only after the original publisher fails to yield a usable article.
+SOURCE_CATALOG={
+    "english":(
+        {"publisher_id":"bbc-en","source_id":"en-001",
+         "feed_url":"https://feeds.bbci.co.uk/news/world/rss.xml",
+         "hosts":frozenset({"www.bbc.com","www.bbc.co.uk"}),"language":"en"},
+        {"publisher_id":"dw-en","source_id":"en-002",
+         "feed_url":"https://rss.dw.com/rdf/rss-en-world",
+         "hosts":frozenset({"www.dw.com"}),"language":"en"},
+    ),
+    "arabic":(
+        {"publisher_id":"aljazeera-ar","source_id":"ar-s003",
+         "feed_url":"https://www.aljazeera.net/aljazeerarss/ar/all.xml",
+         "hosts":frozenset({"www.aljazeera.net"}),"language":"ar"},
+        {"publisher_id":"bbc-ar","source_id":"ar-s004",
+         "feed_url":"https://feeds.bbci.co.uk/arabic/rss.xml",
+         "hosts":frozenset({"www.bbc.com","www.bbc.co.uk"}),"language":"ar"},
+    ),
+}
+
 def _stamp(text):
     return datetime.fromisoformat(_time(text)).astimezone(timezone.utc)
 
 def _verify_source_candidate(item):
     if not isinstance(item,dict) or item.get('product') not in ALLOWED:
         raise ValueError('unsupported_source_product')
-    allowed=ALLOWED[item['product']]
-    if item.get('source_id')!=allowed['source_id']:
+    allowed=next((source for source in SOURCE_CATALOG[item['product']]
+                  if source['source_id']==item.get('source_id')),None)
+    if allowed is None:
         raise ValueError('source_identity_mismatch')
     url=item.get('article_url')
     if not isinstance(url,str):raise ValueError('invalid_source_article')
