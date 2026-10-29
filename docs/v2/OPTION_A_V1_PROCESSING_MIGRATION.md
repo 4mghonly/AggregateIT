@@ -19,3 +19,9 @@
 2. Port Arabic deterministic filtering, impact scoring and dedup into the actual V2 source-admission pipeline, retaining provenance and source-date gates.
 3. Add non-destructive cross-language candidate matching and event evolution receipts, not automatic event merging.
 4. Test no-post end-to-end on identical V1/V2 fixtures and review live visual artifacts before release.
+
+## Corrective batch — Arabic live priority (2026-10-29)
+- Fixed the live Arabic evidence compiler's constant `priority=50`: `v2_b46_live_editorial.py` now calls `arabic_impact_priority` on original-language title and bounded article text, passing publication age and UAE status.
+- Added deterministic V1-inspired strategic, high-impact, routine and freshness terms to `v2_v1_processing_bridge.py`; this is an initial port, not a claim of complete parity with the original V1 multilingual vocabulary.
+- Added `tests/test_v2_arabic_impact.py` and included it in the no-post acceptance workflow.
+- **Not yet verified:** hosted workflow run, full V1 keyword and Arabic filtering parity, live event deduplication, multilingual cross-source merging, model failover, or 7-date shadow comparison. Do not mark migration complete or enable production.
