@@ -42,7 +42,8 @@ def render_genuine_held(editorial:dict, *, output_dir:Path)->dict:
     if out.is_symlink() or (out.exists() and any(out.iterdir())):
         raise ValueError("native_output_requires_empty_directory")
     rendered=render_held_editions(plans["english"],plans["arabic"],
-                                   slot_id=plans["english"]["slot_id"],output_dir=out)
+                                   slot_id=plans["english"]["slot_id"],output_dir=out,
+                                   market_observations=products["english"]["newsroom"].get("market_observations",[]))
     if (rendered.get("schema")!="aggregateit-v2-native-no-post-pages/1"
         or rendered.get("delivery_authorized") is not False):
         raise ValueError("native_renderer_claims_delivery")
