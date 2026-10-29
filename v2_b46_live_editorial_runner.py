@@ -64,6 +64,10 @@ def run(*,render_native=False,render_four_products=False,
                 count[product]['headlines_with_one_supported_country']+=1
             else:
                 count[product]['headline_country_unclassified']+=1
+        # B98: preserve source identity and validate each candidate independently.
+        # A rejected article falls through to the next eligible same-publisher
+        # candidate; the collector never substitutes a different publisher.
+        from v2_b98_source_fallback import choose_eligible
         for candidate in eligible_headlines:
             if count[product]['article_attempts']>=6 or count[product]['article_evidence_eligible']>=3:
                 break
@@ -86,6 +90,10 @@ def run(*,render_native=False,render_four_products=False,
                 except ValueError as exc:
                     code=str(exc)[:80]
                     count[product]['body_gate_rejections'][code]=count[product]['body_gate_rejections'].get(code,0)+1
+                    continue
+                fallback=choose_eligible(product,[capture],max_attempts=1)
+                if fallback['status']!='ELIGIBLE_SOURCE_BACKED_CANDIDATE':
+                    count[product]['body_gate_rejections']['b98_fallback_not_eligible']=count[product]['body_gate_rejections'].get('b98_fallback_not_eligible',0)+1
                     continue
                 captures.append(capture)
                 count[product]['capture_successes']+=1
