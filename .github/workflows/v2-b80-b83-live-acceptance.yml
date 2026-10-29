@@ -9,6 +9,7 @@ on:
       - 'v2_b46_live_editorial_runner.py'
       - 'v2_b98_b100_readiness.py'
       - 'tests/test_v2_b98_b100_readiness.py'
+      - 'v2_b99_pixel_qa.py'
       - 'v2_b95_artifact_restore.py'
       - 'v2_b95_b97_history.py'
       - 'tests/test_v2_b95_b97_history.py'
@@ -100,6 +101,7 @@ jobs:
             python -B v2_b94_daily_evidence.py
             python -B v2_b95_b97_history.py
             python -B v2_b98_b100_readiness.py
+            python -B v2_b99_pixel_qa.py
           else
             echo 'B88-B90 HOLD: genuine bilingual visual archive unavailable; no false acceptance'
           fi
@@ -132,6 +134,7 @@ jobs:
             b94-daily-evidence.sqlite
             b95_b97_history.json
             b98_b100_readiness.json
+            b99_pixel_qa.json
             b95-history/*.json
             v2-engine-evidence.sqlite
             b86-visual-review/*.png
