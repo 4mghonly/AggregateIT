@@ -35,7 +35,19 @@ def restore(directory:Path,*,today:date,repo:str,token:str)->dict:
    # GitHub's artifact endpoint redirects to a temporary signed URL.
    req=urllib.request.Request(a["archive_download_url"],headers={"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json"})
    import io
-   with urllib.request.urlopen(req,timeout=25) as response:
+   class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self,request,fp,code,msg,headers,newurl):return None
+   opener=urllib.request.build_opener(NoRedirect)
+   try:
+    opener.open(req,timeout=25)
+    raise ValueError('missing_artifact_redirect')
+   except urllib.error.HTTPError as exc:
+    if exc.code not in (302,307):raise
+    signed=exc.headers.get('Location','')
+   from urllib.parse import urlsplit
+   target=urlsplit(signed)
+   if target.scheme!='https' or not target.hostname or target.hostname.endswith('github.com') or target.username or target.password:raise ValueError('unsafe_artifact_redirect')
+   with urllib.request.urlopen(urllib.request.Request(signed),timeout=25) as response:
     raw=response.read(35_000_001)
    if len(raw)>35_000_000:raise ValueError("oversized_artifact")
    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
