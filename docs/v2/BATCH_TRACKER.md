@@ -1,4 +1,9 @@
 
+## B97 live publisher discovery phase (2026-10-29)
+
+Previous B98 hosted #40842887582 SUCCESS. Introduced bounded read-only candidate feed probes for DW English and BBC Arabic, with unit tests for unreachable, unsafe and feed-only evidence. Hosted #40846958945 queued; candidate endpoints are unverified until its evidence artifact is inspected. The probe NEVER admits publishers; live article parser/attribution compatibility, secondary source rights and real failover remain outstanding. No V1/main/production/Discord changes; release HOLD.
+
+
 ## B98 source evidence hardening (2026-10-29)
 
 Hosted #40836063231 SUCCESS. Fallback editorial adapter now independently revalidates the actual HTML capture, publisher identity, article URL, headline and publication time rather than trusting caller-supplied eligible=true. Added invalid HTML regression test; CI #40842887582 pending. Still no independently onboarded second publisher, so actual redundancy remains HOLD. B99 RTL/visual reading and B100 live model tests remain outstanding; release HOLD.
