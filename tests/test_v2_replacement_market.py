@@ -29,6 +29,16 @@ class ReplacementMarketTests(unittest.TestCase):
   self.assertEqual(result["editorial"]["products"]["english"]["market_status"],"observed_unverified")
   self.assertEqual(result["editorial"]["products"]["arabic"]["market_status"],"not_applicable")
   self.assertFalse(result["can_release"])
+ def test_market_readout_discloses_cached_source_and_units(self):
+  from v2_native_evidence_render import _market_readout
+  rows=[{"source":"tradingview_cached_snapshot","symbol":"AAPL","value":219.5,
+         "unit":"quoted_price_currency_unspecified","observed_at":NOW}]
+  text=_market_readout(rows)
+  self.assertIn("AAPL",text)
+  self.assertIn("219.50",text)
+  self.assertIn("currency unspecified",text)
+  self.assertIn("not independently verified",text)
+  self.assertIn("No market evidence",_market_readout([]))
  def test_stale_invalid_or_future_cached_data_never_promoted(self):
   t=datetime.fromisoformat(NOW).timestamp()
   sample={"valid":True,"updated":t-86400,"mega_caps":[{"t":"AAPL","price":200}]}
