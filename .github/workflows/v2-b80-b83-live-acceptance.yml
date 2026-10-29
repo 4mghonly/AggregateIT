@@ -11,6 +11,8 @@ on:
       - 'v2_replacement_contract.py'
       - 'tests/test_v2_replacement_contract.py'
       - 'v2_market_bridge.py'
+      - 'v2_native_evidence_render.py'
+      - 'v2_b46_native_held.py'
       - 'tests/test_v2_replacement_market.py'
       - 'v2_b98_b100_readiness.py'
       - 'tests/test_v2_b98_b100_readiness.py'
