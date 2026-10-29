@@ -20,7 +20,10 @@ These specifications were read from `main` and are checked on V2 by `v2_replacem
 
 Evidence: hosted #40849710796: English 3 articles (BBC), Arabic primary 0 eligible, fallback BBC Arabic 2 eligible, 5 source-backed editorial articles, five 4K pages rendered. `tests/test_v2_replacement_pipeline.py` exercises simultaneous primary outage and independent source identity with captured HTML. **Not a full release test.**
 
-### 2. Intelligence/product parity: **INCOMPLETE**
+### 2. Intelligence/product parity: **IN PROGRESS — V1 market cache bridge integrated**
+A read-only adapter `v2_market_bridge.py` consumes V1's existing TradingView pulse cache, validates freshness and numeric prices, and passes source-labelled observations into the English editorial compiler and held English Gazette. The Arabic financial lane remains prohibited. This does **not** yet supply V1-equivalent market regime analysis, fully tested live provider routing, or source-family corroborated event merging.
+
+Remaining work:
 Map the V1 engine's scoring, event lifecycle, deduplication, market/macro context, source family corroboration and actual LLM analysis onto the replacement's editorial plan. Preserve the V1 Gazette and Arabic final-product obligations; do not substitute quote-only laboratory pages for finished analysis. Deduplicate across actual source articles without conflating distinct events. Designate final English and Arabic edition generation as the only product output path. Show unavailable data honestly.
 
 ### 3. Final product rendering: **INCOMPLETE**
