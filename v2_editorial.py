@@ -96,6 +96,19 @@ def _native_excerpt(ledger, event: dict, language: str, now: datetime,
     return candidates[0], "accepted"
 
 
+def select_relevance_first(accepted: list[dict], max_items: int) -> list[dict]:
+    """One UAE editorial emphasis; all other regions compete by relevance.
+
+    A single UAE lead is reserved when present. Remaining slots are filled by
+    priority, irrespective of region. No special Jordan/Palestine/Israel lane.
+    """
+    ordered=sorted(accepted,key=lambda x:(-x["priority"],x["event_id"]))
+    uae=next((x for x in ordered if x["subject_country"]=="AE"),None)
+    chosen=[uae] if uae is not None else []
+    chosen.extend(x for x in ordered if x is not uae)
+    return chosen[:max_items]
+
+
 def plan_edition(*, ledger, annotations: list[dict], product: str,
                  slot_id: str, as_of: str, previous_versions: dict | None = None,
                  max_age_hours: int = 48, max_items: int = 15) -> dict:
@@ -152,27 +165,8 @@ def plan_edition(*, ledger, annotations: list[dict], product: str,
             "translation_status": "not_required_original_quote",
         })
     accepted.sort(key=lambda x: (-x["priority"], x["event_id"]))
-    chosen = []
-    if product == "arabic":
-        # The UAE panel is deliberate; never classify country via publisher host.
-        uae = [x for x in accepted if x["is_uae"]]
-        chosen.extend(uae[:min(4, max_items)])
-        remaining = [x for x in accepted if x not in chosen]
-        # Geography-first coverage: one per other represented region, then fill.
-        regions_seen = set()
-        for x in remaining:
-            if len(chosen) >= max_items:
-                break
-            if x["region"] not in regions_seen:
-                chosen.append(x)
-                regions_seen.add(x["region"])
-        for x in remaining:
-            if len(chosen) >= max_items:
-                break
-            if x not in chosen:
-                chosen.append(x)
-    else:
-        chosen = accepted[:max_items]
+    chosen = (select_relevance_first(accepted,max_items) if product == "arabic"
+              else accepted[:max_items])
     held["eligible_over_page_budget"] += len(accepted) - len(chosen)
     represented = sorted({x["region"] for x in chosen})
     return {
