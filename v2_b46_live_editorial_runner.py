@@ -9,7 +9,7 @@ from datetime import datetime,timezone
 from pathlib import Path
 from v2_feed_items import extract_candidates
 from v2_secure_transport import pinned_https_fetch
-from v2_b46_live_editorial import compile_captured_articles,metrics_only,ALLOWED
+from v2_b46_live_editorial import compile_captured_articles,metrics_only,ALLOWED,SOURCE_CATALOG
 from v2_article_body_gate import extract_body, article_evidence, headline_geography_candidates
 
 FEEDS=(
@@ -17,7 +17,7 @@ FEEDS=(
     ('arabic','https://www.aljazeera.net/aljazeerarss/ar/all.xml'),
 )
 def run(*,render_native=False,render_four_products=False,
-        rss_snapshots=None,observed_at=None,visual_archive_dir=None):
+        rss_snapshots=None,observed_at=None,visual_archive_dir=None,fetch=None):
     if rss_snapshots is not None:
         if not isinstance(rss_snapshots,dict) or set(rss_snapshots)!={'english','arabic'}:
             raise ValueError('incomplete_shared_rss_snapshots')
@@ -32,74 +32,102 @@ def run(*,render_native=False,render_four_products=False,
     else:
         observed=datetime.now(timezone.utc).isoformat()
     slot=observed
-    captures=[];reasons={};count={};feed_digests={}
-    for product,feed in FEEDS:
+    captures=[];reasons={};count={};feed_digests={};source_recovery={}
+    fetcher=fetch or pinned_https_fetch
+    for product,primary_feed in FEEDS:
+        primary=SOURCE_CATALOG[product][0]
+        if primary["feed_url"]!=primary_feed:
+            raise ValueError("primary_feed_contract_mismatch")
         count[product]={'feed_attempted':True,'feed_ok':False,'article_attempts':0,
                         'article_http_ok':0,'capture_successes':0,
                         'headlines_with_one_supported_country':0,'headline_country_unclassified':0,
                         'article_evidence_eligible':0,'body_gate_rejections':{}}
-        try:
-            if rss_snapshots is None:
-                response=pinned_https_fetch(feed,timeout=8,max_bytes=1_000_000,max_redirects=1,
-                    headers={'Accept':'application/rss+xml, application/xml, text/xml'})
-                raw=response['body']
-                resolved_url=response['final_url']
-            else:
-                raw=rss_snapshots[product]['body']
-                resolved_url=feed
-            feed_digests[product]=sha256(raw).hexdigest()
-            parsed=extract_candidates(raw,feed_url=resolved_url,
-                   observed_at=observed,max_items=30,max_bytes=1_000_000)
-            count[product]['feed_ok']=True
-        except Exception as exc:
-            reasons[product+'-feed']=type(exc).__name__;continue
-        # Target explicitly named regions instead of blindly choosing the first
-        # three global stories. The same headline + article-body gate still
-        # makes the final decision; unsupported or multiple countries HOLD.
-        eligible_headlines=[]
-        for item in parsed['items']:
-            country_matches=headline_geography_candidates(item['title'],language=ALLOWED[product]['language'])
-            if len(country_matches)==1:
-                eligible_headlines.append(item)
-                count[product]['headlines_with_one_supported_country']+=1
-            else:
-                count[product]['headline_country_unclassified']+=1
-        # B98: preserve source identity and validate each candidate independently.
-        # A rejected article falls through to the next eligible same-publisher
-        # candidate; the collector never substitutes a different publisher.
-        from v2_b98_source_fallback import choose_eligible
-        for candidate in eligible_headlines:
-            if count[product]['article_attempts']>=6 or count[product]['article_evidence_eligible']>=3:
+        recovery={'primary_publisher':primary['publisher_id'],'selected_publisher':None,
+                  'fallback_attempted':False,'fallback_used':False,'attempts':[]}
+        source_recovery[product]=recovery
+        for position,source in enumerate(SOURCE_CATALOG[product]):
+            if position>0 and (count[product]['article_evidence_eligible']>0
+                               or (rss_snapshots is not None and fetch is None)):
+                # Snapshots without an injected fetch are fully offline.
                 break
-            url=candidate['article_url']
-            from urllib.parse import urlsplit
-            if urlsplit(url).hostname not in ALLOWED[product]['hosts']:
-                continue
-            count[product]['article_attempts']+=1
+            if position>0:recovery['fallback_attempted']=True
+            row={'publisher_id':source['publisher_id'],'feed_ok':False,
+                 'article_attempts':0,'eligible_articles':0}
+            recovery['attempts'].append(row)
+            feed=source['feed_url']
             try:
-                page=pinned_https_fetch(url,timeout=8,max_bytes=850000,max_redirects=1,
-                     headers={'Accept':'text/html'})
-                count[product]['article_http_ok']+=1
-                capture={'product':product,
-                      'source_id':ALLOWED[product]['source_id'],
-                      'article_url':url,'title':candidate['title'],
-                      'published_at':candidate['published_at'],'html_bytes':page['body']}
-                try:
-                    body=extract_body(page['body'],source_url=url,language=ALLOWED[product]['language'])
-                    article_evidence(body,headline=candidate['title'],published_at=candidate['published_at'])
-                except ValueError as exc:
-                    code=str(exc)[:80]
-                    count[product]['body_gate_rejections'][code]=count[product]['body_gate_rejections'].get(code,0)+1
-                    continue
-                fallback=choose_eligible(product,[capture],max_attempts=1)
-                if fallback['status']!='ELIGIBLE_SOURCE_BACKED_CANDIDATE':
-                    count[product]['body_gate_rejections']['b98_fallback_not_eligible']=count[product]['body_gate_rejections'].get('b98_fallback_not_eligible',0)+1
-                    continue
-                captures.append(capture)
-                count[product]['capture_successes']+=1
-                count[product]['article_evidence_eligible']+=1
+                if position==0 and rss_snapshots is not None:
+                    raw=rss_snapshots[product]['body']
+                    resolved_url=feed
+                else:
+                    response=fetcher(feed,timeout=8,max_bytes=1_000_000,max_redirects=1,
+                        headers={'Accept':'application/rss+xml, application/xml, text/xml'})
+                    raw=response['body']
+                    resolved_url=response['final_url']
+                feed_digests[product if position==0 else product+':'+source['publisher_id']]=sha256(raw).hexdigest()
+                parsed=extract_candidates(raw,feed_url=resolved_url,
+                    observed_at=observed,max_age_hours=48,max_items=30,max_bytes=1_000_000)
+                row['feed_ok']=True
+                count[product]['feed_ok']=True
             except Exception as exc:
-                reasons[product+'-article-'+str(count[product]['article_attempts'])]=type(exc).__name__
+                reasons[product+'-'+source['publisher_id']+'-feed']=type(exc).__name__
+                continue
+            eligible_headlines=[]
+            for item in parsed['items']:
+                matches=headline_geography_candidates(item['title'],language=source['language'])
+                if len(matches)==1:
+                    eligible_headlines.append(item)
+                    count[product]['headlines_with_one_supported_country']+=1
+                else:
+                    count[product]['headline_country_unclassified']+=1
+            for candidate in eligible_headlines:
+                if row['article_attempts']>=6 or row['eligible_articles']>=3:
+                    break
+                url=candidate['article_url']
+                from urllib.parse import urlsplit
+                try:
+                    if urlsplit(url).hostname not in source['hosts']:
+                        continue
+                except ValueError:
+                    continue
+                row['article_attempts']+=1
+                count[product]['article_attempts']+=1
+                try:
+                    page=fetcher(url,timeout=8,max_bytes=850000,max_redirects=1,
+                                 headers={'Accept':'text/html'})
+                    count[product]['article_http_ok']+=1
+                    capture={'product':product,'source_id':source['source_id'],
+                        'article_url':url,'title':candidate['title'],
+                        'published_at':candidate['published_at'],'html_bytes':page['body']}
+                    try:
+                        body=extract_body(page['body'],source_url=url,language=source['language'])
+                        article_evidence(body,headline=candidate['title'],
+                                         published_at=candidate['published_at'])
+                    except ValueError as exc:
+                        code=str(exc)[:80]
+                        rejected=count[product]['body_gate_rejections']
+                        rejected[code]=rejected.get(code,0)+1
+                        continue
+                    # The primary preserves the existing independently tested
+                    # source filter. Secondary is checked here AND rechecked by
+                    # the publisher-aware editorial compiler.
+                    if position==0:
+                        from v2_b98_source_fallback import choose_eligible
+                        fallback=choose_eligible(product,[capture],max_attempts=1)
+                        if fallback['status']!='ELIGIBLE_SOURCE_BACKED_CANDIDATE':
+                            rejected=count[product]['body_gate_rejections']
+                            rejected['primary_fallback_not_eligible']=rejected.get('primary_fallback_not_eligible',0)+1
+                            continue
+                    captures.append(capture)
+                    row['eligible_articles']+=1
+                    count[product]['capture_successes']+=1
+                    count[product]['article_evidence_eligible']+=1
+                except Exception as exc:
+                    reasons[product+'-'+source['publisher_id']+'-article-'+str(row['article_attempts'])]=type(exc).__name__
+            if row['eligible_articles']:
+                recovery['selected_publisher']=source['publisher_id']
+                recovery['fallback_used']=position>0
+                break
     # Independent pre-admission failures should not be interpreted as factual reliability.
     result=compile_captured_articles(captures,as_of=observed,slot_id=slot)
     receipt=metrics_only(result)
@@ -133,7 +161,7 @@ def run(*,render_native=False,render_four_products=False,
         else:
             four_products={"status":"HOLD_MISSING_GENUINE_BILINGUAL_EVIDENCE"}
     return {'schema':'aggregateit-v2-b46-live-chain/1',
-        'observed_at':observed,'source_attempts':count,
+        'observed_at':observed,'source_attempts':count,'source_recovery':source_recovery,
         'rss_feed_sha256':feed_digests,
         'rss_shared_snapshot_supplied':rss_snapshots is not None,
         'transport_failures':reasons,'editorial':receipt,'native':native,'four_products':four_products,
@@ -151,6 +179,7 @@ if __name__=='__main__':
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print(json.dumps({'source_attempts':result['source_attempts'],
+                      'source_recovery':result['source_recovery'],
                       'admitted':result['editorial']['admitted_articles'],
                       'held_reasons':result['editorial']['held_reasons'],
                       'editorial_held':{p:r['held_reasons'] for p,r in result['editorial']['products'].items()},
