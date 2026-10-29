@@ -4,7 +4,8 @@ Does not collect, call models, persist outside its explicit output directory,
 or post. It may be called after a full-body ledger plan exists.
 """
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime,timezone
+from math import isfinite
 from hashlib import sha256
 from io import BytesIO
 from pathlib import Path
@@ -44,8 +45,35 @@ def _market_readout(observations:list[dict]|None)->str:
     return 'V1 cached TradingView snapshot, not independently verified: '+ '; '.join(lines)+'.'
 
 
+def _attach_market_charts(data:dict,pulse:dict|None,macro:dict|None,*,
+                          as_of:str,has_admitted_market:bool)->dict:
+    """Reuse actual V1 market arrays in its existing 4K chart renderer, gated by age.
+
+    Caller has independently admitted at least one source-labelled market
+    observation; this does not convert provider prices into verified facts.
+    """
+    out=dict(data)
+    def fresh(value):
+        if not isinstance(value,dict) or value.get('valid') is not True:
+            return False
+        raw=value.get('updated')
+        if not isinstance(raw,(int,float)) or isinstance(raw,bool) or not isfinite(raw):
+            return False
+        stamp=datetime.fromisoformat(as_of.replace('Z','+00:00'))
+        if stamp.utcoffset() is None:raise ValueError('market_slot_needs_timezone')
+        return -300 <= stamp.timestamp()-raw <= 20*3600
+    if has_admitted_market and fresh(pulse):
+        out['pulse']=dict(pulse)
+        if fresh(macro) and isinstance(macro.get('instruments'),list):
+            from market import compute_regime
+            out['macro']=dict(macro)
+            out['regime']=compute_regime(macro)
+    return out
+
+
 def render_held_editions(english_plan:dict,arabic_plan:dict,*,slot_id:str,output_dir:Path,
-                         market_observations:list[dict]|None=None)->dict:
+                         market_observations:list[dict]|None=None,
+                         pulse_snapshot:dict|None=None,macro_snapshot:dict|None=None)->dict:
     if not isinstance(english_plan,dict) or not isinstance(arabic_plan,dict):raise ValueError('plans_required')
     for product,plan,lang in [('english',english_plan,'en'),('arabic',arabic_plan,'ar')]:
         if (plan.get('schema')!='aggregateit-editorial-plan/1'
@@ -67,7 +95,8 @@ def render_held_editions(english_plan:dict,arabic_plan:dict,*,slot_id:str,output
     from v2_arabic_application_rehearsal import _render_brief
     from gazette_render import render_p1,render_p2
     from arabic_layout.render_pages import render as render_arabic
-    data=_render_data(english_plan)
+    data=_attach_market_charts(_render_data(english_plan),pulse_snapshot,macro_snapshot,
+                               as_of=slot_id,has_admitted_market=bool(market_observations))
     empty_analysis={
       'headline':'UNVERIFIED ARTICLE EVIDENCE TEST',
       'lead':'Short attributed original-language source excerpts only. Publication and factual verification withheld.',
