@@ -17,6 +17,7 @@ MIN_BODY_CHARS=80
 _MAX_QUOTE_CHARS=190
 _MAX_QUOTE_WORDS=25
 _ALLOWED_HOSTS={'www.bbc.co.uk':'article_element','www.bbc.com':'article_element',
+                'www.dw.com':'article_element',
                 'www.aljazeera.net':'aljazeera_article_wysiwyg'}
 _BLOCK_TAGS={'script','style','noscript','nav','footer','header','aside','button','form'}
 _COUNTRIES=(
