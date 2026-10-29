@@ -9,7 +9,7 @@ from datetime import datetime,timezone
 from math import isfinite
 import re
 
-SYMBOL=re.compile(r"^[A-Z][A-Z0-9.\\-]{0,10}$")
+SYMBOL=re.compile(r"^[A-Z][A-Z0-9.-]{0,10}$")
 MAX_AGE_SECONDS=20*3600
 
 def convert_v1_market_pulse(pulse:dict|None,*,as_of:str,max_items:int=8)->list[dict]:
