@@ -1,4 +1,9 @@
 
+## B98 independent fallback next implementation
+
+B97 hosted #40816143621 SUCCESS. Added v2_b98_independent_fallback.py and regression tests: simulated primary failure/verified secondary success, unverified secondary HOLD, mismatched article domain refusal, attempt budget. CI run #40817138249 queued. This is a synthetic routing harness only; secondary publisher has NOT been acquired, validated or wired into the live runner. No new production sources or Discord messages. Release HOLD.
+
+
 ## B97 continuation checkpoint
 
 Hosted #40814660962 SUCCESS: 3 English and 2 Arabic source-backed stories, five held 4K pages; 7 historical receipts restored, 2 distinct positive days per language; seven-day gate still HOLD. Added B97 fail-closed independent-publisher registry and tests; no new publishers actually admitted or integrated. Hosted #40816143621 running. Real independent source redundancy, RTL/readability and live LLM fallback remain outstanding. No production changes.
