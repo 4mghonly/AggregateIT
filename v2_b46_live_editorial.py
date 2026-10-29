@@ -14,6 +14,7 @@ from urllib.parse import urlsplit
 from v2_article_body_gate import extract_body,article_evidence
 from v2_b87_topic_bridge import editorial_topic
 from v2_keyword_priority import load_v1_keywords,score_v1_keyword_title
+from v2_v1_processing_bridge import arabic_impact_priority
 from v2_evidence import _time,make_article,make_excerpt,make_claim,make_event,canonical_article_url
 from v2_evidence_ledger import EvidenceLedger
 from v2_editorial import plan_edition
@@ -119,7 +120,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             'event_id':event['event_id'],'region':source_quote['region'],
             'subject_country':source_quote['subject_country'],
             'topic':editorial_topic(item['product'],source_quote['topic_english' if item['product']=='english' else 'topic_arabic']),
-            'priority':score_v1_keyword_title(item['title'],keyword_config)[0] if item['product']=='english' else 50
+            'priority':(score_v1_keyword_title(item['title'],keyword_config)[0] if item['product']=='english' else arabic_impact_priority(item['title']+' '+body['original_text'][:500],age_hours=(now-pub).total_seconds()/3600,is_uae=source_quote['subject_country']=='AE'))
         })
         accepted.append({'source_id':item['source_id'],'product':item['product'],
             'article_id':original['article_id'],'revision_id':original['revision_id'],
