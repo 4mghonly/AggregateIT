@@ -9,7 +9,7 @@ from difflib import SequenceMatcher
 import re
 
 SECURITY=("security","military","missile","drone","attack","border","sanctions","ceasefire","diplomacy","nuclear","naval","terror","police",
-          "امن","أمن","عسكري","صاروخ","مسيرة","مسيّرة","هجوم","حدود","عقوبات","هدنة","دبلوماس","نووي","بحري","شرطة",
+          "امن","أمن","عسكري","صاروخ","مسيرة","مسيّرة","هجوم","حدود","عقوبات","هدنة","دبلوماس","دبلوماسية","نووي","بحري","شرطة",
           "sécurité","militaire","attaque","güvenlik","saldırı","امنیت","نظامی","حمله","موشک","amni","weerar")
 ROUTINE=("traffic","football","sport","restaurant","hotel","lottery","weather","promotion",
          "مرور","ازدحام","مباراة","رياضة","مطعم","فندق","طقس","ترويج")
