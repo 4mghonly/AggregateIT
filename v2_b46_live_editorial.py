@@ -68,12 +68,16 @@ def _verify_source_candidate(item):
     return allowed
 
 def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
-                              previous_versions:dict|None=None, prior_snapshot:dict|None=None)->dict:
+                              previous_versions:dict|None=None, prior_snapshot:dict|None=None,
+                              market_observations:list[dict]|None=None)->dict:
     now=_stamp(as_of);_stamp(slot_id)
     if not isinstance(captures,list) or len(captures)>20:
         raise ValueError('invalid_article_capture_batch')
     if previous_versions is not None and not isinstance(previous_versions,dict):
         raise ValueError('invalid_previous_versions')
+    if market_observations is not None and (not isinstance(market_observations,list)
+                                            or len(market_observations)>12):
+        raise ValueError('invalid_v1_market_context')
     operator_prior=versions_from_signed_journal(prior_snapshot,as_of=as_of) if prior_snapshot is not None else None
     ledger=EvidenceLedger(max_observations=25)
     annotations={'english':[],'arabic':[]}
@@ -127,7 +131,8 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
                  max_items=6)
         critic=build_report([],ledger=ledger,as_of=as_of,verified_families={},
                     verified_languages={},product=product,cadence='daily',slot_id=slot_id)
-        daily=compile_daily(editorial_plan=plan,critic_report=critic,market_observations=[])
+        daily=compile_daily(editorial_plan=plan,critic_report=critic,
+                            market_observations=(market_observations or []) if product=='english' else [])
         products[product]={'story_count':len(daily['stories']),'held_reasons':plan['held_reasons'],
             'represented_regions':plan['represented_regions'],
             'newsroom':daily,'critique':critic,'editorial_plan':plan,'no_publication_authority':True}
