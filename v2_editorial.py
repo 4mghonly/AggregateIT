@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 from v2_evidence import _time
 from v2_script_guard import script_consistent
+from v2_v1_processing_bridge import arabic_select_v1_baseline
 
 AR_REGIONS = frozenset({
     "gcc", "oman", "iran", "turkey", "iraq", "yemen", "egypt",
@@ -102,11 +103,12 @@ def select_relevance_first(accepted: list[dict], max_items: int) -> list[dict]:
     A single UAE lead is reserved when present. Remaining slots are filled by
     priority, irrespective of region. No special Jordan/Palestine/Israel lane.
     """
-    ordered=sorted(accepted,key=lambda x:(-x["priority"],x["event_id"]))
-    uae=next((x for x in ordered if x["subject_country"]=="AE"),None)
-    chosen=[uae] if uae is not None else []
-    chosen.extend(x for x in ordered if x is not uae)
-    return chosen[:max_items]
+    # Preserve V1 publisher diversity while removing its per-region quotas.
+    adapted=[dict(row,score=row["priority"],country=row["subject_country"],
+                  id=row["event_id"],source_id=row.get("evidence",{}).get("source_id"))
+             for row in accepted]
+    return arabic_select_v1_baseline(adapted,max_items)
+
 
 
 def plan_edition(*, ledger, annotations: list[dict], product: str,
