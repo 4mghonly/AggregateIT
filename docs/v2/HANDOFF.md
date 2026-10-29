@@ -1,4 +1,9 @@
 
+## Next implementation checkpoint (2026-10-29)
+
+Previous hosted B98 selector run #40803355436 failed at B95 history restore: subsequent artifacts now contain multiple daily receipt files; corrected bounded acceptance (up to 30) in commit 8deda0d. Integrated B98 source-backed candidate gate into live article capture, preserving same-publisher identity and existing six-attempt limit (commit 6543e31). This is per-article fallback only, not independent publisher redundancy. Hosted #40814660962 pending. Release HOLD; no V1, main, production, Discord, Drive or paid resource changes.
+
+
 ## Resume checkpoint (2026-10-29)
 
 Hosted #40802887500 SUCCESS. GitHub artifact history restoration recovered two prior receipts; distinct real evidence days English=2, Arabic=2; seven-day gate HOLD. B99 five genuine 4K pages passed objective pixel diversity and held-banner checks; independent readability, clipping and RTL remain unverified. Added B98 bounded publisher-allowlisted fallback candidate selector and tests (not yet wired to live runner); hosted #40803355436 pending. New independent publisher expansion and live LLM fallback still outstanding. No main/V1/production/Discord/Drive changes.
