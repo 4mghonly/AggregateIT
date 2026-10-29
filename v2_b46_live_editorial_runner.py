@@ -174,8 +174,19 @@ def run(*,render_native=False,render_four_products=False,
                 four_products={"status":"HOLD_FOUR_PRODUCT_INTEGRATION","error_class":type(exc).__name__}
         else:
             four_products={"status":"HOLD_MISSING_GENUINE_BILINGUAL_EVIDENCE"}
+    arabic_count=count['arabic']
+    arabic_stories=receipt['products']['arabic']['story_count']
+    arabic_zero_diagnosis={
+        'status':'HOLD_NO_ELIGIBLE_ARABIC_STORIES' if arabic_stories==0 else 'ARABIC_STORIES_SELECTED',
+        'counts':dict(arabic_count),
+        'publisher_attempts':source_recovery['arabic']['attempts'],
+        'editorial_held_reasons':receipt['products']['arabic']['held_reasons'],
+        'article_admission_held_reasons':receipt['held_reasons'],
+        'inference_only':True,
+        'full_v1_arabic_parity_verified':False}
     return {'schema':'aggregateit-v2-b46-live-chain/1',
         'observed_at':observed,'source_attempts':count,'source_recovery':source_recovery,
+        'arabic_zero_story_diagnosis':arabic_zero_diagnosis,
         'v1_market_context_observation_count':len(markets),
         'rss_feed_sha256':feed_digests,
         'rss_shared_snapshot_supplied':rss_snapshots is not None,
