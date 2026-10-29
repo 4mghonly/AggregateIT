@@ -82,7 +82,14 @@ jobs:
       - name: Test B97 real candidate source probe guards
         run: python -B -m unittest discover -s tests -p test_v2_b97_live_source_probe.py -v
       - name: Probe two secondary publisher feed candidates (NO ADMISSION)
-        run: python -B v2_b97_live_source_probe.py > b97_live_source_probe.json
+        run: |
+          python -B v2_b97_live_source_probe.py > b97_live_source_probe.json
+          python -B - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('b97_live_source_probe.json').read_text())
+          print(json.dumps({'b97_candidate_probe':data['sources'],'can_release':False}))
+          PY
       - name: Test B98 editorial identity-safe fallback adapter
         run: python -B -m unittest discover -s tests -p test_v2_b98_editorial_adapter.py -v
       - name: Test B98 independent publisher failure recovery
