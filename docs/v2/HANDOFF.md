@@ -1,4 +1,9 @@
 
+## B98 source evidence hardening (2026-10-29)
+
+Hosted #40836063231 SUCCESS. Fallback editorial adapter now independently revalidates the actual HTML capture, publisher identity, article URL, headline and publication time rather than trusting caller-supplied eligible=true. Added invalid HTML regression test; CI #40842887582 pending. Still no independently onboarded second publisher, so actual redundancy remains HOLD. B99 RTL/visual reading and B100 live model tests remain outstanding; release HOLD.
+
+
 ## B98 adapter checkpoint (2026-10-29)
 
 Previous hosted #40817138249 SUCCESS. Added B98 fallback-to-editorial adapter and regression tests: a secondary publisher cannot be silently passed to the existing BBC/Al Jazeera-only compiler under another publisher's source ID. Unknown publisher returns explicit HOLD_PUBLISHER_NOT_ONBOARDED_IN_EDITORIAL_COMPILER; unverified returns HOLD_NO_ELIGIBLE_PUBLISHER. CI #40836063231 running. Actual independent publisher onboarding and live failover still not complete. Release HOLD, no production or main changes.
