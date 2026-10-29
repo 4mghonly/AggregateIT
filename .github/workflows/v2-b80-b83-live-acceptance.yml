@@ -9,6 +9,8 @@ on:
       - 'v2_b46_live_editorial_runner.py'
       - 'v2_b98_b100_readiness.py'
       - 'tests/test_v2_b98_b100_readiness.py'
+      - 'v2_b98_independent_fallback.py'
+      - 'tests/test_v2_b98_independent_fallback.py'
       - 'v2_b97_publisher_registry.py'
       - 'tests/test_v2_b97_publisher_registry.py'
       - 'v2_b98_source_fallback.py'
@@ -73,6 +75,8 @@ jobs:
         run: python -B -m unittest discover -s tests -p test_v2_b94_daily_evidence.py -v
       - name: Test B95-B97 historical receipt contract
         run: python -B -m unittest discover -s tests -p test_v2_b95_b97_history.py -v
+      - name: Test B98 independent publisher failure recovery
+        run: python -B -m unittest discover -s tests -p test_v2_b98_independent_fallback.py -v
       - name: Test B97 independent publisher registry
         run: python -B -m unittest discover -s tests -p test_v2_b97_publisher_registry.py -v
       - name: Test B98 bounded fallback source selector
