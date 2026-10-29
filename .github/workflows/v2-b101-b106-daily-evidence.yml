@@ -1,8 +1,9 @@
 name: V2 B101-B106 daily parity evidence collection (NO POST)
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '17 3 * * *'
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths: ['.github/workflows/v2-b101-b106-daily-evidence.yml']
 permissions:
   contents: read
   actions: read
