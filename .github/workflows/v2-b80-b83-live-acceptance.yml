@@ -8,6 +8,8 @@ on:
       - 'v2_b49_single_slot_shadow.py'
       - 'v2_b46_live_editorial_runner.py'
       - 'tests/test_v2_replacement_pipeline.py'
+      - 'v2_replacement_contract.py'
+      - 'tests/test_v2_replacement_contract.py'
       - 'v2_b98_b100_readiness.py'
       - 'tests/test_v2_b98_b100_readiness.py'
       - 'v2_b97_article_probe.py'
@@ -107,6 +109,10 @@ jobs:
         run: python -B -m unittest discover -s tests -p test_v2_b98_source_fallback.py -v
       - name: Test B98-B100 readiness gates
         run: python -B -m unittest discover -s tests -p test_v2_b98_b100_readiness.py -v
+      - name: Verify Option A V1 schedules and delivery routes unchanged
+        run: |
+          python -B -m unittest discover -s tests -p test_v2_replacement_contract.py -v
+          python -B v2_replacement_contract.py
       - name: Replacement bilingual source outage to real editorial integration
         run: python -B -m unittest discover -s tests -p test_v2_replacement_pipeline.py -v
       - name: B80/B81 original publisher article and editorial evidence
