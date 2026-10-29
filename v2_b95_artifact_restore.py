@@ -49,7 +49,7 @@ def restore(directory:Path,*,today:date,repo:str,token:str)->dict:
      from v2_b95_b97_history import consolidate
      stamp=obj.get("day","")
      day=date.fromisoformat(stamp)
-     if not today-timedelta(days=29)<=day<=today:continue
+     if not today-timedelta(days=29)<=day<today:continue
      destination=directory/(str(run_id)+"-"+day.isoformat()+".json")
      destination.write_bytes(content)
      restored+=1
