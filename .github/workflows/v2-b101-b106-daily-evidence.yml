@@ -3,7 +3,10 @@ on:
   workflow_dispatch:
   push:
     branches: ['rebuild/aggregateit-v2']
-    paths: ['.github/workflows/v2-b101-b106-daily-evidence.yml']
+    paths:
+      - '.github/workflows/v2-b101-b106-daily-evidence.yml'
+      - 'v2_b109_b111_evidence.py'
+      - 'tests/test_v2_b109_b111_evidence.py'
 permissions:
   contents: read
   actions: read
@@ -37,12 +40,17 @@ jobs:
         run: |
           python -B -m unittest discover -s tests -p test_v2_b101_b106_parity_gates.py -v
           python -B -m unittest discover -s tests -p test_v2_b107_evidence_integrity.py -v
+          python -B -m unittest discover -s tests -p test_v2_b109_b111_evidence.py -v
       - name: Read authenticated archived V1 evidence where still available
         continue-on-error: true
         run: python -B v2_b49_archived_edition_runner.py --output reports/b101-b106/v1-archive.json
       - name: Capture one current same-source partial V1/V2 shadow
         continue-on-error: true
         run: python -B v2_b49_shadow_runner.py --output reports/b101-b106/same-slot.json
+      - name: Extract date-specific partial bilingual receipt without claiming full V1/V2 parity
+        if: always()
+        run: |
+          python -B v2_b109_b111_evidence.py --shadow reports/b101-b106/same-slot.json --date "$(date -u +%F)" --output reports/b101-b106/partial-daily-receipt.json
       - name: Report remaining real-world evidence gaps without asserting parity
         if: always()
         run: |
