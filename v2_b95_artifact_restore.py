@@ -52,7 +52,7 @@ def restore(directory:Path,*,today:date,repo:str,token:str)->dict:
    if len(raw)>35_000_000:raise ValueError("oversized_artifact")
    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
     names=[n for n in archive.namelist() if n.startswith("b95-history/") and n.endswith(".json")]
-    if len(names)>1:raise ValueError("unexpected_history_files")
+    if len(names)>30:raise ValueError("unexpected_history_files")
     for name in names:
      if name.count("/")!=1:raise ValueError("unsafe_history_path")
      content=archive.read(name)
