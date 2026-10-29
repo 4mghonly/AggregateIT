@@ -1,4 +1,9 @@
 
+## B95–B100 substantive follow-up (2026-10-29)
+
+B95 implemented read-only GitHub Actions artifact retrieval for earlier successful branch runs and historical per-day receipt consolidation, no Drive credentials. First hosted attempt #40802777005 failed at signed artifact redirect (HTTP 401); changed downloader to follow signed HTTPS URL without forwarding bearer token, commit 010d23a. Reverification run #40802887500 pending. B99 added objective five-page pixel checks for blank pages and mandatory red held watermark, CI wired; this does not verify readability, clipping or Arabic RTL. B97/B98 publisher onboarding and actual feed failover NOT implemented. B100 live primary/fallback model tests NOT implemented (no test credentials in isolated workflow). Maintain release HOLD and no production changes.
+
+
 ## B95–B100 checkpoint
 
 B95-B97 hosted #40763482421 SUCCESS (contract/tests only). B98-B100 readiness gate module and tests added, hosted #40763695123 in progress. Current scope is partial: B95 receipt format/consolidation implemented, but cross-run GitHub artifact retrieval NOT wired; B96 distinct-day checks implemented, but genuine 7-day history NOT collected; B97 new publishers NOT onboarded. B98 reports source health but actual fallback feed routing NOT implemented; B99 4K technical page check only, independent visual QA NOT done; B100 LLM primary/fallback live test NOT done. Release HOLD. No changes to production, main, V1, Discord, Drive or paid resources.
