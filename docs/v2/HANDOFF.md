@@ -1,4 +1,9 @@
 
+## Resume checkpoint (2026-10-29)
+
+Hosted #40802887500 SUCCESS. GitHub artifact history restoration recovered two prior receipts; distinct real evidence days English=2, Arabic=2; seven-day gate HOLD. B99 five genuine 4K pages passed objective pixel diversity and held-banner checks; independent readability, clipping and RTL remain unverified. Added B98 bounded publisher-allowlisted fallback candidate selector and tests (not yet wired to live runner); hosted #40803355436 pending. New independent publisher expansion and live LLM fallback still outstanding. No main/V1/production/Discord/Drive changes.
+
+
 ## B95–B100 substantive follow-up (2026-10-29)
 
 B95 implemented read-only GitHub Actions artifact retrieval for earlier successful branch runs and historical per-day receipt consolidation, no Drive credentials. First hosted attempt #40802777005 failed at signed artifact redirect (HTTP 401); changed downloader to follow signed HTTPS URL without forwarding bearer token, commit 010d23a. Reverification run #40802887500 pending. B99 added objective five-page pixel checks for blank pages and mandatory red held watermark, CI wired; this does not verify readability, clipping or Arabic RTL. B97/B98 publisher onboarding and actual feed failover NOT implemented. B100 live primary/fallback model tests NOT implemented (no test credentials in isolated workflow). Maintain release HOLD and no production changes.
