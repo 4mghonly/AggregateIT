@@ -18,6 +18,17 @@ class ReplacementMarketTests(unittest.TestCase):
   self.assertEqual(len(r["products"]["english"]["newsroom"]["market_observations"]),2)
   self.assertEqual(r["products"]["arabic"]["newsroom"]["market_observations"],[])
   self.assertFalse(r["can_send"])
+ def test_real_replacement_runner_uses_cached_v1_market_context(self):
+  from test_v2_replacement_pipeline import run, snapshots, fake_fetch
+  t=datetime.fromisoformat("2026-10-29T09:00:00+00:00").timestamp()
+  pulse={"valid":True,"updated":t-600,"session_open":False,
+         "mega_caps":[{"t":"AAPL","price":219.5}]}
+  result=run(rss_snapshots=snapshots(),observed_at="2026-10-29T09:00:00+00:00",
+             fetch=fake_fetch,market_snapshot=pulse)
+  self.assertEqual(result["v1_market_context_observation_count"],1)
+  self.assertEqual(result["editorial"]["products"]["english"]["market_status"],"observed_unverified")
+  self.assertEqual(result["editorial"]["products"]["arabic"]["market_status"],"not_applicable")
+  self.assertFalse(result["can_release"])
  def test_stale_invalid_or_future_cached_data_never_promoted(self):
   t=datetime.fromisoformat(NOW).timestamp()
   sample={"valid":True,"updated":t-86400,"mega_caps":[{"t":"AAPL","price":200}]}
