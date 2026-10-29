@@ -15,6 +15,7 @@ from v2_article_body_gate import extract_body,article_evidence
 from v2_b87_topic_bridge import editorial_topic
 from v2_keyword_priority import load_v1_keywords,score_v1_keyword_title
 from v2_v1_full_scoring import score_english_v1
+from v2_event_intelligence import arabic_filter,cluster_candidates,event_evolution
 from v2_v1_processing_bridge import arabic_impact_priority
 from v2_evidence import _time,make_article,make_excerpt,make_claim,make_event,canonical_article_url
 from v2_evidence_ledger import EvidenceLedger
@@ -85,7 +86,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
     keyword_config=load_v1_keywords()
     ledger=EvidenceLedger(max_observations=25)
     annotations={'english':[],'arabic':[]}
-    accepted=[];held=Counter();seen=set()
+    accepted=[];held=Counter();seen=set();event_rows=[]
     for item in captures:
         config=_verify_source_candidate(item)
         url=item['article_url']
@@ -102,6 +103,10 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             source_quote=article_evidence(body,headline=item['title'],published_at=item['published_at'])
         except ValueError as exc:
             held[str(exc)[:80]]+=1;continue
+        if item['product']=='arabic':
+            relevance=arabic_filter(item['title']+' '+body['original_text'][:500],region=source_quote['region'])
+            if not relevance['admit']:
+                held['arabic_'+relevance['reason']]+=1;continue
         original=make_article(source_id=item['source_id'],url=url,
                     original_text=body['original_text'],original_language=config['language'],
                     retrieved_at=as_of,published_at=item['published_at'])
@@ -123,6 +128,9 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             'topic':editorial_topic(item['product'],source_quote['topic_english' if item['product']=='english' else 'topic_arabic']),
             'priority':(score_english_v1(item['title'],body['original_text'][:500],keyword_config=keyword_config)['priority'] if item['product']=='english' else arabic_impact_priority(item['title']+' '+body['original_text'][:500],age_hours=(now-pub).total_seconds()/3600,is_uae=source_quote['subject_country']=='AE'))
         })
+        event_rows.append({'event_id':event['event_id'],'title':item['title'],
+            'region':source_quote['region'],'source_id':item['source_id'],
+            'version_id':event['version_id']})
         accepted.append({'source_id':item['source_id'],'product':item['product'],
             'article_id':original['article_id'],'revision_id':original['revision_id'],
             'excerpt_id':excerpt['excerpt_id'],'event_id':event['event_id'],
@@ -141,6 +149,10 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             'represented_regions':plan['represented_regions'],
             'newsroom':daily,'critique':critic,'editorial_plan':plan,'no_publication_authority':True}
     cross_language=review_only_cross_language_pairs(products)
+    event_review=cluster_candidates([{'event_id':r['event_id'],'title':r['title'],
+          'region':r['region'],'source_id':r['source_id']} for r in event_rows])
+    history_review=event_evolution({r['event_id']:r['version_id'] for r in event_rows},
+                        operator_prior['versions'] if operator_prior is not None else None)
     return {'schema':'aggregateit-v2-b46-article-editorial/1','captured_article_count':len(captures),
             'admitted_articles':len(accepted),'receipts':accepted,'held_reasons':dict(held),
             'ledger_counters':ledger.counters(),'products':products,
@@ -151,6 +163,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             'prior_baseline_off_host_retention_verified':False,
             'baseline_anchor_sha256':operator_prior['prior_anchor_sha256'] if operator_prior else None,
             'cross_language_review':cross_language,
+            'event_cluster_review':event_review,'event_evolution_review':history_review,
             'headline_semantic_alignment_verified':False,
             'publisher_independence_verified':False,
             'source_story_factual_accuracy_verified':False,
