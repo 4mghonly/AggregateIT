@@ -1,4 +1,9 @@
 
+## B97 article compatibility next phase
+
+Hosted #40847215705 SUCCESS: DW English feed 11 items, BBC Arabic feed 27 items, both HOLD_ARTICLE_BODY_GATE_NOT_VALIDATED. Existing primary capture 3 English/1 Arabic. Added bounded live secondary article-body probe with 3 articles per candidate max, host checks, no text persistence and explicit HOLD until publisher-specific parser and attribution are proven. Hosted #40847622671 in progress. No publisher onboarded; release HOLD; production unchanged.
+
+
 ## B97 live probe observability checkpoint
 
 Hosted #40846958945 SUCCESS, existing primary live capture 3 English/1 Arabic. Candidate feed probe produced artifact but did not print its per-publisher results; added sanitized per-candidate logs in workflow commit 033e21c. Hosted #40847215705 queued. Do not infer that DW or BBC Arabic are live-compatible or admitted from overall workflow success. Secondary article parser and independent identity still HOLD.
