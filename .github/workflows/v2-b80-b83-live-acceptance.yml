@@ -9,6 +9,7 @@ on:
       - 'v2_b46_live_editorial_runner.py'
       - 'v2_b98_b100_readiness.py'
       - 'tests/test_v2_b98_b100_readiness.py'
+      - 'v2_b95_artifact_restore.py'
       - 'v2_b95_b97_history.py'
       - 'tests/test_v2_b95_b97_history.py'
       - 'v2_b94_daily_evidence.py'
@@ -28,6 +29,7 @@ on:
       - 'tests/test_v2_sqlite_engine_bridge.py'
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: aggregateit-v2-b80-b83-live-acceptance
   cancel-in-progress: false
@@ -101,6 +103,21 @@ jobs:
           else
             echo 'B88-B90 HOLD: genuine bilingual visual archive unavailable; no false acceptance'
           fi
+      - name: Restore historical successful-run daily receipts (read-only)
+        if: success()
+        env:
+          GH_READ_TOKEN: ${{ github.token }}
+        run: |
+          python -B v2_b95_artifact_restore.py
+          python -B - <<'PY'
+          import json
+          from pathlib import Path
+          from datetime import datetime,timezone
+          from v2_b95_b97_history import consolidate
+          report=consolidate(Path('b95-history'),today=datetime.now(timezone.utc).date())
+          Path('b95_b97_history.json').write_text(json.dumps(report,indent=2)+'\\n')
+          print(json.dumps(report))
+          PY
       - name: Archive no-post real capture receipts
         if: always()
         uses: actions/upload-artifact@v6
