@@ -38,6 +38,13 @@ class ReplacementPipelineTests(unittest.TestCase):
    self.assertEqual(result["editorial"]["products"][p]["story_count"],1)
   self.assertFalse(result["can_release"])
   self.assertFalse(result["discord_sent"])
+ def test_bbc_arabic_main_article_body_is_detected_without_matching_english(self):
+  from v2_article_body_gate import extract_body
+  content=('<main><p>'+AR_BODY+'</p><p>'+AR_BODY+'</p></main>').encode("utf8")
+  body=extract_body(content,source_url=AR_URL,language="ar")
+  self.assertIn("الصومال",body["original_text"])
+  with self.assertRaisesRegex(ValueError,"article_body_container_missing"):
+   extract_body(content,source_url=AR_URL,language="en")
  def test_unregistered_publisher_still_refused(self):
   with self.assertRaisesRegex(ValueError,"source_identity_mismatch"):
    _verify_source_candidate({"product":"english","source_id":"en-unknown",
