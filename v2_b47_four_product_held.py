@@ -16,7 +16,8 @@ from v2_weekly_layout import render_weekly_html, AR_REGIONS
 from v2_b47_weekly_pdf_preview import generate_held_weekly_pdf
 from v2_weekly_discord import bundle_weekly_pdf
 
-def compose_held_products(editorial:dict, *, output_dir:Path, as_of:str)->dict:
+def compose_held_products(editorial:dict, *, output_dir:Path, as_of:str,
+                          pulse_snapshot:dict|None=None,macro_snapshot:dict|None=None)->dict:
     if (not isinstance(editorial,dict)
         or editorial.get('schema')!='aggregateit-v2-b46-article-editorial/1'
         or editorial.get('can_send') is not False
@@ -32,7 +33,8 @@ def compose_held_products(editorial:dict, *, output_dir:Path, as_of:str)->dict:
         if t.utcoffset() is None:raise ValueError('time')
     except (TypeError,AttributeError,ValueError):
         raise ValueError('invalid_product_window') from None
-    daily_native=render_genuine_held(editorial,output_dir=Path(output_dir))
+    daily_native=render_genuine_held(editorial,output_dir=Path(output_dir),
+                                     pulse_snapshot=pulse_snapshot,macro_snapshot=macro_snapshot)
     if daily_native['status']!='HELD_VALID_NATIVE_PAGES':
         raise ValueError('invalid_native_receipts')
     daily={};weekly={}
