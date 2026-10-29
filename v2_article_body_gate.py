@@ -49,7 +49,9 @@ class _ArticleParser(HTMLParser):
     def handle_starttag(self,tag,attrs):
         attrs=dict(attrs)
         classes=set(attrs.get('class','').split())
-        valid_article=(tag=='article') if self.basis=='article_element' else (tag=='div' and 'wysiwyg--all-content' in classes)
+        valid_article=((tag=='article') if self.basis=='article_element'
+                       else (tag in ('article','main')) if self.basis=='bbc_arabic_main'
+                       else (tag=='div' and 'wysiwyg--all-content' in classes))
         self.stack.append((tag,valid_article))
         if tag=='p' and self.current is None and self._body_visible():self.current=[]
     def _body_visible(self):
@@ -74,7 +76,8 @@ def extract_body(html_bytes:bytes,*,source_url:str,language:str)->dict:
     if (not isinstance(source_url,str) or not source_url.startswith('https://') or
             host not in _ALLOWED_HOSTS or language not in ('en','ar')):
         raise ValueError('unapproved_article_source')
-    basis=_ALLOWED_HOSTS[host]
+    basis=('bbc_arabic_main' if host in ('www.bbc.com','www.bbc.co.uk') and language=='ar'
+           else _ALLOWED_HOSTS[host])
     parser=_ArticleParser(basis)
     parser.feed(html_bytes.decode('utf-8',errors='replace'))
     paragraphs=parser.paragraphs
