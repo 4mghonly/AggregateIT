@@ -10,7 +10,8 @@ from pathlib import Path
 from PIL import Image
 from v2_native_evidence_render import render_held_editions
 
-def render_genuine_held(editorial:dict, *, output_dir:Path)->dict:
+def render_genuine_held(editorial:dict, *, output_dir:Path,
+                        pulse_snapshot:dict|None=None,macro_snapshot:dict|None=None)->dict:
     if (not isinstance(editorial,dict) or
         editorial.get("schema")!="aggregateit-v2-b46-article-editorial/1" or
         editorial.get("can_send") is not False or
@@ -43,7 +44,8 @@ def render_genuine_held(editorial:dict, *, output_dir:Path)->dict:
         raise ValueError("native_output_requires_empty_directory")
     rendered=render_held_editions(plans["english"],plans["arabic"],
                                    slot_id=plans["english"]["slot_id"],output_dir=out,
-                                   market_observations=products["english"]["newsroom"].get("market_observations",[]))
+                                   market_observations=products["english"]["newsroom"].get("market_observations",[]),
+                                   pulse_snapshot=pulse_snapshot,macro_snapshot=macro_snapshot)
     if (rendered.get("schema")!="aggregateit-v2-native-no-post-pages/1"
         or rendered.get("delivery_authorized") is not False):
         raise ValueError("native_renderer_claims_delivery")
