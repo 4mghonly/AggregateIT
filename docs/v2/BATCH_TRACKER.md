@@ -1,3 +1,7 @@
+## Product-replacement consolidation — Option A (2026-10-29)
+
+New authoritative plan: `docs/v2/REPLACEMENT_EXECUTION_PLAN.md`. V1 `main` compared against the V2 branch: engine/English/Arabic/market/backup workflow files and Arabic product rules are byte-identical; current delivery contracts protected. Replaced isolated simulated fallback with real secondary feeds directly in `v2_b46_live_editorial_runner.py`, distinct publisher IDs in `SOURCE_CATALOG`, and BBC Arabic main-body extraction. Hosted #40849396413 PASS simulated joint primary outage; #40849710796 SUCCESS live: English BBC 3, Arabic Al Jazeera 0 -> BBC Arabic fallback 2, 5 held 4K pages. Added tests and V1 cadence/route/no-post continuity check; newest CI pending. All production release requirements still HOLD: V1-quality output/LLM/market parity, live model failover, 7-day durable history, visual review, Discord rehearsal, backup/recovery and cutover. No V1/main edits, no Discord posts.
+
 
 ## B97 article compatibility next phase
 
