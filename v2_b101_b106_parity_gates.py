@@ -20,7 +20,7 @@ def _valid_row(row):
   if not isinstance(data,dict) or set(data)!=set(AREAS):raise ValueError("incomplete_processing_dimensions")
   for area in AREAS:
    value=data[area]
-   if value is not None and (not isinstance(value,list) or len(value)>100 or any(not isinstance(x,str) or len(x)>300 for x in value)):raise ValueError("invalid_dimension_values")
+   if value is not None and (not isinstance(value,list) or len(value)>100 or any(not isinstance(x,str) or not x.strip() or len(x)>300 for x in value)):raise ValueError("invalid_dimension_values")
  evidence=row["evidence"]
  if not isinstance(evidence,dict) or set(evidence)!={"v1_executed","v2_executed","same_input_verified","model_fallback_exercised","historical_baseline_authenticated","visual_reviewed","source_provenance_verified"} or any(type(v)!=bool for v in evidence.values()):raise ValueError("invalid_evidence")
  return row
@@ -44,8 +44,9 @@ def assess(rows,*,as_of):
    if left is None or right is None or not trusted:
     dimensions[area]={"status":"UNVERIFIED"}
    else:
-    a,b=set(left),set(right)
-    dimensions[area]={"status":"MATCH" if a==b else "DIFFERENT","v1_only":len(a-b),"v2_only":len(b-a)}
+    from collections import Counter
+    a,b=Counter(left),Counter(right)
+    dimensions[area]={"status":"MATCH" if a==b else "DIFFERENT","v1_only":sum((a-b).values()),"v2_only":sum((b-a).values())}
   if not evidence["historical_baseline_authenticated"]:dimensions["historical_evolution"]={"status":"UNVERIFIED"}
   if not evidence["model_fallback_exercised"]:dimensions["translation_fallback"]={"status":"UNVERIFIED"}
   if not evidence["visual_reviewed"]:dimensions["visual_delivery"]={"status":"UNVERIFIED"}
