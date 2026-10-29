@@ -26,6 +26,9 @@ A read-only adapter `v2_market_bridge.py` consumes V1's existing TradingView pul
 Remaining work:
 Map the V1 engine's scoring, event lifecycle, deduplication, market/macro context, source family corroboration and actual LLM analysis onto the replacement's editorial plan. Preserve the V1 Gazette and Arabic final-product obligations; do not substitute quote-only laboratory pages for finished analysis. Deduplicate across actual source articles without conflating distinct events. Designate final English and Arabic edition generation as the only product output path. Show unavailable data honestly.
 
+#### Integrated genuine V1 market chart milestone (2026-10-29)
+Hosted #40852035162 SUCCESS: original V1 TradingView collector produced 20 mega-cap rows and 18 macro instruments; 8 valid priced observations entered the V2 English product. The **existing V1 4K chart renderer** now receives the original fresh pulse/macro data, rather than a dummy invalid snapshot. Hosted pages visibly contain mega-cap bar charts, market/macro table, commodity bars, movers/scatter, VIX and rates context. Any missing market panels remain unavailable rather than manufactured. English source articles 3; Arabic primary unavailable at evidence gate -> BBC Arabic secondary 2; five held pages rendered. No Discord messages. The actual rendered English output was visually inspected in session: charts are improved, but editorial headline quality, overlapping microtext, empty optional sections, Arabic readability and final LLM assessment are NOT approved.
+
 ### 3. Final product rendering: **INCOMPLETE**
 Replace held laboratory template/content with polished English Gazette (two pages) and Arabic briefing (three 4K slides), including actual facts/citations, separate assessment, region priorities, UAE emphasis, large readable RTL typography and no clipping. Run automated geometry checks **and** inspect the real rendered images. Respect Arabic `PRODUCT_RULES.md`.
 
