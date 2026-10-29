@@ -5,6 +5,11 @@ class ProcessingParityTests(unittest.TestCase):
   self.assertFalse(arabic_filter("ازدحام مروري بسبب مباراة",region="gcc")["admit"])
   self.assertTrue(arabic_filter("هجوم صاروخي على الحدود",region="iran")["admit"])
   self.assertFalse(arabic_filter("هجوم صاروخي على الحدود",region=None)["admit"])
+ def test_diplomatic_talks_in_somalia_admitted(self):
+  text="مباحثات دبلوماسية في الصومال بشأن العلاقات الإقليمية أكد مسؤولون عقد مباحثات دبلوماسية"
+  self.assertTrue(arabic_filter(text,region="somalia")["admit"])
+ def test_unrelated_politics_not_admitted(self):
+  self.assertFalse(arabic_filter("مهرجان ثقافي في الصومال",region="somalia")["admit"])
  def test_reverse_direction_not_merged(self):
   rows=[{"event_id":"a","title":"Iran strikes Israel","region":"iran","published":1000,"source_id":"s1"},{"event_id":"b","title":"Israel strikes Iran","region":"iran","published":1001,"source_id":"s2"}]
   self.assertEqual(cluster_candidates(rows)["automatic_merges"],0)
