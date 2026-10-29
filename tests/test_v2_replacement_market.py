@@ -39,6 +39,22 @@ class ReplacementMarketTests(unittest.TestCase):
   self.assertIn("currency unspecified",text)
   self.assertIn("not independently verified",text)
   self.assertIn("No market evidence",_market_readout([]))
+ def test_gazette_receives_actual_fresh_v1_market_charts_only(self):
+  from v2_native_evidence_render import _attach_market_charts
+  t=datetime.fromisoformat(NOW).timestamp()
+  pulse={"valid":True,"updated":t-300,"session_open":False,
+         "mega_caps":[{"t":"AAPL","price":222.25,"pct":0.8}],"gainers":[],"losers":[]}
+  macro={"valid":True,"updated":t-250,
+         "instruments":[{"sym":"CBOE:VIX","name":"VIX","type":"index","price":19.5,"pct":0.4}]}
+  result=_attach_market_charts({"pulse":{"valid":False},"macro":{"valid":False},"regime":{}},
+                               pulse,macro,as_of=NOW,has_admitted_market=True)
+  self.assertTrue(result["pulse"]["valid"])
+  self.assertTrue(result["macro"]["valid"])
+  self.assertEqual(result["pulse"]["mega_caps"][0]["t"],"AAPL")
+  self.assertIn("vix",result["regime"])
+  result=_attach_market_charts({"pulse":{"valid":False},"macro":{"valid":False},"regime":{}},
+                               pulse,macro,as_of=NOW,has_admitted_market=False)
+  self.assertFalse(result["pulse"]["valid"])
  def test_stale_invalid_or_future_cached_data_never_promoted(self):
   t=datetime.fromisoformat(NOW).timestamp()
   sample={"valid":True,"updated":t-86400,"mega_caps":[{"t":"AAPL","price":200}]}
