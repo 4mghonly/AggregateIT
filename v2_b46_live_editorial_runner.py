@@ -74,6 +74,7 @@ def run(*,render_native=False,render_four_products=False,
                 reasons[product+'-'+source['publisher_id']+'-feed']=type(exc).__name__
                 continue
             eligible_headlines=[]
+            geography_deferred=[]
             for item in parsed['items']:
                 matches=headline_geography_candidates(item['title'],language=source['language'])
                 if len(matches)==1:
@@ -81,6 +82,13 @@ def run(*,render_native=False,render_four_products=False,
                     count[product]['headlines_with_one_supported_country']+=1
                 else:
                     count[product]['headline_country_unclassified']+=1
+                    # Headlines may omit a country while the attributed article
+                    # identifies one. Defer only a bounded sample to body evidence.
+                    if product=='arabic' and len(matches)==0 and len(geography_deferred)<3:
+                        geography_deferred.append(item)
+            if product=='arabic':
+                eligible_headlines.extend(geography_deferred)
+                count[product]['deferred_geography_article_candidates']=len(geography_deferred)
             for candidate in eligible_headlines:
                 if row['article_attempts']>=6 or row['eligible_articles']>=3:
                     break
