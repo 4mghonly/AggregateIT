@@ -1,4 +1,9 @@
 
+## B97 continuation checkpoint
+
+Hosted #40814660962 SUCCESS: 3 English and 2 Arabic source-backed stories, five held 4K pages; 7 historical receipts restored, 2 distinct positive days per language; seven-day gate still HOLD. Added B97 fail-closed independent-publisher registry and tests; no new publishers actually admitted or integrated. Hosted #40816143621 running. Real independent source redundancy, RTL/readability and live LLM fallback remain outstanding. No production changes.
+
+
 ## Next implementation checkpoint (2026-10-29)
 
 Previous hosted B98 selector run #40803355436 failed at B95 history restore: subsequent artifacts now contain multiple daily receipt files; corrected bounded acceptance (up to 30) in commit 8deda0d. Integrated B98 source-backed candidate gate into live article capture, preserving same-publisher identity and existing six-attempt limit (commit 6543e31). This is per-article fallback only, not independent publisher redundancy. Hosted #40814660962 pending. Release HOLD; no V1, main, production, Discord, Drive or paid resource changes.
