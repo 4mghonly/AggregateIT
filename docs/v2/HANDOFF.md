@@ -1,4 +1,9 @@
 
+## B97 live probe observability checkpoint
+
+Hosted #40846958945 SUCCESS, existing primary live capture 3 English/1 Arabic. Candidate feed probe produced artifact but did not print its per-publisher results; added sanitized per-candidate logs in workflow commit 033e21c. Hosted #40847215705 queued. Do not infer that DW or BBC Arabic are live-compatible or admitted from overall workflow success. Secondary article parser and independent identity still HOLD.
+
+
 ## B97 live publisher discovery phase (2026-10-29)
 
 Previous B98 hosted #40842887582 SUCCESS. Introduced bounded read-only candidate feed probes for DW English and BBC Arabic, with unit tests for unreachable, unsafe and feed-only evidence. Hosted #40846958945 queued; candidate endpoints are unverified until its evidence artifact is inspected. The probe NEVER admits publishers; live article parser/attribution compatibility, secondary source rights and real failover remain outstanding. No V1/main/production/Discord changes; release HOLD.
