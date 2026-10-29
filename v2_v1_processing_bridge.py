@@ -51,3 +51,34 @@ def event_duplicate_decision(a,b):
     # Similar text is insufficient to infer event identity, particularly when
     # actor and target are reversed or the event changes over time.
     return {"duplicate":False,"candidate":ratio>=0.78,"reason":"fuzzy_review_only" if ratio>=0.78 else "distinct"}
+
+# Deterministic migration of V1 Arabic impact and routine-vs-strategic gates.
+# Kept pure: source evidence and publisher-date verification remain upstream.
+_STRATEGIC=("sanctions","diplomacy","military","border","ceasefire","security","naval",
+            "عقوبات","دبلوماسية","عسكري","حدود","هدنة","أمن","امن")
+_HIGH=("sanctions","ceasefire","military","border","naval",
+       "عقوبات","هدنة","عسكري","حدود")
+_ROUTINE=("traffic","weather","promotion","lottery","sport","football",
+          "مرور","ازدحام","طقس","رياضة","مباراة")
+def _phrase_hit(text,phrase):
+    return re.search(r"(?<!\\w)"+re.escape(phrase)+r"(?!\\w)",text,re.UNICODE) is not None
+
+def arabic_relevance_gate(text):
+    folded=str(text or "").casefold()
+    strategic=any(_phrase_hit(folded,t) for t in _STRATEGIC)
+    routine=any(_phrase_hit(folded,t) for t in _ROUTINE)
+    return strategic and (not routine or strategic)
+
+def arabic_impact_priority(text,*,age_hours,is_uae=False,official=False):
+    """V1-inspired age/impact ranking mapped to V2 integer 0..100."""
+    folded=str(text or "").casefold()
+    age=max(0.0,float(age_hours))
+    strategic=any(_phrase_hit(folded,t) for t in _STRATEGIC)
+    impact=sum(_phrase_hit(folded,t) for t in _HIGH)
+    routine=any(_phrase_hit(folded,t) for t in _ROUTINE)
+    v1=max(0.0,4.0-age/4.0)+min(8.0,2.0*impact)
+    v1+=2.5 if strategic else 0.0
+    v1+=1.25 if official else 0.0
+    v1+=0.6 if is_uae else 0.0
+    if routine and not strategic:v1-=4.0
+    return max(0,min(100,round(45+v1*3)))
