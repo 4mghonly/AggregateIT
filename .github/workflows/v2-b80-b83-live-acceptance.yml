@@ -59,6 +59,8 @@ on:
       - 'tests/test_v2_b88_b90_acceptance.py'
       - 'v2_b87_topic_bridge.py'
       - 'v2_b46_live_editorial.py'
+      - 'v2_b46_live_editorial_runner.py'
+      - 'tests/test_v2_b108_arabic_zero_diagnosis.py'
       - 'v2_article_body_gate.py'
       - 'tests/test_v2_b87_arabic_topic.py'
       - 'v2_b86_visual_archive.py'
@@ -101,6 +103,8 @@ jobs:
         run: |
           python -B -m unittest discover -s tests -p test_v2_processing_parity_benchmark.py -v
           python -B v2_processing_parity_benchmark.py > v2_processing_parity_benchmark.json
+      - name: Test B108 Arabic zero-story diagnostic
+        run: python -B -m unittest discover -s tests -p test_v2_b108_arabic_zero_diagnosis.py -v
       - name: Test B107 parity evidence integrity
         run: python -B -m unittest discover -s tests -p test_v2_b107_evidence_integrity.py -v
       - name: Test B107 event review regressions
