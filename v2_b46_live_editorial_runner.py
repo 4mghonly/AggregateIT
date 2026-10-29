@@ -132,9 +132,10 @@ def run(*,render_native=False,render_four_products=False,
     # Independent pre-admission failures should not be interpreted as factual reliability.
     # Reuse V1 market cache when present; no new API request and no guessed
     # market figures. Stale/invalid inputs are withheld by the bridge.
+    from market import load_market_pulse,load_macro_pulse
     if market_snapshot is None:
-        from market import load_market_pulse
         market_snapshot=load_market_pulse()
+    macro_snapshot=load_macro_pulse()
     from v2_market_bridge import convert_v1_market_pulse
     markets=convert_v1_market_pulse(market_snapshot,as_of=observed)
     result=compile_captured_articles(captures,as_of=observed,slot_id=slot,
@@ -147,7 +148,9 @@ def run(*,render_native=False,render_four_products=False,
                 from tempfile import TemporaryDirectory
                 from v2_b46_native_held import render_genuine_held
                 with TemporaryDirectory(prefix="v2-b46-source-native-") as temp:
-                    native=render_genuine_held(result,output_dir=Path(temp)/"native")
+                    native=render_genuine_held(result,output_dir=Path(temp)/"native",
+                                               pulse_snapshot=market_snapshot,
+                                               macro_snapshot=macro_snapshot)
             except Exception as exc:
                 native={"status":"HOLD_NATIVE_RENDER_ERROR","error_class":type(exc).__name__}
         else:
@@ -161,7 +164,9 @@ def run(*,render_native=False,render_four_products=False,
                 from v2_b47_four_product_held import compose_held_products
                 with TemporaryDirectory(prefix="v2-b47-four-products-") as temp:
                     output=Path(visual_archive_dir) if visual_archive_dir is not None else Path(temp)/"native"
-                    four_products=compose_held_products(result,output_dir=output,as_of=observed)
+                    four_products=compose_held_products(result,output_dir=output,as_of=observed,
+                                                        pulse_snapshot=market_snapshot,
+                                                        macro_snapshot=macro_snapshot)
                     if visual_archive_dir is not None:
                         from v2_b86_visual_archive import validate_page_archive
                         four_products['visual_archive']=validate_page_archive(output)
