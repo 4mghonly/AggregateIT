@@ -25,7 +25,27 @@ def _stamp(raw:bytes)->bytes:
         buffer=BytesIO();img.save(buffer,'PNG');return buffer.getvalue()
 
 
-def render_held_editions(english_plan:dict,arabic_plan:dict,*,slot_id:str,output_dir:Path)->dict:
+def _market_readout(observations:list[dict]|None)->str:
+    """Literal cached V1 observations only, with attribution and no inferred currency."""
+    if not observations:
+        return 'No market evidence: absent, not zero.'
+    if not isinstance(observations,list) or len(observations)>12:
+        raise ValueError('invalid_market_readout')
+    lines=[]
+    for row in observations[:5]:
+        if (not isinstance(row,dict)
+            or row.get('source')!='tradingview_cached_snapshot'
+            or row.get('unit')!='quoted_price_currency_unspecified'
+            or not isinstance(row.get('symbol'),str)
+            or not isinstance(row.get('value'),(float,int))
+            or isinstance(row.get('value'),bool)):
+            raise ValueError('untrusted_market_readout')
+        lines.append(f"{row['symbol']} quoted {row['value']:.2f} (currency unspecified)")
+    return 'V1 cached TradingView snapshot, not independently verified: '+ '; '.join(lines)+'.'
+
+
+def render_held_editions(english_plan:dict,arabic_plan:dict,*,slot_id:str,output_dir:Path,
+                         market_observations:list[dict]|None=None)->dict:
     if not isinstance(english_plan,dict) or not isinstance(arabic_plan,dict):raise ValueError('plans_required')
     for product,plan,lang in [('english',english_plan,'en'),('arabic',arabic_plan,'ar')]:
         if (plan.get('schema')!='aggregateit-editorial-plan/1'
@@ -59,6 +79,7 @@ def render_held_editions(english_plan:dict,arabic_plan:dict,*,slot_id:str,output
       'key_risk':'Publisher assertions are not independent confirmations.',
       'delta':'No authenticated previous edition for comparison.',
     }
+    empty_analysis['market_read']=_market_readout(market_observations)
     pages=[]
     for n,renderer in enumerate((render_p1,render_p2),1):
         io=BytesIO();renderer(data,empty_analysis,False,io);raw=_stamp(io.getvalue())
