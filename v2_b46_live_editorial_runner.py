@@ -17,7 +17,8 @@ FEEDS=(
     ('arabic','https://www.aljazeera.net/aljazeerarss/ar/all.xml'),
 )
 def run(*,render_native=False,render_four_products=False,
-        rss_snapshots=None,observed_at=None,visual_archive_dir=None,fetch=None):
+        rss_snapshots=None,observed_at=None,visual_archive_dir=None,fetch=None,
+        market_snapshot=None):
     if rss_snapshots is not None:
         if not isinstance(rss_snapshots,dict) or set(rss_snapshots)!={'english','arabic'}:
             raise ValueError('incomplete_shared_rss_snapshots')
@@ -129,7 +130,15 @@ def run(*,render_native=False,render_four_products=False,
                 recovery['fallback_used']=position>0
                 break
     # Independent pre-admission failures should not be interpreted as factual reliability.
-    result=compile_captured_articles(captures,as_of=observed,slot_id=slot)
+    # Reuse V1 market cache when present; no new API request and no guessed
+    # market figures. Stale/invalid inputs are withheld by the bridge.
+    if market_snapshot is None:
+        from market import load_market_pulse
+        market_snapshot=load_market_pulse()
+    from v2_market_bridge import convert_v1_market_pulse
+    markets=convert_v1_market_pulse(market_snapshot,as_of=observed)
+    result=compile_captured_articles(captures,as_of=observed,slot_id=slot,
+                                     market_observations=markets)
     receipt=metrics_only(result)
     native={"status":"NOT_REQUESTED"}
     if render_native:
@@ -162,6 +171,7 @@ def run(*,render_native=False,render_four_products=False,
             four_products={"status":"HOLD_MISSING_GENUINE_BILINGUAL_EVIDENCE"}
     return {'schema':'aggregateit-v2-b46-live-chain/1',
         'observed_at':observed,'source_attempts':count,'source_recovery':source_recovery,
+        'v1_market_context_observation_count':len(markets),
         'rss_feed_sha256':feed_digests,
         'rss_shared_snapshot_supplied':rss_snapshots is not None,
         'transport_failures':reasons,'editorial':receipt,'native':native,'four_products':four_products,
@@ -180,6 +190,7 @@ if __name__=='__main__':
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print(json.dumps({'source_attempts':result['source_attempts'],
                       'source_recovery':result['source_recovery'],
+                      'v1_market_context_observation_count':result['v1_market_context_observation_count'],
                       'admitted':result['editorial']['admitted_articles'],
                       'held_reasons':result['editorial']['held_reasons'],
                       'editorial_held':{p:r['held_reasons'] for p,r in result['editorial']['products'].items()},
