@@ -61,7 +61,7 @@ _HIGH=("sanctions","ceasefire","military","border","naval",
 _ROUTINE=("traffic","weather","promotion","lottery","sport","football",
           "مرور","ازدحام","طقس","رياضة","مباراة")
 def _phrase_hit(text,phrase):
-    return re.search(r"(?<!\\w)"+re.escape(phrase)+r"(?!\\w)",text,re.UNICODE) is not None
+    return re.search(r"(?<!\w)"+re.escape(phrase)+r"(?!\w)",text,re.UNICODE) is not None
 
 def arabic_relevance_gate(text):
     folded=str(text or "").casefold()
