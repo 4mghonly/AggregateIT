@@ -1,4 +1,9 @@
 
+## B98 adapter checkpoint (2026-10-29)
+
+Previous hosted #40817138249 SUCCESS. Added B98 fallback-to-editorial adapter and regression tests: a secondary publisher cannot be silently passed to the existing BBC/Al Jazeera-only compiler under another publisher's source ID. Unknown publisher returns explicit HOLD_PUBLISHER_NOT_ONBOARDED_IN_EDITORIAL_COMPILER; unverified returns HOLD_NO_ELIGIBLE_PUBLISHER. CI #40836063231 running. Actual independent publisher onboarding and live failover still not complete. Release HOLD, no production or main changes.
+
+
 ## B98 independent fallback next implementation
 
 B97 hosted #40816143621 SUCCESS. Added v2_b98_independent_fallback.py and regression tests: simulated primary failure/verified secondary success, unverified secondary HOLD, mismatched article domain refusal, attempt budget. CI run #40817138249 queued. This is a synthetic routing harness only; secondary publisher has NOT been acquired, validated or wired into the live runner. No new production sources or Discord messages. Release HOLD.
