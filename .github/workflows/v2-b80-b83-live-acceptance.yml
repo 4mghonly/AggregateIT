@@ -121,6 +121,15 @@ jobs:
         run: python -B -m unittest discover -s tests -p test_v2_replacement_market.py -v
       - name: Replacement bilingual source outage to real editorial integration
         run: python -B -m unittest discover -s tests -p test_v2_replacement_pipeline.py -v
+      - name: Restore only V1 market snapshots for read-only V2 parity
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            data/market_pulse.json
+            data/macro_pulse.json
+          key: shadow-v1-market-${{ github.run_id }}
+          restore-keys: |
+            market-state-
       - name: B80/B81 original publisher article and editorial evidence
         run: python -B v2_b46_live_editorial_runner.py --output b80_b81_live_editorial.json --render-held --four-products --visual-archive-dir b86-visual-review
       - name: Persist bounded sanitized engine receipts in SQLite
