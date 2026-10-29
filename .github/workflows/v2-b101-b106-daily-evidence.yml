@@ -1,0 +1,57 @@
+name: V2 B101-B106 daily parity evidence collection (NO POST)
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: aggregateit-v2-b101-b106-daily-evidence
+  cancel-in-progress: false
+jobs:
+  collect:
+    if: github.repository == '4mghonly/AggregateIT'
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      V2_NO_POST: '1'
+      DISCORD_WEBHOOK: ''
+      DISCORD_WEBHOOK_ARABIC: ''
+      ARABIC_LLM_API_KEY: ''
+      ARABIC_LLM_FALLBACK_API_KEY: ''
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: rebuild/aggregateit-v2
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install existing isolated dependencies
+        run: python -m pip install -r requirements.txt pillow pyyaml beautifulsoup4 arabic-reshaper python-bidi langdetect==1.0.9
+      - name: Validate comparison evidence gates
+        run: |
+          python -B -m unittest discover -s tests -p test_v2_b101_b106_parity_gates.py -v
+          python -B -m unittest discover -s tests -p test_v2_b107_evidence_integrity.py -v
+      - name: Read authenticated archived V1 evidence where still available
+        continue-on-error: true
+        run: python -B v2_b49_archived_edition_runner.py --output reports/b101-b106/v1-archive.json
+      - name: Capture one current same-source partial V1/V2 shadow
+        continue-on-error: true
+        run: python -B v2_b49_shadow_runner.py --output reports/b101-b106/same-slot.json
+      - name: Report remaining real-world evidence gaps without asserting parity
+        if: always()
+        run: |
+          mkdir -p reports/b101-b106
+          python -B v2_b101_b106_parity_gates.py > reports/b101-b106/seven-day-parity-gate.json
+      - name: Retain sanitized evidence for operator review
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: b101-b106-partial-evidence-${{ github.run_id }}
+          path: reports/b101-b106/
+          retention-days: 7
+          if-no-files-found: warn
