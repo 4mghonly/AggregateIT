@@ -29,6 +29,12 @@ Map the V1 engine's scoring, event lifecycle, deduplication, market/macro contex
 ### 3. Final product rendering: **INCOMPLETE**
 Replace held laboratory template/content with polished English Gazette (two pages) and Arabic briefing (three 4K slides), including actual facts/citations, separate assessment, region priorities, UAE emphasis, large readable RTL typography and no clipping. Run automated geometry checks **and** inspect the real rendered images. Respect Arabic `PRODUCT_RULES.md`.
 
+#### Actual visual review, not just PNG acceptance
+The five 4K held pages from hosted #40850880405 were inspected as a contact sheet on 2026-10-29. They were technically valid, but **not acceptable as final publications**: English pages retain the unverified laboratory masthead and multiple empty market/analysis panels; Arabic pages have large empty panels and text too small relative to the available area. Reuse of V1 market snapshot/chart geometry is being integrated, but editorial summaries, RTL typography and meaningful panel density still require final-product redesign. Do not count this inspection as an independent approval of the final design.
+
+#### Actual V1 cadence caveat
+The reviewed successful `main` runs #40733833078 (English Gazette) and #40839644622 (Arabic) had successful cadence jobs but the actual `slide`/`publish` jobs were **skipped**. A green workflow conclusion alone is not a delivery receipt; obtaining successful real V1 edition artifacts/Discord receipts remains part of the true parity baseline.
+
 ### 4. Durable operation: **INCOMPLETE**
 Persist sanitized evidence, event/market history, 7-day source-backed weekly inputs and recovery snapshots within a zero-paid-resource budget. Integrate V1's proven cache/SQLite/market refresh and alerting where appropriate. Verify restore, bounded cleanup, duplicate-run guards, source failover, LLM primary/fallback, missed-job detection and Discord delivery rehearsal without using production routes.
 
