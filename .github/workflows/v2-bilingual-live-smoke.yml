@@ -43,8 +43,13 @@ jobs:
                       obj=json.load(res)
               except urllib.error.HTTPError as exc:
                   raise RuntimeError(prefix+" inference HTTP "+str(exc.code)) from None
-              content=obj.get("choices",[{}])[0].get("message",{}).get("content","")
-              if not isinstance(content,str) or not content.strip(): raise RuntimeError(prefix+" empty inference response")
+              choices=obj.get("choices") or []
+              msg=choices[0].get("message",{}) if choices else {}
+              content=msg.get("content","")
+              if isinstance(content,list): content=" ".join(part.get("text","") for part in content if isinstance(part,dict))
+              if not isinstance(content,str) or not content.strip():
+                  finish=choices[0].get("finish_reason","missing") if choices else "no_choices"
+                  raise RuntimeError(prefix+" empty response; finish_reason="+str(finish)+"; reasoning_present="+str(bool(msg.get("reasoning"))))
               return True
           for language in ("en","ar"):
               try:
@@ -56,8 +61,13 @@ jobs:
                   print(language+": fallback recovered")
           # Independently test the fallback endpoint for each language, even if primary succeeded.
           for language in ("en","ar"):
-              invoke("FALLBACK",language)
-              print(language+": fallback inference OK")
+              try:
+                  invoke("FALLBACK",language)
+                  print(language+": fallback inference OK")
+              except RuntimeError as exc:
+                  if "empty response" not in str(exc): raise
+                  print(language+": fallback returned empty response; diagnostic="+str(exc))
+                  raise
           for language,key in (("en","ENGLISH_WEBHOOK"),("ar","ARABIC_WEBHOOK")):
               url=need(key)
               if not url.startswith("https://discord.com/api/webhooks/") and not url.startswith("https://discordapp.com/api/webhooks/"):
