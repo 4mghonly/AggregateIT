@@ -125,7 +125,9 @@ def run(*,render_native=False,render_four_products=False,
                     if product=='arabic':
                         from v2_event_intelligence import arabic_filter
                         relevance=arabic_filter(candidate['title']+' '+body['original_text'][:500],
-                                                region=source_quote['region'])
+                                                region=source_quote['region'],
+                                                headline=candidate['title'],
+                                                lead=body['original_text'][:1200])
                         if not relevance['admit']:
                             count[product]['editorial_relevance_precheck_rejections']+=1
                             rejected=count[product]['body_gate_rejections']
