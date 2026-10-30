@@ -42,7 +42,9 @@ def run(*,render_native=False,render_four_products=False,
         count[product]={'feed_attempted':True,'feed_ok':False,'article_attempts':0,
                         'article_http_ok':0,'capture_successes':0,
                         'headlines_with_one_supported_country':0,'headline_country_unclassified':0,
-                        'article_evidence_eligible':0,'body_gate_rejections':{}}
+                        'article_evidence_eligible':0,
+                        'editorial_relevance_precheck_rejections':0,
+                        'body_gate_rejections':{}}
         recovery={'primary_publisher':primary['publisher_id'],'selected_publisher':None,
                   'fallback_attempted':False,'fallback_used':False,'attempts':[]}
         source_recovery[product]=recovery
@@ -110,13 +112,26 @@ def run(*,render_native=False,render_four_products=False,
                         'published_at':candidate['published_at'],'html_bytes':page['body']}
                     try:
                         body=extract_body(page['body'],source_url=url,language=source['language'])
-                        article_evidence(body,headline=candidate['title'],
-                                         published_at=candidate['published_at'])
+                        source_quote=article_evidence(body,headline=candidate['title'],
+                                                      published_at=candidate['published_at'])
                     except ValueError as exc:
                         code=str(exc)[:80]
                         rejected=count[product]['body_gate_rejections']
                         rejected[code]=rejected.get(code,0)+1
                         continue
+                    # Evaluate the same Arabic relevance decision used by the
+                    # compiler BEFORE declaring the publisher a successful
+                    # recovery. Otherwise a rejected article masks fallback.
+                    if product=='arabic':
+                        from v2_event_intelligence import arabic_filter
+                        relevance=arabic_filter(candidate['title']+' '+body['original_text'][:500],
+                                                region=source_quote['region'])
+                        if not relevance['admit']:
+                            count[product]['editorial_relevance_precheck_rejections']+=1
+                            rejected=count[product]['body_gate_rejections']
+                            key='editorial_'+relevance['reason']
+                            rejected[key]=rejected.get(key,0)+1
+                            continue
                     # The primary preserves the existing independently tested
                     # source filter. Secondary is checked here AND rechecked by
                     # the publisher-aware editorial compiler.
