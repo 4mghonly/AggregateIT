@@ -1,6 +1,9 @@
-name: V2 Telegram bilingual preview (manual only)
+name: V2 Telegram bilingual preview (isolated test)
 on:
   workflow_dispatch:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths: ['.github/workflows/v2-telegram-preview.yml']
 permissions:
   contents: read
 concurrency:
