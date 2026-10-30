@@ -63,6 +63,10 @@ on:
       - 'v2_b46_live_editorial_runner.py'
       - 'tests/test_v2_b108_arabic_zero_diagnosis.py'
       - 'tests/test_v2_b113_arabic_recovery.py'
+      - 'v2_b114_arabic_topic_policy.py'
+      - 'tests/test_v2_b114_arabic_precision.py'
+      - 'v2_b114_capture_provenance.py'
+      - 'tests/test_v2_b114_capture_provenance.py'
       - 'v2_article_body_gate.py'
       - 'v2_b112_final_acceptance.py'
       - 'v2_b95_b97_history.py'
@@ -111,6 +115,12 @@ jobs:
           python -B v2_processing_parity_benchmark.py > v2_processing_parity_benchmark.json
       - name: Test B108 Arabic zero-story diagnostic
         run: python -B -m unittest discover -s tests -p test_v2_b108_arabic_zero_diagnosis.py -v
+      - name: Test B114 unified Arabic topic precision, plus negative controls
+        run: |
+          python -B -m unittest discover -s tests -p test_v2_b114_arabic_precision.py -v
+          python -B -m unittest discover -s tests -p test_v2_article_body_gate.py -v
+      - name: Test B114 historical capture provenance
+        run: python -B -m unittest discover -s tests -p test_v2_b114_capture_provenance.py -v
       - name: Test B113 bounded Arabic country-and-editorial recovery
         run: python -B -m unittest discover -s tests -p test_v2_b113_arabic_recovery.py -v
       - name: Test B112 historical conflict integrity
@@ -246,6 +256,9 @@ jobs:
           from v2_b95_b97_history import diagnose_conflicts
           root=Path('b95-history')
           today=datetime.now(timezone.utc).date()
+          from v2_b114_capture_provenance import inspect_slots
+          captures=inspect_slots(root,today=today)
+          Path('b114_capture_provenance.json').write_text(json.dumps(captures,indent=2)+chr(10))
           diagnostics=diagnose_conflicts(root,today=today)
           Path('b112_history_conflicts.json').write_text(json.dumps(diagnostics,indent=2)+chr(10))
           if diagnostics['conflicting_days']:
@@ -261,6 +274,7 @@ jobs:
         with:
           name: aggregateit-v2-b80-b83-real-acceptance
           path: |
+            b114_capture_provenance.json
             b112_final_preparation.json
             b112_history_conflicts.json
             b80_b81_live_editorial.json
