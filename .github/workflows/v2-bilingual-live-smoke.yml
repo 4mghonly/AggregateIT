@@ -36,7 +36,7 @@ jobs:
               model=need(prefix+"_MODEL")
               if not base.startswith("https://"): raise RuntimeError("Non-HTTPS model endpoint")
               prompt="Reply with one word only: "+("READY" if language=="en" else "جاهز")
-              data=json.dumps({"model":model,"messages":[{"role":"user","content":prompt}],"max_tokens":48,"temperature":0}).encode()
+              data=json.dumps({"model":model,"messages":[{"role":"user","content":prompt}],"max_tokens":256,"temperature":0,"reasoning":{"effort":"none"}}).encode()
               req=urllib.request.Request(base+"/chat/completions",data=data,headers={"Authorization":"Bearer "+key,"Content-Type":"application/json","User-Agent":"AggregateIT-V2-isolated-smoke/1"})
               try:
                   with urllib.request.urlopen(req,timeout=22) as res:
