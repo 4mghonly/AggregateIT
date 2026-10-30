@@ -17,7 +17,7 @@ def score_english_v1(title,body="",*,source_name="",keyword_config=None,watchlis
  hits=[]
  weights={"Critical":4,"High":3,"Medium":2,"Low":1}
  for cluster in kw["clusters"]:
-  terms=cluster.get("phrases",[])
+  terms=cluster.get("phrases",[])+cluster.get("tags",[])
   if any(_hit(text,t) for t in terms if isinstance(t,str) and t):
    components["keyword"]+=weights.get(cluster.get("prio"),2)
    hits.append(cluster["id"])
