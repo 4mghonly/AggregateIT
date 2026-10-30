@@ -104,7 +104,9 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
         except ValueError as exc:
             held[str(exc)[:80]]+=1;continue
         if item['product']=='arabic':
-            relevance=arabic_filter(item['title']+' '+body['original_text'][:500],region=source_quote['region'])
+            relevance=arabic_filter(item['title']+' '+body['original_text'][:500],
+                                     region=source_quote['region'],
+                                     headline=item['title'],lead=body['original_text'][:1200])
             if not relevance['admit']:
                 held['arabic_'+relevance['reason']]+=1;continue
         original=make_article(source_id=item['source_id'],url=url,
