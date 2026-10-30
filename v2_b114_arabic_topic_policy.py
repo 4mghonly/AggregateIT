@@ -9,7 +9,7 @@ import unicodedata
 
 # Roots are intentionally small and explicit. Arabic proclitics / definite
 # article and common inflections are recognized without arbitrary substrings.
-_PREFIX=r"(?:[وفبل]?ال?|لل?)"
+_PREFIX=r"(?:[وفبل]?(?:ال)?|لل?)"
 _SUFFIX=r"[ء-ي]{0,5}"
 _AR_LETTER=r"[ء-ي]"
 _SECURITY=(
@@ -20,7 +20,7 @@ _SECURITY=(
 _DIPLOMACY=("دبلوماس","مباحثات","مفاوض","محادث","مبعوث","سفير")
 _POLITICAL=("سياس","انتخاب","برلمان","حكوم","اتفاق","اقتصاد","تجار","رئيس","قرار","قانون")
 _STRATEGIC_POLITICAL=("انتخاب","برلمان","عقوب","سياس")
-_ROUTINE=("مرور","ازدحام","مباراة","رياض","مطعم","فندق","طقس","مهرجان",
+_ROUTINE=("مرور","ازدحام","مباراة","رياضة","رياضي","مطعم","فندق","طقس","مهرجان",
           "موسيقي","ترفيه","تخفيض","خدمات")
 
 def normalize_arabic(value:str)->str:
