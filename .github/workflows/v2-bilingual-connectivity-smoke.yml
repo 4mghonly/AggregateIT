@@ -1,6 +1,9 @@
 name: V2 bilingual credential smoke
 on:
   workflow_dispatch:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths: ['.github/workflows/v2-bilingual-connectivity-smoke.yml']
 permissions:
   contents: read
 jobs:
