@@ -67,6 +67,10 @@ on:
       - 'tests/test_v2_b114_arabic_precision.py'
       - 'v2_b114_capture_provenance.py'
       - 'tests/test_v2_b114_capture_provenance.py'
+      - 'v2_b115_same_capture.py'
+      - 'v2_b115_pair_history.py'
+      - 'tests/test_v2_b115_same_capture.py'
+      - 'tests/test_v2_b115_pair_history.py'
       - 'v2_article_body_gate.py'
       - 'v2_b112_final_acceptance.py'
       - 'v2_b95_b97_history.py'
@@ -121,6 +125,10 @@ jobs:
           python -B -m unittest discover -s tests -p test_v2_article_body_gate.py -v
       - name: Test B114 historical capture provenance
         run: python -B -m unittest discover -s tests -p test_v2_b114_capture_provenance.py -v
+      - name: Test B115 frozen bilingual editorial comparison and daily provenance
+        run: |
+          python -B -m unittest discover -s tests -p test_v2_b115_same_capture.py -v
+          python -B -m unittest discover -s tests -p test_v2_b115_pair_history.py -v
       - name: Test B113 bounded Arabic country-and-editorial recovery
         run: python -B -m unittest discover -s tests -p test_v2_b113_arabic_recovery.py -v
       - name: Test B112 historical conflict integrity
@@ -206,7 +214,9 @@ jobs:
             python -B tv.py --macro || echo "::warning::V1 public macro pulse unavailable; withhold macro figures."
           fi
       - name: B80/B81 original publisher article and editorial evidence
-        run: python -B v2_b46_live_editorial_runner.py --output b80_b81_live_editorial.json --render-held --four-products --visual-archive-dir b86-visual-review
+        run: python -B v2_b46_live_editorial_runner.py --output b80_b81_live_editorial.json --render-held --four-products --same-capture --visual-archive-dir b86-visual-review
+      - name: B115 immutable same-capture V1/V2 editorial receipt
+        run: python -B v2_b115_pair_history.py
       - name: Persist bounded sanitized engine receipts in SQLite
         run: |
           python -B - <<'PY'
@@ -268,6 +278,19 @@ jobs:
           Path('b95_b97_history.json').write_text(json.dumps(report,indent=2)+chr(10))
           print(json.dumps(report))
           PY
+      - name: B115 accumulate distinct GitHub-run-backed paired dates, no synthetic history
+        if: success()
+        run: python -B v2_b115_pair_history.py --history
+      - name: Archive small daily same-capture paired evidence separately
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: aggregateit-v2-b115-paired-only
+          path: |
+            b115_paired_run.json
+            b115_seven_day_history.json
+          retention-days: 14
+          if-no-files-found: warn
       - name: Archive no-post real capture receipts
         if: always()
         uses: actions/upload-artifact@v6
@@ -275,6 +298,7 @@ jobs:
           name: aggregateit-v2-b80-b83-real-acceptance
           path: |
             b114_capture_provenance.json
+            b115_seven_day_history.json
             b112_final_preparation.json
             b112_history_conflicts.json
             b80_b81_live_editorial.json
@@ -291,5 +315,5 @@ jobs:
             b95-history/*.json
             v2-engine-evidence.sqlite
             b86-visual-review/*.png
-          retention-days: 7
+          retention-days: 14
           if-no-files-found: warn

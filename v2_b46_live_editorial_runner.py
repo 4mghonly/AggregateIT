@@ -18,7 +18,7 @@ FEEDS=(
 )
 def run(*,render_native=False,render_four_products=False,
         rss_snapshots=None,observed_at=None,visual_archive_dir=None,fetch=None,
-        market_snapshot=None):
+        market_snapshot=None,compare_same_capture=False):
     if rss_snapshots is not None:
         if not isinstance(rss_snapshots,dict) or set(rss_snapshots)!={'english','arabic'}:
             raise ValueError('incomplete_shared_rss_snapshots')
@@ -34,6 +34,7 @@ def run(*,render_native=False,render_four_products=False,
         observed=datetime.now(timezone.utc).isoformat()
     slot=observed
     captures=[];reasons={};count={};feed_digests={};source_recovery={}
+    frozen_feeds=[];frozen_pages=[]
     fetcher=fetch or pinned_https_fetch
     for product,primary_feed in FEEDS:
         primary=SOURCE_CATALOG[product][0]
@@ -70,6 +71,8 @@ def run(*,render_native=False,render_four_products=False,
                 feed_digests[product if position==0 else product+':'+source['publisher_id']]=sha256(raw).hexdigest()
                 parsed=extract_candidates(raw,feed_url=resolved_url,
                     observed_at=observed,max_age_hours=48,max_items=30,max_bytes=1_000_000)
+                if compare_same_capture:
+                    frozen_feeds.append({'product':product,'source_id':source['source_id'],'body':bytes(raw)})
                 row['feed_ok']=True
                 count[product]['feed_ok']=True
             except Exception as exc:
@@ -110,6 +113,8 @@ def run(*,render_native=False,render_four_products=False,
                     capture={'product':product,'source_id':source['source_id'],
                         'article_url':url,'title':candidate['title'],
                         'published_at':candidate['published_at'],'html_bytes':page['body']}
+                    if compare_same_capture:
+                        frozen_pages.append(dict(capture))
                     try:
                         body=extract_body(page['body'],source_url=url,language=source['language'])
                         source_quote=article_evidence(body,headline=candidate['title'],
@@ -166,6 +171,10 @@ def run(*,render_native=False,render_four_products=False,
     result=compile_captured_articles(captures,as_of=observed,slot_id=slot,
                                      market_observations=markets)
     receipt=metrics_only(result)
+    paired={'status':'NOT_REQUESTED'}
+    if compare_same_capture:
+        from v2_b115_same_capture import compare_same_capture as compare_frozen
+        paired=compare_frozen(frozen_feeds,frozen_pages,observed_at=observed)
     native={"status":"NOT_REQUESTED"}
     if render_native:
         if all(result["products"][p]["story_count"]>0 for p in ("english","arabic")):
@@ -214,6 +223,7 @@ def run(*,render_native=False,render_four_products=False,
         'arabic_zero_story_diagnosis':arabic_zero_diagnosis,
         'v1_market_context_observation_count':len(markets),
         'rss_feed_sha256':feed_digests,
+        'b115_same_capture':paired,
         'rss_shared_snapshot_supplied':rss_snapshots is not None,
         'transport_failures':reasons,'editorial':receipt,'native':native,'four_products':four_products,
         'b45_provider_fallback_connectivity':'NOT_RUN_NO_CREDENTIALS',
@@ -225,8 +235,8 @@ def run(*,render_native=False,render_four_products=False,
         'can_release':False}
 if __name__=='__main__':
     import argparse
-    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');a.add_argument('--visual-archive-dir',type=Path);args=a.parse_args()
-    result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir)
+    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');a.add_argument('--same-capture',action='store_true');a.add_argument('--visual-archive-dir',type=Path);args=a.parse_args()
+    result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir,compare_same_capture=args.same_capture)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print(json.dumps({'source_attempts':result['source_attempts'],
