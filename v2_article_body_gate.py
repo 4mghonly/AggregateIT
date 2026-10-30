@@ -115,7 +115,7 @@ def classify_geography(headline:str,body:str,*,language:str)->dict:
     # When the headline omits country, admit only a unique explicit country
     # in the publisher's opening two paragraphs. Ambiguous mentions are held.
     inferred_from_lead=False
-    if not matches and language=='ar':
+    if not matches:
         lead='\n\n'.join(body.split('\n\n')[:2])[:1200]
         matches=headline_geography_candidates(lead,language=language)
         if not matches:raise ValueError('no_grounded_region')
