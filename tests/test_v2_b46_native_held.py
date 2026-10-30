@@ -39,7 +39,7 @@ class NativeHeldTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 render_genuine_held(bad,output_dir=Path(td)/"pages")
     def test_five_real_png_files_are_hash_checked_and_nonpublishable(self):
-        def renderer(en,ar,*,slot_id,output_dir):
+        def renderer(en,ar,*,slot_id,output_dir,market_observations=None,pulse_snapshot=None,macro_snapshot=None):
             output_dir.mkdir(parents=True)
             pages=[]
             for product,limit in (("english",2),("arabic",3)):
@@ -58,7 +58,7 @@ class NativeHeldTests(unittest.TestCase):
         self.assertFalse(out["publisher_facts_verified"])
         self.assertFalse(out["can_release"])
     def test_renderer_wrong_digest_fails(self):
-        def renderer(en,ar,*,slot_id,output_dir):
+        def renderer(en,ar,*,slot_id,output_dir,market_observations=None,pulse_snapshot=None,macro_snapshot=None):
             output_dir.mkdir(parents=True)
             from PIL import Image
             result=[]
