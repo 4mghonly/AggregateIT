@@ -50,6 +50,7 @@ on:
       - 'v2_b99_pixel_qa.py'
       - 'v2_b95_artifact_restore.py'
       - 'v2_b95_b97_history.py'
+      - 'tests/test_v2_b112_history_conflicts.py'
       - 'tests/test_v2_b95_b97_history.py'
       - 'v2_b94_daily_evidence.py'
       - 'tests/test_v2_b94_daily_evidence.py'
@@ -108,6 +109,8 @@ jobs:
           python -B v2_processing_parity_benchmark.py > v2_processing_parity_benchmark.json
       - name: Test B108 Arabic zero-story diagnostic
         run: python -B -m unittest discover -s tests -p test_v2_b108_arabic_zero_diagnosis.py -v
+      - name: Test B112 historical conflict integrity
+        run: python -B -m unittest discover -s tests -p test_v2_b112_history_conflicts.py -v
       - name: Test B112 bilingual acceptance integrity
         run: python -B -m unittest discover -s tests -p test_v2_b112_final_acceptance.py -v
       - name: Test B107 parity evidence integrity
