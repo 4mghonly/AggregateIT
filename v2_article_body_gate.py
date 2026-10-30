@@ -130,10 +130,10 @@ def classify_geography(headline:str,body:str,*,language:str)->dict:
         if re.search(r'\b(?:attack|shoot|kill|killed|dead|gunmen|security|military)\b',headline,re.I):topic='security'
         else:topic='geopolitics'
     else:
-        if re.search(r'هجوم|قتلى|قتل|إصابة|أمني|عسكري|رصاص|كنيسة',headline):topic='security'
-        elif re.search(r'دبلوماس|مباحثات|وزير|زيارة رسمية',headline):topic='diplomacy'
-        elif re.search(r'اتفاق|اقتصاد|عقوب|مفاوض|محادثات|قمة|حكوم|رئيس|برلمان|انتخاب|تجارة|سياس|قرار|حدود|هدنة|وقف إطلاق النار',headline):topic='geopolitics'
-        else:raise ValueError('arabic_topic_without_explicit_trigger')
+        from v2_b114_arabic_topic_policy import classify_arabic_event
+        classification=classify_arabic_event(headline,body,region=region)
+        topic=classification['topic']
+        if topic is None:raise ValueError('arabic_topic_without_explicit_trigger')
     return {'region':region,'subject_country':country,
             'topic_english':topic if language=='en' else None,
             'topic_arabic':topic if language=='ar' else None,
