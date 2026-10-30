@@ -10,6 +10,14 @@ def api(method, fields, *, files=()):
     token=os.environ.get("V2_TELEGRAM_BOT_TOKEN","").strip()
     if not token or any(x in token for x in "\r\n /"): raise RuntimeError("missing_or_invalid_bot_token")
     url="https://api.telegram.org/bot"+token+"/"+method
+    if not fields and not files:
+        req=urllib.request.Request(url,method="GET")
+        try:
+            with urllib.request.urlopen(req,timeout=45) as resp: answer=json.load(resp)
+        except urllib.error.HTTPError as exc:
+            raise RuntimeError("telegram_http_"+str(exc.code)+"_"+method) from None
+        if not answer.get("ok"): raise RuntimeError("telegram_api_rejected_"+method)
+        return answer["result"]
     boundary="V2TelegramPreviewBoundary"
     parts=[]
     for k,v in fields.items():
