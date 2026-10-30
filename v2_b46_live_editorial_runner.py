@@ -160,7 +160,8 @@ def run(*,render_native=False,render_four_products=False,
             if row['eligible_articles']:
                 recovery['selected_publisher']=source['publisher_id']
                 recovery['fallback_used']=position>0
-                break
+                if not quality_preview:
+                    break
     # Independent pre-admission failures should not be interpreted as factual reliability.
     # Reuse V1 market cache when present; no new API request and no guessed
     # market figures. Stale/invalid inputs are withheld by the bridge.
