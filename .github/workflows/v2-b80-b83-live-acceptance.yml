@@ -62,6 +62,7 @@ on:
       - 'v2_b46_live_editorial_runner.py'
       - 'tests/test_v2_b108_arabic_zero_diagnosis.py'
       - 'v2_b112_final_acceptance.py'
+      - 'v2_b95_b97_history.py'
       - 'tests/test_v2_b112_final_acceptance.py'
       - 'v2_article_body_gate.py'
       - 'tests/test_v2_b87_arabic_topic.py'
@@ -235,7 +236,15 @@ jobs:
           from pathlib import Path
           from datetime import datetime,timezone
           from v2_b95_b97_history import consolidate
-          report=consolidate(Path('b95-history'),today=datetime.now(timezone.utc).date())
+          from v2_b95_b97_history import diagnose_conflicts
+          root=Path('b95-history')
+          today=datetime.now(timezone.utc).date()
+          diagnostics=diagnose_conflicts(root,today=today)
+          Path('b112_history_conflicts.json').write_text(json.dumps(diagnostics,indent=2)+'\\n')
+          if diagnostics['conflicting_days']:
+              report={'schema':'aggregateit-v2-b95-b97-history/1','status':'HOLD_CONFLICTING_SAME_DAY_EVIDENCE','conflicting_days':diagnostics['conflicting_days'],'seven_day_evidence_met':False,'can_release':False}
+          else:
+              report=consolidate(root,today=today)
           Path('b95_b97_history.json').write_text(json.dumps(report,indent=2)+'\\n')
           print(json.dumps(report))
           PY
@@ -246,6 +255,7 @@ jobs:
           name: aggregateit-v2-b80-b83-real-acceptance
           path: |
             b112_final_preparation.json
+            b112_history_conflicts.json
             b80_b81_live_editorial.json
             b83_same_slot_shadow.json
             b88_b90_acceptance.json
