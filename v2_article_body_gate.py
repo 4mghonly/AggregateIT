@@ -112,8 +112,16 @@ def classify_geography(headline:str,body:str,*,language:str)->dict:
     if not all(isinstance(v,str) and v for v in (headline,body)) or language not in ('en','ar'):
         raise ValueError('no_grounded_region')
     matches=headline_geography_candidates(headline,language=language)
+    # When the headline omits country, admit only a unique explicit country
+    # in the publisher's opening two paragraphs. Ambiguous mentions are held.
+    inferred_from_lead=False
+    if not matches and language=='ar':
+        lead='\n\n'.join(body.split('\n\n')[:2])[:1200]
+        matches=headline_geography_candidates(lead,language=language)
+        if not matches:raise ValueError('no_grounded_region')
+        inferred_from_lead=True
     if not matches:raise ValueError('no_grounded_region')
-    if len(matches)!=1:raise ValueError('ambiguous_geography')
+    if len(set(matches))!=1:raise ValueError('ambiguous_geography')
     region,country=matches[0]
     region_rule=next(x for x in _COUNTRIES if x[0]==region and x[1]==country)
     idx=2 if language=='en' else 3
@@ -129,7 +137,8 @@ def classify_geography(headline:str,body:str,*,language:str)->dict:
     return {'region':region,'subject_country':country,
             'topic_english':topic if language=='en' else None,
             'topic_arabic':topic if language=='ar' else None,
-            'classification_status':'headline_and_body_explicit_country',
+            'classification_status':('article_lead_single_explicit_country' if inferred_from_lead
+                                     else 'headline_and_body_explicit_country'),
             'classification_method':'bounded_exact_country_lexicon',
             'event_truth_verified':False}
 
