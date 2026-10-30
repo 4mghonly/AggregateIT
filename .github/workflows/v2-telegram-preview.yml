@@ -1,0 +1,38 @@
+name: V2 Telegram bilingual preview (manual only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: v2-telegram-preview
+  cancel-in-progress: false
+jobs:
+  telegram-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      V2_TELEGRAM_BOT_TOKEN: ${{ secrets.V2_TELEGRAM_BOT_TOKEN }}
+      V2_TELEGRAM_CHAT_ID_ENGLISH: ${{ secrets.V2_TELEGRAM_CHAT_ID_ENGLISH }}
+      V2_TELEGRAM_CHAT_ID_ARABIC: ${{ secrets.V2_TELEGRAM_CHAT_ID_ARABIC }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: rebuild/aggregateit-v2
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install rendering dependencies
+        run: python -m pip install -r requirements.txt feedparser pillow reportlab beautifulsoup4 arabic-reshaper python-bidi
+      - name: Collect real articles and render isolated held pages
+        run: python -B v2_b46_live_editorial_runner.py --output v2-preview-receipt.json --four-products --visual-archive-dir v2-preview-pages
+      - name: Verify and deliver Telegram previews only
+        run: python -B v2_telegram_publish.py
+      - name: Archive sanitized receipt
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: v2-telegram-preview-receipt
+          path: v2-preview-receipt.json
+          retention-days: 3
+          if-no-files-found: warn
