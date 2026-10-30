@@ -27,7 +27,7 @@ def capture_bilingual():
        'html_bytes':('<div class="wysiwyg--all-content"><p>'+AR+'</p><p>'+AR+'</p></div>').encode()}
     return compile_captured_articles([e,a],as_of=AS_OF,slot_id=SLOT)
 
-def fixture_render(editorial,*,output_dir):
+def fixture_render(editorial,*,output_dir,pulse_snapshot=None,macro_snapshot=None):
     output_dir.mkdir()
     pages=[]
     for product,number in [('english',2),('arabic',3)]:
@@ -59,7 +59,7 @@ class B47HeldTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'cannot_substitute_synthetic'):
                 compose_held_products(editorial,output_dir=Path(td)/'native',as_of=AS_OF)
     def test_invalid_native_bytes_fail_checksum(self):
-        def wrong(e,*,output_dir):
+        def wrong(e,*,output_dir,pulse_snapshot=None,macro_snapshot=None):
             m=fixture_render(e,output_dir=output_dir)
             m['native_pages'][0]['sha256']='0'*64
             return m
