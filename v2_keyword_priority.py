@@ -38,3 +38,11 @@ def score_v1_keyword_title(title, config):
             hits.append(str(cluster.get("id","unknown")))
             weights.append(WEIGHTS.get(cluster.get("prio"),6))
     return min(100,50+max(weights,default=0)+min(12,max(0,len(hits)-1)*3)),hits
+
+def score_keyword_context(title, lead, config):
+    """Additive keyword evidence from a bounded article lead; preserve title hits."""
+    if not isinstance(lead,str):
+        raise ValueError("invalid_keyword_context")
+    title_score,title_hits=score_v1_keyword_title(title,config)
+    combined_score,combined_hits=score_v1_keyword_title(title+" "+lead[:1200],config)
+    return max(title_score,combined_score),list(dict.fromkeys(title_hits+combined_hits))
