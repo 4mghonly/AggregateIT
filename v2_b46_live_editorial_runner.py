@@ -18,7 +18,7 @@ FEEDS=(
 )
 def run(*,render_native=False,render_four_products=False,
         rss_snapshots=None,observed_at=None,visual_archive_dir=None,fetch=None,
-        market_snapshot=None,compare_same_capture=False):
+        market_snapshot=None,compare_same_capture=False,quality_preview=False):
     if rss_snapshots is not None:
         if not isinstance(rss_snapshots,dict) or set(rss_snapshots)!={'english','arabic'}:
             raise ValueError('incomplete_shared_rss_snapshots')
@@ -50,7 +50,7 @@ def run(*,render_native=False,render_four_products=False,
                   'fallback_attempted':False,'fallback_used':False,'attempts':[]}
         source_recovery[product]=recovery
         for position,source in enumerate(SOURCE_CATALOG[product]):
-            if position>0 and (count[product]['article_evidence_eligible']>0
+            if position>0 and ((not quality_preview and count[product]['article_evidence_eligible']>0)
                                or (rss_snapshots is not None and fetch is None)):
                 # Snapshots without an injected fetch are fully offline.
                 break
@@ -89,13 +89,15 @@ def run(*,render_native=False,render_four_products=False,
                     count[product]['headline_country_unclassified']+=1
                     # Headlines may omit a country while the attributed article
                     # identifies one. Defer only a bounded sample to body evidence.
-                    if product=='arabic' and len(matches)==0 and len(geography_deferred)<3:
+                    if len(matches)==0 and len(geography_deferred)<(8 if quality_preview else (3 if product=='arabic' else 0)):
                         geography_deferred.append(item)
-            if product=='arabic':
+            if product=='arabic' or quality_preview:
                 eligible_headlines.extend(geography_deferred)
                 count[product]['deferred_geography_article_candidates']=len(geography_deferred)
             for candidate in eligible_headlines:
-                if row['article_attempts']>=6 or row['eligible_articles']>=3:
+                if (row['article_attempts'] >= (10 if quality_preview else 6)
+                    or row['eligible_articles'] >= (5 if quality_preview else 3)
+                    or len(captures)>=20):
                     break
                 url=candidate['article_url']
                 from urllib.parse import urlsplit
@@ -235,8 +237,8 @@ def run(*,render_native=False,render_four_products=False,
         'can_release':False}
 if __name__=='__main__':
     import argparse
-    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');a.add_argument('--same-capture',action='store_true');a.add_argument('--visual-archive-dir',type=Path);args=a.parse_args()
-    result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir,compare_same_capture=args.same_capture)
+    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');a.add_argument('--same-capture',action='store_true');a.add_argument('--quality-preview',action='store_true');a.add_argument('--visual-archive-dir',type=Path);args=a.parse_args()
+    result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir,compare_same_capture=args.same_capture,quality_preview=args.quality_preview)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     print(json.dumps({'source_attempts':result['source_attempts'],
