@@ -39,6 +39,30 @@ def consolidate(directory:Path,*,today:date)->dict:
  eligible={lang:sum(counts[lang]>0 for counts in window.values()) for lang in ("english","arabic")}
  return {"schema":"aggregateit-v2-b95-b97-history/1","unique_days":len(unique),"last_seven_days":eligible,"seven_day_evidence_met":all(v==7 for v in eligible.values()),"publisher_redundancy_verified":False,"can_release":False}
 
+def diagnose_conflicts(directory:Path,*,today:date)->dict:
+ """Describe incompatible same-day receipts without choosing a winner."""
+ root=Path(directory)
+ files=sorted(root.glob("*.json")) if root.exists() else []
+ if len(files)>60:raise ValueError("history_file_limit")
+ by_day={}
+ for file in files:
+  if file.is_symlink() or file.stat().st_size>65536:raise ValueError("unsafe_history_file")
+  row=json.loads(file.read_bytes())
+  if row.get("schema")!="aggregateit-v2-b95-daily-history/1" or row.get("can_release") is not False:
+   raise ValueError("untrusted_history_receipt")
+  day=row.get("day");when=date.fromisoformat(day)
+  if when>today or when<today-timedelta(days=29):raise ValueError("out_of_retention")
+  counts=row.get("stories");digest=row.get("evidence_sha256")
+  if not isinstance(counts,dict) or set(counts)!={"english","arabic"} or any(type(v)!=int or not 0<=v<=30 for v in counts.values()):
+   raise ValueError("invalid_story_counts")
+  if not isinstance(digest,str) or not re.fullmatch("[0-9a-f]{64}",digest):raise ValueError("missing_evidence_digest")
+  by_day.setdefault(day,[]).append({"file":file.name,"stories":counts,"evidence_sha256":digest})
+ conflicts={day:items for day,items in sorted(by_day.items()) if len({(x["stories"]["english"],x["stories"]["arabic"],x["evidence_sha256"]) for x in items})>1}
+ return {"schema":"aggregateit-v2-b112-history-conflicts/1",
+         "receipt_files":len(files),"conflicting_days":len(conflicts),
+         "conflicts":conflicts,"history_accepted":False if conflicts else None,
+         "can_release":False}
+
 def make_daily(acceptance:dict,*,day:str)->dict:
  if acceptance.get("schema")!="aggregateit-v2-b88-b90-acceptance/1" or acceptance.get("can_release") is not False:raise ValueError("untrusted_acceptance")
  counts={lang:acceptance["b89_source_coverage"][lang]["selected_stories"] for lang in ("english","arabic")}
