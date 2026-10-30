@@ -29,7 +29,7 @@ jobs:
         run: python -m pip install -r requirements.txt feedparser pillow reportlab beautifulsoup4 arabic-reshaper python-bidi
       - name: Collect real articles and render isolated held pages
         run: python -B v2_b46_live_editorial_runner.py --output v2-preview-receipt.json --four-products --visual-archive-dir v2-preview-pages
-      - name: Verify Telegram identity and deliver bilingual previews
+      - name: Live retest - verify Telegram identity and deliver bilingual previews
         run: python -B v2_telegram_publish.py
       - name: Archive sanitized receipt
         if: always()
