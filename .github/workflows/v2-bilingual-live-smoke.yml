@@ -1,0 +1,74 @@
+name: V2 isolated bilingual live smoke (TEST POSTS)
+on:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths: ['.github/workflows/v2-bilingual-live-smoke.yml']
+permissions:
+  contents: read
+concurrency:
+  group: v2-bilingual-live-smoke
+  cancel-in-progress: false
+jobs:
+  live-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PRIMARY_KEY: ${{ secrets.V2_LLM_API_KEY }}
+      PRIMARY_BASE: ${{ secrets.V2_LLM_BASE_URL }}
+      PRIMARY_MODEL: ${{ secrets.V2_LLM_MODEL }}
+      FALLBACK_KEY: ${{ secrets.V2_LLM_FALLBACK_API_KEY }}
+      FALLBACK_BASE: ${{ secrets.V2_LLM_FALLBACK_BASE_URL }}
+      FALLBACK_MODEL: ${{ secrets.V2_LLM_FALLBACK_MODEL }}
+      ENGLISH_WEBHOOK: ${{ secrets.V2_DISCORD_WEBHOOK_ENGLISH }}
+      ARABIC_WEBHOOK: ${{ secrets.V2_DISCORD_WEBHOOK_ARABIC }}
+    steps:
+      - name: Bounded bilingual inference, fallback and test delivery
+        shell: python
+        run: |
+          import json, os, urllib.request, urllib.error, time
+          def need(name):
+              v=os.environ.get(name,"").strip()
+              if not v: raise RuntimeError("Missing V2 configuration: "+name)
+              return v
+          def invoke(prefix, language):
+              key=need(prefix+"_KEY")
+              base=need(prefix+"_BASE").rstrip("/")
+              model=need(prefix+"_MODEL")
+              if not base.startswith("https://"): raise RuntimeError("Non-HTTPS model endpoint")
+              prompt="Reply with one word only: "+("READY" if language=="en" else "جاهز")
+              data=json.dumps({"model":model,"messages":[{"role":"user","content":prompt}],"max_tokens":48,"temperature":0}).encode()
+              req=urllib.request.Request(base+"/chat/completions",data=data,headers={"Authorization":"Bearer "+key,"Content-Type":"application/json","User-Agent":"AggregateIT-V2-isolated-smoke/1"})
+              try:
+                  with urllib.request.urlopen(req,timeout=22) as res:
+                      obj=json.load(res)
+              except urllib.error.HTTPError as exc:
+                  raise RuntimeError(prefix+" inference HTTP "+str(exc.code)) from None
+              content=obj.get("choices",[{}])[0].get("message",{}).get("content","")
+              if not isinstance(content,str) or not content.strip(): raise RuntimeError(prefix+" empty inference response")
+              return True
+          for language in ("en","ar"):
+              try:
+                  invoke("PRIMARY",language)
+                  print(language+": primary inference OK")
+              except Exception as exc:
+                  print(language+": primary inference failed ("+type(exc).__name__+"); attempting fallback")
+                  invoke("FALLBACK",language)
+                  print(language+": fallback recovered")
+          # Independently test the fallback endpoint for each language, even if primary succeeded.
+          for language in ("en","ar"):
+              invoke("FALLBACK",language)
+              print(language+": fallback inference OK")
+          for language,key in (("en","ENGLISH_WEBHOOK"),("ar","ARABIC_WEBHOOK")):
+              url=need(key)
+              if not url.startswith("https://discord.com/api/webhooks/") and not url.startswith("https://discordapp.com/api/webhooks/"):
+                  raise RuntimeError("Unexpected Discord webhook domain")
+              message=("[TEST — AggregateIT V2] English isolated LLM + fallback connectivity verified. No production briefing." if language=="en" else "[اختبار — AggregateIT V2] تم التحقق من اتصال النموذج الأساسي والاحتياطي. ليست نشرة إنتاجية.")
+              body=json.dumps({"content":message,"allowed_mentions":{"parse":[]}}).encode()
+              req=urllib.request.Request(url+"?wait=true",data=body,headers={"Content-Type":"application/json","User-Agent":"AggregateIT-V2-isolated-smoke/1"})
+              try:
+                  with urllib.request.urlopen(req,timeout=15) as res:
+                      receipt=json.load(res)
+              except urllib.error.HTTPError as exc:
+                  raise RuntimeError(language+" Discord HTTP "+str(exc.code)) from None
+              if not receipt.get("id"): raise RuntimeError(language+" Discord delivery unconfirmed")
+              print(language+": Discord test message accepted")
