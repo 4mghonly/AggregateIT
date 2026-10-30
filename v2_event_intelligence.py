@@ -17,17 +17,20 @@ STRATEGIC=("missile","attack","sanctions","border","military","ceasefire","nucle
            "صاروخ","هجوم","عقوبات","حدود","عسكري","هدنة","نووي","بحري","ارهاب","إرهاب")
 def _hit(text,word):
  return bool(re.search(r"(?<!\w)"+re.escape(word)+r"(?!\w)",text))
-def arabic_filter(text,*,region,uae_secondary=False):
- """Keep V1 routine exclusion and multilingual security terms, require actual geography."""
- if not isinstance(region,str) or not region:return {"admit":False,"reason":"unverified_event_geography"}
- text=str(text or "").casefold()
- security=any(_hit(text,w) for w in SECURITY)
- strategic=any(_hit(text,w) for w in STRATEGIC)
- routine=any(_hit(text,w) for w in ROUTINE)
- if routine and not strategic:return {"admit":False,"reason":"routine_non_strategic"}
- if security or (region=="gcc" and uae_secondary):
-  return {"admit":True,"reason":"security_or_uae_context"}
- return {"admit":False,"reason":"not_security_relevant"}
+def arabic_filter(text,*,region,uae_secondary=False,headline=None,lead=None):
+ """B114 unified Arabic topic/relevance decision; geography supplied by evidence.
+
+ A legacy one-argument call is treated as headline-like text for compatibility.
+ When source-backed headline and article lead are available, pass both so
+ collector prechecks and editorial compiler use identical evidence.
+ """
+ from v2_b114_arabic_topic_policy import classify_arabic_event
+ title=str(text or "") if headline is None else headline
+ opening="" if lead is None else lead
+ result=classify_arabic_event(title,opening,region=region,
+                              uae_secondary=uae_secondary)
+ return result
+
 def _tokens(title):
  return set(re.findall(r"\w+",str(title or "").casefold()))
 def cluster_candidates(rows,*,limit=200):
