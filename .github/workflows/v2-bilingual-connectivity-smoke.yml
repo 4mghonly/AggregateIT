@@ -1,0 +1,25 @@
+name: V2 bilingual credential smoke
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Verify V2 credentials are configured
+        env:
+          PRIMARY: ${{ secrets.V2_LLM_API_KEY }}
+          FALLBACK: ${{ secrets.V2_LLM_FALLBACK_API_KEY }}
+          ENGLISH: ${{ secrets.V2_DISCORD_WEBHOOK_ENGLISH }}
+          ARABIC: ${{ secrets.V2_DISCORD_WEBHOOK_ARABIC }}
+        shell: bash
+        run: |
+          for name in PRIMARY FALLBACK ENGLISH ARABIC; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing credential: $name"
+              exit 1
+            fi
+            echo "$name configured"
+          done
