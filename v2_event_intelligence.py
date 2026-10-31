@@ -48,6 +48,31 @@ def cluster_candidates(rows,*,limit=200):
                   "similarity":round(sim,3),"review_required":True,
                   "reason":"title_overlap_not_event_identity"})
  return {"groups":groups,"review_pairs":pairs[:50],"omitted_pairs":max(0,len(pairs)-50),"automatic_merges":0}
+
+def suppress_display_duplicates(rows, *, similarity=0.92):
+ """Display-only same-publisher duplicate suppression; evidence IDs untouched.
+
+ Cross-publisher similarities remain visible and eligible for independent
+ corroboration review. Region and publisher must match.
+ """
+ if not isinstance(rows,list) or len(rows)>200:
+  raise ValueError("unbounded_display_candidates")
+ visible=[];hidden=[]
+ for row in rows:
+  if not isinstance(row,dict) or not row.get("event_id") or not row.get("source_id"):
+   raise ValueError("invalid_display_candidate")
+  normalized=" ".join(str(row.get("title","")).casefold().split())
+  duplicate=False
+  for prior in visible:
+   if prior["source_id"]!=row["source_id"] or prior.get("region")!=row.get("region"):
+    continue
+   old=" ".join(str(prior.get("title","")).casefold().split())
+   if normalized and old and SequenceMatcher(None,normalized,old).ratio()>=similarity:
+    duplicate=True;break
+  if duplicate:hidden.append(row["event_id"])
+  else:visible.append(row)
+ return {"visible":visible,"hidden_event_ids":hidden,"automatic_merges":0}
+
 def multilingual_candidates(english,arabic,*,limit=12):
  """Geographic join only; no translation or identity claim."""
  pairs=[]
