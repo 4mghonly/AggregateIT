@@ -20,3 +20,9 @@ def layout_preflight(items, *, language="ar"):
             "within_page_budget":len(items)<=9,
             "overflow_items":max(0,len(items)-9),
             "visual_clipping_verified":False}
+
+
+def prioritize_uae(items):
+    """Stable UAE-first order for Arabic renderer input, preserving all events."""
+    if not isinstance(items,list):raise ValueError("invalid_layout_items")
+    return sorted(items,key=lambda x:0 if x.get("subject_country")=="AE" else 1)
