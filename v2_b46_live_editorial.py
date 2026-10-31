@@ -49,6 +49,11 @@ SOURCE_CATALOG={
     ),
 }
 
+# Add regionally diverse, registry-identified publishers without replacing legacy feeds.
+from v2_registry_source_expansion import extra_sources
+SOURCE_CATALOG={product: tuple(sources)+extra_sources(product,sources)
+                for product,sources in SOURCE_CATALOG.items()}
+
 def _stamp(text):
     return datetime.fromisoformat(_time(text)).astimezone(timezone.utc)
 
