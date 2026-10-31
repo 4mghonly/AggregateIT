@@ -11,7 +11,7 @@ from v2_feed_items import extract_candidates
 from v2_secure_transport import pinned_https_fetch
 from v2_b46_live_editorial import compile_captured_articles,metrics_only,ALLOWED,SOURCE_CATALOG
 from v2_article_body_gate import extract_body, article_evidence, headline_geography_candidates
-from v2_b116_collection_policy import should_try_source
+from v2_b116_collection_policy import should_try_source, source_coverage_receipt
 
 FEEDS=(
     ('english','https://feeds.bbci.co.uk/news/world/rss.xml'),
@@ -182,6 +182,9 @@ def run(*,render_native=False,render_four_products=False,
          for p in ('english','arabic')},
         regions_by_product={p:result['products'][p]['represented_regions']
                             for p in ('english','arabic')})
+    selected_coverage={p:source_coverage_receipt(captures,
+            result['products'][p]['editorial_plan']['items'],product=p)
+            for p in ('english','arabic')}
     paired={'status':'NOT_REQUESTED'}
     if compare_same_capture:
         from v2_b115_same_capture import compare_same_capture as compare_frozen
@@ -234,6 +237,7 @@ def run(*,render_native=False,render_four_products=False,
         'arabic_zero_story_diagnosis':arabic_zero_diagnosis,
         'v1_market_context_observation_count':len(markets),
         'rss_feed_sha256':feed_digests,'editorial_coverage_diagnostics':quality_coverage,
+        'selected_coverage_diagnostics':selected_coverage,
         'b115_same_capture':paired,
         'rss_shared_snapshot_supplied':rss_snapshots is not None,
         'transport_failures':reasons,'editorial':receipt,'native':native,'four_products':four_products,
