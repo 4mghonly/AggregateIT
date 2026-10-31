@@ -64,7 +64,7 @@ def _render_brief(plan: dict, fixture: dict) -> dict:
             "fingerprint": item["event_id"],
             "region": item["region"],
             "title_ar": quote,
-            "summary_ar": "اقتباس من عينة اصطناعية؛ لم يتحقق النظام من صحة محتواه أو استقلال المصدر.",
+            "summary_ar": quote,
             "assessment_ar": "", "watch_ar": "", "status_ar": "غير متحقق",
             "severity": "unknown",
             "sources": [{
