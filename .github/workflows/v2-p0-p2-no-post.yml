@@ -32,6 +32,22 @@ jobs:
         run: PYTHONPATH=tests:. python -m unittest -v test_v2_b118_uae_order
       - name: Compile Python modules
         run: python -m py_compile v2_registry_source_expansion.py v2_b46_live_editorial.py v2_b46_live_editorial_runner.py v2_b116_collection_policy.py v2_b117_grounded_digest.py v2_b118_layout_gate.py v2_native_evidence_render.py v2_arabic_application_rehearsal.py v2_v1_full_scoring.py v2_editorial_quality_metrics.py v2_editorial.py v2_event_intelligence.py v2_b46_live_editorial_runner.py
+      - name: B116-B118 genuine held bilingual collection and render
+        continue-on-error: true
+        timeout-minutes: 7
+        run: |
+          python v2_b46_live_editorial_runner.py --output /tmp/v2-genuine-held.json --render-held --quality-preview
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/v2-genuine-held.json')
+          if p.exists():
+              r=json.loads(p.read_text())
+              print(json.dumps({'native':r['native'].get('status'),
+                                'selected_coverage':r.get('selected_coverage_diagnostics'),
+                                'source_attempts':r.get('source_attempts'),
+                                'can_release':r.get('can_release')},sort_keys=True))
+          PY
       - name: Inspect effective publisher inventory
         run: |
           python - <<'PY'
