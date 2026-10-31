@@ -161,10 +161,9 @@ def run(*,render_native=False,render_four_products=False,
                 except Exception as exc:
                     reasons[product+'-'+source['publisher_id']+'-article-'+str(row['article_attempts'])]=type(exc).__name__
             if row['eligible_articles']:
-                recovery['selected_publisher']=source['publisher_id']
-                recovery['fallback_used']=position>0
-                if not quality_preview:
-                    break
+                if recovery['selected_publisher'] is None:
+                    recovery['selected_publisher']=source['publisher_id']
+                recovery['fallback_used']=recovery['fallback_used'] or position>0
     # Independent pre-admission failures should not be interpreted as factual reliability.
     # Reuse V1 market cache when present; no new API request and no guessed
     # market figures. Stale/invalid inputs are withheld by the bridge.
