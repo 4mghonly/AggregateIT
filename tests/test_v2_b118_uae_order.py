@@ -21,6 +21,8 @@ class UaeOrder(unittest.TestCase):
   brief=_render_brief(plan,{'synthetic':True,'slot_id':'2026-10-31T08:00:00+00:00'})
   self.assertEqual([x['fingerprint'] for x in brief['events']],['u','y'])
   self.assertEqual(brief['events'][0]['summary_ar'],'أعلنت جهة عن اجتماع في الإمارات.')
+  self.assertLessEqual(len(brief['events'][0]['title_ar']),100)
+  self.assertTrue(brief['events'][0]['summary_ar'].startswith(brief['events'][0]['title_ar']))
  def test_no_uae_preserves_order(self):
   rows=[{"subject_country":"YE"},{"subject_country":"IR"}]
   self.assertEqual(prioritize_uae(rows),rows)
