@@ -43,7 +43,7 @@ class ReplacementPipelineTests(unittest.TestCase):
   content=('<article><p>'+AR_BODY+'</p><p>'+AR_BODY+'</p></article>').encode("utf8")
   body=extract_body(content,source_url=AR_URL,language="ar")
   self.assertIn("الصومال",body["original_text"])
-  with self.assertRaisesRegex(ValueError,"article_body_container_missing"):
+  with self.assertRaisesRegex(ValueError,"body_script_mismatch"):
    extract_body(content,source_url=AR_URL,language="en")
  def test_unregistered_publisher_still_refused(self):
   with self.assertRaisesRegex(ValueError,"source_identity_mismatch"):
