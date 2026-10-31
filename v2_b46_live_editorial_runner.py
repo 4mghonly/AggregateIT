@@ -1,7 +1,7 @@
 """B46 one-pass genuine publisher HTML evidence -> B3/B4 -> held no-post metrics.
 
-Only BBC World and Al Jazeera Arabic as established in V2; bounded feed and
-article attempts. No title, body, translation or HTML is persisted in artifacts.
+Primary BBC World and Al Jazeera Arabic with bounded registry-backed regional
+publisher expansion; feed and article attempts are capped. No title, body, translation or HTML is persisted in artifacts.
 """
 import json
 from hashlib import sha256
@@ -11,6 +11,7 @@ from v2_feed_items import extract_candidates
 from v2_secure_transport import pinned_https_fetch
 from v2_b46_live_editorial import compile_captured_articles,metrics_only,ALLOWED,SOURCE_CATALOG
 from v2_article_body_gate import extract_body, article_evidence, headline_geography_candidates
+from v2_b116_collection_policy import should_try_source
 
 FEEDS=(
     ('english','https://feeds.bbci.co.uk/news/world/rss.xml'),
@@ -50,8 +51,10 @@ def run(*,render_native=False,render_four_products=False,
                   'fallback_attempted':False,'fallback_used':False,'attempts':[]}
         source_recovery[product]=recovery
         for position,source in enumerate(SOURCE_CATALOG[product]):
-            if position>0 and ((not quality_preview and count[product]['article_evidence_eligible']>0)
-                               or (rss_snapshots is not None and fetch is None)):
+            if not should_try_source(position=position,quality_preview=quality_preview,
+                    eligible_count=count[product]['article_evidence_eligible'],
+                    distinct_publishers=sum(bool(x['eligible_articles']) for x in recovery['attempts']),
+                    offline_snapshots=(rss_snapshots is not None and fetch is None)):
                 # Snapshots without an injected fetch are fully offline.
                 break
             if position>0:recovery['fallback_attempted']=True
