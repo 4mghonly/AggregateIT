@@ -12,7 +12,7 @@ def grounded_digest(items, *, language="en", max_quotes=3):
         if isinstance(quote,str) and quote.strip() and isinstance(source,str) and source:
             identity=(source,quote.strip())
             if identity not in seen:
-                evidence.append(identity)
+                evidence.append((quote.strip(),source))
                 seen.add(identity)
         if len(evidence)>=max_quotes:break
     if not evidence:
