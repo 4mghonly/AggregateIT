@@ -174,6 +174,12 @@ def run(*,render_native=False,render_four_products=False,
     result=compile_captured_articles(captures,as_of=observed,slot_id=slot,
                                      market_observations=markets)
     receipt=metrics_only(result)
+    from v2_editorial_quality_metrics import assess_coverage
+    quality_coverage=assess_coverage(
+        {p:[{'source_id':row['source_id']} for row in captures if row['product']==p]
+         for p in ('english','arabic')},
+        regions_by_product={p:result['products'][p]['represented_regions']
+                            for p in ('english','arabic')})
     paired={'status':'NOT_REQUESTED'}
     if compare_same_capture:
         from v2_b115_same_capture import compare_same_capture as compare_frozen
@@ -225,7 +231,7 @@ def run(*,render_native=False,render_four_products=False,
         'observed_at':observed,'source_attempts':count,'source_recovery':source_recovery,
         'arabic_zero_story_diagnosis':arabic_zero_diagnosis,
         'v1_market_context_observation_count':len(markets),
-        'rss_feed_sha256':feed_digests,
+        'rss_feed_sha256':feed_digests,'editorial_coverage_diagnostics':quality_coverage,
         'b115_same_capture':paired,
         'rss_shared_snapshot_supplied':rss_snapshots is not None,
         'transport_failures':reasons,'editorial':receipt,'native':native,'four_products':four_products,
