@@ -43,9 +43,6 @@ SOURCE_CATALOG={
         {"publisher_id":"aljazeera-ar","source_id":"ar-s003",
          "feed_url":"https://www.aljazeera.net/aljazeerarss/ar/all.xml",
          "hosts":frozenset({"www.aljazeera.net"}),"language":"ar"},
-        {"publisher_id":"bbc-ar","source_id":"preview-bbc-ar",
-         "feed_url":"https://feeds.bbci.co.uk/arabic/rss.xml",
-         "hosts":frozenset({"www.bbc.com","www.bbc.co.uk"}),"language":"ar"},
     ),
 }
 
