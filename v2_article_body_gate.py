@@ -20,7 +20,12 @@ _ALLOWED_HOSTS={'www.bbc.co.uk':'article_element','www.bbc.com':'article_element
                 'www.dw.com':'article_element',
                 'www.aljazeera.net':'aljazeera_article_wysiwyg',
                 'www.france24.com':'article_element',
-                'www.theguardian.com':'article_element'}
+                'www.theguardian.com':'article_element',
+                'www.middleeasteye.net':'article_element',
+                'shafaq.com':'article_element',
+                'www.dabangasudan.org':'article_element',
+                'www.alakhbar.info':'article_element',
+                'www.hespress.com':'article_element'}
 _BLOCK_TAGS={'script','style','noscript','nav','footer','header','aside','button','form'}
 _COUNTRIES=(
  ('jordan','JO', r'\bJordan(?:ian)?\b',r'الأردن|أردني(?:ون|ين|ة)?|الأردنية|الكرك'),
