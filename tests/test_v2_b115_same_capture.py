@@ -36,6 +36,10 @@ class B115SameCaptureTests(unittest.TestCase):
         self.assertNotIn('مباحثات دبلوماسية', serialized)
         self.assertNotIn('<article>', serialized)
 
+    def test_excessive_feed_count_remains_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'unbounded_same_capture'):
+            compare_same_capture([{'product':'english','source_id':'en-001','body':EMPTY}]*17, [], observed_at=AT)
+
     def test_same_input_replay_is_deterministic_with_fixed_clock(self):
         first = run(rss_snapshots=snapshots(), observed_at=AT, fetch=fake_fetch,
                     compare_same_capture=True, market_snapshot={})['b115_same_capture']
