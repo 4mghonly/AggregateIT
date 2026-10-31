@@ -1,0 +1,36 @@
+name: V2 P0-P2 source and editorial validation (no post)
+on:
+  workflow_dispatch:
+  push:
+    branches: ['rebuild/aggregateit-v2']
+    paths:
+      - '.github/workflows/v2-p0-p2-no-post.yml'
+permissions:
+  contents: read
+concurrency:
+  group: v2-p0-p2-no-post
+  cancel-in-progress: false
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: rebuild/aggregateit-v2
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Focused regression tests
+        run: python -m unittest tests.test_v2_source_catalog_identity tests.test_v2_expanded_preview_sources tests.test_v2_scoring_tag_enhancement tests.test_v2_keyword_context_enhancement tests.test_v2_quality_geography_expansion
+      - name: Compile Python modules
+        run: python -m py_compile v2_registry_source_expansion.py v2_b46_live_editorial.py v2_b46_live_editorial_runner.py v2_v1_full_scoring.py
+      - name: Inspect effective publisher inventory
+        run: |
+          python - <<'PY'
+          from v2_b46_live_editorial import SOURCE_CATALOG
+          for product, sources in SOURCE_CATALOG.items():
+              print(product, len(sources), sorted({s['publisher_id'] for s in sources}))
+              assert len(sources) >= 5
+          PY
