@@ -108,6 +108,11 @@ def render_held_editions(english_plan:dict,arabic_plan:dict,*,slot_id:str,output
       'key_risk':'Publisher assertions are not independent confirmations.',
       'delta':'No authenticated previous edition for comparison.',
     }
+    from v2_b117_grounded_digest import grounded_digest
+    english_digest=grounded_digest(english_plan['items'],language='en',max_quotes=2)
+    if english_digest['status']=='publisher_attributed_only':
+        empty_analysis['lead']=english_digest['lead'][:450]
+        empty_analysis['geopol_read']='Publisher-attributed excerpts; independent verification pending.'
     empty_analysis['market_read']=_market_readout(market_observations)
     pages=[]
     for n,renderer in enumerate((render_p1,render_p2),1):
