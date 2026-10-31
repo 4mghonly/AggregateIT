@@ -95,9 +95,9 @@ def run(*,render_native=False,render_four_products=False,
                 eligible_headlines.extend(geography_deferred)
                 count[product]['deferred_geography_article_candidates']=len(geography_deferred)
             for candidate in eligible_headlines:
-                if (row['article_attempts'] >= (10 if quality_preview else 6)
-                    or row['eligible_articles'] >= (5 if quality_preview else 3)
-                    or len(captures)>=20):
+                if (row['article_attempts'] >= (4 if quality_preview else 6)
+                    or row['eligible_articles'] >= (3 if quality_preview else 3)
+                    or len([x for x in captures if x['product']==product])>=10):
                     break
                 url=candidate['article_url']
                 from urllib.parse import urlsplit
