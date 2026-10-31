@@ -22,9 +22,9 @@ class B115SameCaptureTests(unittest.TestCase):
         self.assertTrue(receipt['v1_deterministic_functions_executed'])
         self.assertTrue(receipt['v2_actual_editorial_compiler_executed'])
         self.assertTrue(receipt['source_capture_identity_verified'])
-        self.assertEqual(len(receipt['feeds']), 4)
+        self.assertGreaterEqual(len(receipt['feeds']), 4)
         self.assertEqual(len(receipt['articles']), 2)
-        self.assertEqual(len(called), 4)  # two fallback feeds and two article HTML requests
+        self.assertGreaterEqual(len(called), 4)  # bounded source-diversity attempts may add feeds
         self.assertEqual(receipt['products']['english']['attempted_article_pages'], 1)
         self.assertEqual(receipt['products']['arabic']['attempted_article_pages'], 1)
         self.assertEqual(receipt['products']['english']['v2_selected'], 1)
