@@ -37,7 +37,7 @@ jobs:
       - name: B116-B118 genuine held bilingual collection and render
         timeout-minutes: 7
         run: |
-          python v2_b46_live_editorial_runner.py --output /tmp/v2-genuine-held.json --render-held --quality-preview
+          python v2_b46_live_editorial_runner.py --output /tmp/v2-genuine-held.json --render-held --quality-preview --visual-archive-dir /tmp/v2-visual-audit
           python - <<'PY'
           import json
           from pathlib import Path
