@@ -1,7 +1,7 @@
 """Evidence-derived coverage diagnostics; never manufacture reporting."""
 from collections import Counter
 
-def assess_coverage(products):
+def assess_coverage(products, *, regions_by_product=None):
     if not isinstance(products,dict):
         raise ValueError("invalid_products")
     result={}
@@ -10,6 +10,8 @@ def assess_coverage(products):
             raise ValueError("invalid_coverage_items")
         publishers=Counter(row["source_id"] for row in items if row.get("source_id"))
         regions={row["region"] for row in items if row.get("region")}
+        if regions_by_product is not None:
+            regions=set(regions_by_product.get(product,[]))
         n=sum(publishers.values())
         result[product]={
             "story_count":len(items),
