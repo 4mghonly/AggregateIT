@@ -111,6 +111,28 @@ def select_relevance_first(accepted: list[dict], max_items: int) -> list[dict]:
 
 
 
+
+def select_diverse_english(accepted: list[dict], max_items: int) -> list[dict]:
+    """Relevance-first selection with modest source/region diversity incentives.
+
+    Never invent stories or alter priorities; reserve space for independent
+    publishers when they are competitive with the highest-ranked stories.
+    """
+    remaining=sorted(accepted,key=lambda x:(-x["priority"],x["event_id"]))
+    chosen=[]
+    while remaining and len(chosen)<max_items:
+        used_sources={x.get("evidence",{}).get("source_id") for x in chosen}
+        used_regions={x["region"] for x in chosen}
+        def score(row):
+            bonus=0
+            if row.get("evidence",{}).get("source_id") not in used_sources:bonus+=8
+            if row["region"] not in used_regions:bonus+=6
+            return row["priority"]+bonus
+        best=max(remaining,key=lambda x:(score(x),x["priority"],x["event_id"]))
+        remaining.remove(best)
+        chosen.append(best)
+    return chosen
+
 def plan_edition(*, ledger, annotations: list[dict], product: str,
                  slot_id: str, as_of: str, previous_versions: dict | None = None,
                  max_age_hours: int = 48, max_items: int = 15) -> dict:
@@ -168,7 +190,7 @@ def plan_edition(*, ledger, annotations: list[dict], product: str,
         })
     accepted.sort(key=lambda x: (-x["priority"], x["event_id"]))
     chosen = (select_relevance_first(accepted,max_items) if product == "arabic"
-              else accepted[:max_items])
+              else select_diverse_english(accepted,max_items))
     held["eligible_over_page_budget"] += len(accepted) - len(chosen)
     represented = sorted({x["region"] for x in chosen})
     return {
