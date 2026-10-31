@@ -91,7 +91,7 @@ def compare_same_capture(feeds: list[dict], pages: list[dict], *, observed_at: s
     observed = datetime.fromisoformat(_time(observed_at)).astimezone(timezone.utc)
     if _git_blob("main.py") != V1_MAIN_BLOB or _git_blob("arabic_live_v2.py") != V1_ARABIC_EDITORIAL_BLOB:
         raise ValueError("v1_editorial_code_drift")
-    if not isinstance(feeds, list) or not 2 <= len(feeds) <= 16 or not isinstance(pages, list) or len(pages) > 24:
+    if not isinstance(feeds, list) or not 2 <= len(feeds) <= 16 or not isinstance(pages, list) or len(pages) > 64:
         raise ValueError("unbounded_same_capture")
     feed_map = {}
     feed_receipts = []
