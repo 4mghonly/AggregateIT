@@ -6,7 +6,7 @@ from v2_b46_live_editorial_runner import run,FEEDS
 
 AT="2026-10-29T09:00:00+00:00"
 URL_PRIMARY="https://www.aljazeera.net/news/2026/10/29/example"
-URL_FALLBACK="https://www.bbc.com/arabic/articles/c1234567890o"
+URL_FALLBACK="https://www.france24.com/ar/20261029-sudan-security-update"
 PRIMARY_TITLE="قرار حكومي جديد بشأن الخدمات في السودان"
 FALLBACK_TITLE="هجوم على منشأة حيوية"
 PRIMARY_TEXT=("أعلنت إدارة السودان إصدار قرار حكومي جديد يتعلق بالخدمات العامة، "
@@ -22,9 +22,9 @@ def feed(title,url):
 
 def fetch(url,**kw):
  if url=="https://rss.dw.com/rdf/rss-en-world":body=EMPTY
- elif url=="https://feeds.bbci.co.uk/arabic/rss.xml":body=feed(FALLBACK_TITLE,URL_FALLBACK)
+ elif url=="https://www.france24.com/ar/rss":body=feed(FALLBACK_TITLE,URL_FALLBACK)
  elif url==URL_PRIMARY:body=('<div class="wysiwyg--all-content"><p>'+PRIMARY_TEXT+'</p><p>'+PRIMARY_TEXT+'</p></div>').encode('utf8')
- elif url==URL_FALLBACK:body=('<main><p>'+FALLBACK_TEXT+'</p><p>'+FALLBACK_TEXT+'</p></main>').encode('utf8')
+ elif url==URL_FALLBACK:body=('<article><p>'+FALLBACK_TEXT+'</p><p>'+FALLBACK_TEXT+'</p></article>').encode('utf8')
  else:raise AssertionError("Unexpected injected URL: "+url)
  return {"body":body,"status":200,"final_url":url,"content_type":"text/html"}
 
@@ -45,7 +45,7 @@ class ArabicRecoveryTests(unittest.TestCase):
   with patch("market.load_market_pulse",return_value={}),patch("market.load_macro_pulse",return_value={}):
    result=run(rss_snapshots=snapshots,observed_at=AT,fetch=fetch)
   self.assertTrue(result["source_recovery"]["arabic"]["fallback_attempted"])
-  self.assertEqual(result["source_recovery"]["arabic"]["selected_publisher"],"bbc-ar")
+  self.assertEqual(result["source_recovery"]["arabic"]["selected_publisher"],"ar-s004")
   self.assertEqual(result["editorial"]["products"]["arabic"]["story_count"],1)
   self.assertGreaterEqual(result["source_attempts"]["arabic"]["editorial_relevance_precheck_rejections"],1)
   self.assertFalse(result["can_release"])
