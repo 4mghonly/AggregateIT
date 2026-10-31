@@ -1,4 +1,6 @@
 import unittest
+import inspect
+import v2_b46_live_editorial_runner as runner
 from v2_b116_collection_policy import should_try_source, source_attempt_budget
 class CollectionPolicyTests(unittest.TestCase):
  def test_normal_collection_does_not_stop_after_one_publisher(self):
@@ -7,6 +9,9 @@ class CollectionPolicyTests(unittest.TestCase):
   self.assertFalse(should_try_source(position=5,quality_preview=False,eligible_count=9,distinct_publishers=3,offline_snapshots=False))
  def test_offline_snapshots_do_not_open_network(self):
   self.assertFalse(should_try_source(position=1,quality_preview=True,eligible_count=0,distinct_publishers=0,offline_snapshots=True))
+ def test_runner_does_not_break_after_first_success(self):
+  source=inspect.getsource(runner.run)
+  self.assertNotIn("if not quality_preview:\\n                    break",source)
  def test_bounded_feed_budget(self):
   self.assertLessEqual(source_attempt_budget(True),12)
   self.assertLessEqual(source_attempt_budget(False),8)
