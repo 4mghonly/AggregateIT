@@ -196,7 +196,7 @@ def run(*,render_native=False,render_four_products=False,
                 from tempfile import TemporaryDirectory
                 from v2_b46_native_held import render_genuine_held
                 with TemporaryDirectory(prefix="v2-b46-source-native-") as temp:
-                    native=render_genuine_held(result,output_dir=Path(temp)/"native",
+                    native=render_genuine_held(result,output_dir=(Path(visual_archive_dir)/"held-native" if visual_archive_dir is not None else Path(temp)/"native"),
                                                pulse_snapshot=market_snapshot,
                                                macro_snapshot=macro_snapshot)
             except Exception as exc:
