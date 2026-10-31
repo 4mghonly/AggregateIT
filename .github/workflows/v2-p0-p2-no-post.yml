@@ -49,6 +49,14 @@ jobs:
                                 'source_attempts':r.get('source_attempts'),
                                 'can_release':r.get('can_release')},sort_keys=True))
           PY
+      - name: Preserve held visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-held-visual-audit
+          path: /tmp/v2-visual-audit/held-native/*.png
+          retention-days: 1
+          if-no-files-found: warn
       - name: Inspect effective publisher inventory
         run: |
           python - <<'PY'
