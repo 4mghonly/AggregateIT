@@ -8,6 +8,11 @@ class GroundedDigestTests(unittest.TestCase):
   self.assertIn("UAE officials announced new security talks.",d["lead"])
   self.assertIn("Yemen officials reported renewed talks.",d["lead"])
   self.assertNotIn("independently confirmed",d["lead"].lower())
+ def test_duplicate_excerpts_do_not_repeat(self):
+  items=[{'region':'gcc','evidence':{'quote':'Publisher reported talks.','source_id':'a'}}, {'region':'gcc','evidence':{'quote':'Publisher reported talks.','source_id':'a'}}]
+  result=grounded_digest(items,language='en')
+  self.assertEqual(result['lead'],'Publisher reported talks.')
+  self.assertEqual(result['sources'],['a'])
  def test_no_items_abstains(self):
   self.assertEqual(grounded_digest([],language="en")["status"],"insufficient_evidence")
  def test_arabic_uses_native_evidence(self):
