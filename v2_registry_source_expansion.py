@@ -35,7 +35,7 @@ def extra_sources(product, existing=()):
         if url in known_urls or source_id in known_ids:
             continue
         # Source hostname is an explicit registry value; no arbitrary redirect host.
-        hosts=frozenset((host,"www."+host))
+        hosts=frozenset((host,"www."+host,parts.hostname))
         result.append({"publisher_id":source_id,"source_id":source_id,
                        "feed_url":url,"hosts":hosts,"language":row.get("language","en")})
         known_urls.add(url)
