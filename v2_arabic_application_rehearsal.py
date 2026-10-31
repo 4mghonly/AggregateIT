@@ -64,7 +64,7 @@ def _render_brief(plan: dict, fixture: dict) -> dict:
         events.append({
             "fingerprint": item["event_id"],
             "region": item["region"],
-            "title_ar": quote,
+            "title_ar": quote.split("،", 1)[0][:100].rstrip(" .،") or quote[:100],
             "summary_ar": quote,
             "assessment_ar": "", "watch_ar": "", "status_ar": "غير متحقق",
             "severity": "unknown",
