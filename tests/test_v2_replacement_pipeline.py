@@ -40,7 +40,7 @@ class ReplacementPipelineTests(unittest.TestCase):
   self.assertFalse(result["discord_sent"])
  def test_arabic_article_body_is_detected_without_matching_english(self):
   from v2_article_body_gate import extract_body
-  content=('<main><p>'+AR_BODY+'</p><p>'+AR_BODY+'</p></main>').encode("utf8")
+  content=('<article><p>'+AR_BODY+'</p><p>'+AR_BODY+'</p></article>').encode("utf8")
   body=extract_body(content,source_url=AR_URL,language="ar")
   self.assertIn("الصومال",body["original_text"])
   with self.assertRaisesRegex(ValueError,"article_body_container_missing"):
