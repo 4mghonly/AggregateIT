@@ -36,3 +36,4 @@ jobs:
               print(product, len(sources), sorted({s['publisher_id'] for s in sources}))
               assert len(sources) >= 5
           PY
+
