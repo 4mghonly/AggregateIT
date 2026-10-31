@@ -15,7 +15,7 @@ from v2_article_body_gate import extract_body,article_evidence
 from v2_b87_topic_bridge import editorial_topic
 from v2_keyword_priority import load_v1_keywords,score_v1_keyword_title
 from v2_v1_full_scoring import score_english_v1
-from v2_event_intelligence import arabic_filter,cluster_candidates,event_evolution
+from v2_event_intelligence import arabic_filter,cluster_candidates,event_evolution,suppress_display_duplicates
 from v2_v1_processing_bridge import arabic_impact_priority
 from v2_evidence import _time,make_article,make_excerpt,make_claim,make_event,canonical_article_url
 from v2_evidence_ledger import EvidenceLedger
@@ -143,6 +143,11 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             'excerpt_id':excerpt['excerpt_id'],'event_id':event['event_id'],
             'original_body_sha256':body['body_sha256'],
             'publisher_attributed_only':True})
+    # Hide repeated same-publisher headlines in the edition, never from the ledger.
+    display=suppress_display_duplicates(event_rows)
+    visible_ids={row['event_id'] for row in display['visible']}
+    annotations={p:[row for row in rows if row['event_id'] in visible_ids]
+                 for p,rows in annotations.items()}
     products={}
     for product in ('english','arabic'):
         plan=plan_edition(ledger=ledger,annotations=annotations[product],product=product,
@@ -171,6 +176,8 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             'baseline_anchor_sha256':operator_prior['prior_anchor_sha256'] if operator_prior else None,
             'cross_language_review':cross_language,
             'event_cluster_review':event_review,'event_evolution_review':history_review,
+            'display_duplicate_suppression':{'hidden_event_ids':display['hidden_event_ids'],
+                                             'automatic_merges':0},
             'headline_semantic_alignment_verified':False,
             'publisher_independence_verified':False,
             'source_story_factual_accuracy_verified':False,
