@@ -160,6 +160,10 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
         products[product]={'story_count':len(daily['stories']),'held_reasons':plan['held_reasons'],
             'represented_regions':plan['represented_regions'],
             'newsroom':daily,'critique':critic,'editorial_plan':plan,'no_publication_authority':True}
+    from v2_b118_layout_gate import layout_preflight
+    layout_diagnostics={p:layout_preflight(products[p]['editorial_plan']['items'],
+                        language='ar' if p=='arabic' else 'en')
+                        for p in ('english','arabic')}
     cross_language=review_only_cross_language_pairs(products)
     event_review=cluster_candidates([{'event_id':r['event_id'],'title':r['title'],
           'region':r['region'],'source_id':r['source_id']} for r in event_rows])
@@ -175,6 +179,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             'prior_baseline_off_host_retention_verified':False,
             'baseline_anchor_sha256':operator_prior['prior_anchor_sha256'] if operator_prior else None,
             'cross_language_review':cross_language,
+            'layout_preflight':layout_diagnostics,
             'event_cluster_review':event_review,'event_evolution_review':history_review,
             'display_duplicate_suppression':{'hidden_event_ids':display['hidden_event_ids'],
                                              'automatic_merges':0},
@@ -205,6 +210,7 @@ def metrics_only(result):
                 for product,r in result['products'].items()},
             'operator_baseline_hmac_verified':result['operator_baseline_hmac_verified'],
             'prior_baseline_off_host_retention_verified':False,
+            'layout_preflight':result.get('layout_preflight',{}),
             'cross_language_review_candidate_count':result['cross_language_review']['candidate_count'],
             'cross_language_automatic_merges':0,
             'real_model_translation_pending':True,
