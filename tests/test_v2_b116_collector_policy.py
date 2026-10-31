@@ -1,7 +1,7 @@
 import unittest
 import inspect
 import v2_b46_live_editorial_runner as runner
-from v2_b116_collection_policy import should_try_source, source_attempt_budget
+from v2_b116_collection_policy import should_try_source, source_attempt_budget, source_coverage_receipt
 class CollectionPolicyTests(unittest.TestCase):
  def test_normal_collection_does_not_stop_after_one_publisher(self):
   self.assertTrue(should_try_source(position=1,quality_preview=False,eligible_count=3,distinct_publishers=1,offline_snapshots=False))
@@ -9,6 +9,13 @@ class CollectionPolicyTests(unittest.TestCase):
   self.assertFalse(should_try_source(position=5,quality_preview=False,eligible_count=9,distinct_publishers=3,offline_snapshots=False))
  def test_offline_snapshots_do_not_open_network(self):
   self.assertFalse(should_try_source(position=1,quality_preview=True,eligible_count=0,distinct_publishers=0,offline_snapshots=True))
+ def test_receipt_distinguishes_capture_from_selected(self):
+  captures=[{'product':'english','source_id':'a'},{'product':'english','source_id':'b'}]
+  selected=[{'evidence':{'source_id':'a'},'region':'gcc'}]
+  report=source_coverage_receipt(captures,selected,product='english')
+  self.assertEqual(report['captured_publisher_count'],2)
+  self.assertEqual(report['selected_publisher_count'],1)
+  self.assertEqual(report['selected_region_count'],1)
  def test_runner_does_not_break_after_first_success(self):
   source=inspect.getsource(runner.run)
   self.assertNotIn("if not quality_preview:\\n                    break",source)
