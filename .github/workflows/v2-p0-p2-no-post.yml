@@ -28,6 +28,8 @@ jobs:
         run: PYTHONPATH=tests:. python -m unittest test_v2_source_catalog_identity test_v2_expanded_preview_sources test_v2_scoring_tag_enhancement test_v2_keyword_context_enhancement test_v2_quality_geography_expansion test_v2_native_content_not_erased test_v2_editorial_quality_metrics test_v2_registry_host_allowlist test_v2_editorial_diversity test_v2_duplicate_display test_v2_preview_budget test_v2_b116_collector_policy test_v2_b117_grounded_digest test_v2_b118_layout_gate test_v2_b118_uae_order
       - name: Stage B117 duplicate-evidence verification
         run: PYTHONPATH=tests:. python -m unittest -v test_v2_b117_grounded_digest
+      - name: Stage B118 Arabic brief verification
+        run: PYTHONPATH=tests:. python -m unittest -v test_v2_b118_uae_order
       - name: Compile Python modules
         run: python -m py_compile v2_registry_source_expansion.py v2_b46_live_editorial.py v2_b46_live_editorial_runner.py v2_b116_collection_policy.py v2_b117_grounded_digest.py v2_b118_layout_gate.py v2_native_evidence_render.py v2_arabic_application_rehearsal.py v2_v1_full_scoring.py v2_editorial_quality_metrics.py v2_editorial.py v2_event_intelligence.py v2_b46_live_editorial_runner.py
       - name: Inspect effective publisher inventory
