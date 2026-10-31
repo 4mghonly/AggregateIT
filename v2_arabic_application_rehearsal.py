@@ -52,8 +52,9 @@ def _render_brief(plan: dict, fixture: dict) -> dict:
     items = plan.get("items", [])
     if not items:
         raise ValueError("no_native_arabic_excerpt_to_render")
+    from v2_b118_layout_gate import prioritize_uae
     events = []
-    for item in items:
+    for item in prioritize_uae(items):
         source = item["evidence"]
         if (source["original_language"].split("-")[0] != "ar"
                 or item["reporting_status"] != "publisher_attributed_not_independently_verified"
