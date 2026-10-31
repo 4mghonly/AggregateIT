@@ -6,7 +6,7 @@ from v2_b46_live_editorial import _verify_source_candidate
 AT="2026-10-29T09:00:00+00:00"
 EMPTY=b'<rss version="2.0"><channel><title>Empty</title></channel></rss>'
 EN_URL="https://www.dw.com/en/somalia-security-update/a-123456"
-AR_URL="https://www.bbc.com/arabic/articles/c1234567890o"
+AR_URL="https://www.france24.com/ar/20261029-somalia-security-update"
 EN_TITLE="Somalia security officials outline latest measures"
 AR_TITLE="مباحثات دبلوماسية في الصومال بشأن العلاقات الإقليمية"
 EN_BODY=("Officials in Somalia said their security teams met with regional representatives "
@@ -21,7 +21,7 @@ def feed(title,url):
          '</item></channel></rss>').encode("utf8")
 def fake_fetch(url,**kwargs):
  if url=="https://rss.dw.com/rdf/rss-en-world":body=feed(EN_TITLE,EN_URL)
- elif url=="https://feeds.bbci.co.uk/arabic/rss.xml":body=feed(AR_TITLE,AR_URL)
+ elif url=="https://www.france24.com/ar/rss":body=feed(AR_TITLE,AR_URL)
  elif url==EN_URL:body=('<article><p>'+EN_BODY+'</p><p>'+EN_BODY+'</p></article>').encode()
  elif url==AR_URL:body=('<article><p>'+AR_BODY+'</p><p>'+AR_BODY+'</p></article>').encode()
  else:raise AssertionError("unexpected_fetch:"+url)
@@ -31,14 +31,14 @@ class ReplacementPipelineTests(unittest.TestCase):
  def test_primary_blackout_recovers_two_real_source_identities_into_editorial(self):
   result=run(rss_snapshots=snapshots(),observed_at=AT,fetch=fake_fetch)
   self.assertEqual(result["editorial"]["admitted_articles"],2)
-  self.assertEqual({x["source_id"] for x in result["editorial"]["evidence_hashes"]},{"en-002","ar-s004"})
-  for p,secondary in (("english","dw-en"),("arabic","bbc-ar")):
+  self.assertEqual({x["source_id"] for x in result["editorial"]["evidence_hashes"]},{"en-018","ar-s004"})
+  for p,secondary in (("english","dw-en"),("arabic","ar-s004")):
    self.assertEqual(result["source_recovery"][p]["selected_publisher"],secondary)
    self.assertTrue(result["source_recovery"][p]["fallback_used"])
    self.assertEqual(result["editorial"]["products"][p]["story_count"],1)
   self.assertFalse(result["can_release"])
   self.assertFalse(result["discord_sent"])
- def test_bbc_arabic_main_article_body_is_detected_without_matching_english(self):
+ def test_arabic_article_body_is_detected_without_matching_english(self):
   from v2_article_body_gate import extract_body
   content=('<main><p>'+AR_BODY+'</p><p>'+AR_BODY+'</p></main>').encode("utf8")
   body=extract_body(content,source_url=AR_URL,language="ar")
@@ -51,6 +51,6 @@ class ReplacementPipelineTests(unittest.TestCase):
                             "article_url":EN_URL,"title":EN_TITLE})
  def test_secondary_identity_cannot_use_primary_host(self):
   with self.assertRaisesRegex(ValueError,"wrong_article_publisher"):
-   _verify_source_candidate({"product":"english","source_id":"en-002",
+   _verify_source_candidate({"product":"english","source_id":"en-018",
                             "article_url":"https://www.bbc.com/news/articles/foo","title":EN_TITLE})
 if __name__=="__main__":unittest.main()
