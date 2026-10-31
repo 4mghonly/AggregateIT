@@ -119,7 +119,9 @@ def run(*,render_native=False,render_four_products=False,
                         'article_url':url,'title':candidate['title'],
                         'published_at':candidate['published_at'],'html_bytes':page['body']}
                     if compare_same_capture:
-                        frozen_pages.append(dict(capture))
+                        from v2_evidence import canonical_article_url
+                        if not any(x['product']==product and canonical_article_url(x['article_url'])==canonical_article_url(url) for x in frozen_pages):
+                            frozen_pages.append(dict(capture))
                     try:
                         body=extract_body(page['body'],source_url=url,language=source['language'])
                         source_quote=article_evidence(body,headline=candidate['title'],
