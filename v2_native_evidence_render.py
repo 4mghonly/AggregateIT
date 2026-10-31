@@ -116,7 +116,8 @@ def render_held_editions(english_plan:dict,arabic_plan:dict,*,slot_id:str,output
         pages.append({'product':'english','page':n,'path':target.name,'sha256':sha256(raw).hexdigest()})
     brief=_render_brief(arabic_plan,{'synthetic':True,'slot_id':slot_id})
     for event in brief['events']:
-        event['summary_ar']='نقل حرفي من تقرير صحفي؛ لم يتم التحقق المستقل من صحة المعلومات.'
+        # Keep the admitted publisher quotation visible; attribution and
+        # unverified status remain explicit, without replacing useful content.
         event['status_ar']='غير متحقق'
     with TemporaryDirectory(prefix='v2-held-arabic-') as temp:
         rendered,clipped=render_arabic(brief,temp)
