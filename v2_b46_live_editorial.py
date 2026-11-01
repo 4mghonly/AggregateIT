@@ -77,7 +77,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
                               previous_versions:dict|None=None, prior_snapshot:dict|None=None,
                               market_observations:list[dict]|None=None)->dict:
     now=_stamp(as_of);_stamp(slot_id)
-    if not isinstance(captures,list) or len(captures)>20:
+    if not isinstance(captures,list) or len(captures)>64:
         raise ValueError('invalid_article_capture_batch')
     if previous_versions is not None and not isinstance(previous_versions,dict):
         raise ValueError('invalid_previous_versions')
@@ -86,7 +86,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
         raise ValueError('invalid_v1_market_context')
     operator_prior=versions_from_signed_journal(prior_snapshot,as_of=as_of) if prior_snapshot is not None else None
     keyword_config=load_v1_keywords()
-    ledger=EvidenceLedger(max_observations=25)
+    ledger=EvidenceLedger(max_observations=64)
     annotations={'english':[],'arabic':[]}
     accepted=[];held=Counter();seen=set();event_rows=[]
     for item in captures:
