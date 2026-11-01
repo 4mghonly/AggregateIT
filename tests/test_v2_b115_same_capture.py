@@ -36,6 +36,17 @@ class B115SameCaptureTests(unittest.TestCase):
         self.assertNotIn('مباحثات دبلوماسية', serialized)
         self.assertNotIn('<article>', serialized)
 
+    def test_editorial_capture_capacity_matches_frozen_comparison_boundary(self):
+        from v2_b46_live_editorial import compile_captured_articles
+        from unittest.mock import patch
+        # Boundary is checked before parsing any captured HTML.
+        with patch('v2_b46_live_editorial._stamp', return_value=None):
+            with self.assertRaisesRegex(ValueError, 'invalid_article_capture_batch'):
+                compile_captured_articles([{}] * 65, as_of=AT, slot_id=AT)
+        # Verify the 64-item batch gets past the batch-size guard.
+        with self.assertRaisesRegex(ValueError, 'unsupported_source_product'):
+            compile_captured_articles([{}] * 64, as_of=AT, slot_id=AT)
+
     def test_excessive_feed_count_remains_rejected(self):
         with self.assertRaisesRegex(ValueError, 'unbounded_same_capture'):
             compare_same_capture([{'product':'english','source_id':'en-001','body':EMPTY}]*17, [], observed_at=AT)
