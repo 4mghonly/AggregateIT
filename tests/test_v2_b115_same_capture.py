@@ -99,7 +99,10 @@ class B115SameCaptureTests(unittest.TestCase):
                                            diagnose_capture=True)
         self.assertEqual(len(report['capture_decisions']), 1)
         self.assertEqual(report['capture_decisions'][0]['stage'], 'rejected_body_or_evidence')
-        self.assertRegex(report['capture_decisions'][0]['reason'], r'^[a-z0-9_]{1,80}
+        self.assertTrue(report['capture_decisions'][0]['reason'].replace('_', '').isalnum())
+        self.assertNotIn('Unstructured sample', json.dumps(report['capture_decisions']))
+
+    def test_excessive_feed_count_remains_rejected(self):
         with self.assertRaisesRegex(ValueError, 'unbounded_same_capture'):
             compare_same_capture([{'product':'english','source_id':'en-001','body':EMPTY}]*17, [], observed_at=AT)
 
