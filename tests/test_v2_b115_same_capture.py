@@ -62,6 +62,18 @@ class B115SameCaptureTests(unittest.TestCase):
             self.assertFalse(output['four_products']['can_release'])
             self.assertFalse(output['discord_sent'])
 
+    def test_native_only_archive_retains_original_subdirectory_contract(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as td:
+            archive=Path(td)/'native-audit'
+            output=run(rss_snapshots=snapshots(),observed_at=AT,fetch=fake_fetch,
+                       market_snapshot={},render_native=True,
+                       render_four_products=False,visual_archive_dir=archive)
+            self.assertEqual(output['native']['status'],'HELD_VALID_NATIVE_PAGES')
+            self.assertEqual(len(list((archive/'held-native').glob('*.png'))),5)
+            self.assertEqual(len(list(archive.glob('*.png'))),0)
+
     def test_no_post_banner_preserves_top_and_bottom_content(self):
         from io import BytesIO
         from PIL import Image
