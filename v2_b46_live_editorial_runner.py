@@ -191,6 +191,22 @@ def run(*,render_native=False,render_four_products=False,
     if compare_same_capture:
         from v2_b115_same_capture import compare_same_capture as compare_frozen
         paired=compare_frozen(frozen_feeds,frozen_pages,observed_at=observed)
+    editorial_review_queue={"status":"NOT_REQUESTED"}
+    if compare_same_capture:
+        from v2_b124_editorial_review_queue import build_review_queue
+        editorial_review_queue=build_review_queue(paired,frozen_pages)
+    # B120: retain only hash-bound, source-linked weekly evidence, never article
+    # bodies, publisher quotations, headlines, models or Discord credentials.
+    weekly_source_roster={"status":"HOLD_MISSING_VERIFIED_GITHUB_RUN_CONTEXT"}
+    if compare_same_capture and paired.get("schema")=="aggregateit-v2-b115-same-capture/1":
+        import os
+        run_id=os.environ.get("GITHUB_RUN_ID","")
+        head_sha=os.environ.get("GITHUB_SHA","")
+        if run_id and head_sha:
+            from v2_b120_weekly_source_roster import make_daily_source_roster
+            weekly_source_roster=make_daily_source_roster(
+                result, observed_at=observed, run_id=run_id,
+                head_sha=head_sha, capture_sha256=paired["input_manifest_sha256"])
     native={"status":"NOT_REQUESTED"}
     if render_native:
         if all(result["products"][p]["story_count"]>0 for p in ("english","arabic")):
@@ -241,6 +257,8 @@ def run(*,render_native=False,render_four_products=False,
         'rss_feed_sha256':feed_digests,'editorial_coverage_diagnostics':quality_coverage,
         'selected_coverage_diagnostics':selected_coverage,
         'b115_same_capture':paired,
+        'b120_weekly_source_roster':weekly_source_roster,
+        'b124_editorial_review_queue':editorial_review_queue,
         'rss_shared_snapshot_supplied':rss_snapshots is not None,
         'transport_failures':reasons,'editorial':receipt,'native':native,'four_products':four_products,
         'b45_provider_fallback_connectivity':'NOT_RUN_NO_CREDENTIALS',
@@ -256,6 +274,14 @@ if __name__=='__main__':
     result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir,compare_same_capture=args.same_capture,quality_preview=args.quality_preview)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
+    if result["b120_weekly_source_roster"].get("schema")=="aggregateit-v2-b120-source-roster-day/1":
+        Path("b120_daily_source_roster.json").write_text(
+            json.dumps(result["b120_weekly_source_roster"],ensure_ascii=False,
+                       sort_keys=True,indent=2)+"\n",encoding="utf8")
+    if result["b124_editorial_review_queue"].get("schema")=="aggregateit-v2-b124-editorial-disagreement-review/1":
+        Path("b124_editorial_review_queue.json").write_text(
+            json.dumps(result["b124_editorial_review_queue"],ensure_ascii=False,
+                       sort_keys=True,indent=2)+"\n",encoding="utf8")
     print(json.dumps({'source_attempts':result['source_attempts'],
                       'source_recovery':result['source_recovery'],
                       'v1_market_context_observation_count':result['v1_market_context_observation_count'],

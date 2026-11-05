@@ -8,3 +8,4 @@ ddgs
 lxml_html_clean>=0.4,<1.0
 reportlab==4.2.5
 pypdf==5.1.0
+langdetect==1.0.9

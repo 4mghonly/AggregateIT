@@ -42,8 +42,12 @@ class ArabicApplicationNoPostTests(unittest.TestCase):
         gate = run_offline_rehearsal(self.fixture, registry())
         plan = gate["products"]["arabic"]["plan"]
         brief = _render_brief(plan, self.fixture)
-        self.assertEqual({e["title_ar"] for e in brief["events"]},
-                         {i["evidence"]["quote"] for i in plan["items"]})
+        # Full attributed quotation remains exact in the summary. The title
+        # intentionally uses a bounded verbatim prefix for readable cards.
+        quotes={i["evidence"]["quote"] for i in plan["items"]}
+        self.assertEqual({e["summary_ar"] for e in brief["events"]},quotes)
+        self.assertTrue(all(any(quote.startswith(e["title_ar"]) for quote in quotes)
+                            for e in brief["events"]))
         self.assertTrue(all(e["severity"] == "unknown" and not e["assessment_ar"]
                             and not e["watch_ar"] for e in brief["events"]))
         self.assertEqual(self.output["translation"], "not_attempted")

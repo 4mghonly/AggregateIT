@@ -49,6 +49,16 @@ on:
       - 'tests/test_v2_b98_source_fallback.py'
       - 'v2_b99_pixel_qa.py'
       - 'v2_b95_artifact_restore.py'
+      - 'v2_b123_publisher_rights_inventory.py'
+      - 'tests/test_v2_b123_publisher_rights_inventory.py'
+      - 'v2_b124_editorial_review_queue.py'
+      - 'tests/test_v2_b124_editorial_review_queue.py'
+      - 'v2_b120_weekly_source_roster.py'
+      - 'tests/test_v2_b120_weekly_source_roster.py'
+      - 'v2_b121_history_quarantine.py'
+      - 'tests/test_v2_b121_history_quarantine.py'
+      - 'v2_b122_no_send_delivery_audit.py'
+      - 'tests/test_v2_b122_no_send_delivery_audit.py'
       - 'v2_b95_b97_history.py'
       - 'tests/test_v2_b112_history_conflicts.py'
       - 'tests/test_v2_b95_b97_history.py'
@@ -131,6 +141,19 @@ jobs:
           python -B -m unittest discover -s tests -p test_v2_b115_pair_history.py -v
       - name: Test B119 independent fail-closed release-readiness synthesis
         run: python -B -m unittest discover -s tests -p test_v2_b119_release_readiness.py -v
+      - name: Test B120 source-linked weekly roster guards (NO POST)
+        run: python -B -m unittest discover -s tests -p test_v2_b120_weekly_source_roster.py -v
+      - name: Test B121 B95 historical conflict quarantine
+        run: python -B -m unittest discover -s tests -p test_v2_b121_history_quarantine.py -v
+      - name: Test B122 no-send delivery and rollback parity preflight
+        run: |
+          python -B -m unittest discover -s tests -p test_v2_b122_no_send_delivery_audit.py -v
+          python -B v2_b122_no_send_delivery_audit.py
+      - name: Test B123 publisher rights status and B124 expert review boundaries
+        run: |
+          python -B -m unittest discover -s tests -p test_v2_b123_publisher_rights_inventory.py -v
+          python -B -m unittest discover -s tests -p test_v2_b124_editorial_review_queue.py -v
+          python -B v2_b123_publisher_rights_inventory.py
       - name: Test B113 bounded Arabic country-and-editorial recovery
         run: python -B -m unittest discover -s tests -p test_v2_b113_arabic_recovery.py -v
       - name: Test B112 historical conflict integrity
@@ -280,6 +303,9 @@ jobs:
           Path('b95_b97_history.json').write_text(json.dumps(report,indent=2)+chr(10))
           print(json.dumps(report))
           PY
+      - name: B121 inspect all restored B95 receipt variants without cherry-picking
+        if: always()
+        run: python -B v2_b121_history_quarantine.py
       - name: B115 accumulate distinct GitHub-run-backed paired dates, no synthetic history
         if: success()
         run: python -B v2_b115_pair_history.py --history
@@ -305,6 +331,11 @@ jobs:
             b114_capture_provenance.json
             b115_seven_day_history.json
             b119_release_readiness.json
+            b120_daily_source_roster.json
+            b121_b95_quarantine.json
+            b122_no_send_delivery.json
+            b123_publisher_rights_inventory.json
+            b124_editorial_review_queue.json
             b112_final_preparation.json
             b112_history_conflicts.json
             b80_b81_live_editorial.json

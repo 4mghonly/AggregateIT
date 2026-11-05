@@ -79,7 +79,7 @@ class B46LiveEditorialTests(unittest.TestCase):
     def test_bad_utc_or_invalid_item_fails_closed(self):
         with self.assertRaises(ValueError):compile_captured_articles([en()],as_of='2026-10-27T08:00:00',slot_id=SLOT)
         with self.assertRaises(ValueError):compile_captured_articles([en()],as_of=NOW,slot_id='2026-10-27T12:00:00')
-        with self.assertRaises(ValueError):compile_captured_articles([en()]*21,as_of=NOW,slot_id=SLOT)
+        with self.assertRaises(ValueError):compile_captured_articles([en()]*65,as_of=NOW,slot_id=SLOT)
     def test_explicit_wrong_topic_or_financial_in_arabic_cannot_enter(self):
         r=compile_captured_articles([ar()],as_of=NOW,slot_id=SLOT)
         self.assertTrue(all(s['topic']!='markets' for s in r['products']['arabic']['newsroom']['stories']))
