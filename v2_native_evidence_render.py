@@ -18,12 +18,17 @@ def _stamp(raw:bytes)->bytes:
     with Image.open(BytesIO(raw)) as image:
         img=image.convert('RGB')
         if img.size!=(3840,2160):raise ValueError('invalid_native_page_dimensions')
-        d=ImageDraw.Draw(img)
-        d.rectangle((0,0,3840,120),fill=(100,22,22))
+        # Preserve the complete masthead and footer under a separate warning
+        # band. Uniform scaling avoids covering Arabic or English source text.
+        page=Image.new('RGB',(3840,2160),(16,29,37))
+        body=img.resize((3627,2040),Image.Resampling.LANCZOS)
+        page.paste(body,((3840-body.width)//2,120))
+        d=ImageDraw.Draw(page)
+        d.rectangle((0,0,3839,119),fill=(100,22,22))
         font_file='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
         font=ImageFont.truetype(font_file,48) if Path(font_file).is_file() else ImageFont.load_default()
         d.text((55,35),'ATTRIBUTED SOURCE TEST | UNVERIFIED | DO NOT PUBLISH',fill=(255,255,255),font=font)
-        buffer=BytesIO();img.save(buffer,'PNG');return buffer.getvalue()
+        buffer=BytesIO();page.save(buffer,'PNG');return buffer.getvalue()
 
 
 def _market_readout(observations:list[dict]|None)->str:
