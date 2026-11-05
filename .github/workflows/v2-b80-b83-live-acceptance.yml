@@ -294,7 +294,6 @@ jobs:
           path: |
             b115_paired_run.json
             b115_seven_day_history.json
-            b119_release_readiness.json
           retention-days: 14
           if-no-files-found: warn
       - name: Archive no-post real capture receipts
@@ -305,6 +304,7 @@ jobs:
           path: |
             b114_capture_provenance.json
             b115_seven_day_history.json
+            b119_release_readiness.json
             b112_final_preparation.json
             b112_history_conflicts.json
             b80_b81_live_editorial.json
