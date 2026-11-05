@@ -76,6 +76,67 @@ class B115SameCaptureTests(unittest.TestCase):
             self.assertEqual(checked.getpixel((1900, 135)), (10, 180, 20))
             self.assertEqual(checked.getpixel((1900, 2130)), (20, 40, 180))
 
+    def test_b115_per_article_selection_diagnostics_are_sanitized(self):
+        receipt = run(rss_snapshots=snapshots(), observed_at=AT, fetch=fake_fetch,
+                      compare_same_capture=True, market_snapshot={})['b115_same_capture']
+        for product in ('english', 'arabic'):
+            rows = receipt['products'][product]['per_article']
+            self.assertTrue(rows)
+            self.assertEqual(rows[0]['v2_decision_stage'], 'selected')
+            self.assertIsNone(rows[0]['v2_decision_reason'])
+            self.assertGreaterEqual(rows[0]['v2_preselection_rank'], 1)
+        serialized = json.dumps(receipt, ensure_ascii=False)
+        self.assertNotIn('Somalia security officials', serialized)
+        self.assertNotIn('مباحثات دبلوماسية', serialized)
+
+    def test_compiler_reports_exact_safe_body_rejection_for_a_capture(self):
+        from v2_b46_live_editorial import compile_captured_articles
+        bad = {'product': 'english', 'source_id': 'en-001',
+               'article_url': 'https://www.bbc.com/news/articles/b115-broken',
+               'title': 'Somalia officials discuss regional security',
+               'published_at': AT, 'html_bytes': b'<html><body>Unstructured sample</body></html>'}
+        report = compile_captured_articles([bad], as_of=AT, slot_id=AT,
+                                           diagnose_capture=True)
+        self.assertEqual(len(report['capture_decisions']), 1)
+        self.assertEqual(report['capture_decisions'][0]['stage'], 'rejected_body_or_evidence')
+        self.assertRegex(report['capture_decisions'][0]['reason'], r'^[a-z0-9_]{1,80}
+        with self.assertRaisesRegex(ValueError, 'unbounded_same_capture'):
+            compare_same_capture([{'product':'english','source_id':'en-001','body':EMPTY}]*17, [], observed_at=AT)
+
+    def test_same_input_replay_is_deterministic_with_fixed_clock(self):
+        first = run(rss_snapshots=snapshots(), observed_at=AT, fetch=fake_fetch,
+                    compare_same_capture=True, market_snapshot={})['b115_same_capture']
+        second = run(rss_snapshots=snapshots(), observed_at=AT, fetch=fake_fetch,
+                     compare_same_capture=True, market_snapshot={})['b115_same_capture']
+        self.assertEqual(first, second)
+
+    def test_article_absent_from_frozen_rss_is_refused(self):
+        feeds = [{'product': p, 'source_id': s,
+                  'body': EMPTY} for p, s in [('english', 'en-001'), ('arabic', 'ar-s003')]]
+        page = {'product': 'english', 'source_id': 'en-001',
+                'article_url': 'https://www.bbc.com/news/articles/unknown',
+                'title': 'Somalia security officials outline latest measures',
+                'published_at': '2026-10-29T08:00:00+00:00',
+                'html_bytes': b'<article><p>Somalia security action is reported.</p></article>'}
+        with self.assertRaisesRegex(ValueError, 'article_not_in_frozen_feed'):
+            compare_same_capture(feeds, [page], observed_at=AT)
+
+    def test_wrong_v1_code_blob_is_refused(self):
+        with patch('v2_b115_same_capture._git_blob', return_value='0' * 40):
+            with self.assertRaisesRegex(ValueError, 'v1_editorial_code_drift'):
+                compare_same_capture([], [], observed_at=AT)
+
+    def test_older_runner_default_does_not_run_comparison(self):
+        output = run(rss_snapshots=snapshots(), observed_at=AT, fetch=fake_fetch,
+                     market_snapshot={})
+        self.assertEqual(output['b115_same_capture'], {'status': 'NOT_REQUESTED'})
+
+
+if __name__ == '__main__':
+    unittest.main()
+)
+        self.assertNotIn('Unstructured sample', json.dumps(report['capture_decisions']))
+
     def test_excessive_feed_count_remains_rejected(self):
         with self.assertRaisesRegex(ValueError, 'unbounded_same_capture'):
             compare_same_capture([{'product':'english','source_id':'en-001','body':EMPTY}]*17, [], observed_at=AT)
