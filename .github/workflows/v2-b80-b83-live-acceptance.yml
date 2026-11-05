@@ -129,6 +129,8 @@ jobs:
         run: |
           python -B -m unittest discover -s tests -p test_v2_b115_same_capture.py -v
           python -B -m unittest discover -s tests -p test_v2_b115_pair_history.py -v
+      - name: Test B119 independent fail-closed release-readiness synthesis
+        run: python -B -m unittest discover -s tests -p test_v2_b119_release_readiness.py -v
       - name: Test B113 bounded Arabic country-and-editorial recovery
         run: python -B -m unittest discover -s tests -p test_v2_b113_arabic_recovery.py -v
       - name: Test B112 historical conflict integrity
@@ -281,6 +283,9 @@ jobs:
       - name: B115 accumulate distinct GitHub-run-backed paired dates, no synthetic history
         if: success()
         run: python -B v2_b115_pair_history.py --history
+      - name: B119 independent readiness audit (HOLD, NO POST)
+        if: always()
+        run: python -B v2_b119_release_readiness.py
       - name: Archive small daily same-capture paired evidence separately
         if: always()
         uses: actions/upload-artifact@v6
@@ -289,6 +294,7 @@ jobs:
           path: |
             b115_paired_run.json
             b115_seven_day_history.json
+            b119_release_readiness.json
           retention-days: 14
           if-no-files-found: warn
       - name: Archive no-post real capture receipts

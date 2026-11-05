@@ -1,0 +1,51 @@
+"""B119: no parser parity or incomplete history can be promoted into release."""
+import unittest
+from datetime import date, timedelta
+from v2_b119_release_readiness import assess, stable_candidate_sha
+
+def fixtures():
+    window=[(date(2026,11,5)-timedelta(days=6-i)).isoformat() for i in range(7)]
+    paired={'schema':'aggregateit-v2-b115-seven-day-paired-history/1',
+            'can_release':False,'window':window,
+            'seven_positive_bilingual_days':True,
+            'seven_distinct_paired_capture_dates':True,
+            'daily':{day:{'capture_runs':1,'english_positive':True,'arabic_positive':True} for day in window}}
+    live={'schema':'aggregateit-v2-b46-live-chain/1','can_release':False,
+          'four_products':{'schema':'aggregateit-v2-b47-four-product-held/1','real_7_day_reporting_verified':False},
+          'native':{'status':'HELD_VALID_NATIVE_PAGES','native_pages':[{}]*5}}
+    shadow={'schema':'aggregateit-v2-b49-single-slot-preflight/1','can_release':False,
+            'all_parser_parity':True,'all_source_headline_parity':True}
+    pixel={'schema':'aggregateit-v2-b99-pixel-qa/1','can_release':False,
+           'all_objective_checks_pass':True}
+    history={'schema':'aggregateit-v2-b95-b97-history/1','can_release':False,
+             'seven_day_evidence_met':False}
+    conflicts={'schema':'aggregateit-v2-b112-history-conflicts/1','can_release':False,
+               'conflicting_days':1}
+    return live,paired,shadow,pixel,history,conflicts
+
+class B119AuditTests(unittest.TestCase):
+    def test_valid_b115_and_objective_pngs_do_not_prove_models_or_delivery(self):
+        a=assess(*fixtures())
+        self.assertTrue(a['gates']['b115_seven_genuine_bilingual_dates'])
+        self.assertTrue(a['gates']['v2_five_native_pages'])
+        self.assertFalse(a['gates']['v1_full_editorial_and_model_parity'])
+        self.assertFalse(a['gates']['v1_v2_same_slot_visual_equivalence'])
+        self.assertFalse(a['gates']['v1_v2_authenticated_delivery_and_rollback_parity'])
+        self.assertEqual(a['release_status'],'HOLD')
+        self.assertFalse(a['can_release'])
+
+    def test_missing_or_conflicting_evidence_fails_closed(self):
+        a=assess({},{},{},{},{},{})
+        self.assertFalse(any(a['gates'].values()))
+        self.assertEqual(a['release_status'],'HOLD')
+        inputs=list(fixtures());inputs[1]['daily'][inputs[1]['window'][2]]['arabic_positive']=False
+        self.assertFalse(assess(*inputs)['gates']['b115_seven_genuine_bilingual_dates'])
+
+    def test_fixed_commit_not_inferred_from_aggregate_dates(self):
+        self.assertIsNone(stable_candidate_sha('/does/not/exist', fixtures()[1]['window'],
+                                               today=date(2026,11,5)))
+        a=assess(*fixtures())
+        self.assertFalse(a['gates']['stable_candidate_seven_genuine_dates'])
+
+if __name__=='__main__':
+    unittest.main()
