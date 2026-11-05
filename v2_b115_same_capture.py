@@ -141,7 +141,9 @@ def compare_same_capture(feeds: list[dict], pages: list[dict], *, observed_at: s
 
     # V2 receives exactly these article bytes, including its prior rejects.
     # V1 receives exactly the same attempted articles after body extraction.
-    replay = compile_captured_articles(pages, as_of=observed_at, slot_id=observed_at)
+    replay = compile_captured_articles(pages, as_of=observed_at, slot_id=observed_at,
+                                       diagnose_capture=True)
+    decision_trace={row['identity_sha256']:row for row in replay['capture_decisions']}
     products = {}
     for product in ("english", "arabic"):
         rows = eligible_rows[product]
@@ -181,7 +183,10 @@ def compare_same_capture(feeds: list[dict], pages: list[dict], *, observed_at: s
                 "v2_topic": v2_labels.get(x["identity_sha256"],{}).get("topic"),
                 "v1_selected": x["identity_sha256"] in v1_selected,
                 "v2_selected": x["identity_sha256"] in v2_selected,
-                "body_extraction": x["body_extraction"]}
+                "body_extraction": x["body_extraction"],
+                "v2_decision_stage": decision_trace[x["identity_sha256"]]["stage"],
+                "v2_decision_reason": decision_trace[x["identity_sha256"]]["reason"],
+                "v2_preselection_rank": decision_trace[x["identity_sha256"]]["preselection_rank"]}
                 for x in sanitized if x["product"] == product],
         }
     canonical = json.dumps({"feeds": sorted(feed_receipts, key=lambda x:(x["product"],x["source_id"])),

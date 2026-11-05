@@ -75,8 +75,9 @@ def _verify_source_candidate(item):
 
 def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
                               previous_versions:dict|None=None, prior_snapshot:dict|None=None,
-                              market_observations:list[dict]|None=None)->dict:
+                              market_observations:list[dict]|None=None, diagnose_capture:bool=False)->dict:
     now=_stamp(as_of);_stamp(slot_id)
+    if type(diagnose_capture) is not bool:raise ValueError('invalid_capture_diagnostics_flag')
     if not isinstance(captures,list) or len(captures)>64:
         raise ValueError('invalid_article_capture_batch')
     if previous_versions is not None and not isinstance(previous_versions,dict):
@@ -88,35 +89,57 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
     keyword_config=load_v1_keywords()
     ledger=EvidenceLedger(max_observations=64)
     annotations={'english':[],'arabic':[]}
-    accepted=[];held=Counter();seen=set();event_rows=[]
+    accepted=[];held=Counter();seen=set();event_rows=[];capture_decisions=[]
     for item in captures:
         config=_verify_source_candidate(item)
         url=item['article_url']
         # Different tracking links must not masquerade as independent stories.
         canonical=canonical_article_url(url)
+        trace=None
+        if diagnose_capture:
+            trace={'product':item['product'],'source_id':item['source_id'],
+                   'identity_sha256':sha256(canonical.encode('utf8')).hexdigest(),
+                   'stage':'unclassified','reason':None,'event_id':None,
+                   'priority':None,'preselection_rank':None}
+            capture_decisions.append(trace)
         if canonical in seen:
-            held['repeated_canonical_article_url']+=1;continue
+            held['repeated_canonical_article_url']+=1
+            if trace is not None:trace.update(stage='rejected_duplicate',reason='repeated_canonical_article_url')
+            continue
         seen.add(canonical)
         pub=_stamp(item['published_at'])
         if not -300<=(now-pub).total_seconds()<=48*3600:
-            held['stale_or_future_article']+=1;continue
+            held['stale_or_future_article']+=1
+            if trace is not None:trace.update(stage='rejected_freshness',reason='stale_or_future_article')
+            continue
         try:
             body=extract_body(item['html_bytes'],source_url=url,language=config['language'])
             source_quote=article_evidence(body,headline=item['title'],published_at=item['published_at'])
         except ValueError as exc:
-            held[str(exc)[:80]]+=1;continue
+            code=str(exc)[:80]
+            held[code]+=1
+            if trace is not None:
+                safe=code if code and code.replace('_','').isalnum() else 'validation_error'
+                trace.update(stage='rejected_body_or_evidence',reason=safe)
+            continue
         if item['product']=='arabic':
             relevance=arabic_filter(item['title']+' '+body['original_text'][:500],
                                      region=source_quote['region'],
                                      headline=item['title'],lead=body['original_text'][:1200])
             if not relevance['admit']:
-                held['arabic_'+relevance['reason']]+=1;continue
+                reason='arabic_'+relevance['reason']
+                held[reason]+=1
+                if trace is not None:trace.update(stage='rejected_arabic_relevance',reason=reason)
+                continue
         original=make_article(source_id=item['source_id'],url=url,
                     original_text=body['original_text'],original_language=config['language'],
                     retrieved_at=as_of,published_at=item['published_at'])
         quote=source_quote['quote']
         at=original['original_text'].find(quote)
-        if at<0:held['quote_not_in_captured_article']+=1;continue
+        if at<0:
+            held['quote_not_in_captured_article']+=1
+            if trace is not None:trace.update(stage='rejected_quote',reason='quote_not_in_captured_article')
+            continue
         excerpt=make_excerpt(original,at,at+len(quote))
         claim=make_claim(statement=quote,excerpts=[excerpt],kind='publisher_assertion')
         ledger.observe(original)
@@ -132,6 +155,9 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             'topic':editorial_topic(item['product'],source_quote['topic_english' if item['product']=='english' else 'topic_arabic']),
             'priority':(score_english_v1(item['title'],body['original_text'][:500],keyword_config=keyword_config)['priority'] if item['product']=='english' else arabic_impact_priority(item['title']+' '+body['original_text'][:500],age_hours=(now-pub).total_seconds()/3600,is_uae=source_quote['subject_country']=='AE'))
         })
+        if trace is not None:
+            trace.update(stage='admitted',event_id=event['event_id'],
+                         priority=annotations[item['product']][-1]['priority'])
         event_rows.append({'event_id':event['event_id'],'title':item['title'],
             'region':source_quote['region'],'source_id':item['source_id'],
             'version_id':event['version_id']})
@@ -166,7 +192,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
           'region':r['region'],'source_id':r['source_id']} for r in event_rows])
     history_review=event_evolution({r['event_id']:r['version_id'] for r in event_rows},
                         operator_prior['versions'] if operator_prior is not None else None)
-    return {'schema':'aggregateit-v2-b46-article-editorial/1','captured_article_count':len(captures),
+    output={'schema':'aggregateit-v2-b46-article-editorial/1','captured_article_count':len(captures),
             'admitted_articles':len(accepted),'receipts':accepted,'held_reasons':dict(held),
             'ledger_counters':ledger.counters(),'products':products,
             'previous_versions_present':previous_versions is not None,
@@ -187,6 +213,27 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
             'live_model_translation_verified':False,
             'market_data_live_verified':False,'can_send':False,
             'discord_sent':False,'production_modified':False}
+    if diagnose_capture:
+        for product in ('english','arabic'):
+            planned=products[product]['editorial_plan']
+            selected={x['event_id'] for x in planned['items']}
+            eligible=sorted((row for row in capture_decisions
+                             if row['product']==product and row['stage']=='admitted'),
+                            key=lambda row:(-row['priority'],row['event_id']))
+            for rank,row in enumerate(eligible,1):
+                row['preselection_rank']=rank
+                if row['event_id'] in selected:
+                    row['stage']='selected'
+                elif row['event_id'] not in visible_ids:
+                    row.update(stage='suppressed_display_duplicate',
+                               reason='same_publisher_display_duplicate')
+                else:
+                    row.update(stage='not_selected_after_admission',
+                               reason='rank_diversity_or_page_budget')
+        output['capture_decisions']=[
+            {key:value for key,value in row.items() if key!='event_id'}
+            for row in capture_decisions]
+    return output
 
 def metrics_only(result):
     if result.get('schema')!='aggregateit-v2-b46-article-editorial/1' or result.get('can_send') is not False:
