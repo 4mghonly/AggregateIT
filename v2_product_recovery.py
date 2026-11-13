@@ -100,6 +100,19 @@ def build_weekly_intelligence(history,language,as_of,max_events=30):
                        "observation_days":len({d for d,_ in rows}),"change_count":changes,
                        "timeline":timeline,"latest_summary":latest["summary"],
                        "source_urls":sorted({x[1]["source_url"] for x in rows})})
+    # Only infer observable patterns, never causation or forward predictions.
+    for event in events:
+        observations=event["observation_days"]
+        changes=event["change_count"]
+        event["assessment"]={
+            "en":("Multiple source observations show a changed account of this development."
+                  if changes else "The available observations do not establish a change in this development."),
+            "ar":("تُظهر الملاحظات المتاحة تغيراً في الرواية المنشورة عن هذا التطور."
+                  if changes else "لا تثبت الملاحظات المتاحة حدوث تغير في هذا التطور."),
+            "evidence_days":observations,
+            "change_observed":bool(changes),
+            "limitation":"No causal inference, independent fact verification, or prediction established."
+        }
     events.sort(key=lambda x:(-x["priority"],-x["change_count"],x["event_id"]))
     return {"language":language,"window_start":start.isoformat(),"window_end":end.isoformat(),
             "days_observed":len(days),"complete_week":len(days)==7,
