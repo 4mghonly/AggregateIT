@@ -37,7 +37,7 @@ class B127Tests(unittest.TestCase):
         self.assertEqual(out["disagreement_count"],14)
         self.assertEqual(out["review_status"],"PENDING_INDEPENDENT_REVIEW")
         self.assertFalse(out["can_release"])
-        self.assertEqual(out["rows"][0]["decision"],"v2_only")
+        self.assertEqual({row["decision"] for row in out["rows"]},{"v1_only","v2_only"})
         self.assertNotIn("headline",out["rows"][0])
     def test_hash_mismatch_fails(self):
         r,s,b=fixture();r[0]["rows"][0]["identity_sha256"]="a"*64
