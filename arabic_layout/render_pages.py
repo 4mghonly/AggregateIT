@@ -72,7 +72,12 @@ def _compact_story_card(c,box,e):
     c.text(REGIONS.get(e.get('region'),'تطور إضافي'),(x+18,y+10,w-36,28),20,True,col,min_size=18,line_ratio=1.10)
     c.text(compact(e.get('title_ar',''),94),(x+18,y+42,w-36,62),29,True,INK,min_size=25,line_ratio=1.15)
     c.text(compact(_source_line(e,1),78),(x+18,y+106,w-36,24),17,True,MUTED,min_size=16,line_ratio=1.08)
-    c.text(compact(e.get('summary_ar',''),235),(x+18,y+136,w-36,h-148),23,False,INK,min_size=20,line_ratio=1.20)
+    # Five-row secondary grids have only ~64 px for summaries. Bound text
+    # to available lines rather than silently clipping Arabic at the bottom.
+    summary_lines=max(1,(h-148)//26)
+    summary_limit=min(235,max(65,summary_lines*40))
+    c.text(compact(e.get('summary_ar',''),summary_limit),
+           (x+18,y+136,w-36,h-148),23,False,INK,min_size=20,line_ratio=1.20)
 
 def _cycle_delta(brief):
     previous=brief.get('previous_events') or []
