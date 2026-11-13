@@ -26,11 +26,14 @@ def read_run(path):
         if not isinstance(title,str) or not title.strip():continue
         change=event.get("what_changed")
         summary=title if not isinstance(change,str) or not change.strip() else title+" — "+change
+        analysis=event.get("analysis") if isinstance(event.get("analysis"),dict) else {}
+        assessment=analysis.get("assessment")
+        extra={"assessment":assessment[:1500],"analysis_origin":"v1_model_unverified"} if isinstance(assessment,str) and assessment.strip() else {}
         rows.append({"event_id":"v1-"+str(event.get("event_id") or source["url"])[:100],
           "headline":title[:300],"summary":summary[:1000],
           "region":str(event.get("entity") or "global")[:100],
           "priority":{"Critical":95,"High":80,"Medium":60,"Low":40}.get(event.get("importance"),60),
-          "topic":"geopolitics","source_url":source["url"]})
+          "topic":"geopolitics","source_url":source["url"],**extra})
     return run["run"][:10],rows
 
 def import_english_runs(paths,database,output_dir):
