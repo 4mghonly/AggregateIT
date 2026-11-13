@@ -395,26 +395,43 @@ def _maritime_rows(events):
             rows.append((REGIONS.get(e.get('region'),'مسار بحري'),_brief_line(e))); used.add(_event_key(e))
     return rows[:4]
 
+def page3_category_plan(brief):
+    """Content-adaptive category selection; never fill a missing topic with noise."""
+    events=_continuity_events(brief)
+    candidates=[
+        ('الجماعات المسلحة','الجهات غير الحكومية الأكثر تأثيراً في الدورة الحالية',OLIVE,_militant_rows(events)),
+        ('الأقاليم الجغرافية','أين يتركز الثقل الإقليمي الآن',BLUE,
+         [(name,text) for name,text in _geographic_rows(events)
+          if text!='تستمر المتابعة من خلال المصادر الإقليمية النشطة مع إبقاء القصة الأعلى أولوية قيد الرصد.']),
+        ('التوترات البحرية','الممرات والمجالات البحرية التي تستحق الانتباه',SAND,_maritime_rows(events)),
+        ('النزاعات','أبرز ساحات الصراع والمتغيرات المرتبطة بها',ALERT,_conflict_rows(events))]
+    return [{'title':title,'subtitle':subtitle,'color':color,'rows':rows}
+            for title,subtitle,color,rows in candidates if rows]
+
 def page3(brief,path):
     c=Canvas(); masthead(c,brief,3)
     events=_continuity_events(brief)
     _page3_stats(c,brief,events)
-
-    _category_rows(c,(55,330,1840,790),'الجماعات المسلحة',
-                   'الجهات غير الحكومية الأكثر تأثيراً في الدورة الحالية',OLIVE,_militant_rows(events))
-    _category_rows(c,(1915,330,1870,790),'الأقاليم الجغرافية',
-                   'أين يتركز الثقل الإقليمي الآن',BLUE,_geographic_rows(events))
-    _category_rows(c,(55,1145,1840,790),'التوترات البحرية',
-                   'الممرات والمجالات البحرية التي تستحق الانتباه',SAND,_maritime_rows(events))
-    _category_rows(c,(1915,1145,1870,790),'النزاعات',
-                   'أبرز ساحات الصراع والمتغيرات المرتبطة بها',ALERT,_conflict_rows(events))
-
-    # Slim executive continuity strip: continuing stories stay visible when they
-    # remain the most consequential, even if they appeared in the prior edition.
+    categories=page3_category_plan(brief)
+    if categories:
+        count=len(categories)
+        cols=2 if count>1 else 1
+        rows=(count+cols-1)//cols
+        gap=20; left=55; top=330; total_width=W-110; total_height=1605
+        width=(total_width-gap*(cols-1))//cols
+        height=(total_height-gap*(rows-1))//rows
+        for i,section in enumerate(categories):
+            col=i%cols; row=i//cols
+            _category_rows(c,(left+col*(width+gap),top+row*(height+gap),width,height),
+                           section['title'],section['subtitle'],section['color'],section['rows'])
+    else:
+        c.text('لا توجد مادة مصنفة مدعومة بمصادر في هذه الدورة.',
+               (55,330,W-110,120),34,True,MUTED,'center')
     c.rounded((55,1958,W-110,118),PANEL_ALT,BORDER,9,1)
     c.text('الخلاصة التنفيذية',(W-560,1974,470,40),27,True,STEEL,min_size=24,line_ratio=1.14)
-    c.text('استمرار القصة نفسها لا يقلل أهميتها إذا بقيت الأعلى تأثيراً.  •  التمييز مطلوب بين الضجيج الإعلامي والمؤشرات القابلة للرصد.  •  أولوية المتابعة: الجغرافيا، الفاعلون المسلحون، والنقاط البحرية الحساسة.',
-           (160,1972,W-800,52),23,True,INK,min_size=20,line_ratio=1.16)
+    summary=(brief.get('analysis') or {}).get('situation_ar') or (
+        'تُعرض الفئات التي تتوافر لها وقائع منسوبة إلى مصادر فقط.')
+    c.text(compact(summary,340),(160,1972,W-800,52),23,True,INK,min_size=20,line_ratio=1.16)
     _footer(c,3,sample=bool(brief.get('sample'))); c.save(path); return c.clipped
 
 
