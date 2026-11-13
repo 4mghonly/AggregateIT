@@ -14,9 +14,9 @@ class GenuineArchiveImportTests(unittest.TestCase):
       "importance":"High","what_changed":"Reported development","analysis":{"assessment":"A cautious assessment of reported security developments."},"sources":[{"url":f"https://example.org/en/{day}"}]}]}
     with zipfile.ZipFile(root/f"ar-{day}.zip","w") as z:z.writestr("briefing.json",json.dumps(ar))
     with zipfile.ZipFile(root/f"en-{day}.zip","w") as z:z.writestr("run.json",json.dumps(en))
-   db=root/"history.sqlite";out=root/"out"
-   a=import_arabic_briefs(sorted(root.glob("ar-*.zip")),db,out)
-   e=import_english_runs(sorted(root.glob("en-*.zip")),db,out)
+   ar_db=root/"arabic_v2.sqlite";en_db=root/"english_v1_baseline.sqlite";out=root/"out"
+   a=import_arabic_briefs(sorted(root.glob("ar-*.zip")),ar_db,out)
+   e=import_english_runs(sorted(root.glob("en-*.zip")),en_db,out)
    self.assertTrue(a["complete_week"])
    self.assertTrue(e["complete_week"])
    self.assertEqual(a["days_observed"],7)
