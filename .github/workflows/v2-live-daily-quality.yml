@@ -1,0 +1,50 @@
+name: V2 real daily editorial no-send acceptance
+on:
+  push:
+    branches: [audit/b119-evidence-reconciliation]
+    paths:
+      - '.github/workflows/v2-live-daily-quality.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  daily-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install source and renderer dependencies
+        run: python -m pip install -r requirements.txt feedparser pillow reportlab beautifulsoup4 arabic-reshaper python-bidi
+      - name: Collect real bilingual evidence and render no-send pages
+        run: |
+          python -B v2_b46_live_editorial_runner.py --output v2-live-quality.json --four-products --quality-preview --visual-archive-dir v2-live-pages --recovery-history-path v2-live-history.sqlite --recovery-output-dir v2-live-weekly
+      - name: Enforce substantive daily content and image output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('v2-live-quality.json').read_text())
+          counts={p:r['editorial']['products'][p]['story_count'] for p in ('english','arabic')}
+          print('daily real evidence',counts,'four products',r['four_products'].get('status',r['four_products'].get('schema')))
+          if any(n<3 for n in counts.values()):
+              raise SystemExit('INSUFFICIENT_REAL_DAILY_EDITORIAL_COVERAGE')
+          if r['four_products'].get('schema')!='aggregateit-v2-b47-four-product-held/1':
+              raise SystemExit('INCOMPLETE_REAL_BILINGUAL_IMAGE_RENDER')
+          for p,required in (('english',2),('arabic',3)):
+              if r['four_products']['daily'][p]['page_count']!=required:
+                  raise SystemExit('MISSING_REAL_IMAGE_PAGE_'+p)
+          PY
+      - name: Preserve real quality evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aggregateit-v2-real-daily-no-send
+          path: |
+            v2-live-quality.json
+            v2-live-pages/*.png
+            v2-live-weekly/*.html
+          if-no-files-found: warn
+          retention-days: 7
