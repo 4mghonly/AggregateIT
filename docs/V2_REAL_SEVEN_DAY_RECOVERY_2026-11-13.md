@@ -76,3 +76,10 @@ Reproduction: GitHub Actions workflow `.github/workflows/v2-seven-day-real-recov
 ## Historical provenance correction
 
 The English archival HTML now displays a visible **V1 comparison baseline — not V2 English editorial history** notice. The V1 and V2 source histories are stored in separate SQLite files and the live runner reports the genuine observed-day count per language. A seven-day English V1 archive must never be counted as seven days of V2 English publishing evidence. The current B47 weekly PDF remains a one-day-source held preview until a native seven-day source/edition-plan integration is implemented and accepted.
+
+
+## Latest acceptance evidence
+
+- [Recovery run 43490470847](https://github.com/4mghonly/AggregateIT/actions/runs/43490470847): **27 regression tests passed**, seven nonempty V1 English baseline days and seven nonempty V2 Arabic days, three real Arabic pages, zero clipped text boxes. Historical data stored in separate provenance-specific databases.
+- [Live V2 no-send run 43490318551](https://github.com/4mghonly/AggregateIT/actions/runs/43490318551): completed successfully with persistent weekly preview receipts and native bilingual daily output.
+- Protected release branch and production publishing were not changed. Full editorial parity and native seven-day weekly PDF integration remain open.
