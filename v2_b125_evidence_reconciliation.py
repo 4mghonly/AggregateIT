@@ -3,12 +3,22 @@
 Input must come from separately authenticated GitHub workflow run metadata.
 This checks consistency, not publisher rights, model parity, or delivery parity.
 """
-from datetime import date, timedelta
+from datetime import date, datetime, timezone, timedelta
 import re
 
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 DIGEST = re.compile(r"[0-9a-f]{64}\Z")
 BRANCH = "rebuild/aggregateit-v2"
+WORKFLOW = ".github/workflows/v2-b80-b83-live-acceptance.yml"
+
+def utc_stamp(raw):
+    if not isinstance(raw,str):
+        return None
+    try:
+        stamp=datetime.fromisoformat(raw.replace("Z","+00:00"))
+        return stamp.astimezone(timezone.utc) if stamp.tzinfo is not None else None
+    except ValueError:
+        return None
 
 def reconcile(pairs, rosters, runs, *, expected_sha):
     issues = []
@@ -51,7 +61,14 @@ def reconcile(pairs, rosters, runs, *, expected_sha):
             issues.append("duplicate_utc_date")
             continue
         used_days.add(day)
-        if (roster.get("utc_date")!=day or run.get("capture_date")!=day
+        observed=utc_stamp(pair.get("observed_at"))
+        roster_observed=utc_stamp(roster.get("observed_at"))
+        started=utc_stamp(run.get("run_started_at"))
+        timing_ok=bool(observed and roster_observed and started and
+                       observed==roster_observed and observed.date()==parsed and
+                       -60 <= (observed-started).total_seconds() <= 7200)
+        if (not timing_ok or roster.get("utc_date")!=day or
+            run.get("path")!=WORKFLOW or run.get("event") not in ("workflow_dispatch","push")
             or pair.get("head_sha")!=expected_sha or roster.get("head_sha")!=expected_sha
             or run.get("head_sha")!=expected_sha
             or pair.get("input_manifest_sha256")!=roster.get("capture_sha256")
