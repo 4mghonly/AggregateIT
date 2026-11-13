@@ -39,7 +39,12 @@ def import_arabic_briefs(paths,database,output_dir):
     if not captures:raise ValueError("no_archives")
     h=ProductHistory(database)
     try:
-        imported=sum(h.record("ar",day,rows) for day,rows in sorted(captures))
+        by_day={}
+        for day,rows in captures:
+            latest=by_day.setdefault(day,{})
+            for row in rows:latest[row["event_id"]]=row
+        imported=sum(h.record("ar",day,list(rows.values()))
+                     for day,rows in sorted(by_day.items()))
         report=build_weekly_intelligence(h,"ar",max(day for day,_ in captures))
         out=Path(output_dir);out.mkdir(parents=True,exist_ok=True)
         (out/"arabic-weekly.html").write_text(render_recovery_html(report),encoding="utf-8")
