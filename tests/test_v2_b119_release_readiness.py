@@ -63,6 +63,21 @@ class B119AuditTests(unittest.TestCase):
         self.assertFalse(out['gates']['v1_full_editorial_and_model_parity'])
         self.assertFalse(out['can_release'])
 
+    def test_b127_queue_reconciled_but_not_adjudicated(self):
+        inputs=list(fixtures())
+        days=inputs[1]['window']
+        evidence={'schema':'aggregateit-v2-b127-identity-matched-review/1',
+                  'candidate_sha':'b67a9e4115f4f88049716d608e54a6d06ef5f15f',
+                  'evidence_reconciled':True,'disagreement_count':73,
+                  'review_status':'PENDING_INDEPENDENT_REVIEW',
+                  'independent_adjudication_verified':False,
+                  'publisher_rights_verified':False,
+                  'can_release':False,'issues':[]}
+        result=assess(*inputs,candidate_sha=evidence['candidate_sha'],b127=evidence)
+        self.assertTrue(result['gates']['b127_identity_matched_disagreements'])
+        self.assertFalse(result['gates']['editorial_disagreements_independently_adjudicated'])
+        self.assertFalse(result['can_release'])
+
     def test_missing_or_conflicting_evidence_fails_closed(self):
         a=assess({},{},{},{},{},{})
         self.assertFalse(any(a['gates'].values()))
