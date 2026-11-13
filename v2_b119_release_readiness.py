@@ -120,9 +120,10 @@ def main():
     pixel=_load('b99_pixel_qa.json')
     history=_load('b95_b97_history.json')
     conflicts=_load('b112_history_conflicts.json')
+    b125=_load('b125_evidence_reconciliation.json')
     today=datetime.now(timezone.utc).date()
     sha=stable_candidate_sha('b115-history',b115.get('window',[]),today=today)
-    result=assess(live,b115,shadow,pixel,history,conflicts,candidate_sha=sha)
+    result=assess(live,b115,shadow,pixel,history,conflicts,candidate_sha=sha,b125=b125)
     Path('b119_release_readiness.json').write_text(
         json.dumps(result,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf8')
     print(json.dumps({'release_status':result['release_status'],
