@@ -52,7 +52,7 @@ def stable_candidate_sha(directory, window, *,today):
     candidates=set.intersection(*(by_date[day] for day in window))
     return sorted(candidates)[0] if candidates else None
 
-def assess(live, b115, shadow, pixel, history, conflicts, *,candidate_sha=None, b125=None, b126=None, b127=None):
+def assess(live, b115, shadow, pixel, history, conflicts, *,candidate_sha=None, b125=None, b126=None, b127=None, b128=None):
     verified={name:isinstance(value,dict) and value.get('schema')==SCHEMAS[name]
               and value.get('can_release') is False for name,value
               in (('live',live),('b115',b115),('shadow',shadow),
@@ -95,11 +95,22 @@ def assess(live, b115, shadow, pixel, history, conflicts, *,candidate_sha=None, 
         b127.get('independent_adjudication_verified') is False and
         b127.get('can_release') is False and b127.get('issues')==[] and
         b127.get('candidate_sha')==candidate_sha)
+    b128_verified=(isinstance(b128,dict) and
+        b128.get('schema')=='aggregateit-v2-b128-adjudication-readiness/1' and
+        b128.get('candidate_sha')==candidate_sha and
+        b128.get('review_queue_valid') is True and
+        type(b128.get('disagreement_count')) is int and b128['disagreement_count']>0 and
+        b128.get('pending_count')==b128['disagreement_count'] and
+        b128.get('reviewed_count')==0 and
+        b128.get('independent_adjudication_verified') is False and
+        b128.get('weekly_full_product_verified') is False and
+        b128.get('can_release') is False and b128.get('issues')==[])
     dims={
         'b115_seven_genuine_bilingual_dates':bilingual,
         'b125_authenticated_same_capture_seven_dates':bool(b125_verified),
         'b126_attributed_weekly_bilingual_source_roster':bool(b126_verified),
         'b127_identity_matched_disagreements':bool(b127_verified),
+        'b128_review_workload_classified':bool(b128_verified),
         'stable_candidate_seven_genuine_dates':bool(bilingual and candidate_sha),
         'v2_four_held_products':four.get('schema')=='aggregateit-v2-b47-four-product-held/1',
         'v2_five_native_pages':native.get('status')=='HELD_VALID_NATIVE_PAGES'
@@ -140,9 +151,10 @@ def main():
     b125=_load('b125_evidence_reconciliation.json')
     b126=_load('b126_weekly_editorial_audit.json')
     b127=_load('b127_identity_review.json')
+    b128=_load('b128_adjudication_readiness.json')
     today=datetime.now(timezone.utc).date()
     sha=stable_candidate_sha('b115-history',b115.get('window',[]),today=today)
-    result=assess(live,b115,shadow,pixel,history,conflicts,candidate_sha=sha,b125=b125,b126=b126,b127=b127)
+    result=assess(live,b115,shadow,pixel,history,conflicts,candidate_sha=sha,b125=b125,b126=b126,b127=b127,b128=b128)
     Path('b119_release_readiness.json').write_text(
         json.dumps(result,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf8')
     print(json.dumps({'release_status':result['release_status'],
