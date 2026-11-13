@@ -1,0 +1,21 @@
+{
+  "can_release": false,
+  "candidate_sha": "b67a9e4115f4f88049716d608e54a6d06ef5f15f",
+  "disagreement_count": 73,
+  "full_model_parity_verified": false,
+  "independent_adjudication_verified": false,
+  "issues": [],
+  "pending_count": 73,
+  "review_queue_valid": true,
+  "reviewed_count": 0,
+  "schema": "aggregateit-v2-b128-adjudication-readiness/1",
+  "triage": {
+    "extraction": 9,
+    "grounding": 13,
+    "ranking": 9,
+    "relevance": 9,
+    "v2_only_requires_review": 33
+  },
+  "weekly_full_product_verified": false,
+  "weekly_source_roster_verified": true
+}
