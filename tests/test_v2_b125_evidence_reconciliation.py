@@ -4,10 +4,10 @@ from v2_b125_evidence_reconciliation import reconcile
 
 SHA = "b67a9e4115f4f88049716d608e54a6d06ef5f15f"
 def pair(day, run):
-    return {"utc_date":day,"github_run_id":str(run),"head_sha":SHA,"input_manifest_sha256":"a"*64,"observed_at":day+"T07:01:00Z",
+    return {"utc_date":day,"github_run_id":str(run),"head_sha":SHA,"input_manifest_sha256":"a"*64,"observed_at":day+"T07:01:00Z","observed_at":day+"T07:01:00Z",
             "products":{"english":{"operational_v2_selected":6},"arabic":{"operational_v2_selected":6}}}
 def roster(day,run):
-    return {"utc_date":day,"github_run_id":str(run),"head_sha":SHA,"capture_sha256":"a"*64,"observed_at":day+"T07:01:00Z",
+    return {"utc_date":day,"github_run_id":str(run),"head_sha":SHA,"capture_sha256":"a"*64,"observed_at":day+"T07:01:00Z","observed_at":day+"T07:01:00Z",
             "products":{"english":{"story_count":6,"stories":[{}]*6},"arabic":{"story_count":6,"stories":[{}]*6}}}
 def meta(day,run):
     return {"id":run,"head_sha":SHA,"head_branch":"rebuild/aggregateit-v2",
