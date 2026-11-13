@@ -1,0 +1,41 @@
+name: V2 recovery offline verification
+on:
+  workflow_dispatch:
+    inputs:
+      archive_paths:
+        description: "Space-separated existing repository-relative editorial JSON archives (optional)"
+        required: false
+        type: string
+permissions:
+  contents: read
+jobs:
+  verify-recovery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify recovery and ingestion tests
+        run: python -m unittest discover -s tests -p 'test_v2_*recovery*.py' -v
+      - name: Backfill repository archives when explicitly supplied
+        if: inputs.archive_paths != ''
+        env:
+          ARCHIVE_PATHS: ${{ inputs.archive_paths }}
+        run: |
+          python - <<'PY'
+          import os,shlex
+          from pathlib import Path
+          from v2_recovery_backfill import backfill
+          paths=[Path(p) for p in shlex.split(os.environ["ARCHIVE_PATHS"])]
+          if not paths or any(p.is_absolute() or ".." in p.parts or not p.is_file() for p in paths):
+              raise SystemExit("invalid archive paths")
+          print(backfill(paths,Path("recovery/history.sqlite"),Path("recovery/weekly")))
+          PY
+      - name: Retain recovered reports for review
+        if: inputs.archive_paths != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: aggregateit-v2-recovery-preview
+          path: recovery/weekly/
+          if-no-files-found: error
