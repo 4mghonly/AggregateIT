@@ -240,6 +240,15 @@ def run(*,render_native=False,render_four_products=False,
                     four_products=compose_held_products(result,output_dir=output,as_of=observed,
                                                         pulse_snapshot=market_snapshot,
                                                         macro_snapshot=macro_snapshot)
+                    if recovery.get("status")!="NOT_REQUESTED":
+                        # Distinguish persisted weekly evidence from B47's one-day
+                        # held PDF; never claim the PDF contains seven days.
+                        four_products["historical_weekly_previews"]={
+                            p:{"days_observed":recovery[p]["days_observed"],
+                               "complete_week":recovery[p]["complete_week"],
+                               "output":recovery[p]["output"],
+                               "pdf_includes_history":False}
+                            for p in ("english","arabic")}
                     if visual_archive_dir is not None:
                         from v2_b86_visual_archive import validate_page_archive
                         four_products['visual_archive']=validate_page_archive(output)
