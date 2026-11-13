@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 from v2_product_recovery import ProductHistory,build_weekly_intelligence
 from v2_recovery_publication import render_recovery_html
 
-def read_brief(path):
+def read_brief(path, *, include_analysis=False):
     path=Path(path)
     if path.suffix.lower()==".zip":
         with zipfile.ZipFile(path) as archive:
@@ -38,20 +38,23 @@ def read_brief(path):
           "summary":summary[:1000],"region":event.get("region") or "unclassified",
           "priority":{"critical":95,"high":80,"medium":60,"low":40}.get(event.get("severity"),60),
           "topic":event.get("topic") or "geopolitics","source_url":source["url"],**extra})
-    return day,rows
+    return (day,rows,brief.get("analysis")) if include_analysis else (day,rows)
 
 def import_arabic_briefs(paths,database,output_dir):
-    captures=[read_brief(p) for p in paths]
+    captures=[read_brief(p,include_analysis=True) for p in paths]
     if not captures:raise ValueError("no_archives")
     h=ProductHistory(database)
     try:
         by_day={}
-        for day,rows in captures:
+        for day,rows,analysis in captures:
             latest=by_day.setdefault(day,{})
             for row in rows:latest[row["event_id"]]=row
+        for day,rows,analysis in captures:
+            if isinstance(analysis,dict):
+                h.record_analysis("ar",day,"arabic_v2_model_unverified",analysis)
         imported=sum(h.record("ar",day,list(rows.values()))
                      for day,rows in sorted(by_day.items()))
-        report=build_weekly_intelligence(h,"ar",max(day for day,_ in captures))
+        report=build_weekly_intelligence(h,"ar",max(day for day,_,_ in captures))
         out=Path(output_dir);out.mkdir(parents=True,exist_ok=True)
         (out/"arabic-weekly.html").write_text(render_recovery_html(report),encoding="utf-8")
         return {"imported":imported,"days_observed":report["days_observed"],
