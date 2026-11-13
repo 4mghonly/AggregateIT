@@ -6,8 +6,8 @@ This checks consistency, not publisher rights, model parity, or delivery parity.
 from datetime import date, timedelta
 import re
 
-SHA = re.compile(r"[0-9a-f]{40}\\Z")
-DIGEST = re.compile(r"[0-9a-f]{64}\\Z")
+SHA = re.compile(r"[0-9a-f]{40}\Z")
+DIGEST = re.compile(r"[0-9a-f]{64}\Z")
 BRANCH = "rebuild/aggregateit-v2"
 
 def reconcile(pairs, rosters, runs, *, expected_sha):
