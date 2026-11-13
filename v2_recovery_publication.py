@@ -45,6 +45,18 @@ def render_recovery_html(report):
                      escape(item["region"])+' · '+str(item["observation_days"])+
                      (' أيام رصد' if ar else ' observed days')+'</p><ol>'+timeline+
                      '</ol>'+insight+'<p>'+links+'</p></article>')
+    executive=""
+    historical=report.get("historical_model_analysis")
+    if historical:
+        content=historical["content"]
+        label="تحليل سابق من النموذج — غير متحقق منه" if ar else "Historical model analysis — unverified"
+        paragraphs=[]
+        for key in ("situation_ar","implications_ar","watch_ar","developing_ar"):
+            value=content.get(key)
+            if isinstance(value,str) and value.strip():paragraphs.append("<p>"+escape(value)+"</p>")
+            elif isinstance(value,list):
+                paragraphs.extend("<p>"+escape(v)+"</p>" for v in value if isinstance(v,str))
+        if paragraphs:executive="<section><h2>"+label+"</h2>"+"".join(paragraphs)+"</section>"
     sections=compact_sections({"events":"".join(cards)})
     body=sections.get("events","")
     return ('<!doctype html><html lang="'+report["language"]+'" dir="'+direction+'"><head>'
