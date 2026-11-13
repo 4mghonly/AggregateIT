@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime, timezone, timedelta
 from v2_b125_evidence_reconciliation import reconcile
 
 SHA = "b67a9e4115f4f88049716d608e54a6d06ef5f15f"
@@ -10,7 +11,9 @@ def roster(day,run):
             "products":{"english":{"story_count":6,"stories":[{}]*6},"arabic":{"story_count":6,"stories":[{}]*6}}}
 def meta(day,run):
     return {"id":run,"head_sha":SHA,"head_branch":"rebuild/aggregateit-v2",
-            "status":"completed","conclusion":"success","capture_date":day}
+            "status":"completed","conclusion":"success","event":"workflow_dispatch",
+            "path":".github/workflows/v2-b80-b83-live-acceptance.yml",
+            "run_started_at":day+"T07:00:00Z"}
 class EvidenceReconciliationTests(unittest.TestCase):
     def setUp(self):
         from datetime import date,timedelta
@@ -44,10 +47,19 @@ class EvidenceReconciliationTests(unittest.TestCase):
     def test_unverified_run_fails_closed(self):
         self.runs[0]["conclusion"]="failure"
         self.assertFalse(self.assess()["seven_verified"])
+    def test_fake_capture_date_metadata_is_not_accepted(self):
+        self.runs[0]["run_started_at"]="2026-11-05T07:00:00Z"
+        self.assertFalse(self.assess()["seven_verified"])
+    def test_wrong_workflow_fails_closed(self):
+        self.runs[0]["path"]="other.yml"
+        self.assertFalse(self.assess()["seven_verified"])
+    def test_missing_run_start_fails_closed(self):
+        del self.runs[0]["run_started_at"]
+        self.assertFalse(self.assess()["seven_verified"])
     def test_nonconsecutive_dates_fails_closed(self):
         self.pairs[6]["utc_date"]="2026-11-14"
         self.rosters[6]["utc_date"]="2026-11-14"
-        self.runs[6]["capture_date"]="2026-11-14"
+        self.runs[6]["run_started_at"]="2026-11-14T07:00:00Z"
         self.assertFalse(self.assess()["seven_verified"])
 if __name__=="__main__":
     unittest.main()
