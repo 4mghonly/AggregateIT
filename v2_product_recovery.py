@@ -37,7 +37,17 @@ def _validated_story(item):
         return None
     if item["priority"]<_MIN_PRIORITY:
         return None
-    return {k:item[k] for k in required}|({"topic":item["topic"]} if item.get("topic") else {})
+    result={k:item[k] for k in required}|({"topic":item["topic"]} if item.get("topic") else {})
+    for field in ("assessment","watch"):
+        value=item.get(field)
+        if value is not None:
+            if not isinstance(value,str) or len(value)>1500:raise ValueError("invalid_analytical_field")
+            if value.strip():result[field]=value.strip()
+    if "assessment" in result or "watch" in result:
+        if item.get("analysis_origin") not in ("v1_model_unverified","arabic_v2_model_unverified"):
+            raise ValueError("missing_analytical_provenance")
+        result["analysis_origin"]=item["analysis_origin"]
+    return result
 
 class ProductHistory:
     """Append-only date/event observations, retaining seven-day trend inputs."""
@@ -99,6 +109,8 @@ def build_weekly_intelligence(history,language,as_of,max_events=30):
                        "topic":latest.get("topic"),"priority":max(x[1]["priority"] for x in rows),
                        "observation_days":len({d for d,_ in rows}),"change_count":changes,
                        "timeline":timeline,"latest_summary":latest["summary"],
+                       "assessment_text":latest.get("assessment"),"watch_text":latest.get("watch"),
+                       "analysis_origin":latest.get("analysis_origin"),
                        "source_urls":sorted({x[1]["source_url"] for x in rows})})
     # Only infer observable patterns, never causation or forward predictions.
     for event in events:
