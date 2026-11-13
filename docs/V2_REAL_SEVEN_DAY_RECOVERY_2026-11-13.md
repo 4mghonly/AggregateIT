@@ -33,3 +33,12 @@ Reproduction: GitHub Actions workflow `.github/workflows/v2-seven-day-real-recov
 6. Do not alter V1 production or the protected `rebuild/aggregateit-v2` release branch until the candidate is demonstrated superior.
 
 **Release state: HOLD pending editorial, rendering and delivery acceptance.** Historical evidence availability itself is no longer the blocker.
+
+
+## Verified live GitHub Actions acceptance (isolated development branch)
+
+- GitHub Actions run [43464917253](https://github.com/4mghonly/AggregateIT/actions/runs/43464917253): successful real-artifact downloads, 18 regression tests, seven nonempty dates for each language, actual Arabic three-page image rendering, **zero clipped text boxes**, and retained SQLite/HTML/PNG output.
+- GitHub Actions run [43465150854](https://github.com/4mghonly/AggregateIT/actions/runs/43465150854): successful after preservation of historical model-generated English assessments with explicit unverified provenance.
+- The original Arabic render had two clipped secondary summary cards. Dynamic summary length corrected both; subsequent real-data render reported zero clipping.
+- Arabic page 3 now omits categories with no matching factual content; page 1 reclaims unused space when zero or one UAE event is present.
+- These are **historical and layout acceptance passes**, not proof of V2 editorial parity or Telegram delivery.
