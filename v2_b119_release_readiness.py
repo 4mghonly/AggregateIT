@@ -52,7 +52,7 @@ def stable_candidate_sha(directory, window, *,today):
     candidates=set.intersection(*(by_date[day] for day in window))
     return sorted(candidates)[0] if candidates else None
 
-def assess(live, b115, shadow, pixel, history, conflicts, *,candidate_sha=None, b125=None):
+def assess(live, b115, shadow, pixel, history, conflicts, *,candidate_sha=None, b125=None, b126=None):
     verified={name:isinstance(value,dict) and value.get('schema')==SCHEMAS[name]
               and value.get('can_release') is False for name,value
               in (('live',live),('b115',b115),('shadow',shadow),
@@ -80,9 +80,17 @@ def assess(live, b115, shadow, pixel, history, conflicts, *,candidate_sha=None, 
         b125.get('seven_verified') is True and b125.get('can_release') is False and
         isinstance(candidate_sha,str) and b125.get('candidate_sha')==candidate_sha and
         b125.get('verified_dates')==dates and consecutive)
+    b126_verified=(isinstance(b126,dict) and
+        b126.get('schema')=='aggregateit-v2-b126-weekly-editorial-audit/1' and
+        b126.get('source_roster_seven_days') is True and
+        b126.get('can_release') is False and b126.get('full_model_parity') is False and
+        b126.get('weekly_full_product_verified') is False and
+        b126.get('issues')==[] and b126.get('candidate_sha')==candidate_sha and
+        b126.get('verified_dates')==dates and consecutive)
     dims={
         'b115_seven_genuine_bilingual_dates':bilingual,
         'b125_authenticated_same_capture_seven_dates':bool(b125_verified),
+        'b126_attributed_weekly_bilingual_source_roster':bool(b126_verified),
         'stable_candidate_seven_genuine_dates':bool(bilingual and candidate_sha),
         'v2_four_held_products':four.get('schema')=='aggregateit-v2-b47-four-product-held/1',
         'v2_five_native_pages':native.get('status')=='HELD_VALID_NATIVE_PAGES'
@@ -121,9 +129,10 @@ def main():
     history=_load('b95_b97_history.json')
     conflicts=_load('b112_history_conflicts.json')
     b125=_load('b125_evidence_reconciliation.json')
+    b126=_load('b126_weekly_editorial_audit.json')
     today=datetime.now(timezone.utc).date()
     sha=stable_candidate_sha('b115-history',b115.get('window',[]),today=today)
-    result=assess(live,b115,shadow,pixel,history,conflicts,candidate_sha=sha,b125=b125)
+    result=assess(live,b115,shadow,pixel,history,conflicts,candidate_sha=sha,b125=b125,b126=b126)
     Path('b119_release_readiness.json').write_text(
         json.dumps(result,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf8')
     print(json.dumps({'release_status':result['release_status'],
