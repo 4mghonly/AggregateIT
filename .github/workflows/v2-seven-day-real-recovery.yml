@@ -70,7 +70,7 @@ jobs:
       - name: Import seven-day real bilingual evidence
         run: |
           python v2_recovery_arabic_archive.py recovery/input/ar/*.zip --database recovery/arabic-v2-history.sqlite --output-dir recovery/output
-          python v2_recovery_english_archive.py recovery/input/en/*.zip --database recovery/history.sqlite --output-dir recovery/output
+          python v2_recovery_english_archive.py recovery/input/en/*.zip --database recovery/english-v1-baseline.sqlite --output-dir recovery/output
       - name: Gate genuine seven-day bilingual coverage
         run: |
           python - <<'PY'
