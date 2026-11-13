@@ -178,10 +178,10 @@ def run(*,render_native=False,render_four_products=False,
     markets=convert_v1_market_pulse(market_snapshot,as_of=observed)
     result=compile_captured_articles(captures,as_of=observed,slot_id=slot,
                                      market_observations=markets)
-    recovery={\"status\":\"NOT_REQUESTED\"}
+    recovery={"status":"NOT_REQUESTED"}
     if recovery_history_path is not None or recovery_output_dir is not None:
         if recovery_history_path is None or recovery_output_dir is None:
-            raise ValueError(\"recovery_paths_required_together\")
+            raise ValueError("recovery_paths_required_together")
         from v2_recovery_pipeline import persist_bilingual_editorial
         recovery=persist_bilingual_editorial(result,recovery_history_path,recovery_output_dir)
     receipt=metrics_only(result)
