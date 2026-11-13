@@ -28,10 +28,16 @@ def read_brief(path):
         summary=event.get("summary_ar")
         if not isinstance(title,str) or not title.strip() or not isinstance(summary,str) or not summary.strip():continue
         identity=hashlib.sha256(source["url"].encode("utf-8")).hexdigest()[:24]
+        assessment=event.get("assessment_ar")
+        watch=event.get("watch_ar")
+        extra={}
+        if isinstance(assessment,str) and assessment.strip():extra["assessment"]=assessment[:1500]
+        if isinstance(watch,str) and watch.strip():extra["watch"]=watch[:1500]
+        if extra:extra["analysis_origin"]="arabic_v2_model_unverified"
         rows.append({"event_id":"source-"+identity,"headline":title[:300],
           "summary":summary[:1000],"region":event.get("region") or "unclassified",
           "priority":{"critical":95,"high":80,"medium":60,"low":40}.get(event.get("severity"),60),
-          "topic":event.get("topic") or "geopolitics","source_url":source["url"]})
+          "topic":event.get("topic") or "geopolitics","source_url":source["url"],**extra})
     return day,rows
 
 def import_arabic_briefs(paths,database,output_dir):
