@@ -103,6 +103,18 @@ class B119AuditTests(unittest.TestCase):
         self.assertFalse(result['gates']['editorial_disagreements_independently_adjudicated'])
         self.assertFalse(result['gates']['v2_weekly_both_languages_seven_real_days'])
 
+    def test_b129_daily_manifests_not_full_weekly_parity(self):
+        inputs=list(fixtures())
+        evidence={'schema':'aggregateit-v2-b129-seven-day-product-evidence/1',
+                  'candidate_sha':'b67a9e4115f4f88049716d608e54a6d06ef5f15f',
+                  'seven_daily_snapshots_verified':True,
+                  'full_weekly_product_parity_verified':False,
+                  'can_release':False,'issues':[]}
+        result=assess(*inputs,candidate_sha=evidence['candidate_sha'],b129=evidence)
+        self.assertTrue(result['gates']['b129_seven_daily_product_manifests'])
+        self.assertFalse(result['gates']['v2_weekly_both_languages_seven_real_days'])
+        self.assertFalse(result['can_release'])
+
     def test_missing_or_conflicting_evidence_fails_closed(self):
         a=assess({},{},{},{},{},{})
         self.assertFalse(any(a['gates'].values()))
