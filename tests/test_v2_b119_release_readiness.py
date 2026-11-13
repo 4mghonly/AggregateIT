@@ -46,6 +46,23 @@ class B119AuditTests(unittest.TestCase):
         self.assertFalse(rejected['gates']['b125_authenticated_same_capture_seven_dates'])
         self.assertFalse(rejected['can_release'])
 
+    def test_b126_weekly_roster_does_not_promote_full_product(self):
+        from datetime import date,timedelta
+        days=[(date(2026,11,6)+timedelta(days=i)).isoformat() for i in range(7)]
+        evidence={'schema':'aggregateit-v2-b126-weekly-editorial-audit/1',
+                  'candidate_sha':'b67a9e4115f4f88049716d608e54a6d06ef5f15f',
+                  'source_roster_seven_days':True,'verified_dates':days,
+                  'full_model_parity':False,'weekly_full_product_verified':False,
+                  'can_release':False,'issues':[]}
+        inputs=list(fixtures())
+        inputs[1]['window']=days
+        inputs[1]['daily']={day:{'capture_runs':1,'english_positive':True,'arabic_positive':True} for day in days}
+        out=assess(*inputs,candidate_sha=evidence['candidate_sha'],b126=evidence)
+        self.assertTrue(out['gates']['b126_attributed_weekly_bilingual_source_roster'])
+        self.assertFalse(out['gates']['v2_weekly_both_languages_seven_real_days'])
+        self.assertFalse(out['gates']['v1_full_editorial_and_model_parity'])
+        self.assertFalse(out['can_release'])
+
     def test_missing_or_conflicting_evidence_fails_closed(self):
         a=assess({},{},{},{},{},{})
         self.assertFalse(any(a['gates'].values()))
