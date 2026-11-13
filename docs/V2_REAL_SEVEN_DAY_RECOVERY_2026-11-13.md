@@ -56,3 +56,8 @@ Reproduction: GitHub Actions workflow `.github/workflows/v2-seven-day-real-recov
 ## Subsequent live collection improvement
 
 [No-send live run 43466393682](https://github.com/4mghonly/AggregateIT/actions/runs/43466393682) passed with **17 admitted source-backed articles**, versus 14 in the earlier live run, following expanded grounded country recognition. Both products retained six selected daily stories under the existing page budget. The test generated five pages and no messages were sent. The geography change increased the candidate pool, not yet the editorial page count. This does not close the V1/V2 same-capture disagreements.
+
+
+## Final observed isolated recovery acceptance
+
+[GitHub Actions run 43466542173](https://github.com/4mghonly/AggregateIT/actions/runs/43466542173) completed the expanded real-history suite: **24 tests passed**, all 14 bilingual daily history dates contained source observations, three Arabic PNGs rendered, **zero clipped text boxes**, and historical SQLite/HTML/PNG artifacts were retained. This is a tested recovery baseline, not a release approval.
