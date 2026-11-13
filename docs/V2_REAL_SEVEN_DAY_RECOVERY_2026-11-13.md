@@ -51,3 +51,8 @@ Reproduction: GitHub Actions workflow `.github/workflows/v2-seven-day-real-recov
 - [Same-capture run 43465999293](https://github.com/4mghonly/AggregateIT/actions/runs/43465999293): V1 English selected 8 versus V2 6 (5 overlap); V1 Arabic selected 11 versus V2 6 (4 overlap). **Selection parity is not established**. There are 4 English and 9 Arabic selection disagreements, plus 2 regional disagreements on common Arabic items. These counts are not editorial quality judgments.
 - The largest observable causes of V2 omissions include missing country/region classification, Arabic topic gating and missing article-body containers. The bounded geographic lexicon has now been expanded to cover Libya, Morocco, Tunisia, Algeria, Bahrain, Kuwait, Sahel and Horn country names; acceptance is rerunning.
 - The native B46 daily product still uses short attributed quotations rather than fully developed original intelligence analysis. That remains a substantive product-quality gap, not a testing artifact.
+
+
+## Subsequent live collection improvement
+
+[No-send live run 43466393682](https://github.com/4mghonly/AggregateIT/actions/runs/43466393682) passed with **17 admitted source-backed articles**, versus 14 in the earlier live run, following expanded grounded country recognition. Both products retained six selected daily stories under the existing page budget. The test generated five pages and no messages were sent. The geography change increased the candidate pool, not yet the editorial page count. This does not close the V1/V2 same-capture disagreements.
