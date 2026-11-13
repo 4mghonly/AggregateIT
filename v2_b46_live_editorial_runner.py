@@ -282,18 +282,15 @@ if __name__=='__main__':
     result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir,compare_same_capture=args.same_capture,quality_preview=args.quality_preview,
                recovery_history_path=args.recovery_history_path,recovery_output_dir=args.recovery_output_dir)
     args.output.parent.mkdir(parents=True,exist_ok=True)
-    args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'
-',encoding='utf8')
+    args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     if result["b120_weekly_source_roster"].get("schema")=="aggregateit-v2-b120-source-roster-day/1":
         Path("b120_daily_source_roster.json").write_text(
             json.dumps(result["b120_weekly_source_roster"],ensure_ascii=False,
-                       sort_keys=True,indent=2)+"
-",encoding="utf8")
+                       sort_keys=True,indent=2)+"\n",encoding="utf8")
     if result["b124_editorial_review_queue"].get("schema")=="aggregateit-v2-b124-editorial-disagreement-review/1":
         Path("b124_editorial_review_queue.json").write_text(
             json.dumps(result["b124_editorial_review_queue"],ensure_ascii=False,
-                       sort_keys=True,indent=2)+"
-",encoding="utf8")
+                       sort_keys=True,indent=2)+"\n",encoding="utf8")
     print(json.dumps({'source_attempts':result['source_attempts'],
                       'source_recovery':result['source_recovery'],
                       'v1_market_context_observation_count':result['v1_market_context_observation_count'],
