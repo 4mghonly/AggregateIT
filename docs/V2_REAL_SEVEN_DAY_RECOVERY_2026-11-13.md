@@ -42,3 +42,12 @@ Reproduction: GitHub Actions workflow `.github/workflows/v2-seven-day-real-recov
 - The original Arabic render had two clipped secondary summary cards. Dynamic summary length corrected both; subsequent real-data render reported zero clipping.
 - Arabic page 3 now omits categories with no matching factual content; page 1 reclaims unused space when zero or one UAE event is present.
 - These are **historical and layout acceptance passes**, not proof of V2 editorial parity or Telegram delivery.
+
+
+## Real bilingual daily acceptance and V1 comparison
+
+- [No-send daily run 43465402665](https://github.com/4mghonly/AggregateIT/actions/runs/43465402665): actual live publishers produced **6 English and 6 Arabic selected events**, all **5 native daily PNG pages**, with the source-backed no-send quality gate passing.
+- The English V2 held preview has been replaced with a clean two-page evidence-first layout. Empty markets, social and chart panels no longer occupy most of the page; a restrained neutral preview strip replaces the oversized red diagnostic banner.
+- [Same-capture run 43465999293](https://github.com/4mghonly/AggregateIT/actions/runs/43465999293): V1 English selected 8 versus V2 6 (5 overlap); V1 Arabic selected 11 versus V2 6 (4 overlap). **Selection parity is not established**. There are 4 English and 9 Arabic selection disagreements, plus 2 regional disagreements on common Arabic items. These counts are not editorial quality judgments.
+- The largest observable causes of V2 omissions include missing country/region classification, Arabic topic gating and missing article-body containers. The bounded geographic lexicon has now been expanded to cover Libya, Morocco, Tunisia, Algeria, Bahrain, Kuwait, Sahel and Horn country names; acceptance is rerunning.
+- The native B46 daily product still uses short attributed quotations rather than fully developed original intelligence analysis. That remains a substantive product-quality gap, not a testing artifact.
