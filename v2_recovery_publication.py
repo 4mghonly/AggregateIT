@@ -33,10 +33,12 @@ def render_recovery_html(report):
             for row in item["timeline"])
         links=" ".join('<a href="'+escape(url,quote=True)+'" rel="noopener noreferrer">'+
                        ("المصدر" if ar else "Source")+'</a>' for url in item["source_urls"])
+        assessment=item.get("assessment",{}).get("ar" if ar else "en","")
+        insight=("<p class=\"assessment\">"+escape(assessment)+"</p>") if assessment else ""
         cards.append('<article><h2>'+escape(item["headline"])+'</h2><p>'+
                      escape(item["region"])+' · '+str(item["observation_days"])+
                      (' أيام رصد' if ar else ' observed days')+'</p><ol>'+timeline+
-                     '</ol><p>'+links+'</p></article>')
+                     '</ol>'+insight+'<p>'+links+'</p></article>')
     sections=compact_sections({"events":"".join(cards)})
     body=sections.get("events","")
     return ('<!doctype html><html lang="'+report["language"]+'" dir="'+direction+'"><head>'
