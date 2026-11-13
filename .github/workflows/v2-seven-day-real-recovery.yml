@@ -68,6 +68,17 @@ jobs:
         run: |
           python v2_recovery_arabic_archive.py recovery/input/ar/*.zip --database recovery/history.sqlite --output-dir recovery/output
           python v2_recovery_english_archive.py recovery/input/en/*.zip --database recovery/history.sqlite --output-dir recovery/output
+      - name: Gate genuine seven-day bilingual coverage
+        run: |
+          python - <<'PY'
+          import sqlite3
+          db=sqlite3.connect('recovery/history.sqlite')
+          for language in ('en','ar'):
+              rows=db.execute('SELECT day,COUNT(*) FROM observations WHERE language=? GROUP BY day ORDER BY day',(language,)).fetchall()
+              print(language,'daily evidence',rows)
+              if len(rows)!=7 or any(count<1 for day,count in rows):
+                  raise SystemExit('INCOMPLETE_REAL_SEVEN_DAY_HISTORY_'+language)
+          PY
       - name: Render genuine Arabic preview pages without sending
         run: |
           python - <<'PY'
