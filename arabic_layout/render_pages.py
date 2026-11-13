@@ -210,9 +210,17 @@ def page1(brief,path):
 
     # Only two dominant information blocks: expanded UAE coverage and three
     # substantial lead stories. No repeated alert/assessment boxes.
-    _uae_panel(c,(55,330,1170,1745),brief,uae)
+    if len(uae)==1:
+        # A single UAE development must not occupy an entire tall column.
+        _uae_panel(c,(55,330,3730,510),brief,uae)
+        lead_box=(55,860,3730,1215)
+    elif not uae:
+        lead_box=(55,330,3730,1745)
+    else:
+        _uae_panel(c,(55,330,1170,1745),brief,uae)
+        lead_box=(1250,330,2535,1745)
 
-    x,y,w,h=panel(c,(1250,330,2535,1745),'أبرز ما يهم اليوم',ALERT,
+    x,y,w,h=panel(c,lead_box,'أبرز ما يهم اليوم',ALERT,
                   'ثلاثة تطورات مختارة، كل قصة تظهر مرة واحدة فقط')
     if not leads:
         c.text('لا توجد تطورات رئيسية مؤهلة بعد التحقق التحريري في النافذة الحالية.',(x,y,w,h),36,True,MUTED,'center')
