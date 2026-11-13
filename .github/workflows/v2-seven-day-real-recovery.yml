@@ -1,10 +1,16 @@
 name: V2 seven-day real-archive recovery
 on:
+  push:
+    branches: [audit/b119-evidence-reconciliation]
+    paths:
+      - '.github/workflows/v2-seven-day-real-recovery.yml'
+      - 'v2_recovery_*.py'
+      - 'tests/test_v2_recovery_*.py'
   workflow_dispatch:
     inputs:
       arabic_artifact_ids:
         description: "Comma-separated GitHub Actions Arabic artifact IDs"
-        required: true
+        required: false
         type: string
       english_artifact_ids:
         description: "Comma-separated GitHub Actions English intel-report artifact IDs"
@@ -27,8 +33,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPOSITORY: ${{ github.repository }}
-          AR_IDS: ${{ inputs.arabic_artifact_ids }}
-          EN_IDS: ${{ inputs.english_artifact_ids }}
+          AR_IDS: ${{ inputs.arabic_artifact_ids || '13577291060,13588224969,13631864661,13706348417,13799600814,13951542206,14044418018' }}
+          EN_IDS: ${{ inputs.english_artifact_ids || '13595225142,13639150027,13719316995,13812311307,13899263741,13993547194,14056072113' }}
         run: |
           python - <<'PY'
           import os,re,urllib.request,pathlib
