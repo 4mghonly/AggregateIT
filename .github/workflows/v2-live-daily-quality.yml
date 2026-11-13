@@ -4,6 +4,9 @@ on:
     branches: [audit/b119-evidence-reconciliation]
     paths:
       - '.github/workflows/v2-live-daily-quality.yml'
+      - 'v2_native_evidence_render.py'
+      - 'arabic_layout/render_pages.py'
+      - 'v2_b46_live_editorial_runner.py'
   workflow_dispatch:
 permissions:
   contents: read
