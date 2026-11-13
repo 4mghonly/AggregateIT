@@ -15,6 +15,13 @@ class EditionAnalysisTests(unittest.TestCase):
    self.assertIn("تقييم استراتيجي",render_recovery_html(report))
    self.assertIn("غير متحقق",render_recovery_html(report))
    h.close()
+ def test_missing_analysis_does_not_invent_implications(self):
+  with tempfile.TemporaryDirectory() as d:
+   h=ProductHistory(Path(d)/"history.sqlite")
+   report=build_weekly_intelligence(h,"ar","2026-11-13")
+   self.assertIsNone(report["historical_model_analysis"])
+   self.assertNotIn("تحليل سابق من النموذج",render_recovery_html(report))
+   h.close()
  def test_conflicting_analysis_is_not_silently_rewritten(self):
   with tempfile.TemporaryDirectory() as d:
    h=ProductHistory(Path(d)/"history.sqlite")
