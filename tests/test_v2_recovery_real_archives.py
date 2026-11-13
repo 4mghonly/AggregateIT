@@ -24,6 +24,7 @@ class GenuineArchiveImportTests(unittest.TestCase):
    self.assertTrue((out/"arabic-weekly.html").exists())
    self.assertTrue((out/"english-weekly.html").exists())
    self.assertIn("Historical model assessment (unverified)",(out/"english-weekly.html").read_text())
+   self.assertIn("V1 comparison baseline",(out/"english-weekly.html").read_text())
  def test_reject_synthetic_arabic_archive(self):
   with tempfile.TemporaryDirectory() as d:
    p=Path(d)/"briefing.json"
