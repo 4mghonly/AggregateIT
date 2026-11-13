@@ -19,7 +19,8 @@ FEEDS=(
 )
 def run(*,render_native=False,render_four_products=False,
         rss_snapshots=None,observed_at=None,visual_archive_dir=None,fetch=None,
-        market_snapshot=None,compare_same_capture=False,quality_preview=False,\n        recovery_history_path=None,recovery_output_dir=None):
+        market_snapshot=None,compare_same_capture=False,quality_preview=False,
+        recovery_history_path=None,recovery_output_dir=None):
     if rss_snapshots is not None:
         if not isinstance(rss_snapshots,dict) or set(rss_snapshots)!={'english','arabic'}:
             raise ValueError('incomplete_shared_rss_snapshots')
@@ -177,7 +178,13 @@ def run(*,render_native=False,render_four_products=False,
     markets=convert_v1_market_pulse(market_snapshot,as_of=observed)
     result=compile_captured_articles(captures,as_of=observed,slot_id=slot,
                                      market_observations=markets)
-    recovery={\"status\":\"NOT_REQUESTED\"}\n    if recovery_history_path is not None or recovery_output_dir is not None:\n        if recovery_history_path is None or recovery_output_dir is None:\n            raise ValueError(\"recovery_paths_required_together\")\n        from v2_recovery_pipeline import persist_bilingual_editorial\n        recovery=persist_bilingual_editorial(result,recovery_history_path,recovery_output_dir)\n    receipt=metrics_only(result)
+    recovery={\"status\":\"NOT_REQUESTED\"}
+    if recovery_history_path is not None or recovery_output_dir is not None:
+        if recovery_history_path is None or recovery_output_dir is None:
+            raise ValueError(\"recovery_paths_required_together\")
+        from v2_recovery_pipeline import persist_bilingual_editorial
+        recovery=persist_bilingual_editorial(result,recovery_history_path,recovery_output_dir)
+    receipt=metrics_only(result)
     from v2_editorial_quality_metrics import assess_coverage
     quality_coverage=assess_coverage(
         {p:[{'source_id':row['source_id']} for row in captures if row['product']==p]
@@ -260,7 +267,8 @@ def run(*,render_native=False,render_four_products=False,
         'b120_weekly_source_roster':weekly_source_roster,
         'b124_editorial_review_queue':editorial_review_queue,
         'rss_shared_snapshot_supplied':rss_snapshots is not None,
-        'transport_failures':reasons,'editorial':receipt,'native':native,'four_products':four_products,\n        'recovery':recovery,
+        'transport_failures':reasons,'editorial':receipt,'native':native,'four_products':four_products,
+        'recovery':recovery,
         'b45_provider_fallback_connectivity':'NOT_RUN_NO_CREDENTIALS',
         'b45_english_to_arabic_semantic_test':'NOT_RUN',
         'b45_somali_to_arabic_semantic_test':'NOT_RUN',
@@ -271,17 +279,21 @@ def run(*,render_native=False,render_four_products=False,
 if __name__=='__main__':
     import argparse
     a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');a.add_argument('--same-capture',action='store_true');a.add_argument('--quality-preview',action='store_true');a.add_argument('--visual-archive-dir',type=Path);a.add_argument('--recovery-history-path',type=Path);a.add_argument('--recovery-output-dir',type=Path);args=a.parse_args()
-    result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir,compare_same_capture=args.same_capture,quality_preview=args.quality_preview,\n               recovery_history_path=args.recovery_history_path,recovery_output_dir=args.recovery_output_dir)
+    result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir,compare_same_capture=args.same_capture,quality_preview=args.quality_preview,
+               recovery_history_path=args.recovery_history_path,recovery_output_dir=args.recovery_output_dir)
     args.output.parent.mkdir(parents=True,exist_ok=True)
-    args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
+    args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'
+',encoding='utf8')
     if result["b120_weekly_source_roster"].get("schema")=="aggregateit-v2-b120-source-roster-day/1":
         Path("b120_daily_source_roster.json").write_text(
             json.dumps(result["b120_weekly_source_roster"],ensure_ascii=False,
-                       sort_keys=True,indent=2)+"\n",encoding="utf8")
+                       sort_keys=True,indent=2)+"
+",encoding="utf8")
     if result["b124_editorial_review_queue"].get("schema")=="aggregateit-v2-b124-editorial-disagreement-review/1":
         Path("b124_editorial_review_queue.json").write_text(
             json.dumps(result["b124_editorial_review_queue"],ensure_ascii=False,
-                       sort_keys=True,indent=2)+"\n",encoding="utf8")
+                       sort_keys=True,indent=2)+"
+",encoding="utf8")
     print(json.dumps({'source_attempts':result['source_attempts'],
                       'source_recovery':result['source_recovery'],
                       'v1_market_context_observation_count':result['v1_market_context_observation_count'],
