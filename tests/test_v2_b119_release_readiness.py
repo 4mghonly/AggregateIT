@@ -34,6 +34,18 @@ class B119AuditTests(unittest.TestCase):
         self.assertEqual(a['release_status'],'HOLD')
         self.assertFalse(a['can_release'])
 
+    def test_b125_evidence_requires_exact_sha_and_verified_dates(self):
+        evidence={'schema':'aggregateit-v2-b125-independent-reconciliation/1',
+                  'candidate_sha':'b67a9e4115f4f88049716d608e54a6d06ef5f15f',
+                  'seven_verified':True,'verified_dates':fixtures()[1]['window'],
+                  'can_release':False}
+        accepted=assess(*fixtures(),candidate_sha=evidence['candidate_sha'],b125=evidence)
+        self.assertTrue(accepted['gates']['b125_authenticated_same_capture_seven_dates'])
+        evidence['candidate_sha']='c'*40
+        rejected=assess(*fixtures(),candidate_sha='b67a9e4115f4f88049716d608e54a6d06ef5f15f',b125=evidence)
+        self.assertFalse(rejected['gates']['b125_authenticated_same_capture_seven_dates'])
+        self.assertFalse(rejected['can_release'])
+
     def test_missing_or_conflicting_evidence_fails_closed(self):
         a=assess({},{},{},{},{},{})
         self.assertFalse(any(a['gates'].values()))
