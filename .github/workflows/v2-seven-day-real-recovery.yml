@@ -6,6 +6,7 @@ on:
       - '.github/workflows/v2-seven-day-real-recovery.yml'
       - 'v2_recovery_*.py'
       - 'v2_product_recovery.py'
+      - 'v2_recovery_publication.py'
       - 'arabic_layout/render_pages.py'
       - 'v2_article_body_gate.py'
       - 'tests/test_v2_recovery_*.py'
