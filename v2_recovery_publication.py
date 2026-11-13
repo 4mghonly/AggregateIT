@@ -35,6 +35,12 @@ def render_recovery_html(report):
                        ("المصدر" if ar else "Source")+'</a>' for url in item["source_urls"])
         assessment=item.get("assessment",{}).get("ar" if ar else "en","")
         insight=("<p class=\"assessment\">"+escape(assessment)+"</p>") if assessment else ""
+        if item.get("assessment_text"):
+            label="تقدير النموذج السابق (غير متحقق منه)" if ar else "Historical model assessment (unverified)"
+            insight+="<p class=\"assessment\"><strong>"+label+":</strong> "+escape(item["assessment_text"])+"</p>"
+        if item.get("watch_text"):
+            label="مؤشر للمتابعة" if ar else "Watch indicator"
+            insight+="<p><strong>"+label+":</strong> "+escape(item["watch_text"])+"</p>"
         cards.append('<article><h2>'+escape(item["headline"])+'</h2><p>'+
                      escape(item["region"])+' · '+str(item["observation_days"])+
                      (' أيام رصد' if ar else ' observed days')+'</p><ol>'+timeline+
