@@ -52,7 +52,7 @@ def stable_candidate_sha(directory, window, *,today):
     candidates=set.intersection(*(by_date[day] for day in window))
     return sorted(candidates)[0] if candidates else None
 
-def assess(live, b115, shadow, pixel, history, conflicts, *,candidate_sha=None):
+def assess(live, b115, shadow, pixel, history, conflicts, *,candidate_sha=None, b125=None):
     verified={name:isinstance(value,dict) and value.get('schema')==SCHEMAS[name]
               and value.get('can_release') is False for name,value
               in (('live',live),('b115',b115),('shadow',shadow),
@@ -75,8 +75,14 @@ def assess(live, b115, shadow, pixel, history, conflicts, *,candidate_sha=None):
                 for day in dates))
     four=live.get('four_products',{}) if verified['live'] else {}
     native=live.get('native',{}) if verified['live'] else {}
+    b125_verified=(isinstance(b125,dict) and
+        b125.get('schema')=='aggregateit-v2-b125-independent-reconciliation/1' and
+        b125.get('seven_verified') is True and b125.get('can_release') is False and
+        isinstance(candidate_sha,str) and b125.get('candidate_sha')==candidate_sha and
+        b125.get('verified_dates')==dates and consecutive)
     dims={
         'b115_seven_genuine_bilingual_dates':bilingual,
+        'b125_authenticated_same_capture_seven_dates':bool(b125_verified),
         'stable_candidate_seven_genuine_dates':bool(bilingual and candidate_sha),
         'v2_four_held_products':four.get('schema')=='aggregateit-v2-b47-four-product-held/1',
         'v2_five_native_pages':native.get('status')=='HELD_VALID_NATIVE_PAGES'
