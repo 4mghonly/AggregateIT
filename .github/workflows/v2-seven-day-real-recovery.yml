@@ -68,12 +68,31 @@ jobs:
         run: |
           python v2_recovery_arabic_archive.py recovery/input/ar/*.zip --database recovery/history.sqlite --output-dir recovery/output
           python v2_recovery_english_archive.py recovery/input/en/*.zip --database recovery/history.sqlite --output-dir recovery/output
+      - name: Render genuine Arabic preview pages without sending
+        run: |
+          python - <<'PY'
+          import json,zipfile
+          from pathlib import Path
+          from arabic_newsletter.render import render
+          snapshots=[]
+          for path in Path('recovery/input/ar').glob('*.zip'):
+              with zipfile.ZipFile(path) as z:
+                  snapshots.append(json.loads(z.read('briefing.json')))
+          if not snapshots:raise SystemExit('no_real_arabic_briefings')
+          brief=max(snapshots,key=lambda x:x['window_end'])
+          output=Path('recovery/output/arabic-pages')
+          paths,clipped=render(brief,output)
+          print('rendered_pages',len(paths),'clipped',clipped)
+          if len(paths)!=3 or any(not p.is_file() for p in paths):
+              raise SystemExit('arabic_renderer_failed')
+          PY
       - name: Retain bilingual previews and SQLite evidence
         uses: actions/upload-artifact@v4
         with:
           name: aggregateit-v2-seven-day-real-history
           path: |
             recovery/output/*.html
+            recovery/output/arabic-pages/*.png
             recovery/history.sqlite
           retention-days: 30
           if-no-files-found: error
