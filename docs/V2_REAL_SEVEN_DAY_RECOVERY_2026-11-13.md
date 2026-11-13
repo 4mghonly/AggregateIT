@@ -61,3 +61,13 @@ Reproduction: GitHub Actions workflow `.github/workflows/v2-seven-day-real-recov
 ## Final observed isolated recovery acceptance
 
 [GitHub Actions run 43466542173](https://github.com/4mghonly/AggregateIT/actions/runs/43466542173) completed the expanded real-history suite: **24 tests passed**, all 14 bilingual daily history dates contained source observations, three Arabic PNGs rendered, **zero clipped text boxes**, and historical SQLite/HTML/PNG artifacts were retained. This is a tested recovery baseline, not a release approval.
+
+
+## 2026-11-13 subsequent repair batch
+
+- Recovered Arabic executive analysis is now stored separately in an append-only, date-keyed `edition_analysis` table and displayed in weekly HTML under an explicit **unverified historical model assessment** label. Existing event assessments and source links remain intact.
+- Corrected a real renderer defect found by a failing regression test: the executive analysis section was constructed but omitted from the HTML return value. The failing test was reproduced in GitHub Actions and corrected.
+- Separated the **English V1 baseline database** (`english-v1-baseline.sqlite`) from the **Arabic V2 history** (`arabic-v2-history.sqlite`). Earlier combined storage could have falsely implied that V2 English had seven historical days. **V2 English historical completeness remains unverified**.
+- The live B46 runner now returns separate persistent-weekly preview receipts when opted in, explicitly marking that the existing B47 weekly PDF does **not** contain the historical seven-day material.
+- GitHub Actions [43490247769](https://github.com/4mghonly/AggregateIT/actions/runs/43490247769) passed after these archive and executive-render fixes.
+- The outstanding integration is genuine seven-day evidence into the existing native weekly PDF/Discord product, not merely a parallel HTML recovery preview. No release authorization is inferred.
