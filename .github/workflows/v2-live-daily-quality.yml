@@ -37,6 +37,8 @@ jobs:
               raise SystemExit('INSUFFICIENT_REAL_DAILY_EDITORIAL_COVERAGE')
           if r['four_products'].get('schema')!='aggregateit-v2-b47-four-product-held/1':
               raise SystemExit('INCOMPLETE_REAL_BILINGUAL_IMAGE_RENDER')
+          if set(r['four_products'].get('historical_weekly_previews',{}))!={'english','arabic'}:
+              raise SystemExit('MISSING_PERSISTED_WEEKLY_PREVIEW_RECEIPTS')
           for p,required in (('english',2),('arabic',3)):
               if r['four_products']['daily'][p]['page_count']!=required:
                   raise SystemExit('MISSING_REAL_IMAGE_PAGE_'+p)
