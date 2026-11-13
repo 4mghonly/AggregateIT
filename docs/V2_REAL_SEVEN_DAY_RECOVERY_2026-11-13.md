@@ -71,3 +71,8 @@ Reproduction: GitHub Actions workflow `.github/workflows/v2-seven-day-real-recov
 - The live B46 runner now returns separate persistent-weekly preview receipts when opted in, explicitly marking that the existing B47 weekly PDF does **not** contain the historical seven-day material.
 - GitHub Actions [43490247769](https://github.com/4mghonly/AggregateIT/actions/runs/43490247769) passed after these archive and executive-render fixes.
 - The outstanding integration is genuine seven-day evidence into the existing native weekly PDF/Discord product, not merely a parallel HTML recovery preview. No release authorization is inferred.
+
+
+## Historical provenance correction
+
+The English archival HTML now displays a visible **V1 comparison baseline — not V2 English editorial history** notice. The V1 and V2 source histories are stored in separate SQLite files and the live runner reports the genuine observed-day count per language. A seven-day English V1 archive must never be counted as seven days of V2 English publishing evidence. The current B47 weekly PDF remains a one-day-source held preview until a native seven-day source/edition-plan integration is implemented and accepted.
