@@ -1,0 +1,1432 @@
+{
+  "schema": "aggregateit-v2-b128-hybrid-closure/1",
+  "candidate_sha": "b67a9e4115f4f88049716d608e54a6d06ef5f15f",
+  "review_packet": [
+    {
+      "utc_date": "2026-11-06",
+      "product": "arabic",
+      "identity_sha256": "1243c5e14a77015a03743afa377af3bd4685a57e9d485e0974796b737abe6b00",
+      "source_url": "https://libyaalahrar.tv/2026/11/05/10-%D9%85%D9%86%D8%B8%D9%85%D8%A7%D8%AA-%D8%AD%D9%82%D9%88%D9%82%D9%8A%D8%A9-%D8%AA%D8%B7%D8%A7%D9%84%D8%A8-%D8%A7%D9%84%D8%B1%D8%A6%D8%A7%D8%B3%D9%8A-%D9%88%D8%AD%D9%83%D9%88%D9%85%D8%A9-%D8%A7%D9%84%D9%88%D8%AD%D8%AF%D8%A9-%D8%A8%D9%83%D8%B4%D9%81-%D9%85%D8%B5%D9%8A%D8%B1-%D9%85%D8%B9%D8%A7%D8%B1%D8%B6-%D9%85%D8%B5%D8%B1%D9%8A-%D9%88%D8%B2%D9%88%D8%AC%D8%AA%D9%87-%D8%A7%D8%AE%D8%AA%D9%81%D9%8A%D8%A7-%D9%81%D9%8A-%D8%B7%D8%B1%D8%A7%D8%A8%D9%84%D8%B3-%D9%85%D9%86%D8%B0-%D9%8A%D9%88%D9%84%D9%8A%D9%88",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-06",
+      "product": "arabic",
+      "identity_sha256": "424db5d87b8f766f3fb7ea014d9827d05b8c41ba85a5bf96ed828973a7bab33e",
+      "source_url": "https://www.france24.com/ar/%D9%81%D9%8A%D8%AF%D9%8A%D9%88/20261105-%D8%A7%D9%84%D8%A3%D8%B1%D8%AF%D9%86-%D9%85%D9%82%D8%AA%D9%84-%D8%B1%D8%AC%D9%84-%D8%A3%D9%85%D9%86-%D9%88%D8%A5%D8%B5%D8%A7%D8%A8%D8%A9-%D8%A2%D8%AE%D8%B1-%D8%B7%D8%B9%D9%86%D8%A7-%D9%82%D8%B1%D8%A8-%D8%B3%D9%81%D8%A7%D8%B1%D8%A9-%D8%B3%D8%B1%D9%8A%D9%84%D8%A7%D9%86%D9%83%D8%A7-%D9%81%D9%8A-%D8%B9%D9%85%D9%91%D8%A7%D9%86",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "article_body_container_missing",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-06",
+      "product": "arabic",
+      "identity_sha256": "84b6caff6c547b8b0a531ce27a6d171ae654719092084cd4c2783fd78767a150",
+      "source_url": "https://www.aljazeera.net/news/2026/11/6/%d9%88%d8%a7%d8%b4%d9%86%d8%b7%d9%86-%d8%aa%d8%b1%d8%a7%d8%ac%d8%b9-%d8%ae%d8%b7%d8%b7-%d8%a7%d8%b3%d8%aa%d8%a6%d9%86%d8%a7%d9%81-%d8%a7%d9%84%d8%b9%d9%85%d9%84%d9%8a%d8%a7%d8%aa-2?traffic_source=rss",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-06",
+      "product": "arabic",
+      "identity_sha256": "8f653a53c7c08c005b83161e0e1158e48de8a17b4086cbfcaf24f3479758924a",
+      "source_url": "https://www.hespress.com/%d8%a7%d9%84%d8%af%d8%b1%d9%87%d9%85-%d9%8a%d8%aa%d8%b1%d8%a7%d8%ac%d8%b9-%d8%a3%d9%85%d8%a7%d9%85-%d8%a7%d9%84%d8%a3%d9%88%d8%b1%d9%88-%d9%88%d8%a7%d9%84%d8%af%d9%88%d9%84%d8%a7%d8%b1-%d8%a7%d9%84-1835293.html",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-06",
+      "product": "arabic",
+      "identity_sha256": "bda09985b8214beb10fe0fefdb98269f5ffef3ce19c270df97ccb29c2acec225",
+      "source_url": "https://libyaalahrar.tv/2026/11/05/%D9%85%D8%B5%D8%B1-%D8%AA%D8%B7%D9%84%D9%82-%D9%85%D8%B4%D8%B1%D9%88%D8%B9%D8%A7-%D9%84%D8%A7%D8%B3%D8%AA%D9%83%D8%B4%D8%A7%D9%81-%D8%A7%D9%84%D9%86%D9%81%D8%B7-%D9%88%D8%A7%D9%84%D8%BA%D8%A7%D8%B2-%D8%A8%D8%A7%D9%84%D9%82%D8%B1%D8%A8-%D9%85%D9%86-%D8%A7%D9%84%D8%AD%D8%AF%D9%88%D8%AF-%D9%85%D8%B9-%D9%84%D9%8A%D8%A8%D9%8A%D8%A7",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "arabic_not_security_relevant",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-06",
+      "product": "arabic",
+      "identity_sha256": "c4118780d30ee29947ae986f8c9ddc686742c56ce8fd8a4e81ad18fa53276fb6",
+      "source_url": "https://www.aljazeera.net/culture/2026/11/6/%d8%a3%d8%b9%d9%85%d8%a7%d9%84%d9%86%d8%a7-%d8%ac%d9%8a%d8%b1%d8%a7%d9%86-%d9%84%d9%88%d8%ad%d8%a7%d8%aa-%d8%a7%d9%84%d9%81%d9%86-%d8%aa%d8%ac%d9%85%d8%b9-%d9%85%d8%a7?traffic_source=rss",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "arabic_topic_without_explicit_trigger",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-06",
+      "product": "arabic",
+      "identity_sha256": "f4834cdb4167491d1ab99a1bd5da7f41f0354c6e6befbc399ad8ec851f327913",
+      "source_url": "https://www.alakhbar.info/6aed2fc62502d50001110e05",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-06",
+      "product": "arabic",
+      "identity_sha256": "f8b9b689e8c71525c96e29a1ef377d9658a905fa26ebbca54ea00afa38536ea2",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d9%82%d8%b6%d8%a7%d9%8a%d8%a7-%d8%a7%d9%84%d8%b4%d8%a8%d8%a7%d8%a8-5-11-2026",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "arabic_topic_without_explicit_trigger",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-06",
+      "product": "english",
+      "identity_sha256": "bc8ee2ea5ba1e1c2b1b280e61626152c9f41480561879469852ccef78e88d242",
+      "source_url": "https://www.theguardian.com/world/2026/nov/05/herzog-netanyahu-eisenkot-israel-election-decision",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "rank_diversity_or_page_budget",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-07",
+      "product": "arabic",
+      "identity_sha256": "03cae7cd84d671a07bdd23b4411b39935df91a517dd6acf43768a8f08bb90d46",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d9%85%d9%84%d9%81%d8%a7%d8%aa-%d8%b3%d9%88%d8%af%d8%a7%d9%86%d9%8a%d8%a9-6-11-2026",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "rank_diversity_or_page_budget",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-07",
+      "product": "arabic",
+      "identity_sha256": "1243c5e14a77015a03743afa377af3bd4685a57e9d485e0974796b737abe6b00",
+      "source_url": "https://libyaalahrar.tv/2026/11/05/10-%D9%85%D9%86%D8%B8%D9%85%D8%A7%D8%AA-%D8%AD%D9%82%D9%88%D9%82%D9%8A%D8%A9-%D8%AA%D8%B7%D8%A7%D9%84%D8%A8-%D8%A7%D9%84%D8%B1%D8%A6%D8%A7%D8%B3%D9%8A-%D9%88%D8%AD%D9%83%D9%88%D9%85%D8%A9-%D8%A7%D9%84%D9%88%D8%AD%D8%AF%D8%A9-%D8%A8%D9%83%D8%B4%D9%81-%D9%85%D8%B5%D9%8A%D8%B1-%D9%85%D8%B9%D8%A7%D8%B1%D8%B6-%D9%85%D8%B5%D8%B1%D9%8A-%D9%88%D8%B2%D9%88%D8%AC%D8%AA%D9%87-%D8%A7%D8%AE%D8%AA%D9%81%D9%8A%D8%A7-%D9%81%D9%8A-%D8%B7%D8%B1%D8%A7%D8%A8%D9%84%D8%B3-%D9%85%D9%86%D8%B0-%D9%8A%D9%88%D9%84%D9%8A%D9%88",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-07",
+      "product": "arabic",
+      "identity_sha256": "28326491f8128cfbee6c03dec9d779211788dc61af692e5fd40d5220953e6081",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d8%ac%d9%88%d9%84%d8%a9-%d8%a7%d9%84%d8%b3%d9%88%d8%af%d8%a7%d9%86-%d8%a7%d9%84%d9%8a%d9%88%d9%85-6-11-2026",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-07",
+      "product": "arabic",
+      "identity_sha256": "4306d806707b9e922f4668b8d5bd70867a052ece5326c0e49e6f1cf32f4f3b0c",
+      "source_url": "https://www.france24.com/ar/%D8%A7%D9%84%D8%B4%D8%B1%D9%82-%D8%A7%D9%84%D8%A3%D9%88%D8%B3%D8%B7/20261106-%D9%85%D9%82%D8%AA%D9%84-%D8%A8%D8%AD%D9%91%D8%A7%D8%B1-%D9%87%D8%AC%D9%88%D9%85-%D8%B5%D8%A7%D8%B1%D9%88%D8%AE-%D9%88%D8%A7%D8%B4%D9%86%D8%B7%D9%86-%D9%86%D8%A7%D9%82%D9%84%D8%A9-%D9%86%D9%81%D8%B7-%D8%AE%D8%A7%D9%85%D9%86%D8%A6%D9%8A-%D8%A7%D9%84%D8%AE%D9%84%D9%8A%D8%AC-%D8%AA%D8%B1%D8%A7%D9%85%D8%A8-%D8%AA%D8%A3%D9%83%D9%8A%D8%AF-%D9%85%D8%AD%D8%A7%D8%AF%D8%AB%D8%A7%D8%AA-%D8%A5%D9%8A%D8%B1%D8%A7%D9%86",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "article_body_container_missing",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-07",
+      "product": "arabic",
+      "identity_sha256": "ce6cca709ee690f50a4c088583f2eb5005df7201022e349c4902de76db362006",
+      "source_url": "https://www.alakhbar.info/6aee8b032502d5000111108f",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-07",
+      "product": "arabic",
+      "identity_sha256": "d3082ae640adad0defb1286665c8b3447c810f30faa16b3ffd53aa6edb6732e3",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d8%a7%d9%84%d9%84%d8%ac%d9%86%d8%a9-%d8%a7%d9%84%d8%aa%d9%85%d9%87%d9%8a%d8%af%d9%8a%d8%a9-%d9%84%d9%86%d9%82%d8%a7%d8%a8%d8%a9-%d8%a7%d9%84%d8%a7%d8%b7%d8%a8%d8%a7%d8%a1-%d8%a7%d9%84%d9%88%d8%b6",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "arabic_topic_without_explicit_trigger",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-07",
+      "product": "arabic",
+      "identity_sha256": "dece252783e9f07c5614d8375fe2bee8eb113f9b71b6e117feffa26b6c2505e8",
+      "source_url": "https://libyaalahrar.tv/2026/11/07/%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AE%D8%A8-%D8%A7%D9%84%D9%88%D8%B7%D9%86%D9%8A-%D9%8A%D9%84%D8%A7%D9%82%D9%8A-%D9%85%D9%86%D8%AA%D8%AE%D8%A8-%D8%AA%D9%88%D9%86%D8%B3-%D9%8A%D9%88%D9%85-%D8%A7%D9%84%D8%AC%D9%85%D8%B9%D8%A9-%D8%A7%D9%84%D9%85%D9%82%D8%A8%D9%84-%D8%B9%D9%84%D9%89-%D8%A3%D8%B1%D8%B6%D9%8A%D8%A9-%D9%85%D9%84%D8%B9%D8%A8-%D8%A7%D9%84%D8%B7%D9%8A%D8%A8-%D8%A7%D9%84%D9%85%D9%87%D9%8A%D8%B1%D9%8A-%D8%A8%D9%85%D8%AF%D9%8A%D9%86%D8%A9-%D8%B5%D9%81%D8%A7%D9%82%D8%B3-%D8%B6%D9%85%D9%86-%D8%AA%D8%B5%D9%81%D9%8A%D8%A7%D8%AA-%D9%83%D8%A3%D8%B3-%D8%A3%D9%85%D9%85-%D8%A5%D9%81%D8%B1%D9%8A%D9%82%D9%8A%D8%A7",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-07",
+      "product": "arabic",
+      "identity_sha256": "f6369197c0534eb5a3661f84d826856d2d4b24116d3cacd1dff0c6b79e8070c1",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d9%86%d8%af%d8%a7%d8%a1-%d8%a3%d9%83%d8%b3%d9%81%d9%88%d8%b1%d8%af-%d9%84%d9%84%d8%b3%d9%84%d8%a7%d9%85-%d9%81%d9%8a-%d8%a7%d9%84%d8%b3%d9%88%d8%af%d8%a7%d9%86",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "arabic",
+      "identity_sha256": "03cae7cd84d671a07bdd23b4411b39935df91a517dd6acf43768a8f08bb90d46",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d9%85%d9%84%d9%81%d8%a7%d8%aa-%d8%b3%d9%88%d8%af%d8%a7%d9%86%d9%8a%d8%a9-6-11-2026",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "rank_diversity_or_page_budget",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "arabic",
+      "identity_sha256": "1630c20f031e5d2bf7228a3d9382fb099672094f12d1f47d3afb2458d7b47b8f",
+      "source_url": "https://www.hespress.com/%d9%85%d8%b7%d9%8a%d8%b9-%d9%8a%d9%86%d8%a7%d9%82%d8%b4-%d9%85%d8%b3%d8%aa%d9%82%d8%a8%d9%84-%d8%a7%d9%84%d8%b3%d9%8a%d9%86%d9%85%d8%a7-%d8%a8%d8%a5%d9%8a%d8%b7%d8%a7%d9%84%d9%8a%d8%a7-1836173.html",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "ambiguous_geography",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "arabic",
+      "identity_sha256": "28326491f8128cfbee6c03dec9d779211788dc61af692e5fd40d5220953e6081",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d8%ac%d9%88%d9%84%d8%a9-%d8%a7%d9%84%d8%b3%d9%88%d8%af%d8%a7%d9%86-%d8%a7%d9%84%d9%8a%d9%88%d9%85-6-11-2026",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "arabic",
+      "identity_sha256": "370765b301d7c4241ec804f0aa3e9dd131fb073e9ce8c948ca259737ae82040a",
+      "source_url": "https://www.aljazeera.net/news/2026/11/8/%d8%a5%d9%8a%d8%b1%d8%a7%d9%86-108?traffic_source=rss",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "arabic",
+      "identity_sha256": "3a281366e81012c3b416b5fc75a38ef4a02b5658d9f72da517fd15b433175eb8",
+      "source_url": "https://www.aljazeera.net/arts/2026/11/8/%d9%88%d8%a7%d8%ad%d8%af%d8%a9-%d9%85%d9%86-%d9%85%d9%84%d9%8a%d9%88%d9%86-%d9%81%d9%8a%d9%84%d9%85-%d9%8a%d9%88%d8%ab%d9%82-10-%d8%a3%d8%b9%d9%88%d8%a7%d9%85-%d9%85%d9%86?traffic_source=rss",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "arabic_topic_without_explicit_trigger",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "arabic",
+      "identity_sha256": "62d89541b9799dd4a6113fbe5ac68665f3300dcb73a6ced559ecf02f978aee02",
+      "source_url": "https://libyaalahrar.tv/2026/11/07/%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D8%B9%D8%A7%D8%B7%D9%8A-%D9%85%D9%82%D8%B1-%D8%A7%D9%84%D8%B3%D9%81%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A%D8%A9-%D8%AC%D8%B2%D8%A1-%D9%85%D9%86-%D8%B0%D8%A7%D9%83%D8%B1%D8%A9-%D8%B7%D8%B1%D8%A7%D8%A8%D9%84%D8%B3-%D8%A7%D9%84%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE%D9%8A%D8%A9",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "arabic",
+      "identity_sha256": "b8b29cd2cfda72d422fa87cbcc7336aa67fc11bdc457d228938cbad20188f8cc",
+      "source_url": "https://www.alakhbar.info/6aefd5ef2502d5000111138b",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "arabic",
+      "identity_sha256": "d3082ae640adad0defb1286665c8b3447c810f30faa16b3ffd53aa6edb6732e3",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d8%a7%d9%84%d9%84%d8%ac%d9%86%d8%a9-%d8%a7%d9%84%d8%aa%d9%85%d9%87%d9%8a%d8%af%d9%8a%d8%a9-%d9%84%d9%86%d9%82%d8%a7%d8%a8%d8%a9-%d8%a7%d9%84%d8%a7%d8%b7%d8%a8%d8%a7%d8%a1-%d8%a7%d9%84%d9%88%d8%b6",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "arabic_topic_without_explicit_trigger",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "arabic",
+      "identity_sha256": "d7949dbc24bb040c4c1ce69e2d0fa6513382bae43289f4d2fc5b1975bb85857d",
+      "source_url": "https://libyaalahrar.tv/2026/11/07/%D8%B3%D9%81%D8%A7%D8%B1%D8%A9-%D9%85%D8%B5%D8%B1-%D8%AA%D8%B9%D9%88%D8%AF-%D8%A5%D9%84%D9%89-%D8%B7%D8%B1%D8%A7%D8%A8%D9%84%D8%B3-%D8%A8%D8%B9%D8%AF-12-%D8%B9%D8%A7%D9%85%D8%A7",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "rank_diversity_or_page_budget",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "english",
+      "identity_sha256": "6d8a06c4630839f617396d0805e33c6e9696935f70629b8070600f21a3bbb995",
+      "source_url": "https://www.bbc.co.uk/news/articles/c65yn1v99ypmo?at_medium=RSS&at_campaign=rss",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "rank_diversity_or_page_budget",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "english",
+      "identity_sha256": "79a8ecf18d1460196950eedd8cb5e4f3a75522f69a2f218ca57756160ef204da",
+      "source_url": "https://www.bbc.co.uk/news/articles/cmy8367lj5xlo?at_medium=RSS&at_campaign=rss",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-08",
+      "product": "english",
+      "identity_sha256": "dadbcd2010b3996e73cfc3aaea215c94eebe7a3908c50543e29708a5cf1db3b3",
+      "source_url": "https://www.theguardian.com/world/2026/nov/07/us-midterm-results-may-help-unite-israeli-coalition-to-unseat-netanyahu",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "rank_diversity_or_page_budget",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-09",
+      "product": "arabic",
+      "identity_sha256": "005e9a0137149c8aec94387fa50f39a300c6ea12264bbbfacece90b2c6a28f30",
+      "source_url": "https://www.france24.com/ar/%D8%A3%D9%88%D8%B1%D9%88%D8%A8%D8%A7/20261109-%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9-%D9%88%D8%B2%D8%B1%D8%A7%D8%A1-%D8%AE%D8%A7%D8%B1%D8%AC%D9%8A%D8%A9-%D9%85%D8%AC%D9%85%D9%88%D8%B9%D8%A9-%D8%A7%D9%84%D8%B3%D8%A8%D8%B9-%D8%A8%D8%A7%D8%B1%D9%8A%D8%B3-%D8%A7%D9%84%D8%AA%D8%B5%D8%B9%D9%8A%D8%AF-%D8%A5%D9%8A%D8%B1%D8%A7%D9%86-%D8%AD%D8%B1%D8%A8-%D8%A3%D9%88%D9%83%D8%B1%D8%A7%D9%86%D9%8A%D8%A7",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "article_body_container_missing",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-09",
+      "product": "arabic",
+      "identity_sha256": "6a72c00dfd5fbc4a0d07438d7a9227e70463e1110a551e55f290dc6fb87606c1",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d9%82%d9%88%d9%89-%d8%a5%d8%b9%d9%84%d8%a7%d9%86-%d8%a7%d9%84%d9%85%d8%a8%d8%a7%d8%af%d8%a6-%d8%aa%d9%8f%d8%ad%d8%b0%d9%91%d8%b1-%d9%85%d9%86-%d8%a8%d8%af%d8%a1-%d8%ad%d9%85%d9%84%d8%a9-%d8%b9",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-09",
+      "product": "arabic",
+      "identity_sha256": "71dd977342dd8547674170c74b6119739f0513cf18f615580cb4e4a8255eb02f",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d8%a5%d8%b6%d8%b1%d8%a7%d8%a8-%d8%b7%d9%84%d8%a7%d8%a8-%d9%87%d9%86%d8%af%d8%b3%d8%a9-%d8%a7%d9%84%d8%ae%d8%b1%d8%b7%d9%88%d9%85-%d9%88%d8%a7%d8%b3%d8%aa%d9%81%d8%aa%d8%a7%d8%a1-%d8%a7%d9%84%d9%83",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "arabic_topic_without_explicit_trigger",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-09",
+      "product": "arabic",
+      "identity_sha256": "b48cd37f62458a0df1348b8ae1b9a06fe561a80fd60708c56dc41ba3c066bf50",
+      "source_url": "https://www.hespress.com/%d8%b9%d8%a8%d9%82-%d8%a7%d9%84%d8%aa%d8%a7%d8%b1%d9%8a%d8%ae-%d8%a8%d8%a7%d9%84%d8%b5%d8%ad%d8%b1%d8%a7%d8%a1-%d8%a7%d9%84%d9%85%d8%ba%d8%b1%d8%a8%d9%8a%d8%a9-%d9%85%d9%86-%d8%a7%d9%84%d9%82%d9%88-1836805.html",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-09",
+      "product": "arabic",
+      "identity_sha256": "d7e1fa973ccfb7ce888d2b9e9c40c4b40d9e19a57f50b820f8fe751956a6f46e",
+      "source_url": "https://www.france24.com/ar/%D8%A7%D9%84%D8%B4%D8%B1%D9%82-%D8%A7%D9%84%D8%A3%D9%88%D8%B3%D8%B7/20261108-%D8%A7%D9%84%D8%A3%D8%B1%D8%AF%D9%86-%D9%8A%D8%B4%D8%AF%D8%AF-%D8%B9%D9%82%D9%88%D8%A8%D8%A7%D8%AA-%D9%82%D8%B6%D8%A7%D9%8A%D8%A7-%D8%A7%D9%84%D8%A5%D8%B1%D9%87%D8%A7%D8%A8-%D8%A8%D8%B9%D8%AF-%D9%87%D8%AC%D9%88%D9%85%D9%8E%D9%8A-%D8%A7%D9%84%D8%B9%D8%A7%D8%B5%D9%85%D8%A9-%D8%B9%D9%85%D9%91%D8%A7%D9%86-%D9%88%D8%A7%D9%84%D9%83%D8%B1%D9%83",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "article_body_container_missing",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-09",
+      "product": "english",
+      "identity_sha256": "2157c5877591a993460614fcab3e8ba96fb0598712956f43b707b9ab02703bd5",
+      "source_url": "https://www.dw.com/en/israeli-president-tasks-gadi-eisenkot-with-forming-government/a-79888288?maca=en-rss-en-world-4025-rdf",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-09",
+      "product": "english",
+      "identity_sha256": "659206a1382c32348f656fa9e5916cbf9ee88588bdcee12de4f37514e13bdfdd",
+      "source_url": "https://www.bbc.co.uk/news/articles/ckly0ex633ydo?at_medium=RSS&at_campaign=rss",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "arabic",
+      "identity_sha256": "08eee879fedfcac45c5898f083975f74c86371a17b956ef704958fe3e5ffe85c",
+      "source_url": "https://www.france24.com/ar/%D8%A3%D9%85%D8%B1%D9%8A%D9%83%D8%A7/20261109-%D8%A7%D9%84%D9%88%D9%84%D8%A7%D9%8A%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D8%AA%D8%AD%D8%AF%D8%A9-%D8%A8%D9%8A%D8%AA-%D9%87%D9%8A%D8%BA%D8%B3%D9%8A%D8%AB-%D9%88%D8%B2%D9%8A%D8%B1-%D8%A7%D9%84%D8%AF%D9%81%D8%A7%D8%B9-%D8%A5%D8%AC%D8%B1%D8%A7%D8%A1%D8%A7%D8%AA-%D8%A7%D9%84%D8%B9%D8%B2%D9%84-%D8%AD%D8%B1%D8%A8-%D8%A5%D9%8A%D8%B1%D8%A7%D9%86",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "article_body_container_missing",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "arabic",
+      "identity_sha256": "43e1b533118ffba007e8e7c39ed18fd413d0c224718a7eeb57867dbc74dcbfad",
+      "source_url": "https://libyaalahrar.tv/2026/11/09/%D8%A7%D9%84%D8%A7%D8%AA%D8%AD%D8%A7%D8%AF-%D8%A7%D9%84%D8%A3%D9%88%D8%B1%D9%88%D8%A8%D9%8A-%D9%8A%D9%85%D8%AF%D8%AF-%D8%B9%D9%85%D9%84%D9%8A%D8%A9-%D8%A5%D9%8A%D8%B1%D9%8A%D9%86%D9%8A-%D8%AD%D8%AA%D9%89-2029-%D9%88%D9%8A%D9%88%D8%B3%D8%B9-%D8%B5%D9%84%D8%A7%D8%AD%D9%8A%D8%A7%D8%AA%D9%87%D8%A7-%D9%84%D9%85%D8%B1%D8%A7%D9%82%D8%A8%D8%A9-%D8%A3%D8%B3%D8%B7%D9%88%D9%84-%D8%A7%D9%84%D8%B8%D9%84-%D8%A7%D9%84%D8%B1%D9%88%D8%B3%D9%8A",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "arabic",
+      "identity_sha256": "5c4409d44c601c8d4c8293fd10190ade79b1455bf1f1d1cbd18a7125e33247e9",
+      "source_url": "https://libyaalahrar.tv/2026/11/09/%D9%85%D8%B5%D8%B1-%D8%AA%D8%AA%D8%AD%D8%AF%D8%AB-%D9%84%D9%84%D8%A3%D8%AD%D8%B1%D8%A7%D8%B1-%D8%B9%D9%86-%D8%AA%D9%81%D8%A7%D9%87%D9%85%D8%A7%D8%AA-%D9%85%D8%B9-%D8%A7%D9%84%D8%AF%D8%A8%D9%8A%D8%A8%D8%A9-%D8%A8%D8%B4%D8%A3%D9%86-%D8%A7%D9%84%D8%AD%D8%AF%D9%88%D8%AF-%D8%A7%D9%84%D8%A8%D8%AD%D8%B1%D9%8A%D8%A9",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "rank_diversity_or_page_budget",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "arabic",
+      "identity_sha256": "7e5277f7dc08e9c4538a25a5179e74dd4438b130b6a0b3f6e357c1c59f6c595f",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d8%b4%d9%83%d9%88%d9%83-%d8%ad%d9%88%d9%84-%d8%a7%d8%b9%d8%aa%d9%82%d8%a7%d9%84-%d8%a7%d9%84%d9%85%d8%b7%d9%84%d9%88%d8%a8-%d9%84%d8%af%d9%8a-%d9%84%d8%a7%d9%87%d8%a7%d9%8a-%d8%a3%d8%ad%d9%85%d8%af",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "arabic",
+      "identity_sha256": "8678bc59514381d8c809d0f6909f4044aceadac327e4a6af429f18ccf3b45a2b",
+      "source_url": "https://libyaalahrar.tv/2026/11/08/%D9%88%D8%B2%D9%8A%D8%B1-%D8%A7%D9%84%D8%AE%D8%A7%D8%B1%D8%AC%D9%8A%D8%A9-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A-%D9%8A%D8%A8%D8%AD%D8%AB-%D9%81%D9%8A-%D8%B7%D8%B1%D8%A7%D8%A8%D9%84%D8%B3-%D8%A7%D9%84%D9%85%D8%B3%D8%A7%D8%B1-%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%B3%D9%8A-%D9%88%D8%A7%D9%84%D8%AA%D8%B9%D8%A7%D9%88%D9%86-%D8%A7%D9%84%D9%86%D9%81%D8%B7%D9%8A",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "arabic",
+      "identity_sha256": "9185a82c8a9e01a94f25268e9ef5de6aa19cd5fc252b73831ba9122846a61294",
+      "source_url": "https://www.france24.com/ar/sciences/20261110-%D8%AA%D8%B1%D8%A7%D8%AC%D8%B9-%D8%B7%D9%81%D9%8A%D9%81-%D9%85%D8%AA%D9%88%D9%82%D8%B9-%D9%81%D9%8A-%D8%A7%D9%86%D8%A8%D8%B9%D8%A7%D8%AB%D8%A7%D8%AA-%D8%A7%D9%84%D9%88%D9%82%D9%88%D8%AF-%D8%A7%D9%84%D8%A3%D8%AD%D9%81%D9%88%D8%B1%D9%8A-%D8%B9%D8%A7%D9%85-2026-%D8%A8%D9%81%D8%B9%D9%84-%D8%AD%D8%B1%D8%A8-%D8%A5%D9%8A%D8%B1%D8%A7%D9%86-%D9%88%D8%A7%D9%84%D8%B7%D8%A7%D9%82%D8%A9-%D8%A7%D9%84%D9%85%D8%AA%D8%AC%D8%AF%D8%AF%D8%A9",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "article_body_container_missing",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "arabic",
+      "identity_sha256": "de09d32edb45b851e5e1688e24039a81e3a547870a2e30f69a407cfadd0a1901",
+      "source_url": "https://www.hespress.com/%d9%85%d8%ac%d9%85%d8%b9-%d8%a7%d9%84%d9%84%d8%ba%d8%a9-%d8%a7%d9%84%d8%b9%d8%b1%d8%a8%d9%8a%d8%a9-%d8%a8%d8%a7%d9%84%d8%b4%d8%a7%d8%b1%d9%82%d8%a9-%d9%8a%d9%86%d8%ac%d8%b2-%d9%85%d9%88%d8%b3%d9%88-1836985.html",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "arabic",
+      "identity_sha256": "e302053c95a0596d76a4de0d73f061b57ffaee4b258363585731556e1b78e7be",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d9%85%d9%84%d9%81%d8%a7%d8%aa-%d8%b3%d9%88%d8%af%d8%a7%d9%86%d9%8a%d8%a9-9-11-2026",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "english",
+      "identity_sha256": "29039739eb4fd04cad738e7acbb1b7da2c1f6a62b652507706219d4b902beaf6",
+      "source_url": "https://www.theguardian.com/world/2026/nov/09/france-blames-irans-revolutionary-guards-for-cyber-attacks-on-supermarket-fridges",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "english",
+      "identity_sha256": "afdc6ec15c3be9fd1f75ee00feee118c4a757b2866d3179ce4bf6132cc259074",
+      "source_url": "https://www.bbc.co.uk/news/articles/cmg474vk6dyqo?at_medium=RSS&at_campaign=rss",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "english",
+      "identity_sha256": "d3abc207a940269ba0633b74793b9c56f5d9b60610eb7aa199ba72addf9d607e",
+      "source_url": "https://www.theguardian.com/environment/2026/nov/09/deadly-floods-iraq-thunderstorms-iran-portugal-japan-snow",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-10",
+      "product": "english",
+      "identity_sha256": "d5714880240dfebd1b59eacbf131ef82e29566184b733143d0a5eeb04cc48bc6",
+      "source_url": "https://www.theguardian.com/world/2026/nov/10/new-knesset-speaker-ousting-netanyahu-israel-pm",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "arabic",
+      "identity_sha256": "4818e356edd94723de272fe5455b9aca454ac9741f6d1165575ac525692bfd47",
+      "source_url": "https://www.aljazeera.net/news/2026/11/11/%d9%86%d9%8a%d9%88%d9%8a%d9%88%d8%b1%d9%83-%d8%aa%d8%a7%d9%8a%d9%85%d8%b2-%d8%a8%d9%8a%d8%b3%d9%86%d8%aa-%d8%a7%d9%86%d8%aa%d9%82%d9%84-%d9%85%d9%86-%d9%85%d9%86%d8%b2%d9%84%d9%87-%d8%a5%d9%84%d9%89?traffic_source=rss",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "arabic",
+      "identity_sha256": "59af04e627c0dd46f97c96f1e5ccf9c11939b53784ddbf31bf766a212cbe0511",
+      "source_url": "https://www.alakhbar.info/6af3c3e1dcb0a00001122c5f",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "arabic",
+      "identity_sha256": "5c4409d44c601c8d4c8293fd10190ade79b1455bf1f1d1cbd18a7125e33247e9",
+      "source_url": "https://libyaalahrar.tv/2026/11/09/%D9%85%D8%B5%D8%B1-%D8%AA%D8%AA%D8%AD%D8%AF%D8%AB-%D9%84%D9%84%D8%A3%D8%AD%D8%B1%D8%A7%D8%B1-%D8%B9%D9%86-%D8%AA%D9%81%D8%A7%D9%87%D9%85%D8%A7%D8%AA-%D9%85%D8%B9-%D8%A7%D9%84%D8%AF%D8%A8%D9%8A%D8%A8%D8%A9-%D8%A8%D8%B4%D8%A3%D9%86-%D8%A7%D9%84%D8%AD%D8%AF%D9%88%D8%AF-%D8%A7%D9%84%D8%A8%D8%AD%D8%B1%D9%8A%D8%A9",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "rank_diversity_or_page_budget",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "arabic",
+      "identity_sha256": "617eb57f981e56db48413f6b4b66d4f3d762c69d3f323dbb8471dae7e7eb46e8",
+      "source_url": "https://www.aljazeera.net/politics/2026/11/11/%d8%a8%d8%a7%d9%84%d8%a3%d8%b1%d9%82%d8%a7%d9%85-%d9%85%d8%a7%d8%b0%d8%a7-%d9%8a%d8%ad%d8%aa%d8%a7%d8%ac-%d9%82%d8%b7%d8%a7%d8%b9-%d8%ba%d8%b2%d8%a9-%d9%84%d9%81%d8%b5%d9%84?traffic_source=rss",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "arabic_not_security_relevant",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "arabic",
+      "identity_sha256": "ab26180fbb5f796882d6666e39b9c80a70ef532e9a33865ef5c35c2dd4594e18",
+      "source_url": "https://www.alakhbar.info/6af36c3ddcb0a00001122bfa",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "arabic",
+      "identity_sha256": "bab8e8b8f33f463e787309ba4340d65c943e2383a67b7f041cb1a297762b9515",
+      "source_url": "https://www.france24.com/ar/%D8%A3%D9%85%D8%B1%D9%8A%D9%83%D8%A7/20261111-%D8%A7%D9%84%D9%88%D9%84%D8%A7%D9%8A%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D8%AA%D8%AD%D8%AF%D8%A9-%D8%A8%D9%8A%D8%AA-%D9%87%D9%8A%D8%BA%D8%B3%D9%8A%D8%AB-%D9%88%D8%B2%D9%8A%D8%B1-%D8%A7%D9%84%D8%AF%D9%81%D8%A7%D8%B9-%D8%A7%D9%84%D8%AC%D9%85%D9%87%D9%88%D8%B1%D9%8A%D9%88%D9%86-%D8%A5%D8%AD%D8%A8%D8%A7%D8%B7-%D8%A5%D8%AC%D8%B1%D8%A7%D8%A1%D8%A7%D8%AA-%D8%A7%D9%84%D8%B9%D8%B2%D9%84",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "article_body_container_missing",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "arabic",
+      "identity_sha256": "e302053c95a0596d76a4de0d73f061b57ffaee4b258363585731556e1b78e7be",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d9%85%d9%84%d9%81%d8%a7%d8%aa-%d8%b3%d9%88%d8%af%d8%a7%d9%86%d9%8a%d8%a9-9-11-2026",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "english",
+      "identity_sha256": "9dbf5d98c76e5882ee7a80cc8d5665258a33684d8ee899acbd80980e1b98f4fc",
+      "source_url": "https://www.theguardian.com/world/2026/nov/10/israeli-opposition-hurries-to-seize-control-as-new-knesset-is-sworn-in",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "english",
+      "identity_sha256": "afdc6ec15c3be9fd1f75ee00feee118c4a757b2866d3179ce4bf6132cc259074",
+      "source_url": "https://www.bbc.co.uk/news/articles/cmg474vk6dyqo?at_medium=RSS&at_campaign=rss",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "english",
+      "identity_sha256": "bf0354919e892807020aa393c5977f4f8418658a7d5958f016a3c49cd36c5edb",
+      "source_url": "https://www.bbc.co.uk/news/articles/c3rryrryk59zo?at_medium=RSS&at_campaign=rss",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-11",
+      "product": "english",
+      "identity_sha256": "d3abc207a940269ba0633b74793b9c56f5d9b60610eb7aa199ba72addf9d607e",
+      "source_url": "https://www.theguardian.com/environment/2026/nov/09/deadly-floods-iraq-thunderstorms-iran-portugal-japan-snow",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "094b15098a3dedbb9d0f3536783a7a1127495d38ec81f1e99c11b9c89dba658e",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d8%a7%d9%84%d9%81%d9%86%d8%a7%d9%86-%d8%a7%d9%84%d8%aa%d8%b4%d9%83%d9%8a%d9%84%d9%8a-%d9%88%d9%84%d9%8a%d8%af-%d9%85%d8%ad%d9%85%d9%88%d8%af-%d9%8a%d9%88%d8%ab%d9%82-%d8%a7%d9%84%d8%b0%d8%a7%d9%83",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "arabic_topic_without_explicit_trigger",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "14f680b2ca784a4c2e0f72ae62234a9bc2e38bf6263bc374c9279cb7b673c465",
+      "source_url": "https://www.hespress.com/%d9%81%d8%b1%d9%82-%d9%88%d8%b7%d9%86%d9%8a%d8%a9-%d9%88%d8%a3%d8%ac%d9%86%d8%a8%d9%8a%d8%a9-%d8%aa%d8%a8%d8%ad%d8%ab-%d8%b9%d9%86-%d8%a3%d8%b3%d8%b1%d8%a7%d8%b1-%d8%a7%d9%84%d9%85%d8%ba%d8%b1%d8%a8-1838088.html",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "366494931abdb0d0f8af2dc50247ae1850a2361837d0ff39f6e620445458f9ca",
+      "source_url": "https://www.aljazeera.net/politics/2026/11/12/%d9%86%d8%aa%d9%86%d9%8a%d8%a7%d9%87%d9%88-%d9%8a%d8%b1%d8%a7%d9%87%d9%86-%d8%b9%d9%84%d9%89-%d8%aa%d8%b1%d9%85%d8%a8-%d9%81%d9%8a%d8%ae%d8%b3%d8%b1-%d9%88%d8%a7%d8%b4%d9%86%d8%b7%d9%86?traffic_source=rss",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "rank_diversity_or_page_budget",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "3cb30c4492c42ebd83aab5253323457202e8f11b56e3cbd73e2f10b0d0c51612",
+      "source_url": "https://www.france24.com/ar/%D8%A3%D9%85%D8%B1%D9%8A%D9%83%D8%A7/20261111-%D9%88%D8%B2%D9%8A%D8%B1-%D8%A7%D9%84%D8%AE%D8%B2%D8%A7%D9%86%D8%A9-%D8%A7%D9%84%D8%A3%D9%85%D8%B1%D9%8A%D9%83%D9%8A-%D9%8A%D9%86%D8%AA%D9%82%D9%84-%D8%A5%D9%82%D8%A7%D9%85%D8%A9-%D9%82%D8%A7%D8%B9%D8%AF%D8%A9-%D8%B9%D8%B3%D9%83%D8%B1%D9%8A%D8%A9-%D8%AD%D9%81%D8%A7%D8%B8-%D8%B3%D9%84%D8%A7%D9%85%D8%A9-%D8%AA%D9%87%D8%AF%D9%8A%D8%AF%D8%A7%D8%AA-%D8%A5%D9%8A%D8%B1%D8%A7%D9%86",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "article_body_container_missing",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "50a2c40cd811cac569ae6b0a3a42c02aded797ef71678b7fd07318ab79af15ea",
+      "source_url": "https://libyaalahrar.tv/2026/11/11/%D9%85%D9%84%D8%A7%D8%AD%D8%B8%D8%A7%D8%AA-%D8%B1%D9%82%D8%A7%D8%A8%D9%8A%D8%A9-%D9%85%D8%B3%D8%AC%D9%84%D8%A9-%D8%B9%D9%84%D9%89-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%81-%D8%A3%D8%A8%D9%88%D8%AE%D8%B2%D8%A7%D9%85-%D9%8A%D8%B9%D9%82%D8%AF-%D9%84%D9%82%D8%A7%D8%A1%D8%A7%D8%AA-%D9%85%D9%86%D9%81%D8%B5%D9%84%D8%A9-%D9%85%D8%B9-%D9%82%D8%A7%D8%AF%D8%B1%D9%8A%D9%88%D9%87-%D9%88%D8%A8%D9%88%D8%B4%D9%8A%D8%AD%D8%A9",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "5b1e47462049ed4a7ac3f55a191e31a5ed3dac0c956753f35220698b1257e62c",
+      "source_url": "https://www.aljazeera.net/politics/2026/11/12/%d8%b3%d9%84%d8%a7%d8%ad-%d8%a7%d9%84%d9%81%d8%b5%d8%a7%d8%a6%d9%84-%d9%81%d9%8a-%d8%a7%d9%84%d8%b9%d8%b1%d8%a7%d9%82-%d8%a7%d9%84%d9%85%d9%87%d9%84%d8%a9?traffic_source=rss",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "73b18ee31dd1bdc1e1014de77fc3157c2607886cb518ff2572a471769a219a2e",
+      "source_url": "https://www.france24.com/ar/%D8%A8%D8%B1%D8%A7%D9%85%D8%AC/%D8%A7%D9%84%D9%86%D9%82%D8%A7%D8%B4/20261111-%D8%A7%D9%84%D9%88%D9%84%D8%A7%D9%8A%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D8%AA%D8%AD%D8%AF%D8%A9-%D8%A5%D9%8A%D8%B1%D8%A7%D9%86-%D9%87%D9%84-%D8%A7%D9%82%D8%AA%D8%B1%D8%A8%D8%AA-%D9%86%D9%87%D8%A7%D9%8A%D8%A9-%D8%A7%D9%84%D8%AD%D8%B1%D8%A8",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "article_body_container_missing",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "cce61137cbb4c27d30f1c567427affed8d9fff3c191f68868c1056eafb63984a",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d8%a3%d9%85-%d8%a7%d9%84%d8%b9%d8%b0%d8%b1%d8%a7%d8%a1-%d8%a3%d9%85%d8%a7%d9%85-%d9%85%d8%ad%d8%a7%d9%83%d9%85%d8%a9-%d8%ac%d8%af%d9%8a%d8%af-%d9%82%d8%af-%d8%aa%d9%88%d8%a7%d8%ac%d9%87-%d8%b9",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "e6c71fb8777220a69b162e7001f6d3fada2d7055d4b52f720d1fd8998b996026",
+      "source_url": "https://www.dabangasudan.org/ar/all-news/article/%d8%ac%d9%88%d9%84%d8%a9-%d8%a7%d9%84%d8%b3%d9%88%d8%af%d8%a7%d9%86-%d8%a7%d9%84%d9%8a%d9%88%d9%85-11-11-2026",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "f525246e2b7711884e50452dbc7edf8fe51e72a10955d727cd30d170bde0ee9f",
+      "source_url": "https://libyaalahrar.tv/2026/11/11/%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9-%D9%88%D8%A3%D8%AB%D9%8A%D9%86%D8%A7-%D9%88%D9%86%D9%8A%D9%82%D9%88%D8%B3%D9%8A%D8%A7-%D8%AC%D8%A8%D9%87%D8%A9-%D8%B1%D9%81%D8%B6-%D9%84%D9%84%D8%A7%D8%AA%D9%81%D8%A7%D9%82%D9%8A%D8%A9-%D8%A7%D9%84%D8%A8%D8%AD%D8%B1%D9%8A%D8%A9-%D9%85%D8%B9-%D8%AA%D8%B1%D9%83%D9%8A%D8%A7",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "arabic",
+      "identity_sha256": "f6b78bca94c3aa148c69d1a25214262fd91357d457070d7b0b65279e6c8215b4",
+      "source_url": "https://www.alakhbar.info/6af511fce9693a0001e8db7e",
+      "selection_difference": "v1_only",
+      "recorded_v2_reason": "no_grounded_region",
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "english",
+      "identity_sha256": "c684c1b397bbe6c2357dd7b338e885b0e5f8c42d648c08d7c94ff840b963e027",
+      "source_url": "https://www.theguardian.com/global-development/2026/nov/11/woman-in-saudi-arabia-sentenced-to-100-lashes-for-giving-birth-outside-marriage",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "english",
+      "identity_sha256": "d52ff7c67b899d1e49f242e482301b2acd362a9083a21915e0916292a6404a06",
+      "source_url": "https://www.dw.com/en/iran-classes-argentina-navy-air-force-as-terrorist-organizations/a-79916290?maca=en-rss-en-world-4025-rdf",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    },
+    {
+      "utc_date": "2026-11-12",
+      "product": "english",
+      "identity_sha256": "dd25b8aa9bb77faae9e0ceec6d6ec1b8605724d2c181f5e72ac742185bbabba6",
+      "source_url": "https://www.theguardian.com/global-development/2026/nov/11/thousands-without-shelter-lethal-cold-storm-gaza-israel-tents-displaced-people-flood",
+      "selection_difference": "v2_only",
+      "recorded_v2_reason": null,
+      "review_status": "PENDING_REVIEW",
+      "reviewer_rubric": "B128-HYBRID-1",
+      "required_checks": [
+        "source_provenance",
+        "editorial_scope",
+        "factual_grounding",
+        "relevance",
+        "translation_if_applicable",
+        "publisher_rights",
+        "independent_second_review"
+      ]
+    }
+  ],
+  "adjudication": {
+    "total": 73,
+    "accepted": 0,
+    "provisional": 0,
+    "pending": 73,
+    "independent_adjudication_verified": false
+  },
+  "weekly": {
+    "products": {
+      "english": {
+        "observed_days": 1,
+        "required_days": 7,
+        "complete_history_flag": false,
+        "pdf_rendered": true,
+        "independent_product_evidence": false
+      },
+      "arabic": {
+        "observed_days": 1,
+        "required_days": 7,
+        "complete_history_flag": false,
+        "pdf_rendered": true,
+        "independent_product_evidence": false
+      }
+    },
+    "missing_snapshot_days": {
+      "english": 6,
+      "arabic": 6
+    },
+    "verified": false,
+    "four_product_reporting_verified": false
+  },
+  "remediation": {
+    "requires_fresh_weekly_reconstruction": true,
+    "requires_independent_source_review": true,
+    "requires_translation_visual_delivery_rights_acceptance": true
+  },
+  "release_status": "HOLD",
+  "can_release": false,
+  "issues": []
+}
