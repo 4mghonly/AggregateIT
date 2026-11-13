@@ -121,9 +121,10 @@ def render_held_editions(english_plan:dict,arabic_plan:dict,*,slot_id:str,output
         empty_analysis['geopol_read']='Publisher-attributed excerpts; independent verification pending.'
     empty_analysis['market_read']=_market_readout(market_observations)
     pages=[]
-    for n,renderer in enumerate((render_p1,render_p2),1):
-        io=BytesIO();renderer(data,empty_analysis,False,io);raw=_stamp(io.getvalue())
-        target=output/f'english-no-post-{n}.png';target.write_bytes(raw)
+    from v2_recovery_english_layout import render_english_held
+    for n,target in enumerate(render_english_held(english_plan,output),1):
+        raw=_stamp(target.read_bytes())
+        target.write_bytes(raw)
         pages.append({'product':'english','page':n,'path':target.name,'sha256':sha256(raw).hexdigest()})
     brief=_render_brief(arabic_plan,{'synthetic':True,'slot_id':slot_id})
     for event in brief['events']:
