@@ -92,6 +92,7 @@ jobs:
           output=Path('recovery/output/arabic-pages')
           paths,clipped=render(brief,output)
           print('rendered_pages',len(paths),'clipped',clipped)
+          if clipped:raise SystemExit('arabic_text_clipping_detected')
           if len(paths)!=3 or any(not p.is_file() for p in paths):
               raise SystemExit('arabic_renderer_failed')
           PY
