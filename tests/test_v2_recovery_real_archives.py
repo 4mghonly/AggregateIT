@@ -11,7 +11,7 @@ class GenuineArchiveImportTests(unittest.TestCase):
     ar={"schema_version":"arabic-brief-v3","sample":False,"window_end":f"2026-11-{day:02d}T18:00:00+04:00","events":[
       {"title_ar":"تطور أمني","summary_ar":"تقرير عن تطور أمني","region":"iran","topic":"security","severity":"high","sources":[{"url":f"https://example.org/ar/{day}"}]}]}
     en={"run":f"2026-11-{day:02d}T12:00:00+00:00","events":[{"event_id":f"evt-{day}","title":"Security development",
-      "importance":"High","what_changed":"Reported development","sources":[{"url":f"https://example.org/en/{day}"}]}]}
+      "importance":"High","what_changed":"Reported development","analysis":{"assessment":"A cautious assessment of reported security developments."},"sources":[{"url":f"https://example.org/en/{day}"}]}]}
     with zipfile.ZipFile(root/f"ar-{day}.zip","w") as z:z.writestr("briefing.json",json.dumps(ar))
     with zipfile.ZipFile(root/f"en-{day}.zip","w") as z:z.writestr("run.json",json.dumps(en))
    db=root/"history.sqlite";out=root/"out"
@@ -23,6 +23,7 @@ class GenuineArchiveImportTests(unittest.TestCase):
    self.assertEqual(e["days_observed"],7)
    self.assertTrue((out/"arabic-weekly.html").exists())
    self.assertTrue((out/"english-weekly.html").exists())
+   self.assertIn("Historical model assessment (unverified)",(out/"english-weekly.html").read_text())
  def test_reject_synthetic_arabic_archive(self):
   with tempfile.TemporaryDirectory() as d:
    p=Path(d)/"briefing.json"
