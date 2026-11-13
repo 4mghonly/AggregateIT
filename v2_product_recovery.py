@@ -59,6 +59,9 @@ class ProductHistory:
           language TEXT NOT NULL, day TEXT NOT NULL, event_id TEXT NOT NULL,
           payload TEXT NOT NULL, PRIMARY KEY(language,day,event_id))""")
         self.db.execute("CREATE INDEX IF NOT EXISTS obs_day ON observations(language,day)")
+        self.db.execute("""CREATE TABLE IF NOT EXISTS edition_analysis (
+          language TEXT NOT NULL, day TEXT NOT NULL, origin TEXT NOT NULL,
+          payload TEXT NOT NULL, PRIMARY KEY(language,day,origin))""")
         self.db.commit()
     def record(self,language,day,stories):
         if language not in ("en","ar") or not isinstance(stories,list) or len(stories)>2000:
@@ -80,6 +83,28 @@ class ProductHistory:
                     raise ValueError("conflicting_historical_observation")
                 self.db.execute("INSERT OR IGNORE INTO observations VALUES(?,?,?,?)",(language,day,key,raw))
         return len(unique)
+    def record_analysis(self,language,day,origin,analysis):
+        if language not in ("en","ar") or origin not in ("arabic_v2_model_unverified","v1_model_unverified"):
+            raise ValueError("invalid_analysis_origin")
+        _day(day)
+        if not isinstance(analysis,dict):raise ValueError("invalid_analysis")
+        safe={}
+        for key,value in analysis.items():
+            if key not in ("situation_ar","implications_ar","watch_ar","developing_ar"):continue
+            if isinstance(value,str) and value.strip():safe[key]=value[:1800]
+            elif isinstance(value,list):safe[key]=[v[:500] for v in value[:6] if isinstance(v,str) and v.strip()]
+        if not safe:return
+        raw=json.dumps(safe,ensure_ascii=False,sort_keys=True)
+        with self.db:
+            prior=self.db.execute("SELECT payload FROM edition_analysis WHERE language=? AND day=? AND origin=?",
+                (language,day,origin)).fetchone()
+            if prior and prior[0]!=raw:raise ValueError("conflicting_edition_analysis")
+            self.db.execute("INSERT OR IGNORE INTO edition_analysis VALUES(?,?,?,?)",
+                (language,day,origin,raw))
+    def latest_analysis(self,language,start,end):
+        row=self.db.execute("SELECT day,origin,payload FROM edition_analysis WHERE language=? AND day>=? AND day<=? ORDER BY day DESC LIMIT 1",
+            (language,start,end)).fetchone()
+        return {"day":row[0],"origin":row[1],"content":json.loads(row[2])} if row else None
     def observations(self,language,start,end):
         if language not in ("en","ar"):raise ValueError("invalid_language")
         return [(d,json.loads(p)) for d,p in self.db.execute("SELECT day,payload FROM observations WHERE language=? AND day>=? AND day<=? ORDER BY day,event_id",(language,start,end))]
@@ -129,4 +154,5 @@ def build_weekly_intelligence(history,language,as_of,max_events=30):
     return {"language":language,"window_start":start.isoformat(),"window_end":end.isoformat(),
             "days_observed":len(days),"complete_week":len(days)==7,
             "events":events[:max_events],"total_events":len(events),
-            "analysis_scope":"source-backed changes only; no invented implications"}
+            "analysis_scope":"source-backed changes only; no invented implications",
+            "historical_model_analysis":history.latest_analysis(language,start.isoformat(),end.isoformat())}
