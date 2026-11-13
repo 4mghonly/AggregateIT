@@ -18,16 +18,17 @@ def _stamp(raw:bytes)->bytes:
     with Image.open(BytesIO(raw)) as image:
         img=image.convert('RGB')
         if img.size!=(3840,2160):raise ValueError('invalid_native_page_dimensions')
-        # Preserve the complete masthead and footer under a separate warning
-        # band. Uniform scaling avoids covering Arabic or English source text.
+        # Keep the no-post status visible without an oversized red diagnostic
+        # banner or unnecessary loss of editorial canvas.
         page=Image.new('RGB',(3840,2160),(16,29,37))
-        body=img.resize((3627,2040),Image.Resampling.LANCZOS)
-        page.paste(body,((3840-body.width)//2,120))
+        body=img.resize((3712,2080),Image.Resampling.LANCZOS)
+        page.paste(body,((3840-body.width)//2,80))
         d=ImageDraw.Draw(page)
-        d.rectangle((0,0,3839,119),fill=(100,22,22))
-        font_file='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
-        font=ImageFont.truetype(font_file,48) if Path(font_file).is_file() else ImageFont.load_default()
-        d.text((55,35),'ATTRIBUTED SOURCE TEST | UNVERIFIED | DO NOT PUBLISH',fill=(255,255,255),font=font)
+        d.rectangle((0,0,3839,79),fill=(31,49,58))
+        font_file='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+        font=ImageFont.truetype(font_file,30) if Path(font_file).is_file() else ImageFont.load_default()
+        d.text((65,22),'V2 EDITORIAL PREVIEW  /  SOURCE ATTRIBUTED  /  NOT FOR PUBLICATION',
+               fill=(221,224,223),font=font)
         buffer=BytesIO();page.save(buffer,'PNG');return buffer.getvalue()
 
 
