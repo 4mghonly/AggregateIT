@@ -91,6 +91,18 @@ class B119AuditTests(unittest.TestCase):
         self.assertFalse(result['gates']['v2_weekly_both_languages_seven_real_days'])
         self.assertFalse(result['can_release'])
 
+    def test_b128_hybrid_evidence_gap_is_visible(self):
+        inputs=list(fixtures())
+        hybrid={'schema':'aggregateit-v2-b128-hybrid-closure/1',
+                'candidate_sha':'b67a9e4115f4f88049716d608e54a6d06ef5f15f',
+                'adjudication':{'total':73,'accepted':0,'pending':73,'independent_adjudication_verified':False},
+                'weekly':{'verified':False,'missing_snapshot_days':{'english':6,'arabic':6}},
+                'release_status':'HOLD','can_release':False,'issues':[]}
+        result=assess(*inputs,candidate_sha=hybrid['candidate_sha'],b128_hybrid=hybrid)
+        self.assertTrue(result['gates']['b128_hybrid_gap_evidence_reconciled'])
+        self.assertFalse(result['gates']['editorial_disagreements_independently_adjudicated'])
+        self.assertFalse(result['gates']['v2_weekly_both_languages_seven_real_days'])
+
     def test_missing_or_conflicting_evidence_fails_closed(self):
         a=assess({},{},{},{},{},{})
         self.assertFalse(any(a['gates'].values()))
