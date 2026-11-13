@@ -48,7 +48,9 @@ def import_english_runs(paths,database,output_dir):
         imported=sum(h.record("en",day,list(rows.values())) for day,rows in sorted(by_day.items()))
         report=build_weekly_intelligence(h,"en",max(by_day))
         out=Path(output_dir);out.mkdir(parents=True,exist_ok=True)
-        (out/"english-weekly.html").write_text(render_recovery_html(report),encoding="utf-8")
+        html=render_recovery_html(report)
+        html=html.replace("<main>","<main><aside style='padding:16px;border:2px solid #a16b45'>V1 comparison baseline — not V2 English editorial history</aside>",1)
+        (out/"english-weekly.html").write_text(html,encoding="utf-8")
         return {"imported":imported,"days_observed":report["days_observed"],
                 "complete_week":report["complete_week"],"events":report["total_events"]}
     finally:h.close()
