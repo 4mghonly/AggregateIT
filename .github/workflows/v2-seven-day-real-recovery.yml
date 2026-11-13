@@ -74,6 +74,15 @@ jobs:
           import json,zipfile
           from pathlib import Path
           from arabic_newsletter.render import render
+          from arabic_layout.render_engine import Canvas
+          original_text=Canvas.text
+          def inspect_clipping(self,text,box,*args,**kwargs):
+              before=self.clipped
+              result=original_text(self,text,box,*args,**kwargs)
+              if self.clipped>before:
+                  print('CLIPPED_BOX',box,'chars',len(str(text)))
+              return result
+          Canvas.text=inspect_clipping
           snapshots=[]
           for path in Path('recovery/input/ar').glob('*.zip'):
               with zipfile.ZipFile(path) as z:
