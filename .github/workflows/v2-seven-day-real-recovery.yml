@@ -69,14 +69,14 @@ jobs:
           PY
       - name: Import seven-day real bilingual evidence
         run: |
-          python v2_recovery_arabic_archive.py recovery/input/ar/*.zip --database recovery/history.sqlite --output-dir recovery/output
+          python v2_recovery_arabic_archive.py recovery/input/ar/*.zip --database recovery/arabic-v2-history.sqlite --output-dir recovery/output
           python v2_recovery_english_archive.py recovery/input/en/*.zip --database recovery/history.sqlite --output-dir recovery/output
       - name: Gate genuine seven-day bilingual coverage
         run: |
           python - <<'PY'
           import sqlite3
-          db=sqlite3.connect('recovery/history.sqlite')
-          for language in ('en','ar'):
+          for language,filename in (('en','english-v1-baseline.sqlite'),('ar','arabic-v2-history.sqlite')):
+              db=sqlite3.connect('recovery/'+filename)
               rows=db.execute('SELECT day,COUNT(*) FROM observations WHERE language=? GROUP BY day ORDER BY day',(language,)).fetchall()
               print(language,'daily evidence',rows)
               if len(rows)!=7 or any(count<1 for day,count in rows):
@@ -117,6 +117,7 @@ jobs:
           path: |
             recovery/output/*.html
             recovery/output/arabic-pages/*.png
-            recovery/history.sqlite
+            recovery/*-history.sqlite
+            recovery/english-v1-baseline.sqlite
           retention-days: 30
           if-no-files-found: error
