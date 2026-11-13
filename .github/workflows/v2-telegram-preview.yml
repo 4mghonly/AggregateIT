@@ -2,7 +2,7 @@ name: V2 Telegram bilingual preview (isolated test)
 on:
   workflow_dispatch:
   push:
-    branches: ['rebuild/aggregateit-v2']
+    branches: ['audit/b119-evidence-reconciliation']
     paths: ['.github/workflows/v2-telegram-preview.yml']
 permissions:
   contents: read
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: rebuild/aggregateit-v2
+          ref: audit/b119-evidence-reconciliation
           persist-credentials: false
       - uses: actions/setup-python@v6
         with:
