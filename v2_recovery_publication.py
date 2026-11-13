@@ -65,4 +65,4 @@ def render_recovery_html(report):
             'main{max-width:900px;margin:auto;padding:30px}article{background:white;border:1px solid #ddd;'
             'padding:24px;margin:16px 0;border-radius:8px}h1,h2{line-height:1.3}a{color:#176175}'
             'li{padding:5px 0}header{border-bottom:3px solid #b59b70}</style></head><body><main>'
-            '<header><h1>'+title+'</h1><p>'+coverage+'</p></header>'+body+'</main></body></html>')
+            '<header><h1>'+title+'</h1><p>'+coverage+'</p></header>'+executive+body+'</main></body></html>')
