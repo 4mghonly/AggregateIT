@@ -3,7 +3,6 @@ import json,os
 from v2_r2_http_transport import make_http_caller
 from v2_r2_model_adapter import make_analysis_provider
 from v2_b46_live_editorial_runner import run
-from v2_r2_telegram_evaluation import send_report
 
 def evaluate():
     configs={}
@@ -25,7 +24,7 @@ def evaluate():
                 status="STRUCTURAL_PASS_UNVERIFIED" if candidates else "ABSTAINED"
                 if role=="primary":accepted=candidates
             except Exception as exc:
-                status="HOLD_"+type(exc).__name__
+                status="HOLD_"+type(exc).__name__+("_"+str(exc) if isinstance(exc,ValueError) and str(exc).startswith(("invalid_analysis_","untrusted_analysis_","duplicate_analysis_")) else "")
             outcomes[role]["languages"][product]=status
             calls.append({"role":role,"product":product,"status":status})
         return accepted
@@ -39,7 +38,9 @@ def evaluate():
         counts={"english":0,"arabic":0}
         provider_status={}
         collection_status="HOLD_"+type(exc).__name__
+    complete=collection_status=="CAPTURED" and all(outcomes[role]["languages"].get(lang)=="STRUCTURAL_PASS_UNVERIFIED" for role in outcomes for lang in ("english","arabic"))
     return {"schema":"aggregateit-v2-r2-real-publisher-acceptance/1",
+        "structural_gate_pass":complete,
         "results":outcomes,"publisher_story_counts":counts,"provider_status":provider_status,
         "collection_status":collection_status,"model_calls":len(calls),
         "real_publisher_evidence_evaluated":bool(calls),
@@ -50,3 +51,5 @@ if __name__=="__main__":
     # Existing Telegram function describes fixtures, so do not mislabel real evidence.
     # This gate is recorded in Actions logs only until a truthful report format exists.
     print(json.dumps(report,ensure_ascii=False,sort_keys=True))
+    if not report["structural_gate_pass"]:
+        raise SystemExit(1)
