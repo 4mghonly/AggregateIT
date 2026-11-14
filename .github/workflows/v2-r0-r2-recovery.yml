@@ -27,6 +27,13 @@ on:
       - 'v2_b47_four_product_held.py'
       - '.github/workflows/v2-r0-r2-recovery.yml'
   workflow_dispatch:
+    inputs:
+      acceptance_gate:
+        description: 'Which R2 acceptance gate to execute'
+        required: false
+        default: 'publisher'
+        type: choice
+        options: [publisher, fixture]
 permissions:
   contents: read
 jobs:
@@ -63,7 +70,7 @@ jobs:
       - name: R2 model-response-to-edition acceptance (offline)
         run: python -m unittest discover -s tests -p 'test_v2_r2_end_to_end_model_acceptance.py' -v
       - name: One-call real V2 model secret acceptance (manual only)
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' && inputs.acceptance_gate == 'fixture'
         env:
           V2_LLM_API_KEY: ${{ secrets.V2_LLM_API_KEY }}
           V2_LLM_BASE_URL: ${{ secrets.V2_LLM_BASE_URL }}
