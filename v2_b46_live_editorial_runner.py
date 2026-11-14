@@ -21,7 +21,9 @@ def run(*,render_native=False,render_four_products=False,
         rss_snapshots=None,observed_at=None,visual_archive_dir=None,fetch=None,
         market_snapshot=None,compare_same_capture=False,quality_preview=False,
         recovery_history_path=None,recovery_output_dir=None,
-        editorial_max_items=6):
+        editorial_max_items=6,analysis_provider=None):
+    if analysis_provider is not None and not callable(analysis_provider):
+        raise ValueError('invalid_analysis_provider')
     if type(editorial_max_items) is not int or not 1<=editorial_max_items<=16:
         raise ValueError('invalid_editorial_capacity')
     if rss_snapshots is not None:
@@ -180,7 +182,8 @@ def run(*,render_native=False,render_four_products=False,
     from v2_market_bridge import convert_v1_market_pulse
     markets=convert_v1_market_pulse(market_snapshot,as_of=observed)
     result=compile_captured_articles(captures,as_of=observed,slot_id=slot,
-                                     market_observations=markets,editorial_max_items=editorial_max_items)
+                                     market_observations=markets,editorial_max_items=editorial_max_items,
+                                     analysis_provider=analysis_provider)
     recovery={"status":"NOT_REQUESTED"}
     if recovery_history_path is not None or recovery_output_dir is not None:
         if recovery_history_path is None or recovery_output_dir is None:
@@ -293,7 +296,7 @@ if __name__=='__main__':
     a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');a.add_argument('--same-capture',action='store_true');a.add_argument('--quality-preview',action='store_true');a.add_argument('--visual-archive-dir',type=Path);a.add_argument('--recovery-history-path',type=Path);a.add_argument('--recovery-output-dir',type=Path);a.add_argument('--editorial-max-items',type=int,default=6);args=a.parse_args()
     result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir,compare_same_capture=args.same_capture,quality_preview=args.quality_preview,
                recovery_history_path=args.recovery_history_path,recovery_output_dir=args.recovery_output_dir,
-               editorial_max_items=args.editorial_max_items)
+               editorial_max_items=args.editorial_max_items,analysis_provider=analysis_provider)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
     if result["b120_weekly_source_roster"].get("schema")=="aggregateit-v2-b120-source-roster-day/1":
