@@ -13,7 +13,7 @@ def _timestamp(x):
     if d.utcoffset() is None:raise ValueError('naive_edition_slot')
     return d.isoformat()
 
-def compile_daily(*, editorial_plan, critic_report=None, market_observations=None):
+def compile_daily(*, editorial_plan, critic_report=None, market_observations=None, analysis_candidates=None):
     p=editorial_plan
     if not isinstance(p,dict) or p.get('schema')!='aggregateit-editorial-plan/1' or p.get('delivery_authorized') is not False:
         raise ValueError('untrusted_editorial_plan')
@@ -39,6 +39,33 @@ def compile_daily(*, editorial_plan, critic_report=None, market_observations=Non
                      'source_url':evidence['source_url'],'quote':evidence['quote'],
                      'change':item.get('change','unknown_no_baseline'),
                      'assessment':None,'verification':'publisher_attributed_unverified'})
+    if analysis_candidates is not None:
+        if not isinstance(analysis_candidates,list) or len(analysis_candidates)>30:
+            raise ValueError('invalid_analysis_candidates')
+        by_event={r['event_id']:r for r in rows}
+        seen_analysis=set()
+        for candidate in analysis_candidates:
+            if not isinstance(candidate,dict):raise ValueError('invalid_analysis_candidate')
+            event_id=candidate.get('event_id')
+            if event_id not in by_event:raise ValueError('analysis_event_not_in_edition')
+            if event_id in seen_analysis:raise ValueError('duplicate_analysis_event')
+            seen_analysis.add(event_id)
+            statement=candidate.get('assessment')
+            if not isinstance(statement,str) or not statement.strip() or len(statement)>1800:
+                raise ValueError('invalid_analysis_assessment')
+            confidence=candidate.get('confidence')
+            if confidence not in ('low','medium','high'):raise ValueError('invalid_analysis_confidence')
+            evidence_ids=candidate.get('evidence_excerpt_ids')
+            if not isinstance(evidence_ids,list) or not evidence_ids or any(not isinstance(e,str) for e in evidence_ids):
+                raise ValueError('invalid_analysis_evidence')
+            if set(evidence_ids)!={by_event[event_id]['excerpt_id']}:
+                raise ValueError('analysis_evidence_not_in_edition')
+            by_event[event_id]['assessment']=statement.strip()
+            by_event[event_id]['analysis_status']='evidence_referenced_unverified'
+            by_event[event_id]['analysis_confidence']=confidence
+            by_event[event_id]['analysis_evidence_excerpt_ids']=list(evidence_ids)
+    for row in rows:
+        row.setdefault('analysis_status','abstained')
     if product=='arabic' and market_observations:
         raise ValueError('arabic_financial_section_forbidden')
     if product=='english' and market_observations is None:market_observations=[]
