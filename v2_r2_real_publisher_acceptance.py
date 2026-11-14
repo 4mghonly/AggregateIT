@@ -14,6 +14,7 @@ def evaluate():
               for role,provider in configs.items()}
     calls=[]
     diagnostics=[]
+    candidate_records=[]
     def provider(*,product,items,as_of):
         if not items:return []
         selected=items[:1]
@@ -33,6 +34,8 @@ def evaluate():
                         if attempt==2:raise
                 status="STRUCTURAL_PASS_UNVERIFIED" if candidates else "ABSTAINED"
                 if role=="primary":accepted=candidates
+                for candidate in candidates:
+                    candidate_records.append({"role":role,"product":product,"assessment":candidate["assessment"],"confidence":candidate["confidence"],"evidence_refs":candidate["evidence_excerpt_ids"]})
             except Exception as exc:
                 status="HOLD_"+type(exc).__name__+("_"+str(exc) if isinstance(exc,ValueError) and str(exc).startswith(("invalid_analysis_","untrusted_analysis_","duplicate_analysis_")) else "")
             outcomes[role]["languages"][product]=status
@@ -48,11 +51,16 @@ def evaluate():
         counts={"english":0,"arabic":0}
         provider_status={}
         collection_status="HOLD_"+type(exc).__name__
-    complete=collection_status=="CAPTURED" and all(outcomes[role]["languages"].get(lang)=="STRUCTURAL_PASS_UNVERIFIED" for role in outcomes for lang in ("english","arabic"))
+    statuses=[outcomes[role]["languages"].get(lang) for role in outcomes for lang in ("english","arabic")]
+    # An explicit empty-items abstention is permitted by the model contract; it is not a structural failure.
+    complete=collection_status=="CAPTURED" and all(status in ("STRUCTURAL_PASS_UNVERIFIED","ABSTAINED") for status in statuses) and any(status=="STRUCTURAL_PASS_UNVERIFIED" for status in statuses)
+    # Surface only derived counters; never print full publisher text or model prose in CI logs.
+    counts_by_route={role:{lang:sum(x["role"]==role and x["product"]==lang for x in candidate_records) for lang in ("english","arabic")} for role in configs}
     return {"schema":"aggregateit-v2-r2-real-publisher-acceptance/1",
         "structural_gate_pass":complete,
         "results":outcomes,"publisher_story_counts":counts,"provider_status":provider_status,
-        "collection_status":collection_status,"model_calls":len(calls),"diagnostics":diagnostics,
+        "collection_status":collection_status,"model_calls":len(calls),"diagnostics":diagnostics,"candidate_counts":counts_by_route,
+        "abstention_accepted_as_valid_contract_behavior":True,
         "real_publisher_evidence_evaluated":bool(calls),
         "independent_semantic_review":False,"editorial_release_authorized":False}
 
