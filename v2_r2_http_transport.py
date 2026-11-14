@@ -29,7 +29,7 @@ def make_http_caller(*,base_url,model,api_key,transport=None):
         response=send(endpoint,headers={"Authorization":"Bearer "+api_key,
             "Content-Type":"application/json"},json={"model":model,
             "messages":[{"role":"system","content":system},{"role":"user","content":payload}],
-            "temperature":0,"max_tokens":1200,"response_format":{"type":"json_object"}},
+            "temperature":0,"max_tokens":2400,"response_format":{"type":"json_object"}},
             timeout=(7,35),allow_redirects=False)
         try:
             if response.status_code!=200:raise ValueError("model_http_failure")
