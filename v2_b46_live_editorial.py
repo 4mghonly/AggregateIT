@@ -76,9 +76,11 @@ def _verify_source_candidate(item):
 def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
                               previous_versions:dict|None=None, prior_snapshot:dict|None=None,
                               market_observations:list[dict]|None=None, diagnose_capture:bool=False,
-                              editorial_max_items:int=6)->dict:
+                              editorial_max_items:int=6, analysis_provider=None)->dict:
     if type(editorial_max_items) is not int or not 1<=editorial_max_items<=16:
         raise ValueError('invalid_editorial_capacity')
+    if analysis_provider is not None and not callable(analysis_provider):
+        raise ValueError('invalid_analysis_provider')
     now=_stamp(as_of);_stamp(slot_id)
     if type(diagnose_capture) is not bool:raise ValueError('invalid_capture_diagnostics_flag')
     if not isinstance(captures,list) or len(captures)>64:
@@ -181,7 +183,17 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
                  max_items=editorial_max_items)
         critic=build_report([],ledger=ledger,as_of=as_of,verified_families={},
                     verified_languages={},product=product,cadence='daily',slot_id=slot_id)
+        analysis_candidates=None
+        if analysis_provider is not None and plan['items']:
+            try:
+                analysis_candidates=analysis_provider(product=product,items=plan['items'],as_of=as_of)
+            except Exception:
+                # A failed model must not bypass evidence or publishing gates.
+                analysis_candidates=None
+            if analysis_candidates is not None and not isinstance(analysis_candidates,list):
+                raise ValueError('invalid_analysis_provider_output')
         daily=compile_daily(editorial_plan=plan,critic_report=critic,
+                            analysis_candidates=analysis_candidates,
                             market_observations=(market_observations or []) if product=='english' else [])
         products[product]={'story_count':len(daily['stories']),'held_reasons':plan['held_reasons'],
             'represented_regions':plan['represented_regions'],
