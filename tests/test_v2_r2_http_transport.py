@@ -20,6 +20,17 @@ class HttpTransportTests(unittest.TestCase):
   self.assertEqual(caller("system","{}"),'{"items":[]}')
   self.assertEqual(seen[0][1]["timeout"],(7,35))
   self.assertFalse(seen[0][1]["allow_redirects"])
+ def test_output_budget_allows_complete_structured_response(self):
+  class Response:
+   status_code=200
+   content=b'{"choices":[{"finish_reason":"stop","message":{"content":"{\\\"items\\\":[]}"}}]}'
+   def json(self):return json.loads(self.content)
+   def close(self):pass
+  def post(url,**kwargs):
+   self.assertGreaterEqual(kwargs["json"]["max_tokens"],2400)
+   return Response()
+  caller=make_http_caller(base_url="https://api.example.com/v1",model="test",api_key="secret",transport=post)
+  self.assertEqual(caller("system","{}"),'{"items":[]}')
  def test_disallows_embedded_credentials(self):
   with self.assertRaisesRegex(ValueError,"invalid_model_endpoint"):
    make_http_caller(base_url="https://user:pass@api.example.com/v1",model="test",api_key="secret")
