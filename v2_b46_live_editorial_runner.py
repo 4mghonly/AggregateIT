@@ -104,7 +104,7 @@ def run(*,render_native=False,render_four_products=False,
             for candidate in eligible_headlines:
                 if (row['article_attempts'] >= (4 if quality_preview else 6)
                     or row['eligible_articles'] >= (3 if quality_preview else 3)
-                    or len([x for x in captures if x['product']==product])>=10):
+                    or len([x for x in captures if x['product']==product])>=max(10,editorial_max_items)):
                     break
                 url=candidate['article_url']
                 from urllib.parse import urlsplit
