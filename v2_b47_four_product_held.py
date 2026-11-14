@@ -17,7 +17,13 @@ from v2_b47_weekly_pdf_preview import generate_held_weekly_pdf
 from v2_weekly_discord import bundle_weekly_pdf
 
 def compose_held_products(editorial:dict, *, output_dir:Path, as_of:str,
-                          pulse_snapshot:dict|None=None,macro_snapshot:dict|None=None)->dict:
+                          pulse_snapshot:dict|None=None,macro_snapshot:dict|None=None,
+                          weekly_history:dict|None=None)->dict:
+    if weekly_history is not None and (not isinstance(weekly_history,dict)
+        or set(weekly_history)!={'english','arabic'}
+        or any(not isinstance(weekly_history[p],list) or len(weekly_history[p])>59
+               for p in ('english','arabic'))):
+        raise ValueError('invalid_weekly_history')
     if (not isinstance(editorial,dict)
         or editorial.get('schema')!='aggregateit-v2-b46-article-editorial/1'
         or editorial.get('can_send') is not False
@@ -70,7 +76,10 @@ def compose_held_products(editorial:dict, *, output_dir:Path, as_of:str,
             'regions_covered':represented,'coverage_gaps':gaps,
             'real_source_backed':True,'market_values_verified':False,
             'translation_verified':False,'discord_sent':False,'can_release':False}
-        report=rollup_week([plan],product=product,as_of=as_of,market_snapshots=[])
+        # Historical plans must be real, separately dated, source-bound daily plans.
+        # rollup_week independently validates their evidence and seven-day window.
+        history=(weekly_history or {}).get(product,[])
+        report=rollup_week([*history,plan],product=product,as_of=as_of,market_snapshots=[])
         html=render_weekly_html(report)
         if not (f'lang="{"en" if product=="english" else "ar"}"' in html
                and f'dir="{"ltr" if product=="english" else "rtl"}"' in html):
