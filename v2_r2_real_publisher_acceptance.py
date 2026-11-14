@@ -13,6 +13,7 @@ def evaluate():
     outcomes={role:{"status":"EVALUATED" if provider else "HOLD_MISSING_CONFIG","languages":{}}
               for role,provider in configs.items()}
     calls=[]
+    diagnostics=[]
     def provider(*,product,items,as_of):
         if not items:return []
         selected=items[:1]
@@ -20,13 +21,22 @@ def evaluate():
         for role,adapter in configs.items():
             if adapter is None:continue
             try:
-                candidates=adapter(product=product,items=selected,as_of=as_of)
+                candidates=[]
+                for attempt in (1,2):
+                    calls.append({"role":role,"product":product,"attempt":attempt})
+                    try:
+                        candidates=adapter(product=product,items=selected,as_of=as_of)
+                        break
+                    except ValueError as error:
+                        code=str(error)
+                        diagnostics.append({"role":role,"product":product,"attempt":attempt,"code":code if code.startswith(("invalid_analysis_","untrusted_analysis_","duplicate_analysis_","invalid_model_","model_")) else "unclassified_value_error"})
+                        if attempt==2:raise
                 status="STRUCTURAL_PASS_UNVERIFIED" if candidates else "ABSTAINED"
                 if role=="primary":accepted=candidates
             except Exception as exc:
                 status="HOLD_"+type(exc).__name__+("_"+str(exc) if isinstance(exc,ValueError) and str(exc).startswith(("invalid_analysis_","untrusted_analysis_","duplicate_analysis_")) else "")
             outcomes[role]["languages"][product]=status
-            calls.append({"role":role,"product":product,"status":status})
+
         return accepted
     try:
         result=run(analysis_provider=provider,editorial_max_items=3,quality_preview=True)
@@ -42,7 +52,7 @@ def evaluate():
     return {"schema":"aggregateit-v2-r2-real-publisher-acceptance/1",
         "structural_gate_pass":complete,
         "results":outcomes,"publisher_story_counts":counts,"provider_status":provider_status,
-        "collection_status":collection_status,"model_calls":len(calls),
+        "collection_status":collection_status,"model_calls":len(calls),"diagnostics":diagnostics,
         "real_publisher_evidence_evaluated":bool(calls),
         "independent_semantic_review":False,"editorial_release_authorized":False}
 
