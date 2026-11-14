@@ -27,7 +27,8 @@ def rollup_week(daily_plans, *,product,as_of,market_snapshots=None,max_stories=3
         when=_dt(edition.get('as_of'))
         if not start<=when<=now:raise ValueError('daily_plan_outside_week')
         if not isinstance(edition.get('items'),list) or len(edition['items'])>30:raise ValueError('invalid_daily_items')
-        days.add(when.date().isoformat())
+        if edition['items']:
+            days.add(when.date().isoformat())
         for item in edition['items']:
             if not isinstance(item,dict) or any(not isinstance(item.get(k),str) or not item[k] for k in ('event_id','version_id','region')):
                 raise ValueError('invalid_weekly_event')
@@ -82,7 +83,8 @@ def rollup_week(daily_plans, *,product,as_of,market_snapshots=None,max_stories=3
                             'change_pct':round(change,3) if change is not None else None})
     represented=sorted({s['region'] for s in stories})
     return {'schema':'aggregateit-v2-weekly-rollup/1','product':product,'as_of':as_of,
-            'window_days':7,'days_with_snapshots':len(days),'unique_events':len(stories),
+            'window_days':7,'days_with_snapshots':len(days),
+            'complete_seven_day_history':len(days)==7,'unique_events':len(stories),
             'stories':stories[:max_stories],'omitted_over_budget':max(0,len(stories)-max_stories),
             'regions_covered':represented,'regions_uncovered':sorted(REGIONS-set(represented)) if product=='arabic' else [],
             'market_changes':markets,'analysis_status':'requires_independent_source_and_editorial_verification',
