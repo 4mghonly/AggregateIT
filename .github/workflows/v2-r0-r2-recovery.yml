@@ -13,6 +13,8 @@ on:
       - 'tests/test_v2_r2_live_analysis_wiring.py'
       - 'tests/test_v2_r2_provider_failure_diagnostics.py'
       - 'tests/test_v2_r2_metrics_truth.py'
+      - 'tests/test_v2_r7_history_contract.py'
+      - 'v2_b47_four_product_held.py'
       - '.github/workflows/v2-r0-r2-recovery.yml'
   workflow_dispatch:
 permissions:
@@ -38,5 +40,7 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_v2_r2_provider_failure_diagnostics.py' -v
       - name: R2 metrics truthfulness regression
         run: python -m unittest discover -s tests -p 'test_v2_r2_metrics_truth.py' -v
+      - name: R7 source-bound history regression
+        run: python -m unittest discover -s tests -p 'test_v2_r7_history_contract.py' -v
       - name: Syntax check affected modules
         run: python -m py_compile v2_b46_live_editorial_runner.py v2_b46_live_editorial.py v2_editorial.py v2_product_compiler.py
