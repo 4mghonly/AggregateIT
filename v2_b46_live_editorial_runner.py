@@ -293,7 +293,17 @@ def run(*,render_native=False,render_four_products=False,
         'can_release':False}
 if __name__=='__main__':
     import argparse
-    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');a.add_argument('--same-capture',action='store_true');a.add_argument('--quality-preview',action='store_true');a.add_argument('--visual-archive-dir',type=Path);a.add_argument('--recovery-history-path',type=Path);a.add_argument('--recovery-output-dir',type=Path);a.add_argument('--editorial-max-items',type=int,default=6);args=a.parse_args()
+    a=argparse.ArgumentParser();a.add_argument('--output',type=Path,required=True);a.add_argument('--render-held',action='store_true');a.add_argument('--four-products',action='store_true');a.add_argument('--same-capture',action='store_true');a.add_argument('--quality-preview',action='store_true');a.add_argument('--visual-archive-dir',type=Path);a.add_argument('--recovery-history-path',type=Path);a.add_argument('--recovery-output-dir',type=Path);a.add_argument('--editorial-max-items',type=int,default=6);a.add_argument('--analysis-model');a.add_argument('--analysis-base-url');args=a.parse_args()
+    analysis_provider=None
+    if args.analysis_model or args.analysis_base_url:
+        if not (args.analysis_model and args.analysis_base_url):
+            a.error('both --analysis-model and --analysis-base-url are required')
+        import os
+        from v2_r2_http_transport import make_http_caller
+        from v2_r2_model_adapter import make_analysis_provider
+        caller=make_http_caller(base_url=args.analysis_base_url,model=args.analysis_model,
+            api_key=os.environ.get('AGGREGATEIT_ANALYSIS_API_KEY',''))
+        analysis_provider=make_analysis_provider(caller=caller) if caller else None
     result=run(render_native=args.render_held,render_four_products=args.four_products,visual_archive_dir=args.visual_archive_dir,compare_same_capture=args.same_capture,quality_preview=args.quality_preview,
                recovery_history_path=args.recovery_history_path,recovery_output_dir=args.recovery_output_dir,
                editorial_max_items=args.editorial_max_items,analysis_provider=analysis_provider)
