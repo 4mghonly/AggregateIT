@@ -49,3 +49,9 @@ The inventory of the writable branch includes 623 entries and 397 Python files. 
 
 ## Exit criteria
 A green test suite is necessary but insufficient. Each batch needs reproducible test evidence and source-matched editorial acceptance. R0–R2 remain open until real analytical output has been inspected, not merely because configuration tests pass.
+
+## R2 resumed implementation checkpoint (2026-11-14)
+- Added optional `analysis_candidates` to `v2_product_compiler.compile_daily` with strict event ID, excerpt ID, confidence, nonempty statement and duplicate controls.
+- Accepted analytical text is explicitly labeled `evidence_referenced_unverified` and `content_truth_verified=False`, `delivery_authorized=False` remain invariant. This is **not** independent corroboration or verification of the model's factual content.
+- No candidate means `analysis_status=abstained`, rather than generating unsupported filler.
+- Added five R2 contract tests and dedicated CI. The model inference adapter, cross-excerpt validation, real model calls and genuine rendered analysis are still outstanding. Do not characterize this contract as complete R2.
