@@ -177,6 +177,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
     annotations={p:[row for row in rows if row['event_id'] in visible_ids]
                  for p,rows in annotations.items()}
     products={}
+    analysis_provider_status={}
     for product in ('english','arabic'):
         plan=plan_edition(ledger=ledger,annotations=annotations[product],product=product,
                  slot_id=slot_id,as_of=as_of,previous_versions=operator_prior['versions'] if operator_prior is not None else None,
@@ -184,12 +185,15 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
         critic=build_report([],ledger=ledger,as_of=as_of,verified_families={},
                     verified_languages={},product=product,cadence='daily',slot_id=slot_id)
         analysis_candidates=None
+        analysis_provider_status[product]='not_configured' if analysis_provider is None else 'no_eligible_stories'
         if analysis_provider is not None and plan['items']:
             try:
                 analysis_candidates=analysis_provider(product=product,items=plan['items'],as_of=as_of)
+                analysis_provider_status[product]='candidates_received' if analysis_candidates else 'provider_abstained'
             except Exception:
                 # A failed model must not bypass evidence or publishing gates.
                 analysis_candidates=None
+                analysis_provider_status[product]='provider_error_abstained'
             if analysis_candidates is not None and not isinstance(analysis_candidates,list):
                 raise ValueError('invalid_analysis_provider_output')
         daily=compile_daily(editorial_plan=plan,critic_report=critic,
@@ -207,7 +211,8 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
           'region':r['region'],'source_id':r['source_id']} for r in event_rows])
     history_review=event_evolution({r['event_id']:r['version_id'] for r in event_rows},
                         operator_prior['versions'] if operator_prior is not None else None)
-    output={'schema':'aggregateit-v2-b46-article-editorial/1','captured_article_count':len(captures),
+    output={'schema':'aggregateit-v2-b46-article-editorial/1',
+            'analysis_provider_status':analysis_provider_status,'captured_article_count':len(captures),
             'admitted_articles':len(accepted),'receipts':accepted,'held_reasons':dict(held),
             'ledger_counters':ledger.counters(),'products':products,
             'previous_versions_present':previous_versions is not None,
