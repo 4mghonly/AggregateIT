@@ -66,3 +66,10 @@ A green test suite is necessary but insufficient. Each batch needs reproducible 
 ### R7 source-bound history input checkpoint (2026-11-14)
 
 `compose_held_products` now accepts optional `weekly_history={'english': [...], 'arabic': [...]}`. Each list contains previously captured daily editorial plans, not generated or fabricated snapshots. The weekly rollup validates plan schema, source excerpt references, language, date window, and counts distinct observation dates. When history is missing, the original single-day incomplete-week status remains. This is an input contract, **not** proof that seven genuine days have been captured. All daily/weekly packets remain held and unsendable. R0–R8 final acceptance remains open.
+
+## R2 live publisher acceptance checkpoint (2026-11-14)
+- Live publisher capture yielded three English and three Arabic stories; primary and fallback configured routes both reached the inference endpoint. Structural response outcomes varied across repeated runs; an explicit empty-items abstention is permitted by the adapter contract and must not be misclassified as a transport failure.
+- Earlier real-publisher run 43606785375: primary English/Arabic pass, fallback Arabic pass, fallback English ValueError. Run 43607533628: primary English ValueError, fallback English pass, both Arabic pass. Run 43607816630: three structural passes and fallback Arabic abstention; strict non-abstention gate failed. These runs do NOT demonstrate reproducible semantic quality.
+- The held runner uses only one selected item per language per model; passing this limited probe cannot establish comprehensive article coverage, contradiction handling, or editorial equivalence. Analysis candidates remain evidence-referenced but unverified.
+- R2 connectivity and provider integration are implemented; full R2 semantic/editorial acceptance remains OPEN pending independent assessment of genuine model prose against source excerpts, Arabic language quality, and rendered edition verification. Do not equate green workflow status with this sign-off.
+- No production delivery authorized. Protected branches unchanged.
