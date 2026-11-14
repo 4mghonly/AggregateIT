@@ -1,0 +1,26 @@
+name: V2 R0-R2 recovery acceptance
+on:
+  push:
+    branches: [audit/b119-evidence-reconciliation]
+    paths:
+      - 'v2_b46_live_editorial.py'
+      - 'v2_editorial.py'
+      - 'v2_product_compiler.py'
+      - 'tests/test_v2_r1_editorial_capacity.py'
+      - '.github/workflows/v2-r0-r2-recovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  editorial-capacity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: R1 regression contract
+        run: python -m unittest discover -s tests -p 'test_v2_r1_editorial_capacity.py' -v
+      - name: Syntax check affected modules
+        run: python -m py_compile v2_b46_live_editorial.py v2_editorial.py v2_product_compiler.py
