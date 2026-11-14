@@ -61,3 +61,8 @@ A green test suite is necessary but insufficient. Each batch needs reproducible 
 - Added regression test `tests/test_v2_r1_runner_capacity.py` and included it in `v2-r0-r2-recovery.yml`.
 - R2: evidence-bound candidate compiler remains deliberately non-publishing; actual model generation, claim verification and renderer integration remain open.
 - R3–R8: **NOT COMPLETE**. No user-facing Telegram samples or production sends were authorized or triggered by this batch.
+
+
+### R7 source-bound history input checkpoint (2026-11-14)
+
+`compose_held_products` now accepts optional `weekly_history={'english': [...], 'arabic': [...]}`. Each list contains previously captured daily editorial plans, not generated or fabricated snapshots. The weekly rollup validates plan schema, source excerpt references, language, date window, and counts distinct observation dates. When history is missing, the original single-day incomplete-week status remains. This is an input contract, **not** proof that seven genuine days have been captured. All daily/weekly packets remain held and unsendable. R0–R8 final acceptance remains open.
