@@ -282,4 +282,5 @@ def metrics_only(result):
             'model_call_status':('not_configured' if all(v=='not_configured' for v in result.get('analysis_provider_status',{}).values()) else
                                  'no_eligible_stories' if all(v=='no_eligible_stories' for v in result.get('analysis_provider_status',{}).values()) else
                                  'provider_invoked_or_abstained'),
-            'model_called':any(v in ('candidates_received','provider_abstained','provider_error_abstained') for v in result.get('analysis_provider_status',{}).values()),'discord_sent':False,'can_release':False}
+            'analysis_provider_invoked':any(v in ('candidates_received','provider_abstained','provider_error_abstained') for v in result.get('analysis_provider_status',{}).values()),
+            'model_called':False,'discord_sent':False,'can_release':False}
