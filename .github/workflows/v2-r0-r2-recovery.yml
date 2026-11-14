@@ -18,6 +18,8 @@ on:
       - 'v2_weekly_rollup.py'
       - 'v2_r2_model_adapter.py'
       - 'tests/test_v2_r2_model_adapter.py'
+      - 'v2_r2_http_transport.py'
+      - 'tests/test_v2_r2_http_transport.py'
       - 'v2_b47_four_product_held.py'
       - '.github/workflows/v2-r0-r2-recovery.yml'
   workflow_dispatch:
@@ -50,5 +52,7 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_v2_r7_observation_days.py' -v
       - name: R2 provider-neutral model adapter regression
         run: python -m unittest discover -s tests -p 'test_v2_r2_model_adapter.py' -v
+      - name: R2 HTTPS transport regression
+        run: python -m unittest discover -s tests -p 'test_v2_r2_http_transport.py' -v
       - name: Syntax check affected modules
         run: python -m py_compile v2_b46_live_editorial_runner.py v2_b46_live_editorial.py v2_editorial.py v2_product_compiler.py
