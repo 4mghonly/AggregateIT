@@ -75,7 +75,10 @@ def _verify_source_candidate(item):
 
 def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
                               previous_versions:dict|None=None, prior_snapshot:dict|None=None,
-                              market_observations:list[dict]|None=None, diagnose_capture:bool=False)->dict:
+                              market_observations:list[dict]|None=None, diagnose_capture:bool=False,
+                              editorial_max_items:int=6)->dict:
+    if type(editorial_max_items) is not int or not 1<=editorial_max_items<=16:
+        raise ValueError('invalid_editorial_capacity')
     now=_stamp(as_of);_stamp(slot_id)
     if type(diagnose_capture) is not bool:raise ValueError('invalid_capture_diagnostics_flag')
     if not isinstance(captures,list) or len(captures)>64:
@@ -175,7 +178,7 @@ def compile_captured_articles(captures:list[dict],*,as_of:str,slot_id:str,
     for product in ('english','arabic'):
         plan=plan_edition(ledger=ledger,annotations=annotations[product],product=product,
                  slot_id=slot_id,as_of=as_of,previous_versions=operator_prior['versions'] if operator_prior is not None else None,
-                 max_items=6)
+                 max_items=editorial_max_items)
         critic=build_report([],ledger=ledger,as_of=as_of,verified_families={},
                     verified_languages={},product=product,cadence='daily',slot_id=slot_id)
         daily=compile_daily(editorial_plan=plan,critic_report=critic,
