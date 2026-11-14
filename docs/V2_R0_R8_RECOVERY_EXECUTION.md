@@ -55,3 +55,9 @@ A green test suite is necessary but insufficient. Each batch needs reproducible 
 - Accepted analytical text is explicitly labeled `evidence_referenced_unverified` and `content_truth_verified=False`, `delivery_authorized=False` remain invariant. This is **not** independent corroboration or verification of the model's factual content.
 - No candidate means `analysis_status=abstained`, rather than generating unsupported filler.
 - Added five R2 contract tests and dedicated CI. The model inference adapter, cross-excerpt validation, real model calls and genuine rendered analysis are still outstanding. Do not characterize this contract as complete R2.
+
+## Continuous recovery checkpoint (2026-11-14, second pass)
+- R1: The live runner now accepts `editorial_max_items` (1–16, default six), propagates it to the compiler, and raises its per-language capture ceiling when the requested story budget exceeds ten. CLI `--editorial-max-items` is supported. This does not guarantee the available publisher roster supplies enough distinct eligible stories.
+- Added regression test `tests/test_v2_r1_runner_capacity.py` and included it in `v2-r0-r2-recovery.yml`.
+- R2: evidence-bound candidate compiler remains deliberately non-publishing; actual model generation, claim verification and renderer integration remain open.
+- R3–R8: **NOT COMPLETE**. No user-facing Telegram samples or production sends were authorized or triggered by this batch.
