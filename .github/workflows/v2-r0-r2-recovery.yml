@@ -20,6 +20,7 @@ on:
       - 'tests/test_v2_r2_model_adapter.py'
       - 'v2_r2_http_transport.py'
       - 'v2_r2_secret_model_probe.py'
+      - 'v2_r2_real_publisher_acceptance.py'
       - 'tests/test_v2_r2_http_transport.py'
       - 'tests/test_v2_r2_runner_wiring.py'
       - 'tests/test_v2_r2_end_to_end_model_acceptance.py'
@@ -83,5 +84,15 @@ jobs:
           V2_TELEGRAM_CHAT_ID_ENGLISH: ${{ secrets.V2_TELEGRAM_CHAT_ID_ENGLISH }}
           V2_TELEGRAM_CHAT_ID_ARABIC: ${{ secrets.V2_TELEGRAM_CHAT_ID_ARABIC }}
         run: python v2_r2_telegram_evaluation.py
+      - name: Real publisher bilingual R2 model acceptance (manual only)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          V2_LLM_API_KEY: ${{ secrets.V2_LLM_API_KEY }}
+          V2_LLM_BASE_URL: ${{ secrets.V2_LLM_BASE_URL }}
+          V2_LLM_MODEL: ${{ secrets.V2_LLM_MODEL }}
+          V2_LLM_FALLBACK_API_KEY: ${{ secrets.V2_LLM_FALLBACK_API_KEY }}
+          V2_LLM_FALLBACK_BASE_URL: ${{ secrets.V2_LLM_FALLBACK_BASE_URL }}
+          V2_LLM_FALLBACK_MODEL: ${{ secrets.V2_LLM_FALLBACK_MODEL }}
+        run: python v2_r2_real_publisher_acceptance.py
       - name: Syntax check affected modules
         run: python -m py_compile v2_b46_live_editorial_runner.py v2_b46_live_editorial.py v2_editorial.py v2_product_compiler.py
