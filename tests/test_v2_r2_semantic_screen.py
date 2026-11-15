@@ -15,6 +15,12 @@ class SemanticScreenTests(unittest.TestCase):
     def test_negation_mismatch(self):
         r=screen(product="english",quote="The ministry denied the report.",assessment="The ministry confirmed the report.")
         self.assertIn("negation_mismatch_review",r["flags"])
+    def test_arabic_negation_substring_is_not_a_negation(self):
+        r=screen(product="arabic",quote="قال المسؤول إن الإعلان قائم.",assessment="أعلن المسؤول أن الإعلان قائم.")
+        self.assertNotIn("negation_mismatch_review",r["flags"])
+    def test_arabic_explicit_negation_still_flagged(self):
+        r=screen(product="arabic",quote="لم يصدر القرار اليوم.",assessment="صدر القرار اليوم بالفعل.")
+        self.assertIn("negation_mismatch_review",r["flags"])
     def test_clear_is_not_verified(self):
         r=screen(product="english",quote="The committee met today.",assessment="The committee met today.")
         self.assertEqual(r["status"],"SCREEN_CLEAR_UNVERIFIED")
