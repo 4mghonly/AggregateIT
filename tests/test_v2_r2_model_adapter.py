@@ -8,6 +8,15 @@ class ModelAdapterTests(unittest.TestCase):
    return '{"items":[{"event_id":"ev1","assessment":"The proposal is not a confirmed outcome.","confidence":"low","evidence_excerpt_ids":["ex1"]}]}'
   result=make_analysis_provider(caller=caller)(product="english",items=self.items,as_of="2026-11-14T12:00:00+00:00")
   self.assertEqual(result[0]["event_id"],"ev1")
+ def test_arabic_prompt_and_response(self):
+  def caller(system,payload):
+   self.assertIn("Modern Standard Arabic",system)
+   return '{"items":[{"event_id":"ev1","assessment":"المقترح ليس قراراً نهائياً حتى الآن.","confidence":"low","evidence_excerpt_ids":["ex1"]}]}'
+  result=make_analysis_provider(caller=caller)(product="arabic",items=self.items,as_of="2026-11-14T12:00:00+00:00")
+  self.assertEqual(len(result),1)
+ def test_english_response_rejected_for_arabic(self):
+  with self.assertRaisesRegex(ValueError,"invalid_analysis_language"):
+   parse_analysis_response('{"items":[{"event_id":"ev1","assessment":"The proposal is not confirmed.","confidence":"low","evidence_excerpt_ids":["ex1"]}]}',self.items,product="arabic")
  def test_hallucinated_evidence_is_rejected(self):
   with self.assertRaisesRegex(ValueError,"untrusted_analysis_evidence"):
    parse_analysis_response('{"items":[{"event_id":"ev1","assessment":"Invented","confidence":"high","evidence_excerpt_ids":["fake"]}]}',self.items)
