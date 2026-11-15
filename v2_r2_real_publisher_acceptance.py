@@ -2,6 +2,7 @@
 import json,os
 from v2_r2_http_transport import make_http_caller
 from v2_r2_model_adapter import make_analysis_provider
+from v2_r2_semantic_screen import screen
 from v2_b46_live_editorial_runner import run
 
 def evaluate():
@@ -15,6 +16,8 @@ def evaluate():
     calls=[]
     diagnostics=[]
     candidate_records=[]
+    semantic_screen_counts={"SCREEN_CLEAR_UNVERIFIED":0,"REVIEW_REQUIRED":0}
+    semantic_flag_counts={}
     def provider(*,product,items,as_of):
         if not items:return []
         selected=items[:1]
@@ -35,6 +38,11 @@ def evaluate():
                 status="STRUCTURAL_PASS_UNVERIFIED" if candidates else "ABSTAINED"
                 if role=="primary":accepted=candidates
                 for candidate in candidates:
+                    quote=selected[0]["evidence"]["quote"]
+                    screened=screen(product=product,quote=quote,assessment=candidate["assessment"])
+                    semantic_screen_counts[screened["status"]]+=1
+                    for flag in screened["flags"]:
+                        semantic_flag_counts[flag]=semantic_flag_counts.get(flag,0)+1
                     candidate_records.append({"role":role,"product":product,"assessment":candidate["assessment"],"confidence":candidate["confidence"],"evidence_refs":candidate["evidence_excerpt_ids"]})
             except Exception as exc:
                 status="HOLD_"+type(exc).__name__+("_"+str(exc) if isinstance(exc,ValueError) and str(exc).startswith(("invalid_analysis_","untrusted_analysis_","duplicate_analysis_")) else "")
@@ -59,7 +67,8 @@ def evaluate():
     return {"schema":"aggregateit-v2-r2-real-publisher-acceptance/1",
         "structural_gate_pass":complete,
         "results":outcomes,"publisher_story_counts":counts,"provider_status":provider_status,
-        "collection_status":collection_status,"model_calls":len(calls),"diagnostics":diagnostics,"candidate_counts":counts_by_route,
+        "collection_status":collection_status,"model_calls":len(calls),"diagnostics":diagnostics,"candidate_counts":counts_by_route,"semantic_screen_counts":semantic_screen_counts,
+        "semantic_flag_counts":semantic_flag_counts,
         "abstention_accepted_as_valid_contract_behavior":True,
         "real_publisher_evidence_evaluated":bool(calls),
         "independent_semantic_review":False,"editorial_release_authorized":False}
