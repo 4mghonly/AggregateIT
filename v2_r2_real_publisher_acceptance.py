@@ -1,4 +1,4 @@
-"""Held live-publisher bilingual R2 evaluation; at most four model requests total."""
+"""Held live-publisher bilingual R2 evaluation; up to eight requests with retries."""
 import json,os
 from v2_r2_http_transport import make_http_caller
 from v2_r2_model_adapter import make_analysis_provider
@@ -64,7 +64,10 @@ def evaluate():
     complete=collection_status=="CAPTURED" and all(status in ("STRUCTURAL_PASS_UNVERIFIED","ABSTAINED") for status in statuses) and any(status=="STRUCTURAL_PASS_UNVERIFIED" for status in statuses)
     # Surface only derived counters; never print full publisher text or model prose in CI logs.
     counts_by_route={role:{lang:sum(x["role"]==role and x["product"]==lang for x in candidate_records) for lang in ("english","arabic")} for role in configs}
+    semantic_gate_pass=(complete and semantic_screen_counts["REVIEW_REQUIRED"]==0 and
+                        all(counts_by_route[role][lang]>0 for role in configs for lang in ("english","arabic")))
     return {"schema":"aggregateit-v2-r2-real-publisher-acceptance/1",
+        "semantic_screen_gate_pass":semantic_gate_pass,
         "structural_gate_pass":complete,
         "results":outcomes,"publisher_story_counts":counts,"provider_status":provider_status,
         "collection_status":collection_status,"model_calls":len(calls),"diagnostics":diagnostics,"candidate_counts":counts_by_route,"semantic_screen_counts":semantic_screen_counts,
