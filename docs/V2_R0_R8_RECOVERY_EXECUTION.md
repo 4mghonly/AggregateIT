@@ -73,3 +73,11 @@ A green test suite is necessary but insufficient. Each batch needs reproducible 
 - The held runner uses only one selected item per language per model; passing this limited probe cannot establish comprehensive article coverage, contradiction handling, or editorial equivalence. Analysis candidates remain evidence-referenced but unverified.
 - R2 connectivity and provider integration are implemented; full R2 semantic/editorial acceptance remains OPEN pending independent assessment of genuine model prose against source excerpts, Arabic language quality, and rendered edition verification. Do not equate green workflow status with this sign-off.
 - No production delivery authorized. Protected branches unchanged.
+
+## R2 semantic-screening acceptance checkpoint (2026-11-15)
+- Run 43693843031 completed green: four structural model/language passes, three captured publisher stories per language, no model transport diagnostics, five new semantic-screen unit tests passed and R3–R8 held regressions passed.
+- Semantic-screen output was **two REVIEW_REQUIRED and two SCREEN_CLEAR_UNVERIFIED**. The aggregate flags were two Arabic-script-insufficient and two negation-mismatch-review. The run did not expose the model prose or source excerpts for independent adjudication; these flags are not proven factual defects.
+- Corrected Arabic negation/uncertainty keyword matching to word boundaries to reduce substring false positives, added tests for Arabic explicit negation and substring handling.
+- Introduced independent `semantic_screen_gate_pass` receipt field requiring four non-abstained model/language outputs and zero review flags. The original `structural_gate_pass` remains a separate structural contract. Neither gate represents independent semantic verification.
+- R2 independent semantic review, Arabic editorial quality, and native rendered edition verification remain **OPEN**. R0–R1 matched-source parity and R3–R8 real-world acceptance remain **OPEN**. Do not raise release readiness from green structural CI alone.
+- Held retest: https://github.com/4mghonly/AggregateIT/actions/runs/43694709544 . No publication or Telegram send authorized.
