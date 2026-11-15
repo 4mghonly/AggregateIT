@@ -6,11 +6,11 @@ _LATIN = re.compile(r"[A-Za-z]")
 _NUMBERS = re.compile(r"(?<!\w)\d+(?:[.,]\d+)?(?!\w)")
 _NEGATIONS = {
     "english": re.compile(r"\b(?:not|never|no|denied|without|failed|unlikely)\b", re.I),
-    "arabic": re.compile(r"(?:لم|لن|ليس|ليست|لا|غير|نفى|نفت|دون)")
+    "arabic": re.compile(r"(?<![\u0621-\u064a])(?:لم|لن|ليس|ليست|لا|غير|نفى|نفت|دون)(?![\u0621-\u064a])")
 }
 _UNCERTAINTY = {
     "english": re.compile(r"\b(?:may|might|could|possible|proposed|proposal|reportedly|alleged|planned)\b", re.I),
-    "arabic": re.compile(r"(?:قد|ربما|محتمل|مقترح|خطة|يعتزم|أفادت|بحسب)")
+    "arabic": re.compile(r"(?<![\u0621-\u064a])(?:قد|ربما|محتمل|مقترح|خطة|يعتزم|أفادت|بحسب)(?![\u0621-\u064a])")
 }
 def screen(*, product, quote, assessment):
     """Return review flags, not a claim of factual correctness."""
